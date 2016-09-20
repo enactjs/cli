@@ -1,0 +1,10 @@
+---
+language: node_js
+node_js:
+  - 4
+  - 6
+cache:
+  directories:
+  - global-cli/node_modules
+  - node_modules
+script: tasks/e2e.sh
