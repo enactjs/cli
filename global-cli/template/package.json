@@ -1,0 +1,32 @@
+{
+  "name": "my-app",
+  "version": "1.0.0",
+  "description": "A general template for an Enact application.",
+  "author": "",
+  "main": "src/index.js",
+  "scripts": {
+    "serve": "enact serve --progress --inline --hot",
+    "pack": "enact pack",
+    "pack-p": "enact pack -p",
+    "watch": "enact pack --watch",
+    "clean": "enact clean",
+    "lint": "enact lint",
+    "test": "enact test start --single-run --browsers PhantomJS",
+    "test-json": "enact test start --single-run --browsers PhantomJS --reporters json",
+    "test-watch": "enact test start --browsers PhantomJS"
+  },
+  "license": "Apache-2.0",
+  "repository": "",
+  "peerDependencies": {
+    "enact-dev": "^0.1.0"
+  },
+  "devDependencies": {
+    "sinon": "git+https://github.com/sinonjs/sinon.git",
+    "enzyme": "^2.4.1"
+  },
+  "dependencies": {
+    "enact": "github:enyojs/enact#release/1.0.0-alpha.1",
+    "react": "^15.3.1",
+    "react-dom": "^15.3.1"
+  }
+}
