@@ -3,7 +3,7 @@ import kind from 'enact-core/kind';
 import Button from 'enact-moonstone/Button';
 import {Panel, Header} from 'enact-moonstone/Panels';
 
-export default kind({
+const MainPanel = kind({
 	name: 'MainPanel',
 
 	render: () => (
@@ -13,3 +13,5 @@ export default kind({
 		</Panel>
 	)
 });
+
+export default MainPanel;
