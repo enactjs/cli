@@ -6,7 +6,8 @@ var
 	HtmlWebpackPlugin = require('html-webpack-plugin'),
 	GracefulFsPlugin = require('./GracefulFsPlugin.js'),
 	QuietPlugin = require('./QuietPlugin.js'),
-	LessPluginRi = require('resolution-independence');
+	LessPluginRi = require('resolution-independence'),
+	utils = require('./utils');
 
 var dev = {
 	devtool:'sourcemap',
@@ -52,13 +53,7 @@ module.exports = {
 			resolve: {
 				alias: {
 					'ilib':'enyo-i18n/ilib/lib',
-					'webpack/hot/dev-server': require.resolve('webpack/hot/dev-server'),
-					'enact-core':'enact/packages/core',
-					'enact-ui':'enact/packages/ui',
-					'enact-moonstone':'enact/packages/moonstone',
-					'enact-spotlight':'enact/packages/spotlight',
-					'enact-i18n':'enact/packages/i18n',
-					'enact-webos':'enact/packages/webos'
+					'webpack/hot/dev-server': require.resolve('webpack/hot/dev-server')
 				},
 				root: [path.resolve('./node_modules')],
 				extensions: ['', '.js', '.jsx', '.es6'],
@@ -106,7 +101,7 @@ module.exports = {
 				lessPlugins: ((opts.ri) ? [new LessPluginRi(opts.ri)] : [])
 			},
 			plugins: [
-				new webpack.NoErrorsPlugin(),
+				//new webpack.NoErrorsPlugin(),
 				new webpack.optimize.OccurrenceOrderPlugin(),
 				new webpack.optimize.DedupePlugin(),
 				new webpack.DefinePlugin({
@@ -126,6 +121,14 @@ module.exports = {
 		};
 		if(opts.noEmit) {
 			config.plugins.splice(config.plugins.length-1, 1);
+		}
+		if(utils.exists(path.join('node_modules', 'enact'))) {
+			config.resolve.alias['enact-core'] = 'enact/packages/core';
+			config.resolve.alias['enact-ui'] = 'enact/packages/ui';
+			config.resolve.alias['enact-moonstone'] = 'enact/packages/moonstone';
+			config.resolve.alias['enact-spotlight'] = 'enact/packages/spotlight';
+			config.resolve.alias['enact-i18n'] = 'enact/packages/i18n';
+			config.resolve.alias['enact-webos'] = 'enact/packages/webos';
 		}
 		return config;
 	},
