@@ -61,8 +61,6 @@ These tasks will execute all valid tests that are within the project directory w
 
 ## Displaying Lint Output in the Editor
 
->Note: this feature is available with `react-scripts@0.2.0` and higher.
-
 Some editors, including Sublime Text, Atom, and Visual Studio Code, provide plugins for ESLint.
 
 They are not required for linting. You should see the linter output right in your terminal as well as the browser console. However, if you prefer the lint results to appear right in your editor, there are some extra steps you can do.

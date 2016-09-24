@@ -1,14 +1,7 @@
 var
 	path = require('path'),
-	fs = require('fs');
-
-function exists(item) {
-	try {
-		return !!(fs.statSync(item));
-	} catch(e) {
-		return false;
-	}
-}
+	fs = require('fs'),
+	exists = require('./utils').exists;
 
 function PrerenderPlugin(options) {
 	this.options = options || {};
