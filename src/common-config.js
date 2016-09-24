@@ -52,7 +52,7 @@ module.exports = {
 			devtool: (opts.noEmit ? null : spec.devtool),
 			resolve: {
 				alias: {
-					'ilib':'enyo-i18n/ilib/lib',
+					'ilib':'enact-i18n/ilib/lib',
 					'webpack/hot/dev-server': require.resolve('webpack/hot/dev-server')
 				},
 				root: [path.resolve('./node_modules')],
