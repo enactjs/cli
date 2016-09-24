@@ -30,7 +30,8 @@ var setup = function(config, overrides, entryDeps) {
 };
 
 module.exports = {
-	app: function() {
+	app: function(args) {
+		opts = mixin(opts, args || {});
 		if(process.env.ENYO_CONTAINER) {
 			opts.namedLibs = process.env.ENYO_CONTAINER.split(',');
 			return this.container(opts);
@@ -48,15 +49,18 @@ module.exports = {
 			return out.length===1 ? out[0] : out;
 		}
 	},
-	container: function() {
+	container: function(args) {
+		opts = mixin(opts, args || {});
 		var c = containerConfig(opts);
 		return setup(c, opts, []);
 	},
-	library: function() {
+	library: function(args) {
+		opts = mixin(opts, args || {});
 		var c = libConfig(opts);
 		return setup(c, opts, []);
 	},
-	karma: function() {
+	karma: function(args) {
+		opts = mixin(opts, args || {});
 		return (function(karmaObj) {
 			var c = karmaConfig({karma:karmaObj, ri:opts.ri});
 			karmaObj.set(mixin(c, opts || {}));

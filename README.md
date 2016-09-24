@@ -1,116 +1,87 @@
-# enyo-config
-A standalone dev environment for Enyo apps using Webpack, Babel, and a collection of other tools.
+# enact-dev
+A standalone dev environment for Enact apps using Webpack, Babel, React, and a collection of other tools.
 
 ## Installation
-All that's needed to install is to use npm and save enyo-config as a devDependency.
+All that's needed to install enact-dev is to use npm to install it globally. For Mac/Linux `sudo` may be required.
 ```
-npm install enyojs/enyo-config --save-dev
-```
-If you want the dev environment plus a full test suite (a considerable extra amount of overhead), then you can:
-```
-npm install enyojs/enyo-config#test-suite --save-dev
+npm install -g enyojs/enact-dev
 ```
 
-## Included Binaries
-To help simplify certain aspects of development, enyo-config includes these helper binaries:
-* `enyo-transpile` - Transpiles the code from ES6 to ES6 into a ./build directory
-* `enyo-clean` - Deletes any applicable ./build or ./dist directories
+>Note: Node 6.x+ is highly recommended for optimum speed and efficiency, however anything since Node 4.x is compatible.
 
-As a result of enyo-config encapsulating the full dev environment, some situations like linking, global-style installation, and Node 4.x require particular dependency binaries to be exposed for use by apps/libraries. The following binaries are exposed with an 'enyo-' prefix to avoid any collision:
-* `enyo-webpack`
-* `enyo-webpack-dev-server`
-* `enyo-karma` (only on test-suite)
+## Creating a new App
+The only time you're ever want to directly use the Enact CLI is when you want to create a new project.
 
-## Webpack Config
-There are 3 preset configuration options built-in to enyo-config. Each of them will deeply mix in passed parameters and support standard webpack layouts.
-
-#### App Config
-This is the standard app config and the one you'll probably want to use. It features support for React, Babel, LESS/CSS modules, asset handling, optional resolution independence, generated html, built-in babel-polyfill, etc.. It has extra support for the following special properties used in the building of the final configuration:
-* `title` - Title to be inserted into the html file's header `<title>/<title>`
-* `ri` - resolution independence options to be passed to the [LESS plugin](https://github.com/enyojs/less-plugin-resolution-independence). When undefined, the plugins will no be used. An empty object will use default values for the plugin (baseSize=16).
-
-Usage example webpack.config.js:
-```
-var config = require('enyo-config');
-module.exports = config.app({
-	title: 'My Application',
-	ri: {
-		baseSize: 24
-	}
-});
+```sh
+enact init [directory]
 ```
 
-#### Container Config
-This is a specialized variation on the regular app config. The main difference is that specified libraries, built from the library config below, are implicitly expected in the browser page memory as external libraries. No html is generated, purely the js/css/assets. This allows apps to use Enyo libraries in a modular fashion and still be fully compatable with both app config and container config without any sourcecode changes.
+This will generate a basic App template, complete with npm scripts and dependencies setup. If no directory path is specified, it will be generated within the working directory.
 
-The container config can be explicitly envoked:
-```
-var config = require('enyo-config');
-module.exports = config.container({
-	namedLibs: [
-		'enyo-core',
-		'enyo-ui',
-		'enyo-ui-moonstone'
-		// ... etc.
-	],
-	ri: {
-		baseSize: 24
-	}
-});
-```
-More conveniently, however is to simply code for the regular app config then when you can automatically switch to a container build by setting the enironment variable ENYO_CONTAINER, a comma-separated list of which libraries can be maked for external use.
+>Advanced: If you've used `npm link` on separate installations of the Enact repo, you can include `--link` to the `init` command and NPM will symlink your Enact repo, rather than reinstall.
 
-#### Library Config
-The library configuration will allow webpack to build a standalone library script the container apps can interpret and access correctly. Enyo libraries are intended to support modular calls, so this uses a custom Webpack plugin to create a library that retains its modular structure internally. It has extra support for the following special properties used in the building of the final configuration:
-* `name` - global variable name for the library`<title>/<title>`
-* `ri` - resolution independence options to be passed to the [LESS plugin](http://github.com/enyojs/less-plugin-resolution-independence). When undefined, the plugins will no be used. An empty object will use default values for the plugin (baseSize=16).
+## Available App Scripts
 
-Usage example webpack.config.js:
-```
-var config = require('enyo-config');
-module.exports = config.library({
-	name: 'my_lib',
-	ri: {
-		baseSize: 24
-	}
-});
+Within the project directory, you can run:
+
+### `npm run serve`
+
+Builds and serves the app in the development mode.<br>
+Open [http://localhost:8080](http://localhost:8080) to view it in the browser.
+
+The page will reload if you make edits.<br>
+
+### `npm run pack` and `npm run pack-p`
+
+Builds the project in the worlding directory. Specifically, `pack` builds in development mode with code un-minified and with debug code include, whereas `pack-p` builds in production mode, with everything minified and optimized for performance.
+
+### `npm run watch`
+
+Builds the project in development mode and keeps watch over the project directory. Whenever files are changed, added, or deleted, the project will automatically get rebuilt using an active shared cache to speed up the process. This is similar to the `serve` task, but without the http server.
+
+### `npm run clean`
+
+Deleted previous build fragments from ./dist.
+
+### `npm run lint`
+
+Runs the Enact configuration of Eslint on the project for syntax analysis.
+
+### `npm run test`, `npm run test-json`, and `npm run test-watch`
+
+These tasks will execute all valid tests that are within the project directory with varying features. The `test` is standard tests, `test-json` uses a json reporter for output, and `test-watch` will re-execute tests when files change.
+
+
+## Displaying Lint Output in the Editor
+
+Some editors, including Sublime Text, Atom, and Visual Studio Code, provide plugins for ESLint.
+
+They are not required for linting. You should see the linter output right in your terminal. However, if you prefer the lint results to appear right in your editor, there are some extra steps you can do.
+
+You would need to install an ESLint plugin for your editor first.
+
+>**A note for Atom `linter-eslint` users**
+
+>If you are using the Atom `linter-eslint` plugin, make sure that **Use global ESLint installation** option is checked:
+
+><img src="http://i.imgur.com/yVNNHJM.png" width="300">
+
+Then add this block to the `package.json` file of your project:
+
+```js
+{
+  // ...
+  "eslintConfig": {
+    "extends": "enact"
+  }
+}
 ```
 
-## Babel Config
-Within enyo-config is a customize babelrc setup. If, for some reason, you need access to it, you can access its path via:
-```
-var config = require('enyo-config');
-var babelrc = config.babelrc;
+Finally, you will need to install some packages *globally*:
 
-// use babelrc path for something
-// for example, could use it with the 'extends' option in Babel
-// see http://babeljs.io/docs/usage/options/
+```sh
+npm install -g eslint-config-enact eslint-plugin-react eslint-plugin-babel babel-eslint
+
 ```
 
-## ESlint Config
-Similarly, there is an eslint ruleset within enyo-config that can be harnessed by apps or libraries. Just create a project level `.eslintrc.js` file containing:
-```
-module.exports = require('enyo-config').eslint;
-```
-The eslint rules can be be modified if desired however they've been set to current in-house standards for Enyo and are most useful as is.
-
-To test with eslint, be sure to global install:
-```
-npm install -g eslint eslint-plugin-react eslint-plugin-babel babel-eslint
-```
-Then you can run eslint from any project root anytime. For more information on the Enyo ruleset used, see [enyojs/eslint-config-enyo](http://github.com/enyojs/eslint-config-enyo).
-
-## Test-Suite
-The test-suite edition of enyo-config includes a collection of tools for software testing: enzyme, mocha, sinon, phantomjs, chai, karma, etc.. In addition, development builds of apps will include a [window.ReactPerf object](https://facebook.github.io/react/docs/perf.html) which can be used from the Chrome inspector console.
-
-A Karma configuration is built-in to simplify the usage and setup. Similar to the webpack app config, it supports overrides passed in and has special support for an `ri` resolution independence object.
-
-Usage example karma.conf.js:
-```
-var config = require('enyo-config');
-module.exports = config.karma({
-	ri: {
-		baseSize: 24
-	}
-});
-```
+We recognize that this is suboptimal, but it is currently required due to the way we hide the ESLint dependency. The ESLint team is already [working on a solution to this](https://github.com/eslint/eslint/issues/3458) so this may become unnecessary in a couple of months.
