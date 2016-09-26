@@ -1,7 +1,7 @@
 {
   "name": "my-app",
   "version": "1.0.0",
-  "description": "A general template for an Enact application.",
+  "description": "A general template for an Enact Moonstone application.",
   "author": "",
   "main": "src/index.js",
   "scripts": {
@@ -15,7 +15,8 @@
     "test-json": "enact test start --single-run --browsers PhantomJS --reporters json",
     "test-watch": "enact test start --browsers PhantomJS"
   },
-  "license": "Apache-2.0",
+  "license": "UNLICENSED",
+  "private": true,
   "repository": "",
   "dependencies": {
     "enact": "github:enyojs/enact#feature/PLAT-27518",
