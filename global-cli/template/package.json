@@ -17,9 +17,6 @@
   },
   "license": "Apache-2.0",
   "repository": "",
-  "peerDependencies": {
-    "enact-dev": "^0.1.0"
-  },
   "dependencies": {
     "enact": "github:enyojs/enact#feature/PLAT-27518",
     "react": "^15.3.2",
