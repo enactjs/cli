@@ -1,11 +1,11 @@
-/* global console beforeEach afterEach*/
-/* eslint no-console: ["error", { allow: ["error"] }] */
+/* global console beforeEach afterEach */
+/* eslint no-var: off, no-console: ["error", { allow: ["error"] }] */
 
-import {
-	watchErrorAndWarnings,
-	filterErrorAndWarnings,
-	restoreErrorAndWarnings
-} from 'enyo-console-spy';
+var spy = require('enyo-console-spy');
+
+var watchErrorAndWarnings = spy.watchErrorAndWarnings;
+var filterErrorAndWarnings = spy.filterErrorAndWarnings;
+var restoreErrorAndWarnings = spy.restoreErrorAndWarnings;
 
 beforeEach(watchErrorAndWarnings);
 
@@ -14,7 +14,7 @@ afterEach(function (done) {
 	const expected = 0;
 	restoreErrorAndWarnings();
 	if (actual.length > expected) {
-		console.error(`PropType Failure: ${this.currentTest.parent.title} at "${this.currentTest.title}"`);
+		console.error('PropType Failure:', this.currentTest.parent.title, 'at "', this.currentTest.title, '"');
 	}
 	done();
 	expect(actual).to.have.length(expected);
