@@ -15,8 +15,13 @@ my-app/
   node_modules/
   package.json
   src/
-    App.js
-    App.less
+    App/
+      App.js
+      App.less
+      package.json
+    components/
+    views/
+      MainPanel.js
     index.js
 ```
 
@@ -40,7 +45,7 @@ The page will reload if you make edits.<br>
 
 ### `npm run pack` and `npm run pack-p`
 
-Builds the project in the worlding directory. Specifically, `pack` builds in development mode with code un-minified and with debug code include, whereas `pack-p` builds in production mode, with everything minified and optimized for performance.
+Builds the project in the working directory. Specifically, `pack` builds in development mode with code un-minified and with debug code include, whereas `pack-p` builds in production mode, with everything minified and optimized for performance.
 
 ### `npm run watch`
 
@@ -48,7 +53,7 @@ Builds the project in development mode and keeps watch over the project director
 
 ### `npm run clean`
 
-Deleted previous build fragments from ./dist.
+Deletes previous build fragments from ./dist.
 
 ### `npm run lint`
 
@@ -56,8 +61,7 @@ Runs the Enact configuration of Eslint on the project for syntax analysis.
 
 ### `npm run test`, `npm run test-json`, and `npm run test-watch`
 
-These tasks will execute all valid tests that are within the project directory with varying features. The `test` is standard tests, `test-json` uses a json reporter for output, and `test-watch` will re-execute tests when files change.
-
+These tasks will execute all valid tests (files that end in `-specs.js`) that are within the project directory. The `test` is a standard execution pass, `test-json` uses a json reporter for output, and `test-watch` will set up a watcher to re-execute tests when files change.
 
 ## Displaying Lint Output in the Editor
 
@@ -130,8 +134,8 @@ import kind from 'enact-core/kind';
 import Button from './Button'; // Import a component from another file
 
 const DangerButton = kind({
-  render() {
-    return <Button color="red" />;
+  render(props) {
+    return <Button {...props} color="red" />;
   }
 });
 
@@ -203,7 +207,7 @@ const Header = kind({
   }
 });
 
-export default function Header;
+export default Header;
 ```
 
 This is currently required for local images. This ensures that when the project is built, webpack will correctly move the images into the build folder, and provide us with correct paths.
