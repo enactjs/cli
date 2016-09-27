@@ -18,6 +18,12 @@
   "license": "UNLICENSED",
   "private": true,
   "repository": "",
+  "enact": {
+    "title":"My App",
+    "ri": {
+      "baseSize":24
+    }
+  },
   "dependencies": {
     "enact": "github:enyojs/enact#feature/PLAT-27518",
     "react": "^15.3.2",
