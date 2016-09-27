@@ -1,4 +1,4 @@
-/* global console beforeEach afterEach */
+/* global console */
 /* eslint no-var: off, no-console: ["error", { allow: ["error"] }] */
 
 var spy = require('enyo-console-spy');
