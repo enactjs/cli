@@ -52,7 +52,7 @@ module.exports = {
 			devtool: (opts.noEmit ? null : spec.devtool),
 			resolve: {
 				alias: {
-					'ilib':'enact-i18n/ilib/lib',
+					'ilib':'@enact/i18n/ilib/lib',
 					'webpack/hot/dev-server': require.resolve('webpack/hot/dev-server')
 				},
 				root: [path.resolve('./node_modules')],
@@ -86,7 +86,7 @@ module.exports = {
 						loader: (opts.noEmit ? spec.cssLoader.replace('css', 'css/locals').replace(/.sourceMap/g, '') : ExtractTextPlugin.extract('style', spec.cssLoader))
 					},
 					{
-						test: /\.js$|\.es6$|\.jsx$/, loader: 'babel', exclude: /node_modules.(?!enact)/, query: {
+						test: /\.js$|\.es6$|\.jsx$/, loader: 'babel', exclude: /node_modules.(?!@enact)/, query: {
 							extends: path.join(__dirname, '.babelrc'),
 							cacheDirectory: spec.babelCache
 						}
@@ -123,12 +123,7 @@ module.exports = {
 			config.plugins.splice(config.plugins.length-1, 1);
 		}
 		if(utils.exists(path.join('node_modules', 'enact'))) {
-			config.resolve.alias['enact-core'] = 'enact/packages/core';
-			config.resolve.alias['enact-ui'] = 'enact/packages/ui';
-			config.resolve.alias['enact-moonstone'] = 'enact/packages/moonstone';
-			config.resolve.alias['enact-spotlight'] = 'enact/packages/spotlight';
-			config.resolve.alias['enact-i18n'] = 'enact/packages/i18n';
-			config.resolve.alias['enact-webos'] = 'enact/packages/webos';
+			config.resolve.alias['@enact'] = 'enact/packages';
 		}
 		return config;
 	},
