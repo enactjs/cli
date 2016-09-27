@@ -9,5 +9,8 @@ module.exports = function(args) {
 			args.splice(1, 0, require.resolve('./internal/karma.js'));
 		}
 	}
-	cp.fork(require.resolve('karma/bin/karma'), args, {env:process.env, cwd:process.cwd()});
+	var child = cp.fork(require.resolve('karma/bin/karma'), args, {env:process.env, cwd:process.cwd()});
+	child.on('close', function(code, signal) {
+		process.exit(code);
+	});
 };

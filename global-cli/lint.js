@@ -9,5 +9,8 @@ module.exports = function(args) {
 		args.unshift('--ignore-pattern', 'build/*');
 		args.unshift('--ignore-pattern', 'dist/*');
 	}
-	cp.fork(require.resolve('eslint/bin/eslint'), args, {env:process.env, cwd:process.cwd()});
+	var child = cp.fork(require.resolve('eslint/bin/eslint'), args, {env:process.env, cwd:process.cwd()});
+	child.on('close', function(code, signal) {
+		process.exit(code);
+	});
 };
