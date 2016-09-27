@@ -15,7 +15,7 @@ module.exports = function(args) {
 	if(args[0]) {
 		dest = args[0];
 	}
-	console.log('Initializing to project to ' + path.resolve(dest));
+	console.log('Initializing new project in ' + path.resolve(dest));
 	ncp(path.join(__dirname, 'template'), dest, {stopOnErr:true}, function(ncpErr) {
 		var npm = cp.exec('npm --loglevel error install ' + opts.join(' '), {env:process.env, cwd:path.resolve(dest)});
 		npm.stdout.pipe(process.stdout);
