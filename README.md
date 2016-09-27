@@ -41,7 +41,7 @@ Builds the project in development mode and keeps watch over the project director
 
 ### `npm run clean`
 
-Deleted previous build fragments from ./dist.
+Deletes previous build fragments from ./dist.
 
 ### `npm run lint`
 
@@ -49,7 +49,7 @@ Runs the Enact configuration of Eslint on the project for syntax analysis.
 
 ### `npm run test`, `npm run test-json`, and `npm run test-watch`
 
-These tasks will execute all valid tests that are within the project directory with varying features. The `test` is standard tests, `test-json` uses a json reporter for output, and `test-watch` will re-execute tests when files change.
+These tasks will execute all valid tests (files that end in `-specs.js`) that are within the project directory. The `test` is a standard execution pass, `test-json` uses a json reporter for output, and `test-watch` will set up a watcher to re-execute tests when files change.
 
 
 ## Displaying Lint Output in the Editor
