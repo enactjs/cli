@@ -86,7 +86,7 @@ module.exports = {
 						loader: (opts.noEmit ? spec.cssLoader.replace('css', 'css/locals').replace(/.sourceMap/g, '') : ExtractTextPlugin.extract('style', spec.cssLoader))
 					},
 					{
-						test: /\.js$|\.es6$|\.jsx$/, loader: 'babel', exclude: /node_modules.(?!@enact)/, query: {
+						test: /\.js$|\.es6$|\.jsx$/, loader: 'babel', exclude: /node_modules.(?!@*enact)/, query: {
 							extends: path.join(__dirname, '.babelrc'),
 							cacheDirectory: spec.babelCache
 						}
