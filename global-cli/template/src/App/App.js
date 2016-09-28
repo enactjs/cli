@@ -1,7 +1,7 @@
 import React from 'react';
-import kind from 'enact-core/kind';
-import MoonstoneDecorator from 'enact-moonstone/MoonstoneDecorator';
-import {Panels} from 'enact-moonstone/Panels';
+import kind from '@enact/core/kind';
+import MoonstoneDecorator from '@enact/moonstone/MoonstoneDecorator';
+import {Panels} from '@enact/moonstone/Panels';
 import MainPanel from '../views/MainPanel';
 import css from './App.less';
 
