@@ -25,7 +25,7 @@
     }
   },
   "dependencies": {
-    "enact": "github:enyojs/enact#feature/PLAT-27518",
+    "enact": "github:enyojs/enact#develop",
     "react": "^15.3.2",
     "react-dom": "^15.3.2"
   }
