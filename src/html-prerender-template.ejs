@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title><%= htmlWebpackPlugin.options.title %></title>
+		<script type="text/javascript">
+			(function() {
+				var screenTypes = <%= JSON.stringify(htmlWebpackPlugin.options.screenTypes || []) %>;
+				var defaultType = {name: 'standard', pxPerRem: 16, width: window.innerWidth, height: window.innerHeight, aspectRatioName: 'standard', base: true};
+				if(screenTypes.length===0) {
+					screenTypes.push(defaultType);
+				}
+				var height = window.innerHeight,
+					width = window.innerWidth;
+				var scrObj = screenTypes[screenTypes.length - 1];
+				if(height > width) {
+					width = height;
+				}
+				for(var i=screenTypes.length-1; i>=0; i--) {
+					if(width <= screenTypes[i].width) {
+						scrObj = screenTypes[i];
+					}
+				}
+				document.documentElement.style.fontSize = scrObj.pxPerRem + 'px';
+			})();
+		</script>
+		<% for(var i=0; i<htmlWebpackPlugin.files.css.length; i++) { %><link href="<%= htmlWebpackPlugin.files.css[i] %>" rel="stylesheet"/><% } %>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="text/javascript">
+			requestAnimationFrame(function(){
+				var appendScript = function(src) {
+					var script = document.createElement('script');
+					script.type = 'text/javascript';
+					script.src = src;
+					document.body.appendChild(script);
+				};
+				<% for(var j=0; j<htmlWebpackPlugin.files.js.length; j++) { %>appendScript('<%= htmlWebpackPlugin.files.js[j] %>');<% } %>
+			});
+		</script>
+		
+	</body>
+</html>

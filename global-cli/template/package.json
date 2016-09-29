@@ -1,0 +1,32 @@
+{
+  "name": "my-app",
+  "version": "1.0.0",
+  "description": "A general template for an Enact Moonstone application.",
+  "author": "",
+  "main": "src/index.js",
+  "scripts": {
+    "serve": "enact serve --progress --inline --hot",
+    "pack": "enact pack",
+    "pack-p": "enact pack -p",
+    "watch": "enact pack --watch",
+    "clean": "enact clean",
+    "lint": "enact lint .",
+    "test": "enact test start --single-run --browsers PhantomJS",
+    "test-json": "enact test start --single-run --browsers PhantomJS --reporters json",
+    "test-watch": "enact test start --browsers PhantomJS"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "repository": "",
+  "enact": {
+    "title":"My App",
+    "ri": {
+      "baseSize":24
+    }
+  },
+  "dependencies": {
+    "enact": "github:enyojs/enact#develop",
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2"
+  }
+}
