@@ -33,7 +33,7 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 				} catch(e) {
 					console.log();
 					console.log(chalk.yellow('Unable to generate prerender of app state HTML'));
-					console.log(e.message || e);
+					console.log('Reason: ' + e.message || e);
 					if(e.stack) {
 						console.log(e.stack);
 					}
