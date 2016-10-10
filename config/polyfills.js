@@ -9,7 +9,7 @@
  */
 // @remove-on-eject-end
 
-if(typeof window === 'object') {
+if (typeof window === 'object') {
 	if (typeof Promise === 'undefined' && typeof window === 'object') {
 		// Rejection tracking prevents a common issue where React gets into an
 		// inconsistent state due to an error, but it gets swallowed by a Promise,

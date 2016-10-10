@@ -15,11 +15,12 @@ var
 	path = require('path'),
 	minimist = require('minimist'),
 	filesize = require('filesize'),
+	exists = require('path-exists').sync,
 	rimrafSync = require('rimraf').sync,
 	webpack = require('webpack'),
 	devConfig = require('../config/webpack.config.dev'),
-	isoConfig = require('../config/webpack.config.dev'),
 	prodConfig = require('../config/webpack.config.prod'),
+	PrerenderPlugin = require('../config/PrerenderPlugin'),
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
 	recursive = require('recursive-readdir'),
 	stripAnsi = require('strip-ansi');
@@ -82,6 +83,55 @@ function printFileSizes(stats, previousSizeMap) {
 	});
 }
 
+function readJSON(file) {
+	try {
+		return JSON.parse(fs.readFileSync(file, {encoding:'utf8'}));
+	} catch(e) {
+		return undefined;
+	}
+}
+
+
+function setupIsomorphic(config) {
+	var meta = readJSON('package.json') || {};
+	var enact = meta.enact || {};
+	var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom');
+	if(!exists(reactDOM)) {
+		reactDOM = require.resolve('react-dom');
+	}
+	// Include react-dom as top level entrypoint so espose-loader will expose
+	// it to window.ReactDOM to allow runtime rendering of the app.
+	config.entry.main.unshift(reactDOM);
+
+	// The App entrypoint for isomorphics builds *must* export a ReactElement.
+	config.entry.main[config.entry.main.length-1] =
+			path.resolve(enact.isomorphic || enact.prerender || meta.main || 'index.js');
+
+	// Since we're building for isomorphic usage, expose ReactElement 
+	config.output.library = 'App';
+
+	// Use universal module definition to allow usage in Node and browser environments.
+	config.output.libraryTarget = 'umd';
+
+	// Expose the 'react-dom' on a global context for App's rendering
+	// Currently maps the toolset to window.ReactDOM.
+	config.module.loaders.push({
+		test: reactDOM,
+		loader: 'expose?ReactDOM'
+	});
+
+	// Update HTML webpack plugin to use the isomorphic template and include screentypes
+	config.plugins[0].options.inject = false;
+	config.plugins[0].options.template = path.join(__dirname, '..', 'config',
+			'html-template-isomorphic.ejs');
+	config.plugins[0].options.screenTypes = enact.screenTypes
+			|| readJSON('./node_modules/@enact/moonstone/MoonstoneDecorator/screenTypes.json')
+			|| readJSON('./node_modules/enact/packages/moonstone/MoonstoneDecorator/screenTypes.json');
+
+	// Include plugin to prerender the html into the index.html
+	config.plugins.push(new PrerenderPlugin());
+}
+
 // Create the build and optionally, print the deployment instructions.
 function build(config, previousSizeMap, guided) {
 	if(process.env.NODE_ENV === 'development') {
@@ -89,9 +139,11 @@ function build(config, previousSizeMap, guided) {
 	} else {
 		console.log('Creating an optimized production build...');
 	}
+	config.bail = true;
 	webpack(config).run((err, stats) => {
 		if (err) {
-			console.error('Failed to create a ' + process.env.NODE_ENV + ' build. Reason:');
+			console.log();
+			console.error(chalk.red('Failed to create a ' + process.env.NODE_ENV + ' build.'));
 			console.error(err.message || err);
 			process.exit(1);
 		}
@@ -104,7 +156,7 @@ function build(config, previousSizeMap, guided) {
 		if(guided) {
 			var openCommand = process.platform === 'win32' ? 'start' : 'open';
 			console.log('The ' + chalk.cyan('dist') + ' directory is ready to be deployed.');
-			console.log('You may also serve it locally with a static server:')
+			console.log('You may also serve it locally with a static server:');
 			console.log();
 			console.log('	' + chalk.cyan('npm') +	' install -g pushstate-server');
 			console.log('	' + chalk.cyan('pushstate-server') + ' dist');
@@ -138,7 +190,8 @@ function displayHelp() {
 	console.log('  Options');
 	console.log('    -w, --watch       Rebuild on file changes');
 	console.log('    -p, --production  Build in production mode');
-	console.log('    -i, --isomorphic  Build in isomorphic mode');
+	console.log('    -i, --isomorphic  Use isomorphic code layout');
+	console.log('                      (Includes prerendering)');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -155,10 +208,7 @@ module.exports = function(args) {
 	var config;
 
 	// Do this as the first thing so that any code reading it knows the right env.
-	if(opts.isomorphic) {
-		process.env.NODE_ENV = 'production';
-		config = isoConfig;
-	} else if(opts.production) {
+	if(opts.production) {
 		process.env.NODE_ENV = 'production';
 		config = prodConfig;
 	} else {
@@ -166,10 +216,14 @@ module.exports = function(args) {
 		config = devConfig;
 	}
 
+	if(opts.isomorphic) {
+		setupIsomorphic(config);
+	}
+
 	// Warn and crash if required files are missing
-	/*if (!checkRequiredFiles([config.entry.main[config.entry.main.length-1]])) {
+	if (!checkRequiredFiles([config.entry.main[config.entry.main.length-1]])) {
 		process.exit(1);
-	}*/
+	}
 
 	if(opts.watch) {
 		watch(config);
@@ -200,4 +254,4 @@ module.exports = function(args) {
 			build(config, previousSizeMap);
 		});
 	}
-}
+};

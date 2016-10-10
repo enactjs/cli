@@ -10,6 +10,8 @@
 // @remove-on-eject-end
 
 var
+	path = require('path'),
+	os = require('os'),
 	chalk = require('chalk'),
 	webpack = require('webpack'),
 	WebpackDevServer = require('webpack-dev-server'),
@@ -17,7 +19,6 @@ var
 	httpProxyMiddleware = require('http-proxy-middleware'),
 	detect = require('detect-port'),
 	minimist = require('minimist'),
-	clearConsole = require('react-dev-utils/clearConsole'),
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
 	formatWebpackMessages = require('react-dev-utils/formatWebpackMessages'),
 	openBrowser = require('react-dev-utils/openBrowser'),
@@ -36,6 +37,14 @@ config.entry.main.unshift(require.resolve('react-dev-utils/webpackHotDevClient')
 // This is necessary to emit hot updates
 config.plugins.push(new webpack.HotModuleReplacementPlugin());
 
+var isFirstClear = true;
+function clearConsole() {
+	// On first run, clear completely so it doesn't show half screen on Windows.
+	// On next runs, use a different sequence that properly scrolls back.
+	process.stdout.write(isFirstClear ? '\x1bc' : (os.platform()==='linux' ? '\x1b[2J\x1b[0;0f' : '\x1b[2J\x1b[0f'));
+	isFirstClear = false;
+}
+
 function setupCompiler(host, port, protocol) {
 	// "Compiler" is a low-level interface to Webpack.
 	// It lets us listen to some events and provide our own custom messages.
@@ -48,12 +57,13 @@ function setupCompiler(host, port, protocol) {
 	compiler.plugin('invalid', function() {
 		clearConsole();
 		console.log('Compiling...');
+		console.log();
 	});
 
 	// "done" event fires when Webpack has finished recompiling the bundle.
 	// Whether or not you have warnings or errors, you will get this event.
 	compiler.plugin('done', function(stats) {
-		clearConsole();
+		//clearConsole();
 
 		// We have switched off the default Webpack output in WebpackDevServer
 		// options so we are going to "massage" the warnings and errors and present
@@ -121,7 +131,7 @@ function onProxyError(proxy) {
 		res.end('Proxy error: Could not proxy request ' + req.url + ' from ' +
 			host + ' to ' + proxy + ' (' + err.code + ').'
 		);
-	}
+	};
 }
 
 function addMiddleware(devServer) {
@@ -183,7 +193,9 @@ function addMiddleware(devServer) {
 }
 
 function runDevServer(host, port, protocol) {
+	console.log('**TEST4**');
 	var devServer = new WebpackDevServer(compiler, {
+		contentBase:__dirname,
 		// Silence WebpackDevServer's own logs since they're generally not useful.
 		// It will still show compile warnings and errors with this setting.
 		clientLogLevel: 'none',
@@ -208,12 +220,13 @@ function runDevServer(host, port, protocol) {
 		https: protocol === "https",
 		host: host
 	});
-
+	console.log('**TEST5**');
 	// Our custom middleware proxies requests to /index.html or a remote API.
 	addMiddleware(devServer);
-
+	console.log('**TEST6**');
 	// Launch WebpackDevServer.
 	devServer.listen(port, (err, result) => {
+		console.log('**TEST7**');
 		if (err) {
 			return console.log(err);
 		}
@@ -228,8 +241,11 @@ function runDevServer(host, port, protocol) {
 function run(port) {
 	var protocol = process.env.HTTPS === 'true' ? "https" : "http";
 	var host = process.env.HOST || config.devServer.host || 'localhost';
+	console.log('**TEST2**');
 	setupCompiler(host, port, protocol);
+	console.log('**TEST3**');
 	runDevServer(host, port, protocol);
+	console.log('**TEST_END**');
 }
 
 function displayHelp() {
@@ -264,6 +280,7 @@ module.exports = function(args) {
 	// run on a different port. `detect()` Promise resolves to the next free port.
 	detect(DEFAULT_PORT).then(port => {
 		if (port === DEFAULT_PORT) {
+			console.log('**TEST1**');
 			run(port);
 			return;
 		}

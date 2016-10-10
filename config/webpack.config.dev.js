@@ -54,7 +54,7 @@ module.exports = {
 	},
 	output: {
 		// The build output directory.
-		path: './dist',
+		path: path.resolve('./dist'),
 		// Generated JS file names (with nested folders).
 		// There will be one main bundle, and one file per asynchronous chunk.
 		// We don't currently advertise code splitting but Webpack supports it.
@@ -90,7 +90,7 @@ module.exports = {
 		preLoaders: [
 			{
 				test: /\.(js|jsx|es6)$/,
-				loader: 'eslint',
+				loader: 'eslint-loader',
 				exclude: /node_modules/
 			}
 		],
@@ -190,7 +190,8 @@ module.exports = {
 	// Point ESLint to our predefined config.
 	eslint: {
 		configFile: require.resolve('eslint-config-enact'),
-		useEslintrc: false
+		useEslintrc: false,
+		failOnError: true
 	},
 	// @remove-on-eject-end
 	// We use PostCSS for autoprefixing only.
@@ -252,4 +253,6 @@ module.exports = {
 try {
 	fs.accessSync(path.join('node_modules', 'enact'));
 	module.exports.resolve.alias['@enact'] = 'enact/packages';
-} catch (err) {}
+} catch (err) {
+	delete module.exports.resolve.alias['@enact'];
+}
