@@ -32,10 +32,18 @@
 		<div id="root"></div>
 		<script type="text/javascript">
 			requestAnimationFrame(function(){
+				var count = 0;
 				var appendScript = function(src) {
+					count++;
 					var script = document.createElement('script');
 					script.type = 'text/javascript';
 					script.src = src;
+					script.onload = function() {
+						count--;
+						if(count===0 && (typeof App === 'object') && window.ReactDOM) {
+							ReactDOM.render(App, document.getElementById('root'));
+						}
+					};
 					document.body.appendChild(script);
 				};
 				<% for(var j=0; j<htmlWebpackPlugin.files.js.length; j++) { %>appendScript('<%= htmlWebpackPlugin.files.js[j] %>');<% } %>
