@@ -1,6 +1,7 @@
 var
 	path = require('path'),
 	fs = require('fs'),
+	chalk = require('chalk'),
 	requireFromString = require('require-from-string');
 
 function PrerenderPlugin(options) {
@@ -30,9 +31,14 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 					var code = ReactDOMServer.renderToString(App['default'] || App);
 					params.html = params.html.replace('<div id="root"></div>', '<div id="root">' + code + '</div>');
 				} catch(e) {
-					console.error('ERROR: Unable to generate prerender of app state html.');
-					console.error(e);
-					process.exit(1);
+					console.log();
+					console.log(chalk.yellow('Unable to generate prerender of app state HTML'));
+					console.log(e.message || e);
+					if(e.stack) {
+						console.log(e.stack);
+					}
+					console.log();
+					console.log('Continuing build without prerendering...');
 				}
 				callback && callback();
 			});
