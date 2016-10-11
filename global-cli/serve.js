@@ -193,7 +193,6 @@ function addMiddleware(devServer) {
 }
 
 function runDevServer(host, port, protocol) {
-	console.log('**TEST4**');
 	var devServer = new WebpackDevServer(compiler, {
 		contentBase:__dirname,
 		// Silence WebpackDevServer's own logs since they're generally not useful.
@@ -220,13 +219,10 @@ function runDevServer(host, port, protocol) {
 		https: protocol === "https",
 		host: host
 	});
-	console.log('**TEST5**');
 	// Our custom middleware proxies requests to /index.html or a remote API.
 	addMiddleware(devServer);
-	console.log('**TEST6**');
 	// Launch WebpackDevServer.
 	devServer.listen(port, (err, result) => {
-		console.log('**TEST7**');
 		if (err) {
 			return console.log(err);
 		}
@@ -234,18 +230,19 @@ function runDevServer(host, port, protocol) {
 		clearConsole();
 		console.log(chalk.cyan('Starting the development server...'));
 		console.log();
-		openBrowser(protocol + '://' + host + ':' + port + '/');
+		if(host==='0.0.0.0') {
+			openBrowser(protocol + '://127.0.0.1:' + port + '/');
+		} else {
+			openBrowser(protocol + '://' + host + ':' + port + '/');
+		}
 	});
 }
 
 function run(port) {
 	var protocol = process.env.HTTPS === 'true' ? "https" : "http";
 	var host = process.env.HOST || config.devServer.host || 'localhost';
-	console.log('**TEST2**');
 	setupCompiler(host, port, protocol);
-	console.log('**TEST3**');
 	runDevServer(host, port, protocol);
-	console.log('**TEST_END**');
 }
 
 function displayHelp() {
@@ -280,7 +277,6 @@ module.exports = function(args) {
 	// run on a different port. `detect()` Promise resolves to the next free port.
 	detect(DEFAULT_PORT).then(port => {
 		if (port === DEFAULT_PORT) {
-			console.log('**TEST1**');
 			run(port);
 			return;
 		}

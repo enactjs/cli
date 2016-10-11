@@ -73,7 +73,8 @@ module.exports = {
 	// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
 	// directory of `enact-dev` itself rather than the project directory.
 	resolveLoader: {
-		root: path.resolve(__dirname, '../node_modules')
+		root: path.resolve(__dirname, '../node_modules'),
+		fallback: path.resolve('./node_modules')
 	},
 	// @remove-on-eject-end
 	module: {
@@ -83,6 +84,7 @@ module.exports = {
 			{
 				test: /\.(js|jsx|es6)$/,
 				loader: 'eslint-loader',
+				include: process.cwd(),
 				exclude: /node_modules/
 			}
 		],

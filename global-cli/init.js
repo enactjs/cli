@@ -7,7 +7,8 @@ var
 	semver = require('semver'),
 	exists = require('path-exists').sync;
 
-var ENACT_DEV_NPM = 'enyojs/enact-dev';
+// @TODO: switch back to master when 0.2.0 releases
+var ENACT_DEV_NPM = 'enyojs/enact-dev#develop';
 	
 function createApp(output, template, link, local, verbose) {
 	var root = path.resolve(output);
@@ -199,9 +200,8 @@ function displayHelp() {
 	console.log('                          (default: cwd)');
 	console.log();
 	console.log('  Options');
-	// Unadvertised options while under development
-	//console.log('    -link             Link in any applicable dependencies');
-	//console.log('    -local            Include enact-dev locally in the project');
+	console.log('    -link             Link in any applicable dependencies');
+	console.log('    -local            Include enact-dev locally in the project');
 	console.log('    -verbose          Verbose output logging');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
