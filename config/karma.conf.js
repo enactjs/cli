@@ -35,6 +35,7 @@ module.exports = function(karma) {
 		preprocessors: {
 			// add webpack as preprocessor
 			'./!(node_modules)/**/*.js': ['webpack', 'sourcemap'],
+			[require.resolve('./polyfills')]: ['webpack', 'sourcemap'],
 			[require.resolve('./proptype-checker')]: ['webpack', 'sourcemap']
 		},
 
@@ -83,7 +84,7 @@ module.exports = function(karma) {
 						query: {
 							// @remove-on-eject-begin
 							babelrc: false,
-							extends: path.join(__dirname, '.babelrc')
+							extends: path.join(__dirname, '.babelrc'),
 							// @remove-on-eject-end
 							cacheDirectory: findCacheDir({
 								name: 'enact-dev'
