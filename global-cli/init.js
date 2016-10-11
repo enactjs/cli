@@ -87,10 +87,25 @@ function copyTemplate(template, dest) {
 		}
 	});
 
+	// Update package.json name
 	var pkgJSON = path.join(dest, 'package.json');
 	var meta = JSON.parse(fs.readFileSync(pkgJSON, {encoding:'utf8'}));
 	meta.name = path.basename(dest);
 	fs.writeFileSync(pkgJSON, JSON.stringify(meta, null, '\t'), {encoding:'utf8'});
+
+	// Update appinfo.json if it exists in the template
+	var appinfo = path.join(dest, 'appinfo.json');
+	if(!exists(appinfo)) {
+		appinfo = path.join(dest, 'webos-meta', 'appinfo.json');
+		if(!exists(appinfo)) {
+			appinfo = undefined;
+		}
+	}
+	if(appinfo) {
+		var aiMeta = JSON.parse(fs.readFileSync(appinfo, {encoding:'utf8'}));
+		aiMeta.id = meta.name;
+		fs.writeFileSync(appinfo, JSON.stringify(aiMeta, null, '\t'), {encoding:'utf8'});
+	}
 }
 
 function installDeps(root, link, local, verbose, callback) {
