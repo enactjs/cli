@@ -26,6 +26,12 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 				} catch(e) {
 					ReactDOMServer = require('react-dom/server');
 				}
+				if (!global.fetch) {
+					global.fetch = require('node-fetch');
+					global.Response = global.fetch.Response;
+					global.Headers = global.fetch.Headers;
+					global.Request = global.fetch.Request;
+				}
 				try {
 					var App = requireFromString(compilation.assets['main.js'].source(), 'main.js');
 					var code = ReactDOMServer.renderToString(App['default'] || App);
