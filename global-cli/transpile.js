@@ -1,31 +1,45 @@
 var
 	path = require('path'),
-	ncp = require('ncp').ncp,
 	glob = require('glob'),
 	babel = require('babel-core'),
-	fs = require('fs'),
-	config = require('..');
+	fs = require('fs-extra'),
+	minimist = require('minimist');
+
+function displayHelp() {
+	console.log('  Usage');
+	console.log('    enact transpile [options]');
+	console.log();
+	console.log('  Options');
+	console.log('    -o, --output      Directory to transpile to');
+	console.log('    -v, --version     Display version information');
+	console.log('    -h, --help        Display help information');
+	console.log();
+	process.exit(0);
+}
 
 module.exports = function(args) {
-	var sourceRoot = '.';
-	var buildRoot = './build';
+	var opts = minimist(args, {
+		string: ['o', 'output'],
+		boolean: ['h', 'help'],
+		alias: {o:'output', h:'help'}
+	});
+	opts.help && displayHelp();
 
-	var outputFlag = args.indexOf('-o');
-	if(outputFlag>=0 && args[outputFlag+1]) {
-		buildRoot = args[outputFlag+1];
-	}
+	var sourceRoot = '.';
+	var buildRoot = opts.output || './build';
 
 	console.log('Transpiling via Babel to ' + path.resolve(buildRoot));
-	ncp(sourceRoot, buildRoot, {filter:/^(?!.*(node_modules|build|dist|\\.git)).*$/, stopOnErr:true}, function(ncpErr) {
-		if(ncpErr) {
-			console.error(ncpErr);
+	fs.copy(sourceRoot, buildRoot, {filter:/^(?!.*(node_modules|build|dist|\\.git)).*$/, stopOnErr:true}, function(cpErr) {
+		if(cpErr) {
+			console.error(cpErr);
 		} else {
 			glob(buildRoot + '/**/*.js', {nodir:true}, function(globErr, files) {
 				if(globErr) {
 					console.error(globErr);
 				} else {
+					var babelrc = path.join(__dirname, '..', 'config', '.babelrc');
 					files.forEach(function(js) {
-						babel.transformFile(js, {extends:config.babelrc}, function(babelErr, result) {
+						babel.transformFile(js, {extends:babelrc}, function(babelErr, result) {
 							if(babelErr) {
 								console.error(babelErr);
 							} else {
