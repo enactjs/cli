@@ -95,41 +95,45 @@ function readJSON(file) {
 function setupIsomorphic(config) {
 	var meta = readJSON('package.json') || {};
 	var enact = meta.enact || {};
-	var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom');
-	if(!exists(reactDOM)) {
-		reactDOM = require.resolve('react-dom');
+	// only use isomorphic if an isomorphic entrypoint is specified
+	if(enact.isomorphic || enact.prerender) {
+		var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom');
+		if(!exists(reactDOM)) {
+			reactDOM = require.resolve('react-dom');
+		}
+		// Include react-dom as top level entrypoint so espose-loader will expose
+		// it to window.ReactDOM to allow runtime rendering of the app.
+		config.entry.main.unshift(reactDOM);
+
+		// The App entrypoint for isomorphics builds *must* export a ReactElement.
+		config.entry.main[config.entry.main.length-1] = path.resolve(enact.isomorphic || enact.prerender);
+
+		// Since we're building for isomorphic usage, expose ReactElement 
+		config.output.library = 'App';
+
+		// Use universal module definition to allow usage in Node and browser environments.
+		config.output.libraryTarget = 'umd';
+
+		// Expose the 'react-dom' on a global context for App's rendering
+		// Currently maps the toolset to window.ReactDOM.
+		config.module.loaders.push({
+			test: reactDOM,
+			loader: 'expose?ReactDOM'
+		});
+
+		// Update HTML webpack plugin to use the isomorphic template and include screentypes
+		config.plugins[0].options.inject = false;
+		config.plugins[0].options.template = path.join(__dirname, '..', 'config',
+				'html-template-isomorphic.ejs');
+		config.plugins[0].options.screenTypes = enact.screenTypes
+				|| readJSON('./node_modules/@enact/moonstone/MoonstoneDecorator/screenTypes.json')
+				|| readJSON('./node_modules/enact/packages/moonstone/MoonstoneDecorator/screenTypes.json');
+
+		// Include plugin to prerender the html into the index.html
+		config.plugins.push(new PrerenderPlugin());
+	} else {
+		console.log(chalk.yellow('Isomorphic entrypoint not found in package.json; building normally'));
 	}
-	// Include react-dom as top level entrypoint so espose-loader will expose
-	// it to window.ReactDOM to allow runtime rendering of the app.
-	config.entry.main.unshift(reactDOM);
-
-	// The App entrypoint for isomorphics builds *must* export a ReactElement.
-	config.entry.main[config.entry.main.length-1] =
-			path.resolve(enact.isomorphic || enact.prerender || meta.main || 'index.js');
-
-	// Since we're building for isomorphic usage, expose ReactElement 
-	config.output.library = 'App';
-
-	// Use universal module definition to allow usage in Node and browser environments.
-	config.output.libraryTarget = 'umd';
-
-	// Expose the 'react-dom' on a global context for App's rendering
-	// Currently maps the toolset to window.ReactDOM.
-	config.module.loaders.push({
-		test: reactDOM,
-		loader: 'expose?ReactDOM'
-	});
-
-	// Update HTML webpack plugin to use the isomorphic template and include screentypes
-	config.plugins[0].options.inject = false;
-	config.plugins[0].options.template = path.join(__dirname, '..', 'config',
-			'html-template-isomorphic.ejs');
-	config.plugins[0].options.screenTypes = enact.screenTypes
-			|| readJSON('./node_modules/@enact/moonstone/MoonstoneDecorator/screenTypes.json')
-			|| readJSON('./node_modules/enact/packages/moonstone/MoonstoneDecorator/screenTypes.json');
-
-	// Include plugin to prerender the html into the index.html
-	config.plugins.push(new PrerenderPlugin());
 }
 
 // Create the build and optionally, print the deployment instructions.
