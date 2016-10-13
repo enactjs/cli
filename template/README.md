@@ -77,21 +77,10 @@ You would need to install an ESLint plugin for your editor first.
 
 ><img src="http://i.imgur.com/yVNNHJM.png" width="300">
 
-Then add this block to the `package.json` file of your project:
-
-```js
-{
-  // ...
-  "eslintConfig": {
-    "extends": "enact"
-  }
-}
-```
-
-Finally, you will need to install some packages *globally*:
+Then, you will need to install some packages *globally*:
 
 ```sh
-npm install -g eslint-config-enact eslint-plugin-react eslint-plugin-babel babel-eslint
+npm install -g enyojs/eslint-config-enact eslint-plugin-react eslint-plugin-babel babel-eslint
 
 ```
 

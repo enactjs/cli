@@ -24,6 +24,9 @@
       "baseSize":24
     }
   },
+  "eslintConfig": {
+    "extends": "enact"
+  },
   "dependencies": {
     "enact": "github:enyojs/enact#feature/PLAT-27518",
     "react": "^15.3.2",
