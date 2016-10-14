@@ -146,6 +146,14 @@ function addMiddleware(devServer) {
 	var enact = appPkg.enact || {};
 	var proxy = enact.proxy || appPkg.proxy;
 	devServer.use(historyApiFallback({
+		rewrites: [
+			{
+				from: /.*\.json$/,
+				to: function(context) {
+					return context.parsedUrl.pathname;
+				}
+			}
+		],
 		// Paths with dots should still use the history fallback.
 		// See https://github.com/facebookincubator/create-react-app/issues/387.
 		disableDotRule: true,
