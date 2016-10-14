@@ -94,7 +94,7 @@ module.exports = function(karma) {
 					{test: /\.(c|le)ss$/, loader: ExtractTextPlugin.extract('style',
 							'css?-autoprefixer&modules&sourceMap&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss!less?sourceMap')
 					},
-					{test: /ilibmanifest\.json$/, loader: 'ilib'},
+					{test: /ilibmanifest\.json$/, loader: 'ilib?noSave'},
 					{test: /\.json$/, loader: 'json', exclude: /ilibmanifest\.json$/},
 					{test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/, loader: 'file',
 						query: {
