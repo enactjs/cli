@@ -110,7 +110,7 @@ module.exports = function(karma) {
 				],
 				noParse: /node_modules\/json-schema\/lib\/validate\.js/
 			},
-			devServer: {host: '0.0.0.0', port: 8080, stats: 'errors-only'},
+			devServer: {host: '0.0.0.0', port: 8080},
 			postcss: function() {
 				return [autoprefixer({browsers: ['>1%', 'last 4 versions', 'Firefox ESR', 'not ie < 9']})];
 			},
@@ -131,7 +131,10 @@ module.exports = function(karma) {
 		},
 
 		webpackServer: {
-			noInfo: true // please don't spam the console when running in karma!
+			// please don't spam the console when running in karma!
+			noInfo: true,
+			progress: false,
+			stats: false
 		},
 
 		plugins: [
