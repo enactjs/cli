@@ -134,7 +134,17 @@ module.exports = function(karma) {
 			// please don't spam the console when running in karma!
 			noInfo: true,
 			progress: false,
-			stats: false
+			stats: {
+				assets: false,
+				chunkModules: false,
+				chunks: false,
+				colors: true,
+				errorDetails: false,
+				hash: false,
+				reasons: false,
+				timings: false,
+				version: false
+			}
 		},
 
 		plugins: [
