@@ -22,6 +22,11 @@ if (typeof window === 'object') {
 	require('whatwg-fetch');
 }
 
+// Common String ES6 functionalities for character values.
+// Used by Enact's Moonstone library.
+require('string.fromcodepoint');
+require('string.prototype.codepointat');
+
 // Object.assign() is commonly used with Enact and React.
 // It will use the native implementation if it's present and isn't buggy.
 Object.assign = require('object-assign');
