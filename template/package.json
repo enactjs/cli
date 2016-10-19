@@ -28,7 +28,12 @@
     "extends": "enact"
   },
   "dependencies": {
-    "enact": "github:enyojs/enact#feature/PLAT-27518",
+    "@enact/core": "^1.0.0-alpha.1",
+    "@enact/ui": "^1.0.0-alpha.1",
+    "@enact/moonstone": "^1.0.0-alpha.1",
+    "@enact/spotlight": "^1.0.0-alpha.1",
+    "@enact/i18n": "^1.0.0-alpha.1",
+    "@enact/webos": "^1.0.0-alpha.1",
     "react": "^15.3.2",
     "react-dom": "^15.3.2"
   }
