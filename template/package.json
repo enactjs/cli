@@ -5,7 +5,7 @@
   "author": "",
   "main": "src/index.js",
   "scripts": {
-    "serve": "enact serve --progress --inline --hot",
+    "serve": "enact serve",
     "pack": "enact pack",
     "pack-p": "enact pack -p",
     "watch": "enact pack --watch",
@@ -19,13 +19,16 @@
   "private": true,
   "repository": "",
   "enact": {
-    "title":"My App",
+    "isomorphic": "src/iso.js",
     "ri": {
       "baseSize":24
     }
   },
+  "eslintConfig": {
+    "extends": "enact"
+  },
   "dependencies": {
-    "enact": "github:enyojs/enact#develop",
+    "enact": "github:enyojs/enact#feature/PLAT-27518",
     "react": "^15.3.2",
     "react-dom": "^15.3.2"
   }
