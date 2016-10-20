@@ -143,7 +143,8 @@ module.exports = function(karma) {
 				hash: false,
 				reasons: false,
 				timings: false,
-				version: false
+				version: false,
+				children: false
 			}
 		},
 
