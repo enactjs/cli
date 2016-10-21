@@ -31,7 +31,7 @@
     "enyo-console-spy": "enyojs/enyo-console-spy",
     "enzyme": "~2.4.1",
     "eslint": "~3.7.1",
-    "eslint-config-enact": "github:enyojs/eslint-config-enact#PLAT-28813",
+    "eslint-config-enact": "github:enyojs/eslint-config-enact",
     "eslint-config-enact-internal": "github:enyojs/eslint-config-enact-internal",
     "eslint-loader": "~1.5.0",
     "eslint-plugin-babel": "~3.3.0",
