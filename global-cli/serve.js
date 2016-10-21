@@ -200,7 +200,7 @@ function addMiddleware(devServer) {
 	devServer.use(devServer.middleware);
 }
 
-function runDevServer(host, port, protocol) {
+function runDevServer(host, port, protocol, shouldOpen) {
 	var devServer = new WebpackDevServer(compiler, {
 		contentBase: process.cwd(),
 		// Silence WebpackDevServer's own logs since they're generally not useful.
@@ -246,11 +246,11 @@ function runDevServer(host, port, protocol) {
 	});
 }
 
-function run(port) {
+function run(port, shouldOpen) {
 	var protocol = process.env.HTTPS === 'true' ? "https" : "http";
 	var host = process.env.HOST || config.devServer.host || 'localhost';
 	setupCompiler(host, port, protocol);
-	runDevServer(host, port, protocol);
+	runDevServer(host, port, protocol, shouldOpen);
 }
 
 function displayHelp() {
@@ -258,6 +258,7 @@ function displayHelp() {
 	console.log('    enact serve [options]');
 	console.log();
 	console.log('  Options');
+	console.log('    -b, --browser     Automatically open browser');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -266,8 +267,8 @@ function displayHelp() {
 
 module.exports = function(args) {
 	var opts = minimist(args, {
-		boolean: ['h', 'help'],
-		alias: {h:'help'}
+		boolean: ['b', 'browser', 'h', 'help'],
+		alias: {b:'browser', h:'help'}
 	});
 	opts.help && displayHelp();
 
@@ -285,7 +286,7 @@ module.exports = function(args) {
 	// run on a different port. `detect()` Promise resolves to the next free port.
 	detect(DEFAULT_PORT).then(port => {
 		if (port === DEFAULT_PORT) {
-			run(port);
+			run(port, opts.browser);
 			return;
 		}
 
@@ -296,7 +297,7 @@ module.exports = function(args) {
 
 		prompt(question, true).then(shouldChangePort => {
 			if (shouldChangePort) {
-				run(port);
+				run(port, opts.browser);
 			}
 		});
 	});

@@ -12,7 +12,7 @@ function displayHelp() {
 	console.log();
 	console.log('  Options');
 	console.log('    -l, --local       Scan with local eslint config');
-	console.log('    -f, --framework   Scan with strict framework config');
+	console.log('    -s, --strict      Scan with strict eslint config');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -21,13 +21,13 @@ function displayHelp() {
 
 module.exports = function(args) {
 	var opts = minimist(args, {
-		boolean: ['l', 'local', 'f', 'framework', 'h', 'help'],
-		alias: {l:'local', f:'framework', h:'help'}
+		boolean: ['l', 'local', 's', 'strict', 'f', 'framework', 'h', 'help'],
+		alias: {l:'local', s:'strict', f:'framework', h:'help'}
 	});
 	opts.help && displayHelp();
 
 	var eslintArgs = [];
-	if(opts.framework) {
+	if(opts.strict || opts.framework) {
 		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact-internal/index.js'));
 	} else if(!opts.local) {
 		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact/index.js'));
