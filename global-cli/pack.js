@@ -14,12 +14,15 @@ var
 	fs = require('fs-extra'),
 	path = require('path'),
 	minimist = require('minimist'),
+	glob = require('glob'),
 	filesize = require('filesize'),
 	exists = require('path-exists').sync,
 	rimrafSync = require('rimraf').sync,
 	webpack = require('webpack'),
 	devConfig = require('../config/webpack.config.dev'),
 	prodConfig = require('../config/webpack.config.prod'),
+	EnactFrameworkPlugin = require('../config/EnactFrameworkPlugin'),
+	EnactFrameworkRefPlugin = require('../config/EnactFrameworkRefPlugin'),
 	PrerenderPlugin = require('../config/PrerenderPlugin'),
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
 	recursive = require('recursive-readdir'),
@@ -91,6 +94,30 @@ function readJSON(file) {
 	}
 }
 
+function setupFramework(config) {
+	var libDirs = [
+		''
+	];
+	var entry = glob.sync('@enact/**/*.@(js|jsx|es6)', {
+		cwd: path.resolve('./node_modules'),
+		nodir: true,
+		ignore: [
+			'./webpack.config.js',
+			'./.eslintrc.js',
+			'./karma.conf.js',
+			'./build/**/*.*',
+			'./dist/**/*.*',
+			'./node_modules/**/*.*',
+			'**/tests/*.js'
+		]
+	}).concat(['react', 'react-dom']);
+	config.entry.main = entry;
+	config.output.library = 'enact_framework';
+	config.output.libraryTarget = 'umd';
+	config.module.loaders[2].loader += '?noSave';
+	config.plugins.shift();
+	config.plugins.push(new EnactFrameworkPlugin());
+}
 
 function setupIsomorphic(config) {
 	var meta = readJSON('package.json') || {};
@@ -204,7 +231,7 @@ function displayHelp() {
 
 module.exports = function(args) {
 	var opts = minimist(args, {
-		boolean: ['p', 'production', 'i', 'isomorphic', 'w', 'watch', 'h', 'help'],
+		boolean: ['framework', 'p', 'production', 'i', 'isomorphic', 'w', 'watch', 'h', 'help'],
 		alias: {p:'production', i:'isomorphic', w:'watch', h:'help'}
 	});
 	opts.help && displayHelp();
@@ -220,12 +247,14 @@ module.exports = function(args) {
 		config = devConfig;
 	}
 
-	if(opts.isomorphic) {
+	if(opts.framework) {
+		setupFramework(config);
+	} else if(opts.isomorphic) {
 		setupIsomorphic(config);
 	}
 
 	// Warn and crash if required files are missing
-	if (!checkRequiredFiles([config.entry.main[config.entry.main.length-1]])) {
+	if (!opts.framework && !checkRequiredFiles([config.entry.main[config.entry.main.length-1]])) {
 		process.exit(1);
 	}
 
