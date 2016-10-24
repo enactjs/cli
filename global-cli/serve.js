@@ -238,10 +238,12 @@ function runDevServer(host, port, protocol, shouldOpen) {
 		clearConsole();
 		console.log(chalk.cyan('Starting the development server...'));
 		console.log();
-		if(host==='0.0.0.0') {
-			openBrowser(protocol + '://127.0.0.1:' + port + '/');
-		} else {
-			openBrowser(protocol + '://' + host + ':' + port + '/');
+		if(shouldOpen) {
+			if(host==='0.0.0.0') {
+				openBrowser(protocol + '://127.0.0.1:' + port + '/');
+			} else {
+				openBrowser(protocol + '://' + host + ':' + port + '/');
+			}
 		}
 	});
 }
