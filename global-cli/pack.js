@@ -94,10 +94,19 @@ function readJSON(file) {
 	}
 }
 
+function externalFramework(config, external, inject) {
+	config.plugins.push(new EnactFrameworkRefPlugin({
+		name:'enact_framework',
+		libraries:['@enact', 'react', 'react-dom'],
+		external: {
+			path: external,
+			inject: inject
+		}
+	}));
+}
+
 function setupFramework(config) {
-	var libDirs = [
-		''
-	];
+	// Form list of framework entries; Every @enact/* js file as well as react/react-dom
 	var entry = glob.sync('@enact/**/*.@(js|jsx|es6)', {
 		cwd: path.resolve('./node_modules'),
 		nodir: true,
@@ -110,19 +119,28 @@ function setupFramework(config) {
 			'./node_modules/**/*.*',
 			'**/tests/*.js'
 		]
-	}).concat(['react', 'react-dom']);
-	config.entry.main = entry;
+	}).concat(['react', 'react-dom', 'react/lib/ReactPerf']);
+	config.entry = {enact:entry};
+
+	// Use universal module definition to allow usage and name as 'enact_framework'
 	config.output.library = 'enact_framework';
 	config.output.libraryTarget = 'umd';
-	config.module.loaders[2].loader += '?noSave';
+
+	// Append additional options to the ilib-loader to skip './resources' detection/generation
+	config.module.loaders[2].loader += '?noSave&noResources';
+
+	// Remove the HTML generation plugin and webOS-meta plugin
 	config.plugins.shift();
+	config.plugins.pop();
+
+	// Add the framework plugin to build in an externally accessible manner
 	config.plugins.push(new EnactFrameworkPlugin());
 }
 
 function setupIsomorphic(config) {
 	var meta = readJSON('package.json') || {};
 	var enact = meta.enact || {};
-	// only use isomorphic if an isomorphic entrypoint is specified
+	// Only use isomorphic if an isomorphic entrypoint is specified
 	if(enact.isomorphic || enact.prerender) {
 		var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom');
 		if(!exists(reactDOM)) {
@@ -232,6 +250,7 @@ function displayHelp() {
 module.exports = function(args) {
 	var opts = minimist(args, {
 		boolean: ['framework', 'p', 'production', 'i', 'isomorphic', 'w', 'watch', 'h', 'help'],
+		string: ['externals', 'externals-inject'],
 		alias: {p:'production', i:'isomorphic', w:'watch', h:'help'}
 	});
 	opts.help && displayHelp();
@@ -249,8 +268,13 @@ module.exports = function(args) {
 
 	if(opts.framework) {
 		setupFramework(config);
-	} else if(opts.isomorphic) {
-		setupIsomorphic(config);
+	} else {
+		if(opts.isomorphic) {
+			setupIsomorphic(config);
+		}
+		if(opts.externals) {
+			externalFramework(config, opts.externals, opts['externals-inject']);
+		}
 	}
 
 	// Warn and crash if required files are missing
