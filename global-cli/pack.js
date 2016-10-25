@@ -95,6 +95,7 @@ function readJSON(file) {
 }
 
 function externalFramework(config, external, inject) {
+	// Add the reference plugin so the app uses the external framework
 	config.plugins.push(new EnactFrameworkRefPlugin({
 		name:'enact_framework',
 		libraries:['@enact', 'react', 'react-dom'],
@@ -244,13 +245,21 @@ function displayHelp() {
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
+	/*
+		Hidden Options:
+			--framework           Builds the @enact/*, react, and react-dom into an external framework
+			--no-mangle           Will skip mangling during production build
+			--externals           Specify a local directory path to the standalone external framework
+			--externals-inject    Remote public path to the external framework for use injecting into HTML
+	*/
 	process.exit(0);
 }
 
 module.exports = function(args) {
 	var opts = minimist(args, {
-		boolean: ['framework', 'p', 'production', 'i', 'isomorphic', 'w', 'watch', 'h', 'help'],
+		boolean: ['minify', 'framework', 'p', 'production', 'i', 'isomorphic', 'w', 'watch', 'h', 'help'],
 		string: ['externals', 'externals-inject'],
+		default: {minify:true},
 		alias: {p:'production', i:'isomorphic', w:'watch', h:'help'}
 	});
 	opts.help && displayHelp();
@@ -261,6 +270,12 @@ module.exports = function(args) {
 	if(opts.production) {
 		process.env.NODE_ENV = 'production';
 		config = prodConfig;
+		if(!opts['minify']) {
+			// Allow Uglify's optimizations/debug-code-removal but don't minify
+			config.plugins[4].options.mangle = false;
+			config.plugins[4].options.beautify = true;
+			config.plugins[4].options.output.comments = true;
+		}
 	} else {
 		process.env.NODE_ENV = 'development';
 		config = devConfig;
