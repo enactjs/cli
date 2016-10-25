@@ -23,6 +23,7 @@ function EnactFrameworkPlugin(options) {
 }
 module.exports = EnactFrameworkPlugin;
 EnactFrameworkPlugin.prototype.apply = function(compiler) {
+	// Map entries to the DLLEntryPlugin
 	compiler.plugin('entry-option', function(context, entry) {
 		function itemToPlugin(item, name) {
 			if(Array.isArray(item))
@@ -39,6 +40,8 @@ EnactFrameworkPlugin.prototype.apply = function(compiler) {
 		}
 		return true;
 	});
+
+	// Format the internal module ID to a usable named descriptor
 	compiler.plugin('compilation', function(compilation) {
 		compilation.plugin('before-module-ids', function(modules) {
 			modules.forEach(function(module) {
@@ -52,14 +55,18 @@ EnactFrameworkPlugin.prototype.apply = function(compiler) {
 						module.id = parent;
 					}
 					module.id = module.id.replace(/\\/g, '/');
+
+					// Remove any leading ./node_modules prefix
 					var nodeModulesPrefix = './node_modules/';
 					if(module.id.indexOf(nodeModulesPrefix)===0) {
 						module.id = module.id.substring(nodeModulesPrefix.length);
 					}
 					if(module.id.indexOf('node_modules')===-1) {
+						// Remove any js file extension
 						if(module.id.indexOf('.js')===module.id.length-3) {
 							module.id = module.id.substring(0, module.id.length-3);
 						}
+						// Remove any /index suffix as we want the user-accessible ID
 						if(module.id.indexOf('/index')===module.id.length-6 && module.id.length>6) {
 							module.id = module.id.substring(0, module.id.length-6);
 						}

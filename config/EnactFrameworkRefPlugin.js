@@ -4,6 +4,8 @@ var
 	DelegatedSourceDependency = require('webpack/lib/dependencies/DelegatedSourceDependency'),
 	DelegatedModule = require('webpack/lib/DelegatedModule');
 
+// Custom DelegateFactoryPlugin designed to redirect Enact framework require() calls
+// to the external framework
 function DelegatedEnactFactoryPlugin(options) {
 	this.options = options || {};
 }
@@ -23,6 +25,16 @@ DelegatedEnactFactoryPlugin.prototype.apply = function(normalModuleFactory) {
 	});
 };
 
+// Form a correct filepath that can be used within the build's output directory
+function normalizePath(dir, file, compiler) {
+	if(path.isAbsolute(dir)) {
+		return path.join(dir, file);
+	} else {
+		return path.relative(path.resolve(compiler.options.output.path), path.join(process.cwd(), dir, file));
+	}
+}
+
+// Reference plugin to handle rewiring the external Enact framework requests
 function EnactFrameworkRefPlugin(opts) {
 	this.options = opts || {};
 	this.options.name = this.options.name || 'enact_framework';
@@ -41,21 +53,32 @@ EnactFrameworkRefPlugin.prototype.apply = function(compiler) {
 	var libs = this.options.libraries;
 	var external = this.options.external;
 
+	// Declare enact_framework as an external dependency
 	var externals = {};
 	externals[name] = name;
-	compiler.apply(new ExternalsPlugin('var', externals));
+	compiler.apply(new ExternalsPlugin(compiler.options.output.libraryTarget || 'var', externals));
 
 	compiler.plugin('compilation', function(compilation, params) {
 		var normalModuleFactory = params.normalModuleFactory;
 		compilation.dependencyFactories.set(DelegatedSourceDependency, normalModuleFactory);
+		
+		compilation.plugin('html-webpack-plugin-alter-chunks', function(chunks, params) {
+			// Add the framework files as a pseudo-chunk so they get injected into the HTML
+			chunks.unshift({
+				names: ['enact_framework'],
+				files: [
+					normalizePath(external.inject, 'enact.js', compiler),
+					normalizePath(external.inject, 'enact.css', compiler)
+				]
+			});
 
-		compilation.plugin('html-webpack-plugin-before-html-processing', function(params, callback) {
-			params.assets.js.unshift(path.join(external.inject, 'enact.js'));
-			params.assets.css.unshift(path.join(external.inject, 'enact.css'));
-			params.plugin.options.external = external;
-			callback();
+			// Store the absolute filepath to the external framework so the PrerenderPlugin can use it
+			params.plugin.options.externalFramework = path.resolve(path.join(external.path, 'enact.js'));
+			return chunks;
 		});
 	});
+
+	// Apply the Enact factory plugin to handle the require() delagation/rerouting
 	compiler.plugin('compile', function(params) {
 		params.normalModuleFactory.apply(new DelegatedEnactFactoryPlugin({
 			name: name,
