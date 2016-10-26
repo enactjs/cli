@@ -185,7 +185,7 @@ function setupIsomorphic(config) {
 // Create the build and optionally, print the deployment instructions.
 function build(config, previousSizeMap, guided) {
 	if(process.env.NODE_ENV === 'development') {
-		console.log('Creating an development build...');
+		console.log('Creating a development build...');
 	} else {
 		console.log('Creating an optimized production build...');
 	}
@@ -248,7 +248,7 @@ function displayHelp() {
 	/*
 		Hidden Options:
 			--framework           Builds the @enact/*, react, and react-dom into an external framework
-			--no-mangle           Will skip mangling during production build
+			--no-minify           Will skip minification during production build
 			--externals           Specify a local directory path to the standalone external framework
 			--externals-inject    Remote public path to the external framework for use injecting into HTML
 	*/
