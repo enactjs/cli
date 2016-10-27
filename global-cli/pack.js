@@ -14,12 +14,15 @@ var
 	fs = require('fs-extra'),
 	path = require('path'),
 	minimist = require('minimist'),
+	glob = require('glob'),
 	filesize = require('filesize'),
 	exists = require('path-exists').sync,
 	rimrafSync = require('rimraf').sync,
 	webpack = require('webpack'),
 	devConfig = require('../config/webpack.config.dev'),
 	prodConfig = require('../config/webpack.config.prod'),
+	EnactFrameworkPlugin = require('../config/EnactFrameworkPlugin'),
+	EnactFrameworkRefPlugin = require('../config/EnactFrameworkRefPlugin'),
 	PrerenderPlugin = require('../config/PrerenderPlugin'),
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
 	recursive = require('recursive-readdir'),
@@ -91,11 +94,54 @@ function readJSON(file) {
 	}
 }
 
+function externalFramework(config, external, inject) {
+	// Add the reference plugin so the app uses the external framework
+	config.plugins.push(new EnactFrameworkRefPlugin({
+		name:'enact_framework',
+		libraries:['@enact', 'react', 'react-dom'],
+		external: {
+			path: external,
+			inject: inject
+		}
+	}));
+}
+
+function setupFramework(config) {
+	// Form list of framework entries; Every @enact/* js file as well as react/react-dom
+	var entry = glob.sync('@enact/**/*.@(js|jsx|es6)', {
+		cwd: path.resolve('./node_modules'),
+		nodir: true,
+		ignore: [
+			'./webpack.config.js',
+			'./.eslintrc.js',
+			'./karma.conf.js',
+			'./build/**/*.*',
+			'./dist/**/*.*',
+			'./node_modules/**/*.*',
+			'**/tests/*.js'
+		]
+	}).concat(['react', 'react-dom', 'react/lib/ReactPerf']);
+	config.entry = {enact:entry};
+
+	// Use universal module definition to allow usage and name as 'enact_framework'
+	config.output.library = 'enact_framework';
+	config.output.libraryTarget = 'umd';
+
+	// Append additional options to the ilib-loader to skip './resources' detection/generation
+	config.module.loaders[2].loader += '?noSave&noResources';
+
+	// Remove the HTML generation plugin and webOS-meta plugin
+	config.plugins.shift();
+	config.plugins.pop();
+
+	// Add the framework plugin to build in an externally accessible manner
+	config.plugins.push(new EnactFrameworkPlugin());
+}
 
 function setupIsomorphic(config) {
 	var meta = readJSON('package.json') || {};
 	var enact = meta.enact || {};
-	// only use isomorphic if an isomorphic entrypoint is specified
+	// Only use isomorphic if an isomorphic entrypoint is specified
 	if(enact.isomorphic || enact.prerender) {
 		var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom');
 		if(!exists(reactDOM)) {
@@ -139,7 +185,7 @@ function setupIsomorphic(config) {
 // Create the build and optionally, print the deployment instructions.
 function build(config, previousSizeMap, guided) {
 	if(process.env.NODE_ENV === 'development') {
-		console.log('Creating an development build...');
+		console.log('Creating a development build...');
 	} else {
 		console.log('Creating an optimized production build...');
 	}
@@ -199,12 +245,21 @@ function displayHelp() {
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
+	/*
+		Hidden Options:
+			--framework           Builds the @enact/*, react, and react-dom into an external framework
+			--no-minify           Will skip minification during production build
+			--externals           Specify a local directory path to the standalone external framework
+			--externals-inject    Remote public path to the external framework for use injecting into HTML
+	*/
 	process.exit(0);
 }
 
 module.exports = function(args) {
 	var opts = minimist(args, {
-		boolean: ['p', 'production', 'i', 'isomorphic', 'w', 'watch', 'h', 'help'],
+		boolean: ['minify', 'framework', 'p', 'production', 'i', 'isomorphic', 'w', 'watch', 'h', 'help'],
+		string: ['externals', 'externals-inject'],
+		default: {minify:true},
 		alias: {p:'production', i:'isomorphic', w:'watch', h:'help'}
 	});
 	opts.help && displayHelp();
@@ -215,17 +270,30 @@ module.exports = function(args) {
 	if(opts.production) {
 		process.env.NODE_ENV = 'production';
 		config = prodConfig;
+		if(!opts['minify']) {
+			// Allow Uglify's optimizations/debug-code-removal but don't minify
+			config.plugins[4].options.mangle = false;
+			config.plugins[4].options.beautify = true;
+			config.plugins[4].options.output.comments = true;
+		}
 	} else {
 		process.env.NODE_ENV = 'development';
 		config = devConfig;
 	}
 
-	if(opts.isomorphic) {
-		setupIsomorphic(config);
+	if(opts.framework) {
+		setupFramework(config);
+	} else {
+		if(opts.isomorphic) {
+			setupIsomorphic(config);
+		}
+		if(opts.externals) {
+			externalFramework(config, opts.externals, opts['externals-inject']);
+		}
 	}
 
 	// Warn and crash if required files are missing
-	if (!checkRequiredFiles([config.entry.main[config.entry.main.length-1]])) {
+	if (!opts.framework && !checkRequiredFiles([config.entry.main[config.entry.main.length-1]])) {
 		process.exit(1);
 	}
 
