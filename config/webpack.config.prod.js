@@ -93,7 +93,7 @@ module.exports = {
 			{
 				test: /\.(js|jsx|es6)$/,
 				loader: 'babel',
-				exclude: /node_modules.(?!@*enact)/,
+				exclude: /node_modules.(?!@enact)/,
 				// @remove-on-eject-begin
 				query: {
 					babelrc: false,
@@ -249,10 +249,3 @@ module.exports = {
 		new WebOSMetaPlugin()
 	]
 };
-
-try {
-	fs.accessSync(path.join('node_modules', 'enact'));
-	module.exports.resolve.alias['@enact'] = 'enact/packages';
-} catch (err) {
-	delete module.exports.resolve.alias['@enact'];
-}
