@@ -24,6 +24,7 @@ var
 	EnactFrameworkPlugin = require('../config/EnactFrameworkPlugin'),
 	EnactFrameworkRefPlugin = require('../config/EnactFrameworkRefPlugin'),
 	PrerenderPlugin = require('../config/PrerenderPlugin'),
+	BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin,
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
 	recursive = require('recursive-readdir'),
 	stripAnsi = require('strip-ansi');
@@ -182,6 +183,14 @@ function setupIsomorphic(config) {
 	}
 }
 
+function statsAnalyzer(config) {
+	config.plugins.push(new BundleAnalyzerPlugin({
+		analyzerMode: 'static',
+		reportFilename: 'stats.html',
+		openAnalyzer: false
+	}));
+}
+
 // Create the build and optionally, print the deployment instructions.
 function build(config, previousSizeMap, guided) {
 	if(process.env.NODE_ENV === 'development') {
@@ -238,6 +247,7 @@ function displayHelp() {
 	console.log('    enact pack [options]');
 	console.log();
 	console.log('  Options');
+	console.log('    -s, --stats       Output bundle analysis file');
 	console.log('    -w, --watch       Rebuild on file changes');
 	console.log('    -p, --production  Build in production mode');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
@@ -257,10 +267,10 @@ function displayHelp() {
 
 module.exports = function(args) {
 	var opts = minimist(args, {
-		boolean: ['minify', 'framework', 'p', 'production', 'i', 'isomorphic', 'w', 'watch', 'h', 'help'],
+		boolean: ['minify', 'framework', 's', 'stats', 'p', 'production', 'i', 'isomorphic', 'w', 'watch', 'h', 'help'],
 		string: ['externals', 'externals-inject'],
 		default: {minify:true},
-		alias: {p:'production', i:'isomorphic', w:'watch', h:'help'}
+		alias: {s:'stats', p:'production', i:'isomorphic', w:'watch', h:'help'}
 	});
 	opts.help && displayHelp();
 
@@ -290,6 +300,10 @@ module.exports = function(args) {
 		if(opts.externals) {
 			externalFramework(config, opts.externals, opts['externals-inject']);
 		}
+	}
+
+	if(opts.stats) {
+		statsAnalyzer(config);
 	}
 
 	// Warn and crash if required files are missing
