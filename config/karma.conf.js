@@ -80,7 +80,7 @@ module.exports = function(karma) {
 			},
 			module: {
 				loaders: [
-					{test: /\.(js|jsx|es6)$/, loader: 'babel', exclude: /node_modules.(?!@*enact)/,
+					{test: /\.(js|jsx|es6)$/, loader: 'babel', exclude: /node_modules.(?!@enact)/,
 						query: {
 							// @remove-on-eject-begin
 							babelrc: false,
