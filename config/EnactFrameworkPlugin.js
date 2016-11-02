@@ -49,7 +49,7 @@ function normalizeModuleID(id) {
 DllModule.prototype.source = function() {
 	var header = '';
 	if(DllModule.entries[this.name]) {
-		header += '__webpack_require__.preload = function() {\n';
+		header += '__webpack_require__.load = function() {\n';
 		for(var i=0; i<DllModule.entries[this.name].length; i++) {
 			header += '\t__webpack_require__(\'' + DllModule.entries[this.name][i] + '\');\n';
 		}
