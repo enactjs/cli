@@ -49,9 +49,10 @@ function normalizeModuleID(id) {
 DllModule.prototype.source = function() {
 	var header = '';
 	if(DllModule.entries[this.name]) {
-		header += '__webpack_require__.load = function() {\n';
+		header += '__webpack_require__.load = function(loader) {\n';
+		header += '\tloader = loader || __webpack_require__;'
 		for(var i=0; i<DllModule.entries[this.name].length; i++) {
-			header += '\t__webpack_require__(\'' + DllModule.entries[this.name][i] + '\');\n';
+			header += '\tloader(\'' + DllModule.entries[this.name][i] + '\');\n';
 		}
 		header += '};\n';
 	}
