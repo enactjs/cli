@@ -155,7 +155,7 @@ function setupIsomorphic(config) {
 		// The App entrypoint for isomorphics builds *must* export a ReactElement.
 		config.entry.main[config.entry.main.length-1] = path.resolve(enact.isomorphic || enact.prerender);
 
-		// Since we're building for isomorphic usage, expose ReactElement 
+		// Since we're building for isomorphic usage, expose ReactElement
 		config.output.library = 'App';
 
 		// Use universal module definition to allow usage in Node and browser environments.
@@ -228,7 +228,7 @@ function build(config, previousSizeMap, guided) {
 // Create the build and watch for changes.
 function watch(config) {
 	if(process.env.NODE_ENV === 'development') {
-		console.log('Creating an development build and watching for changes...');
+		console.log('Creating a development build and watching for changes...');
 	} else {
 		console.log('Creating an optimized production build and watching for changes...');
 	}
