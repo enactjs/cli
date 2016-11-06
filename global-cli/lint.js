@@ -28,7 +28,7 @@ module.exports = function(args) {
 
 	var eslintArgs = [];
 	if(opts.strict || opts.framework) {
-		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact/strict'));
+		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact-internal'));
 	} else if(!opts.local) {
 		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact'));
 	}
