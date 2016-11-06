@@ -1,4 +1,24 @@
-## 0.2.0 (October 14, 2016)
+## 0.3.0 (November 7, 2016)
+
+### init
+
+* Sanitizes directory name so only valid characters are included as the package name.
+
+### pack
+
+* Added `-s`/`--stats` flag to generate a stats.html bundle analysis report.
+* Fixed development build failure when generating sourcemaps.
+* Refactored ESLint configuration with an optional strict mode.
+* Updated `eslint` to use 3.9.1 for new rule support.
+* Updated `eslint-plugin-enact` to 6.5.0 for new rule support.
+
+### serve
+
+* Browser no longer automatically opens. Use `-b`/`--browser` flag to re-enable the feature.
+* Fixed serve failure when generating sourcemaps.
+
+
+## 0.2.0 (October 21, 2016)
 
 * Refactored entire project into a dedicated standalone global CLI with features/functionality integrated from 
 [create-react-app](https://github.com/facebookincubator/create-react-app)
@@ -17,7 +37,8 @@
 
 ### pack
 
-* Switched from using `babel-polyfill` to a more simpliffied set of polyfills covering Promise, Object.assign, and Fetch APIs
+* Switched from using `babel-polyfill` to a more simplified set of polyfills covering Promise, Object.assign, 
+  String.prototype.codePointAt, String.fromCodePoint, Math.sign, and Fetch APIs
 * Scans files with ESLint as part of the build process, failing on errors.
 * Switched from OS-level to a local ./node_modules/.cache/ location for babel caching in development mode.
 * Support auto-prefixing of CSS.
