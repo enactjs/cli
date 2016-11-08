@@ -31,7 +31,7 @@ function createApp(output, template, link, local, verbose) {
 	process.chdir(root);
 	copyTemplate(template, root);
 
-	installDeps(root,link, local, verbose, function() {
+	installDeps(root, link, local, verbose, function() {
 		console.log();
 		console.log('Success! Created ' + appName + ' at ' + root);
 		console.log();
@@ -90,7 +90,7 @@ function copyTemplate(template, dest) {
 	// Update package.json name
 	var pkgJSON = path.join(dest, 'package.json');
 	var meta = JSON.parse(fs.readFileSync(pkgJSON, {encoding:'utf8'}));
-	meta.name = path.basename(dest);
+	meta.name = path.basename(dest).replace(/ /g, '-').toLowerCase();
 	fs.writeFileSync(pkgJSON, JSON.stringify(meta, null, '\t'), {encoding:'utf8'});
 
 	// Update appinfo.json if it exists in the template

@@ -20,12 +20,16 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 		if(compiler.outputFileSystem.writeFile===NodeOutputFileSystem.prototype.writeFile) {
 			compilation.plugin('html-webpack-plugin-after-html-processing', function(params, callback) {
 				var appFile = path.join(compiler.context, compiler.options.output.path, 'main.js');
+
+				// Attempt to resolve 'react-dom/server' relative to the project itself with internal as fallback
 				var ReactDOMServer;
 				try {
 					ReactDOMServer = require(path.join(compiler.context, 'node_modules', 'react-dom', 'server'));
 				} catch(e) {
 					ReactDOMServer = require('react-dom/server');
 				}
+
+				// Add fetch to the global variables
 				if (!global.fetch) {
 					global.fetch = require('node-fetch');
 					global.Response = global.fetch.Response;
@@ -33,7 +37,12 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 					global.Request = global.fetch.Request;
 				}
 				try {
-					var App = requireFromString(compilation.assets['main.js'].source(), 'main.js');
+					var src = compilation.assets['main.js'].source();
+					if(params.plugin.options.externalFramework) {
+						// Add external Enact framework filepath if it's used
+						src = src.replace(/require\(["']enact_framework["']\)/g, 'require("' + params.plugin.options.externalFramework +  '")');
+					}
+					var App = requireFromString(src, 'main.js');
 					var code = ReactDOMServer.renderToString(App['default'] || App);
 					params.html = params.html.replace('<div id="root"></div>', '<div id="root">' + code + '</div>');
 				} catch(e) {

@@ -28,9 +28,9 @@ module.exports = function(args) {
 
 	var eslintArgs = [];
 	if(opts.strict || opts.framework) {
-		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact-internal/index.js'));
+		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact/strict'));
 	} else if(!opts.local) {
-		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact/index.js'));
+		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact'));
 	}
 	eslintArgs.push('--ignore-pattern', 'node_modules/*');
 	eslintArgs.push('--ignore-pattern', 'build/*');
