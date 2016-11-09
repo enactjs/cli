@@ -29,7 +29,7 @@ module.exports = function(args) {
 	var buildRoot = opts.output || './build';
 
 	console.log('Transpiling via Babel to ' + path.resolve(buildRoot));
-	fs.copy(sourceRoot, buildRoot, {filter:/^(?!.*(node_modules|build|dist|\\.git)).*$/, stopOnErr:true}, function(cpErr) {
+	fs.copy(sourceRoot, buildRoot, {filter:function(f) { return /^(?!.*(node_modules|build|dist|\\.git)).*$/.test(f); }, stopOnErr:true}, function(cpErr) {
 		if(cpErr) {
 			console.error(cpErr);
 		} else {
