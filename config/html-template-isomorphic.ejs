@@ -41,7 +41,7 @@
 					script.onload = function() {
 						count--;
 						if(count===0 && (typeof App === 'object') && window.ReactDOM) {
-							ReactDOM.render(App, document.getElementById('root'));
+							ReactDOM.render(App['default'] || App, document.getElementById('root'));
 						}
 					};
 					document.body.appendChild(script);
