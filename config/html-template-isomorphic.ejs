@@ -32,6 +32,7 @@
 		<div id="root"></div>
 		<script type="text/javascript">
 			requestAnimationFrame(function(){
+			<% if(!htmlWebpackPlugin.options.snapshot) { %>
 				var count = 0;
 				var appendScript = function(src) {
 					count++;
@@ -47,6 +48,17 @@
 					document.body.appendChild(script);
 				};
 				<% for(var j=0; j<htmlWebpackPlugin.files.js.length; j++) { %>appendScript('<%= htmlWebpackPlugin.files.js[j] %>');<% } %>
+			<% } else { %>
+				if(window.iLib) {
+					delete iLib._platform;
+					iLib.setLocale(iLib.getLocale());
+				}
+				if(typeof App === 'object') {
+					ReactDOM.render(App['default'] || App, document.getElementById('root'));
+				} else {
+					console.log('ERROR: Snapshot app not found');
+				}
+			<% } %>
 			});
 		</script>
 		

@@ -24,6 +24,7 @@ var
 	EnactFrameworkPlugin = require('../config/EnactFrameworkPlugin'),
 	EnactFrameworkRefPlugin = require('../config/EnactFrameworkRefPlugin'),
 	PrerenderPlugin = require('../config/PrerenderPlugin'),
+	SnapshotPlugin = require('../config/SnapshotPlugin'),
 	BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin,
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
 	recursive = require('recursive-readdir'),
@@ -56,7 +57,7 @@ function getDifferenceLabel(currentSize, previousSize) {
 // Print a detailed summary of build files.
 function printFileSizes(stats, previousSizeMap) {
 	var assets = stats.toJson().assets
-		.filter(asset => /\.(js|css)$/.test(asset.name))
+		.filter(asset => /\.(js|css|bin)$/.test(asset.name))
 		.map(asset => {
 			var fileContents = fs.readFileSync('./dist/' + asset.name);
 			var size = fs.statSync('./dist/' + asset.name).size;
@@ -139,7 +140,7 @@ function setupFramework(config) {
 	config.plugins.push(new EnactFrameworkPlugin());
 }
 
-function setupIsomorphic(config) {
+function setupIsomorphic(config, snapshot) {
 	var meta = readJSON('package.json') || {};
 	var enact = meta.enact || {};
 	// Only use isomorphic if an isomorphic entrypoint is specified
@@ -178,9 +179,33 @@ function setupIsomorphic(config) {
 
 		// Include plugin to prerender the html into the index.html
 		config.plugins.push(new PrerenderPlugin());
+
+		// Apply snapshot specialization options if needed
+		if(snapshot) {
+			setupSnapshot(config);
+		}
 	} else {
 		console.log(chalk.yellow('Isomorphic entrypoint not found in package.json; building normally'));
 	}
+}
+
+function setupSnapshot(config, isFramework) {
+	if(!isFramework) {
+		// Update HTML webpack plugin to mark it as snapshot mode for the isomorphic template
+		config.plugins[0].options.snapshot = true;
+
+		// Expose iLib so we can update _platform value once page loads, if used
+		config.module.loaders.push({
+			test: path.join(process.cwd(), 'node_modules', '@enact', 'i18n', 'ilib', 'lib', 'ilib.js'),
+			loader: 'expose?iLib'
+		});
+	}
+
+	// Include plugin to attempt generation of v8 snapshot binary if V8_MKSNAPSHOT env var is set
+	config.plugins.push(new SnapshotPlugin({
+		target: (isFramework ? 'enact.js' : 'main.js'),
+		append: (isFramework ? '\nenact_framework.load();\n' : undefined)
+	}));
 }
 
 function statsAnalyzer(config) {
@@ -257,8 +282,9 @@ function displayHelp() {
 	console.log();
 	/*
 		Hidden Options:
-			--framework           Builds the @enact/*, react, and react-dom into an external framework
+			--snapshot            Extension of isomorphic code layout which builds for V8 snapshot support
 			--no-minify           Will skip minification during production build
+			--framework           Builds the @enact/*, react, and react-dom into an external framework
 			--externals           Specify a local directory path to the standalone external framework
 			--externals-inject    Remote public path to the external framework for use injecting into HTML
 	*/
@@ -267,7 +293,7 @@ function displayHelp() {
 
 module.exports = function(args) {
 	var opts = minimist(args, {
-		boolean: ['minify', 'framework', 's', 'stats', 'p', 'production', 'i', 'isomorphic', 'w', 'watch', 'h', 'help'],
+		boolean: ['minify', 'framework', 's', 'stats', 'p', 'production', 'i', 'isomorphic', 'snapshot', 'w', 'watch', 'h', 'help'],
 		string: ['externals', 'externals-inject'],
 		default: {minify:true},
 		alias: {s:'stats', p:'production', i:'isomorphic', w:'watch', h:'help'}
@@ -293,9 +319,12 @@ module.exports = function(args) {
 
 	if(opts.framework) {
 		setupFramework(config);
+		if(opts.snapshot) {
+			setupSnapshot(config, true);
+		}
 	} else {
 		if(opts.isomorphic) {
-			setupIsomorphic(config);
+			setupIsomorphic(config, (opts.snapshot && !opts.externals));
 		}
 		if(opts.externals) {
 			externalFramework(config, opts.externals, opts['externals-inject']);
@@ -303,6 +332,10 @@ module.exports = function(args) {
 	}
 
 	if(opts.stats) {
+		if(opts.production && opts.isomorphic) {
+			console.log(chalk.yellow('Notice: Due to limitations, the stats analyzer is incompatible with isomorphic code'
+					+ ' layout in production mode, and will display pre-minified sizes only.'));
+		}
 		statsAnalyzer(config);
 	}
 
@@ -318,7 +351,7 @@ module.exports = function(args) {
 		// This lets us display how much they changed later.
 		recursive('dist', (err, fileNames) => {
 			var previousSizeMap = (fileNames || [])
-				.filter(fileName => /\.(js|css)$/.test(fileName))
+				.filter(fileName => /\.(js|css|bin)$/.test(fileName))
 				.reduce((memo, fileName) => {
 					var key = shortFilename(fileName);
 					memo[key] = fs.statSync(fileName).size;
