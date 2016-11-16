@@ -8,7 +8,7 @@ var
 	exists = require('path-exists').sync;
 
 // @TODO: switch back to master when 0.2.0 releases
-var ENACT_DEV_NPM = 'enyojs/enact-dev#develop';
+var ENACT_DEV_NPM = 'enyojs/enact-dev';
 	
 function createApp(output, template, link, local, verbose) {
 	var root = path.resolve(output);
@@ -208,7 +208,7 @@ function isSafeToCreateProjectIn(root) {
 
 function displayHelp() {
 	console.log('  Usage');
-	console.log('    enact init [options] [<directory>]');
+	console.log('    enact create [options] [<directory>]');
 	console.log();
 	console.log('  Arguments');
 	console.log('    directory         Optional project destination directory');

@@ -9,8 +9,11 @@ if(process.argv.indexOf('-v')>=0 || process.argv.indexOf('--version')>=0) {
 	console.log();
 } else {
 	var command = process.argv[2];
+
 	switch(command) {
 		case 'init':
+			command = 'create';
+		case 'create':
 		case 'serve':
 		case 'transpile':
 		case 'pack':
@@ -21,7 +24,7 @@ if(process.argv.indexOf('-v')>=0 || process.argv.indexOf('--version')>=0) {
 			task(process.argv.slice(3));
 			break;
 		default:
-			var init = require('../global-cli/init');
-			init(['--help']);
+			var create = require('../global-cli/create');
+			create(['--help']);
 	}
 }

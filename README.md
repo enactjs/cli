@@ -13,7 +13,7 @@ npm install -g enyojs/enact-dev
 The only time you're ever want to directly use the Enact CLI is when you want to create a new project.
 
 ```sh
-enact init [directory]
+enact create [directory]
 ```
 
 This will generate a basic App template, complete with npm scripts and dependencies setup. If no directory path is specified, it will be generated within the working directory.
