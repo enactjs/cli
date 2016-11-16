@@ -46,7 +46,8 @@ SnapshotPlugin.prototype.apply = function(compiler) {
 			// Run mksnapshot utility
 			var err;
 			var child = cp.spawnSync(opts.exec, opts.args, {
-				cwd: compiler.options.output.path
+				cwd: compiler.options.output.path,
+				encoding: 'utf8'
 			});
 
 			if(child.status === 0) {
