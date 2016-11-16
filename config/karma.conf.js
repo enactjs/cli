@@ -29,12 +29,12 @@ module.exports = function(karma) {
 		files: [
 			require.resolve('./polyfills'),
 			require.resolve('./proptype-checker'),
-			'./!(node_modules)/**/*-specs.js'
+			'./!(node_modules|dist|build)/**/*-specs.js'
 		],
 
 		preprocessors: {
 			// add webpack as preprocessor
-			'./!(node_modules)/**/*.js': ['webpack'],
+			'./!(node_modules|dist|build)/**/*.js': ['webpack'],
 			[require.resolve('./polyfills')]: ['webpack'],
 			[require.resolve('./proptype-checker')]: ['webpack']
 		},
