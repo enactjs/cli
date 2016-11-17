@@ -1,8 +1,29 @@
+## 0.4.0
+
+### create
+
+* Renamed `init` command to `create` for clarity of purpose.
+
+### transpile
+
+* Fixed fs-extra depreciation warning about using a RegExp in copying
+
+### pack
+
+* Fixes App rendering in isomorphic code layout, where apps exported as ES6 default would fail to render.
+
+### test
+
+* Properly ignore ./dist and ./build directories when searching for tests.
+* Removed sourcemap support as it was causing issues.
+
+
 ## 0.3.0 (November 7, 2016)
 
 ### init
 
 * Sanitizes directory name so only valid characters are included as the package name.
+* Template updated for Enact 1.0.0-alpha.3
 
 ### pack
 
@@ -29,6 +50,7 @@
 * Verifies the user has a compatible Node version.
 * Verifies the destination directory is safe to create a project in.
 * Template now include webOS meta files (appinfo.json, icons.png, etc.).
+* Template updated for Enact 1.0.0-alpha.2
 * The package.json and appinfo.json will update their respective `name`/`id` to the project directory's name.
 * Added `--verbose` flag option to provide detailed logging.
 * Added `--link` flag option to link any dependencies that have been `npm link` rathen than install.
