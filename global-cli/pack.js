@@ -290,6 +290,10 @@ module.exports = function(args) {
 		process.env.NODE_ENV = 'development';
 		config = devConfig;
 	}
+	// Backwards compatibility for <15.4.0 React
+	if(!exists(path.join(process.cwd(), 'node_modules', 'react-dom', 'lib', 'ReactPerf.js'))) {
+		config.resolve.alias['react-dom/lib/ReactPerf'] = 'react/lib/ReactPerf';
+	}
 
 	if(opts.framework) {
 		setupFramework(config);
