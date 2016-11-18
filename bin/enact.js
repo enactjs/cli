@@ -12,6 +12,9 @@ if(process.argv.indexOf('-v')>=0 || process.argv.indexOf('--version')>=0) {
 
 	switch(command) {
 		case 'init':
+			var chalk = require('chalk');
+			console.log(chalk.gray('Warning: \'enact init\' is depreciated.'
+				+ ' Please use \'enact create\''));
 			command = 'create';
 		case 'create':
 		case 'serve':
