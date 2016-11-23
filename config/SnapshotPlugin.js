@@ -74,7 +74,7 @@ SnapshotPlugin.prototype.apply = function(compiler) {
 			}
 
 			if(err) {
-				chalk.red('Snapshot blob generation failed.')
+				console.log(chalk.red('Snapshot blob generation failed.'));
 			}
 			callback(err);
 		} else {
