@@ -122,7 +122,13 @@ function setupFramework(config) {
 			'./node_modules/**/*.*',
 			'**/tests/*.js'
 		]
-	}).concat(['react', 'react-dom', 'react/lib/ReactPerf']);
+	}).concat(['react', 'react-dom']);
+	if(!exists(path.join(process.cwd(), 'node_modules', 'react-dom', 'lib', 'ReactPerf.js'))) {
+		entry.push('react/lib/ReactPerf');
+	} else {
+		entry.push('react-dom/lib/ReactPerf');
+	}
+	console.log(entry);
 	config.entry = {enact:entry};
 
 	// Use universal module definition to allow usage and name as 'enact_framework'
@@ -316,10 +322,6 @@ module.exports = function(args) {
 		process.env.NODE_ENV = 'development';
 		config = devConfig;
 	}
-	// Backwards compatibility for <15.4.0 React
-	if(!exists(path.join(process.cwd(), 'node_modules', 'react-dom', 'lib', 'ReactPerf.js'))) {
-		config.resolve.alias['react-dom/lib/ReactPerf'] = 'react/lib/ReactPerf';
-	}
 
 	if(opts.framework) {
 		setupFramework(config);
@@ -327,6 +329,10 @@ module.exports = function(args) {
 			setupSnapshot(config, true);
 		}
 	} else {
+		// Backwards compatibility for <15.4.0 React
+		if(!exists(path.join(process.cwd(), 'node_modules', 'react-dom', 'lib', 'ReactPerf.js'))) {
+			config.resolve.alias['react-dom/lib/ReactPerf'] = 'react/lib/ReactPerf';
+		}
 		if(opts.isomorphic) {
 			setupIsomorphic(config, (opts.snapshot && !opts.externals));
 		}
