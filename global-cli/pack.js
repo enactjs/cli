@@ -96,14 +96,6 @@ function readJSON(file) {
 	}
 }
 
-function setupTemplateOverride(config) {
-	var meta = readJSON('package.json') || {};
-	var enact = meta.enact || {};
-	if(enact.template) {
-		config.plugins[0].options.template = path.resolve(enact.template);
-	}
-}
-
 function externalFramework(config, external, inject) {
 	// Add the reference plugin so the app uses the external framework
 	config.plugins.push(new EnactFrameworkRefPlugin({
@@ -339,7 +331,6 @@ module.exports = function(args) {
 			setupSnapshot(config, true);
 		}
 	} else {
-		setupTemplateOverride(config);
 		if(opts.isomorphic) {
 			setupIsomorphic(config, (opts.snapshot && !opts.externals));
 		}
