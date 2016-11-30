@@ -196,7 +196,7 @@ module.exports = {
 			// be determined automatically from any appinfo.json files discovered.
 			title: enact.title || '',
 			inject: 'body',
-			template: path.join(__dirname, 'html-template.ejs'),
+			template: enact.template || path.join(__dirname, 'html-template.ejs'),
 			xhtml: true,
 			minify: {
 				removeComments: true,
