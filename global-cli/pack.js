@@ -261,7 +261,7 @@ function watch(config) {
 	} else {
 		console.log('Creating an optimized production build and watching for changes...');
 	}
-	webpack(config).watch((err, stats) => {
+	webpack(config).watch({}, (err, stats) => {
 		if (err) {
 			console.error('Failed to create ' + process.env.NODE_ENV + ' build. Reason:');
 			console.error(err.message || err);
