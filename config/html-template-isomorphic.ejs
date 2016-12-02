@@ -41,7 +41,7 @@
 					script.src = src;
 					script.onload = function() {
 						count--;
-						if(count===0 && (typeof App === 'object') && window.ReactDOM) {
+						if(count===0 && (typeof App === 'object') && (typeof ReactDOM === 'object') && !App.isRendered) {
 							ReactDOM.render(App['default'] || App, document.getElementById('root'));
 						}
 					};
@@ -53,7 +53,7 @@
 					delete iLib._platform;
 					iLib.setLocale(iLib.getLocale());
 				}
-				if(typeof App === 'object') {
+				if(typeof App === 'object' && (typeof ReactDOM === 'object')) {
 					ReactDOM.render(App['default'] || App, document.getElementById('root'));
 				} else {
 					console.log('ERROR: Snapshot app not found');
