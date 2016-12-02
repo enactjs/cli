@@ -128,7 +128,6 @@ function setupFramework(config) {
 	} else {
 		entry.push('react-dom/lib/ReactPerf');
 	}
-	console.log(entry);
 	config.entry = {enact:entry};
 
 	// Use universal module definition to allow usage and name as 'enact_framework'
