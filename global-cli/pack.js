@@ -145,7 +145,7 @@ function setupIsomorphic(config, snapshot) {
 	var enact = meta.enact || {};
 	// Only use isomorphic if an isomorphic entrypoint is specified
 	if(enact.isomorphic || enact.prerender) {
-		var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom');
+		var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom', 'index.js');
 		if(!exists(reactDOM)) {
 			reactDOM = require.resolve('react-dom');
 		}
