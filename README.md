@@ -57,7 +57,7 @@ These tasks will execute all valid tests (files that end in `-specs.js`) that ar
 The enact-dev tool will check the project's `package.json` looking for an optional `enact` object for a few customization options:
 
 * `template` _[string]_ - Filepath to an alternate HTML template to use with the [Webpack html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin).
-* `isomorphic` _[boolean|string]_ - If `true`, it indicates the default entrypoint is isomorphic-compatible (and can be built via the `--isomorphic` enact-dev flag). If the value is a string, then it will use that value as a filepath to a custom isomorphic-compatible entrypoint.
+* `isomorphic` _[string]_ - Filepath to a custom isomorphic-compatible entrypoint (and can be built via the `--isomorphic` enact-dev flag).
 * `title` _[string]_ - Title text that should be put within the HTML's `<title></title>` tags. Note: if this is a webOS-project, the title by default will be auto-detected from the appinfo.json content.
 * `ri` _[object]_ - Resolution independence options to be forwarded to the [LESS plugin](https://github.com/enyojs/less-plugin-resolution-independence).
 * `proxy` _[string]_ - Proxy target during project `serve` to be used within the [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware).
@@ -67,7 +67,7 @@ For example:
 {
 	...
 	"enact": {
-		"isomorphic": true,
+		"isomorphic": "./src/iso.js",
 		"ri": {
 			"baseSize":24
 		}
