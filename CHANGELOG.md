@@ -1,21 +1,27 @@
-## 0.4.0
+## 0.4.0 (December 5, 2016)
 
 ### create
 
 * Renamed `init` command to `create` for clarity of purpose.
+* Template updated for Enact 1.0.0-alpha.4
 
 ### transpile
 
-* Fixed fs-extra depreciation warning about using a RegExp in copying
+* Fixed fs-extra depreciation warning about using a RegExp in copying.
 
 ### pack
 
-* Fixes App rendering in isomorphic code layout, where apps exported as ES6 default would fail to render.
+* Added support for overriding with a custom HTML template.
+* Viewport meta tags added to restrict user-scale to 1.
+* Documented `package.json` Enact build options in README.md.
+* Fixed app rendering in isomorphic code layout, where apps exported as ES6 default would fail to render.
+* Fixed ReactPerf bundling with React 15.4.x, with backwards support for earlier versions.
+* Fixed `--watch` support.
 
 ### test
 
 * Properly ignore ./dist and ./build directories when searching for tests.
-* Removed sourcemap support as it was causing issues.
+* Removed unneeded sourcemap support to greatly improved memory management and avoid js heap crashes in PhantomJS.
 
 
 ## 0.3.0 (November 7, 2016)

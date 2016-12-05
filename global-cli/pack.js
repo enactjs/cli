@@ -341,10 +341,6 @@ module.exports = function(args) {
 	}
 
 	if(opts.stats) {
-		if(opts.production && opts.isomorphic) {
-			console.log(chalk.yellow('Notice: Due to limitations, the stats analyzer is incompatible with isomorphic code'
-					+ ' layout in production mode, and will display pre-minified sizes only.'));
-		}
 		statsAnalyzer(config);
 	}
 
