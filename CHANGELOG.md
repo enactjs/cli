@@ -11,6 +11,7 @@
 ### pack
 
 * Fixes App rendering in isomorphic code layout, where apps exported as ES6 default would fail to render.
+* Supports `__BROWSER__` expression in Babel to detect browser-based environments, which transpiles to `typeof window !== 'undefined'`
 
 ### test
 
