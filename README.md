@@ -13,7 +13,7 @@ npm install -g enyojs/enact-dev
 The only time you're ever want to directly use the Enact CLI is when you want to create a new project.
 
 ```sh
-enact init [directory]
+enact create [directory]
 ```
 
 This will generate a basic App template, complete with npm scripts and dependencies setup. If no directory path is specified, it will be generated within the working directory.
@@ -50,6 +50,31 @@ Runs the Enact configuration of Eslint on the project for syntax analysis.
 ### `npm run test`, `npm run test-json`, and `npm run test-watch`
 
 These tasks will execute all valid tests (files that end in `-specs.js`) that are within the project directory. The `test` is a standard execution pass, `test-json` uses a json reporter for output, and `test-watch` will set up a watcher to re-execute tests when files change.
+
+
+## Enact Build Options
+
+The enact-dev tool will check the project's `package.json` looking for an optional `enact` object for a few customization options:
+
+* `template` _[string]_ - Filepath to an alternate HTML template to use with the [Webpack html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin).
+* `isomorphic` _[boolean|string]_ - If `true`, it indicates the default entrypoint is isomorphic-compatible (and can be built via the `--isomorphic` enact-dev flag). If the value is a string, then it will use that value as a filepath to a custom isomorphic-compatible entrypoint.
+* `title` _[string]_ - Title text that should be put within the HTML's `<title></title>` tags. Note: if this is a webOS-project, the title by default will be auto-detected from the appinfo.json content.
+* `ri` _[object]_ - Resolution independence options to be forwarded to the [LESS plugin](https://github.com/enyojs/less-plugin-resolution-independence).
+* `proxy` _[string]_ - Proxy target during project `serve` to be used within the [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware).
+
+For example:
+```js
+{
+	...
+	"enact": {
+		"isomorphic": true,
+		"ri": {
+			"baseSize":24
+		}
+	}
+	...
+} 
+```
 
 
 ## Displaying Lint Output in the Editor

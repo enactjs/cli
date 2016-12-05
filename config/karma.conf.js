@@ -29,14 +29,14 @@ module.exports = function(karma) {
 		files: [
 			require.resolve('./polyfills'),
 			require.resolve('./proptype-checker'),
-			'./!(node_modules)/**/*-specs.js'
+			'./!(node_modules|dist|build)/**/*-specs.js'
 		],
 
 		preprocessors: {
 			// add webpack as preprocessor
-			'./!(node_modules)/**/*.js': ['webpack', 'sourcemap'],
-			[require.resolve('./polyfills')]: ['webpack', 'sourcemap'],
-			[require.resolve('./proptype-checker')]: ['webpack', 'sourcemap']
+			'./!(node_modules|dist|build)/**/*.js': ['webpack'],
+			[require.resolve('./polyfills')]: ['webpack'],
+			[require.resolve('./proptype-checker')]: ['webpack']
 		},
 
 		failOnEmptyTestSuite: false,
@@ -44,7 +44,7 @@ module.exports = function(karma) {
 		webpack: {
 			// Use essentially the same webpack config as from the development build setup.
 			// We do not include an entry value as Karma will control that.
-			devtool: 'inline-source-map',
+			devtool: null,
 			output: {
 				path: './dist',
 				filename: '[name].js'
@@ -153,7 +153,6 @@ module.exports = function(karma) {
 			'karma-mocha',
 			'karma-chai',
 			'karma-dirty-chai',
-			'karma-sourcemap-loader',
 			'karma-chrome-launcher',
 			'karma-phantomjs-launcher',
 			'karma-json-reporter'
