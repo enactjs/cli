@@ -156,7 +156,7 @@ function setupIsomorphic(config, snapshot) {
 
 		// If 'isomorphic' value is a string, use custom entrypoint.
 		if(typeof iso === 'string') {
-			config.entry.main[config.entry.main.length-1] = iso;
+			config.entry.main[config.entry.main.length-1] = path.resolve(iso);
 		}
 
 		// Since we're building for isomorphic usage, expose ReactElement
