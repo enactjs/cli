@@ -53,7 +53,7 @@
 						document.body.appendChild(script);
 					}
 				};
-				appendScripts('<%= JSON.stringify(htmlWebpackPlugin.files.js || []) %>');
+				appendScripts(<%= JSON.stringify(htmlWebpackPlugin.files.js || []) %>);
 			<% } else { %>
 				if(window.iLib) {
 					delete iLib._platform;
