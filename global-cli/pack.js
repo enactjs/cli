@@ -148,8 +148,9 @@ function setupFramework(config) {
 function setupIsomorphic(config, snapshot) {
 	var meta = readJSON('package.json') || {};
 	var enact = meta.enact || {};
+	var iso = enact.isomorphic || enact.prerender;
 	// Only use isomorphic if an isomorphic entrypoint is specified
-	if(enact.isomorphic || enact.prerender) {
+	if(iso) {
 		var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom', 'index.js');
 		if(!exists(reactDOM)) {
 			reactDOM = require.resolve('react-dom');
@@ -158,8 +159,10 @@ function setupIsomorphic(config, snapshot) {
 		// it to window.ReactDOM to allow runtime rendering of the app.
 		config.entry.main.unshift(reactDOM);
 
-		// The App entrypoint for isomorphics builds *must* export a ReactElement.
-		config.entry.main[config.entry.main.length-1] = path.resolve(enact.isomorphic || enact.prerender);
+		// If 'isomorphic' value is a string, use custom entrypoint.
+		if(typeof iso === 'string') {
+			config.entry.main[config.entry.main.length-1] = path.resolve(iso);
+		}
 
 		// Since we're building for isomorphic usage, expose ReactElement
 		config.output.library = 'App';
