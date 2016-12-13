@@ -72,13 +72,6 @@ function setupCompiler(host, port, protocol) {
 		if (!messages.errors.length && !messages.warnings.length) {
 			console.log(chalk.green('Compiled successfully!'));
 			console.log();
-			console.log('The app is running at:');
-			console.log();
-			console.log('	' + chalk.cyan(protocol + '://' + host + ':' + port + '/'));
-			console.log();
-			console.log('Note that the development build is not optimized.');
-			console.log('To create a production build, use ' + chalk.cyan('npm run pack-p') + '.');
-			console.log();
 		}
 
 		// If errors exist, only show errors.
@@ -104,7 +97,16 @@ function setupCompiler(host, port, protocol) {
 			console.log('You may use special comments to disable some warnings.');
 			console.log('Use ' + chalk.yellow('// eslint-disable-next-line') + ' to ignore the next line.');
 			console.log('Use ' + chalk.yellow('/* eslint-disable */') + ' to ignore all warnings in a file.');
+			console.log();
 		}
+
+		console.log('The app is running at:');
+		console.log();
+		console.log('	' + chalk.cyan(protocol + '://' + host + ':' + port + '/'));
+		console.log();
+		console.log('Note that the development build is not optimized.');
+		console.log('To create a production build, use ' + chalk.cyan('npm run pack-p') + '.');
+		console.log();
 	});
 }
 
