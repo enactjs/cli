@@ -39,6 +39,8 @@
 						if((typeof App === 'object') && (typeof ReactDOM === 'object')) {
 							var appEle = (App && App.__esModule) ? App['default'] : App;
 							if(typeof appEle === 'object' && appEle) {
+								console.warn('WARNING: HTML-side isomorphic rendering is depreciated and will be removed in a future release. Please conditionally render within the app itself.');
+								console.warn('    See https://github.com/enyojs/enact-dev/blob/develop/template/src/index.js for an example entrypoint.');
 								ReactDOM.render(appEle, document.getElementById('root'));
 							}
 						}
