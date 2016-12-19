@@ -38,7 +38,7 @@ If prerendering fails, there will be a stack trace printed to the console and th
 Generally, when a prerender fails, it's due to `window` or `document` being used during initial state creation (prior to mounting). Leave all access of those globals until after mount or wrap in an if-statement to check global variable existence.
 
 > **Important Note**:
-> Prerendering requires an app to be coded such that it does not require access to the window or document to create its initial state. The act of prerendering take place in a Node-based environment, so no window nor document are available. > 
+> Prerendering requires an app to be coded such that it does not require access to the `window` or `document` to create its initial state. The act of prerendering take place in a Node-based environment, so no window nor document are available. 
 > If your app must use `document` or `window` in creation of its initial state, be sure to wrap those in if-statements to avoid prerender failure. For example:
 > ``` 
 >    if(typeof window !== 'undefined') {
