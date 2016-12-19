@@ -2,6 +2,7 @@ var
 	path = require('path'),
 	fs = require('fs'),
 	cp = require('child_process'),
+	exists = require('path-exists').sync,
 	chalk = require('chalk');
 
 function isNodeOutputFS(compiler) {
@@ -21,6 +22,19 @@ function getBlobName(args) {
 		}
 	}
 	return 'snapshot_blob.bin';
+}
+
+function updateAppInfo(output, blob) {
+	var appInfo = path.join(output, 'appinfo.json');
+	if(exists(appInfo)) {
+		try {
+			var meta = JSON.parse(fs.readFileSync(appInfo, {encoding:'utf8'}));
+			meta.v8SnapshotFile = blob;
+			fs.writeFileSync(appInfo, JSON.stringify(meta, null, '\t'), {encoding:'utf8'});
+		} catch(e) {
+			return new Error('Failed to set "v8SnapshotFile" property in appinfo.json');
+		}
+	}
 }
 
 function SnapshotPlugin(options) {
@@ -60,6 +74,7 @@ SnapshotPlugin.prototype.apply = function(compiler) {
 							size: function() { return stat.size; },
 							emitted: true
 						};
+						err = updateAppInfo(compiler.options.output.path, blob);
 					} else {
 						// Temporary fix: mksnapshot may create a 0-byte blob on error
 						err = new Error(child.stdout + '\n' + child.stderr);
