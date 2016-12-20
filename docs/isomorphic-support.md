@@ -1,7 +1,7 @@
 ---
 title: Isomorphic Support
 ---
-The isomorphic code layout is a special feature which builds projects in a javascript layourt that can be potentially processed by any environment, such as [NodeJS](https://nodejs.org) or the browser. One main benefit is that this code can be evaluted at build-time and prerendered into the HTML document ahead of time.
+The isomorphic code layout is a special feature which builds projects in a javascript layout that can be potentially processed by any environment, such as [NodeJS](https://nodejs.org) or the browser. One main benefit is that this code can be evaluted at build-time and prerendered into the HTML document ahead of time.
 
 ## What is "Prerendering"?
 Prerendering, with regards to Enact apps, means that we render out the initial state at runtime.  The app's initial states is rendered via React into an HTML string and placed into the **index.html** file.
