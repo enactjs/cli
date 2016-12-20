@@ -4,7 +4,7 @@ var
 	externalsSetup = require('./externals'),
 	frameworkSetup = require('./framework'),
 	isomorphicSetup = require('./isomorphic'),
-	statsSetup = require('./stats');
+	statsSetup = require('./stats'),
 	unmangledSetup = require('./unmangled');
 
 module.exports = {
