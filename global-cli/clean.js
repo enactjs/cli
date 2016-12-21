@@ -13,7 +13,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-module.exports = function() {
+module.exports = function(args) {
 	var opts = minimist(args, {
 		boolean: ['h', 'help'],
 		alias: {h:'help'}

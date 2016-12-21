@@ -34,26 +34,34 @@
 			requestAnimationFrame(function(){
 			<% if(!htmlWebpackPlugin.options.snapshot) { %>
 				var count = 0;
-				var appendScript = function(src) {
-					count++;
-					var script = document.createElement('script');
-					script.type = 'text/javascript';
-					script.src = src;
-					script.onload = function() {
-						count--;
-						if(count===0 && (typeof App === 'object') && window.ReactDOM) {
-							ReactDOM.render(App['default'] || App, document.getElementById('root'));
+				var appendScripts = function(js) {
+					if(js.length===0) {
+						if((typeof App === 'object') && (typeof ReactDOM === 'object')) {
+							var appEle = (App && App.__esModule) ? App['default'] : App;
+							if(typeof appEle === 'object' && appEle) {
+								console.warn('WARNING: HTML-side isomorphic rendering is depreciated and will be removed in a future release. Please conditionally render within the app itself.');
+								console.warn('    See https://github.com/enyojs/enact-dev/blob/develop/template/src/index.js for an example entrypoint.');
+								ReactDOM.render(appEle, document.getElementById('root'));
+							}
 						}
-					};
-					document.body.appendChild(script);
+					} else {
+						var src = js.shift();
+						var script = document.createElement('script');
+						script.type = 'text/javascript';
+						script.src = src;
+						script.onload = function() {
+							appendScripts(js);
+						};
+						document.body.appendChild(script);
+					}
 				};
-				<% for(var j=0; j<htmlWebpackPlugin.files.js.length; j++) { %>appendScript('<%= htmlWebpackPlugin.files.js[j] %>');<% } %>
+				appendScripts(<%= JSON.stringify(htmlWebpackPlugin.files.js || []) %>);
 			<% } else { %>
 				if(window.iLib) {
 					delete iLib._platform;
 					iLib.setLocale(iLib.getLocale());
 				}
-				if(typeof App === 'object') {
+				if(typeof App === 'object' && (typeof ReactDOM === 'object')) {
 					ReactDOM.render(App['default'] || App, document.getElementById('root'));
 				} else {
 					console.log('ERROR: Snapshot app not found');

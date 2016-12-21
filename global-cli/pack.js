@@ -14,18 +14,12 @@ var
 	fs = require('fs-extra'),
 	path = require('path'),
 	minimist = require('minimist'),
-	glob = require('glob'),
 	filesize = require('filesize'),
-	exists = require('path-exists').sync,
 	rimrafSync = require('rimraf').sync,
 	webpack = require('webpack'),
+	modifiers = require('./modifiers'),
 	devConfig = require('../config/webpack.config.dev'),
 	prodConfig = require('../config/webpack.config.prod'),
-	EnactFrameworkPlugin = require('../config/EnactFrameworkPlugin'),
-	EnactFrameworkRefPlugin = require('../config/EnactFrameworkRefPlugin'),
-	PrerenderPlugin = require('../config/PrerenderPlugin'),
-	SnapshotPlugin = require('../config/SnapshotPlugin'),
-	BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin,
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
 	recursive = require('recursive-readdir'),
 	stripAnsi = require('strip-ansi');
@@ -86,139 +80,6 @@ function printFileSizes(stats, previousSizeMap) {
 			'	' + chalk.dim(asset.folder + path.sep) + chalk.cyan(asset.name)
 		);
 	});
-}
-
-function readJSON(file) {
-	try {
-		return JSON.parse(fs.readFileSync(file, {encoding:'utf8'}));
-	} catch(e) {
-		return undefined;
-	}
-}
-
-function externalFramework(config, external, inject) {
-	// Add the reference plugin so the app uses the external framework
-	config.plugins.push(new EnactFrameworkRefPlugin({
-		name:'enact_framework',
-		libraries:['@enact', 'react', 'react-dom'],
-		external: {
-			path: external,
-			inject: inject
-		}
-	}));
-}
-
-function setupFramework(config) {
-	// Form list of framework entries; Every @enact/* js file as well as react/react-dom
-	var entry = glob.sync('@enact/**/*.@(js|jsx|es6)', {
-		cwd: path.resolve('./node_modules'),
-		nodir: true,
-		ignore: [
-			'./webpack.config.js',
-			'./.eslintrc.js',
-			'./karma.conf.js',
-			'./build/**/*.*',
-			'./dist/**/*.*',
-			'./node_modules/**/*.*',
-			'**/tests/*.js'
-		]
-	}).concat(['react', 'react-dom']);
-	if(!exists(path.join(process.cwd(), 'node_modules', 'react-dom', 'lib', 'ReactPerf.js'))) {
-		entry.push('react/lib/ReactPerf');
-	} else {
-		entry.push('react-dom/lib/ReactPerf');
-	}
-	config.entry = {enact:entry};
-
-	// Use universal module definition to allow usage and name as 'enact_framework'
-	config.output.library = 'enact_framework';
-	config.output.libraryTarget = 'umd';
-
-	// Append additional options to the ilib-loader to skip './resources' detection/generation
-	config.module.loaders[2].loader += '?noSave&noResources';
-
-	// Remove the HTML generation plugin and webOS-meta plugin
-	config.plugins.shift();
-	config.plugins.pop();
-
-	// Add the framework plugin to build in an externally accessible manner
-	config.plugins.push(new EnactFrameworkPlugin());
-}
-
-function setupIsomorphic(config, snapshot) {
-	var meta = readJSON('package.json') || {};
-	var enact = meta.enact || {};
-	// Only use isomorphic if an isomorphic entrypoint is specified
-	if(enact.isomorphic || enact.prerender) {
-		var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom', 'index.js');
-		if(!exists(reactDOM)) {
-			reactDOM = require.resolve('react-dom');
-		}
-		// Include react-dom as top level entrypoint so espose-loader will expose
-		// it to window.ReactDOM to allow runtime rendering of the app.
-		config.entry.main.unshift(reactDOM);
-
-		// The App entrypoint for isomorphics builds *must* export a ReactElement.
-		config.entry.main[config.entry.main.length-1] = path.resolve(enact.isomorphic || enact.prerender);
-
-		// Since we're building for isomorphic usage, expose ReactElement
-		config.output.library = 'App';
-
-		// Use universal module definition to allow usage in Node and browser environments.
-		config.output.libraryTarget = 'umd';
-
-		// Expose the 'react-dom' on a global context for App's rendering
-		// Currently maps the toolset to window.ReactDOM.
-		config.module.loaders.push({
-			test: reactDOM,
-			loader: 'expose?ReactDOM'
-		});
-
-		// Update HTML webpack plugin to use the isomorphic template and include screentypes
-		config.plugins[0].options.inject = false;
-		config.plugins[0].options.template = path.join(__dirname, '..', 'config',
-				'html-template-isomorphic.ejs');
-		config.plugins[0].options.screenTypes = enact.screenTypes
-				|| readJSON('./node_modules/@enact/moonstone/MoonstoneDecorator/screenTypes.json')
-				|| readJSON('./node_modules/enact/packages/moonstone/MoonstoneDecorator/screenTypes.json');
-
-		// Include plugin to prerender the html into the index.html
-		config.plugins.push(new PrerenderPlugin());
-
-		// Apply snapshot specialization options if needed
-		if(snapshot) {
-			setupSnapshot(config);
-		}
-	} else {
-		console.log(chalk.yellow('Isomorphic entrypoint not found in package.json; building normally'));
-	}
-}
-
-function setupSnapshot(config, isFramework) {
-	if(!isFramework) {
-		// Update HTML webpack plugin to mark it as snapshot mode for the isomorphic template
-		config.plugins[0].options.snapshot = true;
-
-		// Expose iLib so we can update _platform value once page loads, if used
-		config.module.loaders.push({
-			test: path.join(process.cwd(), 'node_modules', '@enact', 'i18n', 'ilib', 'lib', 'ilib.js'),
-			loader: 'expose?iLib'
-		});
-	}
-
-	// Include plugin to attempt generation of v8 snapshot binary if V8_MKSNAPSHOT env var is set
-	config.plugins.push(new SnapshotPlugin({
-		target: (isFramework ? 'enact.js' : 'main.js'),
-		append: (isFramework ? '\nenact_framework.load();\n' : undefined)
-	}));
-}
-
-function statsAnalyzer(config) {
-	config.plugins.push(new BundleAnalyzerPlugin({
-		analyzerMode: 'static',
-		reportFilename: 'stats.html',
-		openAnalyzer: false
-	}));
 }
 
 // Create the build and optionally, print the deployment instructions.
@@ -305,44 +166,16 @@ module.exports = function(args) {
 	});
 	opts.help && displayHelp();
 
-	var config;
+	process.env.NODE_ENV = 'development';
+	var config = devConfig;
 
 	// Do this as the first thing so that any code reading it knows the right env.
 	if(opts.production) {
 		process.env.NODE_ENV = 'production';
 		config = prodConfig;
-		if(!opts['minify']) {
-			// Allow Uglify's optimizations/debug-code-removal but don't minify
-			config.plugins[4].options.mangle = false;
-			config.plugins[4].options.beautify = true;
-			config.plugins[4].options.output.comments = true;
-		}
-	} else {
-		process.env.NODE_ENV = 'development';
-		config = devConfig;
 	}
 
-	if(opts.framework) {
-		setupFramework(config);
-		if(opts.snapshot) {
-			setupSnapshot(config, true);
-		}
-	} else {
-		// Backwards compatibility for <15.4.0 React
-		if(!exists(path.join(process.cwd(), 'node_modules', 'react-dom', 'lib', 'ReactPerf.js'))) {
-			config.resolve.alias['react-dom/lib/ReactPerf'] = 'react/lib/ReactPerf';
-		}
-		if(opts.isomorphic) {
-			setupIsomorphic(config, (opts.snapshot && !opts.externals));
-		}
-		if(opts.externals) {
-			externalFramework(config, opts.externals, opts['externals-inject']);
-		}
-	}
-
-	if(opts.stats) {
-		statsAnalyzer(config);
-	}
+	modifiers.apply(config, opts);
 
 	// Warn and crash if required files are missing
 	if (!opts.framework && !checkRequiredFiles([config.entry.main[config.entry.main.length-1]])) {

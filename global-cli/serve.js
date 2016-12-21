@@ -72,13 +72,6 @@ function setupCompiler(host, port, protocol) {
 		if (!messages.errors.length && !messages.warnings.length) {
 			console.log(chalk.green('Compiled successfully!'));
 			console.log();
-			console.log('The app is running at:');
-			console.log();
-			console.log('	' + chalk.cyan(protocol + '://' + host + ':' + port + '/'));
-			console.log();
-			console.log('Note that the development build is not optimized.');
-			console.log('To create a production build, use ' + chalk.cyan('npm run pack-p') + '.');
-			console.log();
 		}
 
 		// If errors exist, only show errors.
@@ -104,7 +97,16 @@ function setupCompiler(host, port, protocol) {
 			console.log('You may use special comments to disable some warnings.');
 			console.log('Use ' + chalk.yellow('// eslint-disable-next-line') + ' to ignore the next line.');
 			console.log('Use ' + chalk.yellow('/* eslint-disable */') + ' to ignore all warnings in a file.');
+			console.log();
 		}
+
+		console.log('The app is running at:');
+		console.log();
+		console.log('	' + chalk.cyan(protocol + '://' + host + ':' + port + '/'));
+		console.log();
+		console.log('Note that the development build is not optimized.');
+		console.log('To create a production build, use ' + chalk.cyan('npm run pack-p') + '.');
+		console.log();
 	});
 }
 
@@ -248,11 +250,11 @@ function runDevServer(host, port, protocol, shouldOpen) {
 	});
 }
 
-function run(port, shouldOpen) {
+function run(port, opts) {
 	var protocol = process.env.HTTPS === 'true' ? "https" : "http";
-	var host = process.env.HOST || config.devServer.host || 'localhost';
+	var host = process.env.HOST || opts.host || config.devServer.host || 'localhost';
 	setupCompiler(host, port, protocol);
-	runDevServer(host, port, protocol, shouldOpen);
+	runDevServer(host, port, protocol, opts.browser);
 }
 
 function displayHelp() {
@@ -261,6 +263,8 @@ function displayHelp() {
 	console.log();
 	console.log('  Options');
 	console.log('    -b, --browser     Automatically open browser');
+	console.log('    -i, --host        Server host IP address');
+	console.log('    -p, --port        Server port number');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -269,8 +273,9 @@ function displayHelp() {
 
 module.exports = function(args) {
 	var opts = minimist(args, {
+		string: ['i', 'host', 'p', 'port'],
 		boolean: ['b', 'browser', 'h', 'help'],
-		alias: {b:'browser', h:'help'}
+		alias: {b:'browser', i:'host', p:'port', h:'help'}
 	});
 	opts.help && displayHelp();
 
@@ -282,13 +287,13 @@ module.exports = function(args) {
 	}
 
 	// Tools like Cloud9 rely on this.
-	var DEFAULT_PORT = process.env.PORT || config.devServer.port || 8080;
+	var DEFAULT_PORT = process.env.PORT || opts.port || config.devServer.port || 8080;
 
 	// We attempt to use the default port but if it is busy, we offer the user to
 	// run on a different port. `detect()` Promise resolves to the next free port.
 	detect(DEFAULT_PORT).then(port => {
-		if (port === DEFAULT_PORT) {
-			run(port, opts.browser);
+		if (port == DEFAULT_PORT) {
+			run(port, opts);
 			return;
 		}
 
@@ -299,7 +304,7 @@ module.exports = function(args) {
 
 		prompt(question, true).then(shouldChangePort => {
 			if (shouldChangePort) {
-				run(port, opts.browser);
+				run(port, opts);
 			}
 		});
 	});
