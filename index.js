@@ -1,6 +1,6 @@
 
 module.exports = {
-	init: require('./global-cli/init'),
+	create: require('./global-cli/create'),
 	pack: require('./global-cli/pack'),
 	serve: require('./global-cli/serve'),
 	clean: require('./global-cli/clean'),

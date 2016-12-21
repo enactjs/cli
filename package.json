@@ -1,6 +1,6 @@
 {
   "name": "enact-dev",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Full-featured build environment for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",

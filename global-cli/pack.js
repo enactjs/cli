@@ -82,14 +82,6 @@ function printFileSizes(stats, previousSizeMap) {
 	});
 }
 
-function readJSON(file) {
-	try {
-		return JSON.parse(fs.readFileSync(file, {encoding:'utf8'}));
-	} catch(e) {
-		return undefined;
-	}
-}
-
 // Create the build and optionally, print the deployment instructions.
 function build(config, previousSizeMap, guided) {
 	if(process.env.NODE_ENV === 'development') {

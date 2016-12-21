@@ -1,3 +1,29 @@
+## 0.5.0 (December 20, 2016)
+
+Several additional documentation files have been added to the `docs` directory, to cover common topics.
+
+### create
+
+* Template updated for Enact 1.0.0-beta.1
+* Template has been updated to use a single isomorphic-compatible entrypoint [index.js](https://github.com/enyojs/enact-dev/blob/master/template/src/index.js).
+
+## serve
+
+* Added support for `--host` option to specify a server host IP address to use.
+* Added support for `--port` option to specify a server port humber to use.
+* The host/port details will now correctly output when linter warnings occur.
+
+### pack
+
+* Added primary support for singluar entrypoints for both regular and isomorphic code layouts.
+* Refactored build customization features (like `--isomorphic` and `--stats`) into separate files and cleaned up the implementations.
+* Depreciated isomorphic HTML-side rendering. Isomorphic entrypoints should render to the DOM when in a browser environment.
+
+### clean
+
+* Fixed clean command failing due to missing internal parameters.
+
+
 ## 0.4.0 (December 5, 2016)
 
 ### create
