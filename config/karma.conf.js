@@ -144,7 +144,8 @@ module.exports = function(karma) {
 				reasons: false,
 				timings: false,
 				version: false,
-				children: false
+				children: false,
+				warnings: false
 			}
 		},
 
