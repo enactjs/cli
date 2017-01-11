@@ -39,7 +39,7 @@ module.exports = function(karma) {
 			[require.resolve('./proptype-checker')]: ['webpack']
 		},
 
-		failOnEmptyTestSuite: false,
+		failOnEmptyTestSuite: true,
 
 		webpack: {
 			// Use essentially the same webpack config as from the development build setup.
