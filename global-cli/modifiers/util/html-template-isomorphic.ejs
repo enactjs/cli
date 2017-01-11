@@ -57,9 +57,8 @@
 				};
 				appendScripts(<%= JSON.stringify(htmlWebpackPlugin.files.js || []) %>);
 			<% } else { %>
-				if(window.iLib) {
-					delete iLib._platform;
-					iLib.setLocale(iLib.getLocale());
+				if(typeof iLibLocale === 'object') {
+					iLibLocale.updateLocale();
 				}
 				if(typeof App === 'object' && (typeof ReactDOM === 'object')) {
 					ReactDOM.render(App['default'] || App, document.getElementById('root'));

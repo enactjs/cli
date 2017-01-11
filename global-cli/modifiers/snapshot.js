@@ -11,10 +11,10 @@ module.exports = function(config, opts) {
 			htmlPlugin.options.snapshot = true;
 		}
 
-		// Expose iLib so we can update _platform value once page loads, if used
+		// Expose iLib locale utility function module so we can update the locale on page load, if used
 		config.module.loaders.push({
-			test: path.join(process.cwd(), 'node_modules', '@enact', 'i18n', 'ilib', 'lib', 'ilib.js'),
-			loader: 'expose?iLib'
+			test: path.join(process.cwd(), 'node_modules', '@enact', 'i18n', 'src', 'locale.js'),
+			loader: 'expose?iLibLocale'
 		});
 	}
 
