@@ -83,6 +83,7 @@
     "sinon": "git+https://github.com/sinonjs/sinon.git",
     "string.fromcodepoint": "~0.2.1",
     "string.prototype.codepointat": "~0.2.0",
+    "string.prototype.repeat": "~0.2.0",
     "strip-ansi": "~3.0.1",
     "style-loader": "~0.13.1",
     "webos-meta-webpack-plugin": "enyojs/webos-meta-webpack-plugin#0.1.1",

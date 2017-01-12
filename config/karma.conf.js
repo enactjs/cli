@@ -28,6 +28,7 @@ module.exports = function(karma) {
 		frameworks: ['mocha', 'chai', 'dirty-chai'],
 		files: [
 			require.resolve('./polyfills'),
+			require.resolve('string.prototype.repeat'),
 			require.resolve('./proptype-checker'),
 			'./!(node_modules|dist|build)/**/*-specs.js'
 		],
@@ -36,6 +37,7 @@ module.exports = function(karma) {
 			// add webpack as preprocessor
 			'./!(node_modules|dist|build)/**/*.js': ['webpack'],
 			[require.resolve('./polyfills')]: ['webpack'],
+			[require.resolve('string.prototype.repeat')]: ['webpack'],
 			[require.resolve('./proptype-checker')]: ['webpack']
 		},
 
