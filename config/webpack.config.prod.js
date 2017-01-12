@@ -17,6 +17,7 @@ var removeclass = require('postcss-remove-classes').default;
 var LessPluginRi = require('resolution-independence');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var V8LazyParseWebpackPlugin = require('v8-lazy-parse-webpack-plugin');
 var GracefulFsPlugin = require('graceful-fs-webpack-plugin');
 var WebOSMetaPlugin = require('webos-meta-webpack-plugin');
 
@@ -228,7 +229,8 @@ module.exports = {
 		new webpack.optimize.UglifyJsPlugin({
 			compress: {
 				screw_ie8: true, // React doesn't support IE8
-				warnings: false
+				warnings: false,
+				negate_iife: false
 			},
 			mangle: {
 				screw_ie8: true
@@ -240,6 +242,9 @@ module.exports = {
 		}),
 		// Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
 		new ExtractTextPlugin('[name].css'),
+		// Exploit lazy loading of code in V8-based browsers by modifying the
+		// module template to be wrapped in parentheses.
+		new V8LazyParseWebpackPlugin(),
 		// Switch the internal NodeOutputFilesystem to use graceful-fs to avoid
 		// EMFILE errors when hanndling mass amounts of files at once, such as
 		// what happens when using ilib bundles/resources.
