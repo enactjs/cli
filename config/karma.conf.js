@@ -74,7 +74,7 @@ module.exports = function(karma) {
 				'react/lib/ExecutionEnvironment': true,
 				'react/lib/ReactContext': true
 			},
-			node: Object.assign({}, enact.node|| {}, {
+			node: Object.assign({}, enact.node || {}, {
 				console: true,
 				fs: 'empty',
 				net: 'empty',
