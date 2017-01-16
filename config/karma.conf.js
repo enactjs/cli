@@ -15,7 +15,7 @@ function readJSON(file) {
 	try {
 		return JSON.parse(fs.readFileSync(file, {encoding:'utf8'}));
 	} catch(e) {
-		return undefined;
+		return null;
 	}
 }
 
