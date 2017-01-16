@@ -77,8 +77,6 @@ module.exports = {
 		fallback: path.resolve('./node_modules')
 	},
 	// @remove-on-eject-end
-	// Optional configuration for polyfilling NodeJS built-ins.
-	node: enact.node|| null,
 	module: {
 		// First, run the linter.
 		// It's important to do this before Babel processes the JS.

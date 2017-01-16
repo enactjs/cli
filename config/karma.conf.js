@@ -72,12 +72,12 @@ module.exports = function(karma) {
 				'react/lib/ExecutionEnvironment': true,
 				'react/lib/ReactContext': true
 			},
-			node: Object.assign({}, enact.node|| {}, {
+			node: {
 				console: true,
 				fs: 'empty',
 				net: 'empty',
 				tls: 'empty'
-			}),
+			},
 			module: {
 				loaders: [
 					{test: /\.(js|jsx|es6)$/, loader: 'babel', exclude: /node_modules.(?!@enact)/,
