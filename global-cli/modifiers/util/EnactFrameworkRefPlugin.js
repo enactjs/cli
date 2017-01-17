@@ -11,14 +11,12 @@ function DelegatedEnactFactoryPlugin(options) {
 }
 DelegatedEnactFactoryPlugin.prototype.apply = function(normalModuleFactory) {
 	var name = this.options.name;
-	var libs = this.options.libraries;
+	var libReg = new RegExp('^(' + this.options.libraries.join('|') + ')(?=[\\\\\\/]|$)');
 	normalModuleFactory.plugin('factory', function(factory) {
 		return function(data, callback) {
 			var request = data.dependency.request;
-			for(var i=0; i<libs.length; i++) {
-				if(request && request.indexOf(libs[i]) === 0) {
-					return callback(null, new DelegatedModule(name, request, 'require', request));
-				}
+			if(request && libReg.test(request)) {
+				return callback(null, new DelegatedModule(name, request, 'require', request));
 			}
 			return factory(data, callback);
 		};
