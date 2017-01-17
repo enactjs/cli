@@ -61,14 +61,16 @@ EnactFrameworkRefPlugin.prototype.apply = function(compiler) {
 		compilation.dependencyFactories.set(DelegatedSourceDependency, normalModuleFactory);
 		
 		compilation.plugin('html-webpack-plugin-alter-chunks', function(chunks, params) {
-			// Add the framework files as a pseudo-chunk so they get injected into the HTML
-			chunks.unshift({
-				names: ['enact_framework'],
-				files: [
-					normalizePath(external.inject, 'enact.js', compiler),
-					normalizePath(external.inject, 'enact.css', compiler)
-				]
-			});
+			if(!external.snapshot) {
+				// Add the framework files as a pseudo-chunk so they get injected into the HTML
+				chunks.unshift({
+					names: ['enact_framework'],
+					files: [
+						normalizePath(external.inject, 'enact.js', compiler),
+						normalizePath(external.inject, 'enact.css', compiler)
+					]
+				});
+			}
 
 			// Store the absolute filepath to the external framework so the PrerenderPlugin can use it
 			params.plugin.options.externalFramework = path.resolve(path.join(external.path, 'enact.js'));

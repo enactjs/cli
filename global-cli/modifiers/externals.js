@@ -7,7 +7,8 @@ module.exports = function(config, opts) {
 		libraries: ['@enact', 'react', 'react-dom'],
 		external: {
 			path: opts.externals,
-			inject: opts['externals-inject'] || opts.inject
+			inject: opts['externals-inject'] || opts.inject,
+			snapshot: opts.snapshot
 		}
 	}));
 };
