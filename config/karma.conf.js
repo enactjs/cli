@@ -15,7 +15,7 @@ function readJSON(file) {
 	try {
 		return JSON.parse(fs.readFileSync(file, {encoding:'utf8'}));
 	} catch(e) {
-		return undefined;
+		return null;
 	}
 }
 
@@ -74,12 +74,12 @@ module.exports = function(karma) {
 				'react/lib/ExecutionEnvironment': true,
 				'react/lib/ReactContext': true
 			},
-			node: {
+			node: Object.assign({}, enact.node || {}, {
 				console: true,
 				fs: 'empty',
 				net: 'empty',
 				tls: 'empty'
-			},
+			}),
 			module: {
 				loaders: [
 					{test: /\.(js|jsx|es6)$/, loader: 'babel', exclude: /node_modules.(?!@enact)/,
