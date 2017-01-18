@@ -108,7 +108,7 @@ module.exports = {
 					extends: path.join(__dirname, '.babelrc'),
 					// @remove-on-eject-end
 					// This is a feature of `babel-loader` for webpack (not Babel itself).
-					// It enables caching results in ./node_modules/.cache/react-scripts/
+					// It enables caching results in ./node_modules/.cache/enact-dev/
 					// directory for faster rebuilds. So use findCacheDir() because of:
 					// https://github.com/facebookincubator/create-react-app/issues/483
 					cacheDirectory: findCacheDir({
