@@ -40,11 +40,12 @@ var findParent = function(dir) {
 };
 
 function normalizeModuleID(id) {
-	parentCache[id] = findParent(path.dirname(id));
-	if(parentCache[id]) {
-		var main = checkPkgMain(parentCache[id]);
-		if(main && path.resolve(id)===path.resolve(path.join(parentCache[id], main))) {
-			id = parentCache[id];
+	var dir = exists(id) && fs.statSync(id).isDirectory() ? id : path.dirname(id);
+	parentCache[dir] = findParent(dir);
+	if(parentCache[dir]) {
+		var main = checkPkgMain(parentCache[dir]);
+		if(main && path.resolve(id)===path.resolve(path.join(parentCache[dir], main))) {
+			id = parentCache[dir];
 		}
 	}
 	id = id.replace(/\\/g, '/');
