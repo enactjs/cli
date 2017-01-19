@@ -1,5 +1,6 @@
 var
 	path = require('path'),
+	fs = require('fs'),
 	helper = require('./util/config-helper'),
 	SnapshotPlugin = require('./util/SnapshotPlugin');
 
@@ -11,10 +12,11 @@ module.exports = function(config, opts) {
 			htmlPlugin.options.snapshot = true;
 		}
 
-		// Expose iLib so we can update _platform value once page loads, if used
-		config.module.loaders.push({
-			test: path.join(process.cwd(), 'node_modules', '@enact', 'i18n', 'ilib', 'lib', 'ilib.js'),
-			loader: 'expose?iLib'
+		// Expose iLib locale utility function module so we can update the locale on page load, if used
+		var babel = helper.findLoader(config, 'babel');
+		config.module.loaders.splice((babel>=0 ? babel : 0), 0, {
+			test: fs.realpathSync(path.join(process.cwd(), 'node_modules', '@enact', 'i18n', 'src', 'locale.js')),
+			loader: 'expose?iLibLocale'
 		});
 	}
 
