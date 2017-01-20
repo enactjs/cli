@@ -1,5 +1,7 @@
 var
 	path = require('path'),
+	fs = require('fs'),
+	exists = require('path-exists').sync,
 	ExternalsPlugin = require('webpack/lib/ExternalsPlugin'),
 	DelegatedSourceDependency = require('webpack/lib/dependencies/DelegatedSourceDependency'),
 	DelegatedModule = require('webpack/lib/DelegatedModule');
@@ -32,6 +34,30 @@ function normalizePath(dir, file, compiler) {
 	}
 }
 
+function isNodeOutputFS(compiler) {
+	try {
+		var NodeOutputFileSystem = require('webpack/lib/node/NodeOutputFileSystem');
+		return (compiler.outputFileSystem.writeFile===NodeOutputFileSystem.prototype.writeFile);
+	} catch(e) {
+		console.error('SnapshotPlugin loader is not compatible with standalone global installs of Webpack.');
+		return false;
+	}
+}
+
+function updateAppInfo(output, blob) {
+	var appInfo = path.join(output, 'appinfo.json');
+	if(exists(appInfo)) {
+		try {
+			var meta = JSON.parse(fs.readFileSync(appInfo, {encoding:'utf8'}));
+			meta.v8SnapshotFile = blob;
+			fs.writeFileSync(appInfo, JSON.stringify(meta, null, '\t'), {encoding:'utf8'});
+		} catch(e) {
+			return new Error('Failed to set "v8SnapshotFile" property in appinfo.json');
+		}
+	}
+}
+
+
 // Reference plugin to handle rewiring the external Enact framework requests
 function EnactFrameworkRefPlugin(opts) {
 	this.options = opts || {};
@@ -61,16 +87,15 @@ EnactFrameworkRefPlugin.prototype.apply = function(compiler) {
 		compilation.dependencyFactories.set(DelegatedSourceDependency, normalModuleFactory);
 		
 		compilation.plugin('html-webpack-plugin-alter-chunks', function(chunks, params) {
+			var chunkFiles = [ normalizePath(external.inject, 'enact.css', compiler) ];
 			if(!external.snapshot) {
-				// Add the framework files as a pseudo-chunk so they get injected into the HTML
-				chunks.unshift({
-					names: ['enact_framework'],
-					files: [
-						normalizePath(external.inject, 'enact.js', compiler),
-						normalizePath(external.inject, 'enact.css', compiler)
-					]
-				});
+				chunkFiles.unshift(normalizePath(external.inject, 'enact.js', compiler));
 			}
+			// Add the framework files as a pseudo-chunk so they get injected into the HTML
+			chunks.unshift({
+				names: ['enact_framework'],
+				files: chunkFiles
+			});
 
 			// Store the absolute filepath to the external framework so the PrerenderPlugin can use it
 			params.plugin.options.externalFramework = path.resolve(path.join(external.path, 'enact.js'));
@@ -85,4 +110,14 @@ EnactFrameworkRefPlugin.prototype.apply = function(compiler) {
 			libraries: libs,
 		}));
 	});
+
+	if(external.snapshot) {
+		compiler.plugin('after-emit', function(compilation, callback) {
+			var err;
+			if(isNodeOutputFS(compiler)) {
+				err = updateAppInfo(compiler.options.output.path, normalizePath(external.inject, 'snapshot_blob.bin', compiler));
+			}
+			callback(err);
+		});
+	}
 };
