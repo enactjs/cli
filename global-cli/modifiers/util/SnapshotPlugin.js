@@ -3,6 +3,7 @@ var
 	fs = require('fs'),
 	cp = require('child_process'),
 	exists = require('path-exists').sync,
+	findCacheDir = require('find-cache-dir'),
 	chalk = require('chalk');
 
 function isNodeOutputFS(compiler) {
@@ -53,10 +54,20 @@ SnapshotPlugin.prototype.apply = function(compiler) {
 
 	compiler.plugin('after-emit', function(compilation, callback) {
 		if(isNodeOutputFS(compiler) && opts.exec) {
+			var ssCache = path.join(findCacheDir({
+					name: 'enact-dev',
+					create: true
+				}), 'snapshot-target.js');
+
 			// Append anything optional to the js to be included in the snapshot
-			if(opts.append) {
-				fs.appendFileSync(path.join(compiler.options.output.path, opts.target), opts.append, {encoding:'utf8'});
+			if(opts.prepend || opts.append) {
+				var text = opts.prepend || '';
+				text += fs.readFileSync(path.join(compiler.options.output.path, opts.target), {encoding:'utf8'});
+				text += opts.append || '';
+				fs.writeFileSync(ssCache, text, {encoding:'utf8'});
+				opts.args[opts.args.length-1] = path.resolve(ssCache);
 			}
+
 			// Run mksnapshot utility
 			var err;
 			var child = cp.spawnSync(opts.exec, opts.args, {
@@ -91,6 +102,12 @@ SnapshotPlugin.prototype.apply = function(compiler) {
 			if(err) {
 				console.log(chalk.red('Snapshot blob generation failed.'));
 			}
+
+			// cleanup any temporary data
+			if(exists(ssCache)) {
+				fs.unlinkSync(ssCache);
+			}
+
 			callback(err);
 		} else {
 			callback();

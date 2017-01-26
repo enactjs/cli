@@ -22,7 +22,8 @@ module.exports = function(config, opts) {
 
 	// Include plugin to attempt generation of v8 snapshot binary if V8_MKSNAPSHOT env var is set
 	config.plugins.push(new SnapshotPlugin({
-		target: (opts.framework ? 'enact.js' : 'main.js'),
-		append: (opts.framework ? '\nenact_framework.load();\n' : undefined)
+		target: (opts.framework ? 'enact.js' : 'main.js')
+		// Disabled temporarily until effectiveness is proven
+		//append: (opts.framework ? '\nenact_framework.load();\n' : undefined)
 	}));
 };

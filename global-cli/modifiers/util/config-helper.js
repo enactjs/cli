@@ -3,8 +3,8 @@ module.exports = {
 		var index = -1;
 		if(config && config.module && config.module.loaders && name) {
 			for(var i=0; i<config.module.loaders.length; i++) {
-				if(config.module.loaders.loader) {
-					if(config.module.loaders.loader.split(/[?!]/)[0].replace(/-loader$/, '')==name.replace(/-loader$/, '')) {
+				if(config.module.loaders[i].loader) {
+					if(config.module.loaders[i].loader.split(/[?!]/)[0].replace(/-loader$/, '')==name.replace(/-loader$/, '')) {
 						index = i;
 						break;
 					}

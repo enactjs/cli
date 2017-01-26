@@ -36,6 +36,9 @@
 				var count = 0;
 				var appendScripts = function(js) {
 					if(js.length===0) {
+						if(typeof enact_framework !== 'undefined') {
+							window.ReactDOM = enact_framework('react-dom');
+						}
 						if((typeof App === 'object') && (typeof ReactDOM === 'object')) {
 							var appEle = (App && App.__esModule) ? App['default'] : App;
 							if(typeof appEle === 'object' && appEle) {
