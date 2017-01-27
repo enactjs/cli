@@ -1,3 +1,22 @@
+## 0.5.1 (January 27, 2017)
+
+## create
+
+* Template updated for Enact 1.0.0-beta.2 and React 15.4.2.
+* Template's .gitignore file now correctly includes `dist`.
+
+## pack
+
+* Added a `node` Enact build option to support polyfilling NodeJS components. See [here](https://github.com/enyojs/enact-dev/blob/master/README.md#enact-build-options) for more info.
+* All localized appinfo.json resources and assets will now be correctly copied to the output directory.
+
+# test
+
+* Added a polyfill for String.prototype.repeat, as phantomjs lacks the API.
+* Webpack build warnings will no longer spam the console in certain scenarios.
+* Test action will now automatically fail when no test suite is found. This was done to allows tests which build incorrect or have missing modules to correctly fail. See [#38](https://github.com/enyojs/enact-dev/pull/38) for more background information.
+
+
 ## 0.5.0 (December 20, 2016)
 
 Several additional documentation files have been added to the `docs` directory, to cover common topics.
