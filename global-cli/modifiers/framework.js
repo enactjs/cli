@@ -35,7 +35,7 @@ module.exports = function(config, opts) {
 	// Append additional options to the ilib-loader to skip './resources' detection/generation
 	var ilibLoader = helper.getLoaderByName(config, 'ilib');
 	if(ilibLoader) {
-		ilibLoader.loader += '?noSave&noResources';
+		ilibLoader.loader += '?noResources';
 	}
 
 	// Remove the HTML generation plugin and webOS-meta plugin

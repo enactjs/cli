@@ -26,7 +26,7 @@ function readJSON(file) {
 	try {
 		return JSON.parse(fs.readFileSync(file, {encoding:'utf8'}));
 	} catch(e) {
-		return undefined;
+		return null;
 	}
 }
 
@@ -85,6 +85,8 @@ module.exports = {
 		fallback: path.resolve('./node_modules')
 	},
 	// @remove-on-eject-end
+	// Optional configuration for polyfilling NodeJS built-ins.
+	node: enact.node || null,
 	module: {
 		// First, run the linter.
 		// It's important to do this before Babel processes the JS.
@@ -108,7 +110,7 @@ module.exports = {
 					extends: path.join(__dirname, '.babelrc'),
 					// @remove-on-eject-end
 					// This is a feature of `babel-loader` for webpack (not Babel itself).
-					// It enables caching results in ./node_modules/.cache/react-scripts/
+					// It enables caching results in ./node_modules/.cache/enact-dev/
 					// directory for faster rebuilds. So use findCacheDir() because of:
 					// https://github.com/facebookincubator/create-react-app/issues/483
 					cacheDirectory: findCacheDir({

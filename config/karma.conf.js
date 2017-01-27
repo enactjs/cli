@@ -15,7 +15,7 @@ function readJSON(file) {
 	try {
 		return JSON.parse(fs.readFileSync(file, {encoding:'utf8'}));
 	} catch(e) {
-		return undefined;
+		return null;
 	}
 }
 
@@ -28,6 +28,7 @@ module.exports = function(karma) {
 		frameworks: ['mocha', 'chai', 'dirty-chai'],
 		files: [
 			require.resolve('./polyfills'),
+			require.resolve('string.prototype.repeat'),
 			require.resolve('./proptype-checker'),
 			'./!(node_modules|dist|build)/**/*-specs.js'
 		],
@@ -36,10 +37,11 @@ module.exports = function(karma) {
 			// add webpack as preprocessor
 			'./!(node_modules|dist|build)/**/*.js': ['webpack'],
 			[require.resolve('./polyfills')]: ['webpack'],
+			[require.resolve('string.prototype.repeat')]: ['webpack'],
 			[require.resolve('./proptype-checker')]: ['webpack']
 		},
 
-		failOnEmptyTestSuite: false,
+		failOnEmptyTestSuite: true,
 
 		webpack: {
 			// Use essentially the same webpack config as from the development build setup.
@@ -72,12 +74,12 @@ module.exports = function(karma) {
 				'react/lib/ExecutionEnvironment': true,
 				'react/lib/ReactContext': true
 			},
-			node: {
+			node: Object.assign({}, enact.node || {}, {
 				console: true,
 				fs: 'empty',
 				net: 'empty',
 				tls: 'empty'
-			},
+			}),
 			module: {
 				loaders: [
 					{test: /\.(js|jsx|es6)$/, loader: 'babel', exclude: /node_modules.(?!@enact)/,
@@ -144,7 +146,8 @@ module.exports = function(karma) {
 				reasons: false,
 				timings: false,
 				version: false,
-				children: false
+				children: false,
+				warnings: false
 			}
 		},
 

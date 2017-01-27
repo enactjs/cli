@@ -21,13 +21,22 @@ module.exports = function(config, opts) {
 	var iso = enact.isomorphic || enact.prerender;
 	// Only use isomorphic if an isomorphic entrypoint is specified
 	if(iso) {
-		var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom', 'index.js');
-		if(!exists(reactDOM)) {
-			reactDOM = require.resolve('react-dom');
+		if(!opts.externals) {
+			var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom', 'index.js');
+			if(!exists(reactDOM)) {
+				reactDOM = require.resolve('react-dom');
+			}
+			// Prepend react-dom as top level entrypoint so espose-loader will expose
+			// it to window.ReactDOM to allow runtime rendering of the app.
+			config.entry.main.unshift(reactDOM);
+
+			// Expose the 'react-dom' on a global context for App's rendering
+			// Currently maps the toolset to window.ReactDOM.
+			config.module.loaders.push({
+				test: reactDOM,
+				loader: 'expose?ReactDOM'
+			});
 		}
-		// Prepend react-dom as top level entrypoint so espose-loader will expose
-		// it to window.ReactDOM to allow runtime rendering of the app.
-		config.entry.main.unshift(reactDOM);
 
 		// If 'isomorphic' value is a string, use custom entrypoint.
 		if(typeof iso === 'string') {
@@ -39,13 +48,6 @@ module.exports = function(config, opts) {
 
 		// Use universal module definition to allow usage in Node and browser environments.
 		config.output.libraryTarget = 'umd';
-
-		// Expose the 'react-dom' on a global context for App's rendering
-		// Currently maps the toolset to window.ReactDOM.
-		config.module.loaders.push({
-			test: reactDOM,
-			loader: 'expose?ReactDOM'
-		});
 
 		// Update HTML webpack plugin to use the isomorphic template and include screentypes
 		var htmlPlugin = helper.getPluginByName(config, 'HtmlWebpackPlugin');

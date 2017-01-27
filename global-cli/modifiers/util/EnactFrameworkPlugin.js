@@ -3,7 +3,8 @@ var
 	fs = require('fs'),
 	DllEntryPlugin = require('webpack/lib/DllEntryPlugin'),
 	DllModule = require('webpack/lib/DllModule'),
-	RawSource = require("webpack/lib/RawSource");
+	RawSource = require("webpack/lib/RawSource"),
+	exists = require('path-exists').sync;
 
 var pkgCache = {};
 var checkPkgMain = function(dir) {
@@ -20,11 +21,32 @@ var checkPkgMain = function(dir) {
 	}
 };
 
+var parentCache = {};
+var findParent = function(dir) {
+	if(parentCache[dir]) {
+		return parentCache[dir];
+	} else {
+		var currPkg = path.join(dir, 'package.json');
+		if(exists(currPkg)) {
+			return dir;
+		} else {
+			if(dir === '/' || dir === '' || dir === '.') {
+				return null;
+			} else {
+				return findParent(path.dirname(dir));
+			}
+		}
+	}
+};
+
 function normalizeModuleID(id) {
-	var parent = path.dirname(id);
-	var main = checkPkgMain(parent);
-	if(main && path.resolve(id)===path.resolve(path.join(parent, main))) {
-		id = parent;
+	var dir = exists(id) && fs.statSync(id).isDirectory() ? id : path.dirname(id);
+	parentCache[dir] = findParent(dir);
+	if(parentCache[dir]) {
+		var main = checkPkgMain(parentCache[dir]);
+		if(main && path.resolve(id)===path.resolve(path.join(parentCache[dir], main))) {
+			id = parentCache[dir];
+		}
 	}
 	id = id.replace(/\\/g, '/');
 

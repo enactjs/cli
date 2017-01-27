@@ -6,8 +6,8 @@ import {Panel, Header} from '@enact/moonstone/Panels';
 const MainPanel = kind({
 	name: 'MainPanel',
 
-	render: () => (
-		<Panel>
+	render: (props) => (
+		<Panel {...props}>
 			<Header title="Hello world!" />
 			<Button>Click me</Button>
 		</Panel>

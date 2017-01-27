@@ -71,6 +71,7 @@ The enact-dev tool will check the project's `package.json` looking for an option
 * `isomorphic` _[boolean|string]_ - If `true`, it indicates the default entrypoint is isomorphic-compatible (and can be built via the `--isomorphic` enact-dev flag). If the value is a string, then it will use that value as a filepath to a custom isomorphic-compatible entrypoint.
 * `title` _[string]_ - Title text that should be put within the HTML's `<title></title>` tags. Note: if this is a webOS-project, the title by default will be auto-detected from the appinfo.json content.
 * `ri` _[object]_ - Resolution independence options to be forwarded to the [LESS plugin](https://github.com/enyojs/less-plugin-resolution-independence).
+* `node` _[object]_ - Configuration settings for polyfilling NodeJS built-ins. See `node` [webpack option](https://webpack.github.io/docs/configuration.html#node).
 * `proxy` _[string]_ - Proxy target during project `serve` to be used within the [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware).
 
 For example:
@@ -104,7 +105,7 @@ You would need to install an ESLint plugin for your editor first.
 Then, you will need to install some packages *globally*:
 
 ```sh
-npm install -g enyojs/eslint-config-enact eslint-plugin-react eslint-plugin-babel babel-eslint
+npm install -g enyojs/eslint-config-enact eslint-plugin-react eslint-plugin-babel babel-eslint eslint
 
 ```
 
@@ -128,7 +129,7 @@ For example:
 ### `Button.js`
 
 ```js
-import kind from 'enact-core/kind';
+import kind from '@enact/core/kind';
 
 const Button = kind({
   render() {
@@ -143,7 +144,7 @@ export default Button; // Don’t forget to use export default!
 
 
 ```js
-import kind from 'enact-core/kind';
+import kind from '@enact/core/kind';
 import Button from './Button'; // Import a component from another file
 
 const DangerButton = kind({
@@ -182,7 +183,7 @@ This project setup uses [Webpack](https://webpack.github.io/) for handling all a
 ### `Button.js`
 
 ```js
-import kind from 'enact-core/kind';
+import kind from '@enact/core/kind';
 import styles './Button.css'; // Tell Webpack that Button.js uses these styles
 
 const Button = kind({
@@ -208,7 +209,7 @@ You can **`import` an image right in a JavaScript module**. This tells Webpack t
 Here is an example:
 
 ```js
-import kind from 'enyo-core/kind';
+import kind from '@enact/core/kind';
 import logo from './logo.png'; // Tell Webpack this JS file uses this image
 
 console.log(logo); // /logo.84287d09.png

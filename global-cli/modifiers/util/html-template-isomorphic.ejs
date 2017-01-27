@@ -36,6 +36,9 @@
 				var count = 0;
 				var appendScripts = function(js) {
 					if(js.length===0) {
+						if(typeof enact_framework !== 'undefined') {
+							window.ReactDOM = enact_framework('react-dom');
+						}
 						if((typeof App === 'object') && (typeof ReactDOM === 'object')) {
 							var appEle = (App && App.__esModule) ? App['default'] : App;
 							if(typeof appEle === 'object' && appEle) {
@@ -57,9 +60,8 @@
 				};
 				appendScripts(<%= JSON.stringify(htmlWebpackPlugin.files.js || []) %>);
 			<% } else { %>
-				if(window.iLib) {
-					delete iLib._platform;
-					iLib.setLocale(iLib.getLocale());
+				if(typeof iLibLocale === 'object') {
+					iLibLocale.updateLocale();
 				}
 				if(typeof App === 'object' && (typeof ReactDOM === 'object')) {
 					ReactDOM.render(App['default'] || App, document.getElementById('root'));
