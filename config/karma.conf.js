@@ -128,7 +128,7 @@ module.exports = function(karma) {
 				new ExtractTextPlugin('[name].css'),
 				new CaseSensitivePathsPlugin(),
 				new GracefulFsPlugin(),
-				new ILibPlugin({create:false}),
+				new ILibPlugin({create: false}),
 				new WebOSMetaPlugin()
 			]
 		},
