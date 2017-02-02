@@ -8,6 +8,7 @@ var autoprefixer = require('autoprefixer');
 var LessPluginRi = require('resolution-independence');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var GracefulFsPlugin = require('graceful-fs-webpack-plugin');
+var ILibPlugin = require('ilib-webpack-plugin');
 var WebOSMetaPlugin = require('webos-meta-webpack-plugin');
 var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 
@@ -96,8 +97,7 @@ module.exports = function(karma) {
 					{test: /\.(c|le)ss$/, loader: ExtractTextPlugin.extract('style',
 							'css?-autoprefixer&modules&sourceMap&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss!less?sourceMap')
 					},
-					{test: /ilibmanifest\.json$/, loader: 'ilib?noSave'},
-					{test: /\.json$/, loader: 'json', exclude: /ilibmanifest\.json$/},
+					{test: /\.json$/, loader: 'json'},
 					{test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/, loader: 'file',
 						query: {
 							name: '[path][name].[ext]'
@@ -128,6 +128,7 @@ module.exports = function(karma) {
 				new ExtractTextPlugin('[name].css'),
 				new CaseSensitivePathsPlugin(),
 				new GracefulFsPlugin(),
+				new ILibPlugin({create: false}),
 				new WebOSMetaPlugin()
 			]
 		},

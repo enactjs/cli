@@ -32,10 +32,11 @@ module.exports = function(config, opts) {
 	config.output.library = 'enact_framework';
 	config.output.libraryTarget = 'umd';
 
-	// Append additional options to the ilib-loader to skip './resources' detection/generation
-	var ilibLoader = helper.getLoaderByName(config, 'ilib');
-	if(ilibLoader) {
-		ilibLoader.loader += '?noResources';
+	// Modify the iLib plugin options to skip './resources' detection/generation
+	var ilibPlugin = helper.getPluginByName(config, 'ILibPlugin');
+	if(ilibPlugin) {
+		ilibPlugin.options.create = false;
+		ilibPlugin.options.resources = false;
 	}
 
 	// Remove the HTML generation plugin and webOS-meta plugin

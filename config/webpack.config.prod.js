@@ -18,6 +18,7 @@ var LessPluginRi = require('resolution-independence');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var GracefulFsPlugin = require('graceful-fs-webpack-plugin');
+var ILibPlugin = require('ilib-webpack-plugin');
 var WebOSMetaPlugin = require('webos-meta-webpack-plugin');
 
 function readJSON(file) {
@@ -130,17 +131,11 @@ module.exports = {
 						'css?-autoprefixer&modules&importLoaders=1!postcss!less')
 				// Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
 			},
-			// Support importing ilib bundles.
-			{
-				test: /ilibmanifest\.json$/,
-				loader: 'ilib'
-			},
 			// JSON is not enabled by default in Webpack but both Node and Browserify
 			// allow it implicitly so we also enable it.
 			{
 				test: /\.json$/,
-				loader: 'json',
-				exclude: /ilibmanifest\.json$/
+				loader: 'json'
 			},
 			// "file" loader makes sure those assets get copied during build
 			// When you `import` an asset, you get its output filename.
@@ -246,6 +241,10 @@ module.exports = {
 		// EMFILE errors when hanndling mass amounts of files at once, such as
 		// what happens when using ilib bundles/resources.
 		new GracefulFsPlugin(),
+		// Automatically configure iLib library within @enact/i18n. Additionally,
+		// ensure the locale data files and the resource files are copied during
+		// the build to the output directory.
+		new ILibPlugin(),
 		// Automatically detect ./appinfo.json and ./webos-meta/appinfo.json files,
 		// and parses any to copy over any webOS meta assets at build time.
 		new WebOSMetaPlugin()
