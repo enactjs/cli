@@ -9,7 +9,6 @@ var LessPluginRi = require('resolution-independence');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var GracefulFsPlugin = require('graceful-fs-webpack-plugin');
 var ILibPlugin = require('ilib-webpack-plugin');
-var WebOSMetaPlugin = require('webos-meta-webpack-plugin');
 var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 
 function readJSON(file) {
@@ -128,8 +127,7 @@ module.exports = function(karma) {
 				new ExtractTextPlugin('[name].css'),
 				new CaseSensitivePathsPlugin(),
 				new GracefulFsPlugin(),
-				new ILibPlugin({create: false}),
-				new WebOSMetaPlugin()
+				new ILibPlugin({create: false})
 			]
 		},
 
