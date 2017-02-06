@@ -36,7 +36,7 @@ module.exports = function (args) {
 	eslintArgs.push('--ignore-pattern', 'build/*');
 	eslintArgs.push('--ignore-pattern', 'dist/*');
 	if (opts._.length) {
-		eslintArgs.push(...opts._);
+		eslintArgs = eslintArgs.concat(opts._);
 	} else {
 		eslintArgs.push('.');
 	}
