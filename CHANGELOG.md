@@ -1,16 +1,23 @@
+## Unreleased
+
+### lint
+
+* Updated dependencies for eslint. If you are using editor-based linting, please update your global dependencies to match.
+* Additional options may be passed to the lint command.  Use the following format:  `npm run lint -- --my-option .`.  When passing additional options you must specify the file or directory to lint.
+
 ## 0.5.1 (January 27, 2017)
 
-## create
+### create
 
 * Template updated for Enact 1.0.0-beta.2 and React 15.4.2.
 * Template's .gitignore file now correctly includes `dist`.
 
-## pack
+### pack
 
 * Added a `node` Enact build option to support polyfilling NodeJS components. See [here](https://github.com/enyojs/enact-dev/blob/master/README.md#enact-build-options) for more info.
 * All localized appinfo.json resources and assets will now be correctly copied to the output directory.
 
-# test
+### test
 
 * Added a polyfill for String.prototype.repeat, as phantomjs lacks the API.
 * Webpack build warnings will no longer spam the console in certain scenarios.
