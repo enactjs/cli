@@ -19,7 +19,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-module.exports = function(args) {
+module.exports = function (args) {
 	var opts = minimist(args, {
 		boolean: ['l', 'local', 's', 'strict', 'f', 'framework', 'h', 'help'],
 		alias: {l:'local', s:'strict', f:'framework', h:'help'}
@@ -27,17 +27,21 @@ module.exports = function(args) {
 	opts.help && displayHelp();
 
 	var eslintArgs = [];
-	if(opts.strict || opts.framework) {
+	if (opts.strict || opts.framework) {
 		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact/strict'));
-	} else if(!opts.local) {
+	} else if (!opts.local) {
 		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact'));
 	}
 	eslintArgs.push('--ignore-pattern', 'node_modules/*');
 	eslintArgs.push('--ignore-pattern', 'build/*');
 	eslintArgs.push('--ignore-pattern', 'dist/*');
-	eslintArgs.push(opts._[0] || '.');
+	if (opts._.length) {
+		eslintArgs = eslintArgs.concat(opts._);
+	} else {
+		eslintArgs.push('.');
+	}
 	var child = cp.fork(require.resolve('eslint/bin/eslint'), eslintArgs, {env:process.env, cwd:process.cwd()});
-	child.on('close', function(code, signal) {
+	child.on('close', function (code, signal) {
 		process.exit(code);
 	});
 };
