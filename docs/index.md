@@ -1,8 +1,8 @@
 ---
-title: enact-dev
+title: enact-dev Command Line Tool
 ---
 
-The enact-dev package includes the following documentation:
+The enact-dev package provides a command-line tool for creating and building Enact applications. The following sections describe its installation and use:
 
 * [Installation](./installation.md)
 * [Starting a New App](./starting-a-new-app.md)
