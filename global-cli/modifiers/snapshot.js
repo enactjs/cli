@@ -12,6 +12,8 @@ module.exports = function(config, opts) {
 			htmlPlugin.options.snapshot = true;
 		}
 
+		config.entry.main.splice(config.entry.main.length-1, 0, require.resolve('./util/snapshot-helper'));
+
 		// Expose iLib locale utility function module so we can update the locale on page load, if used
 		var babel = helper.findLoader(config, 'babel');
 		config.module.loaders.splice((babel>=0 ? babel : 0), 0, {
