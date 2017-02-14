@@ -60,6 +60,9 @@
 				};
 				appendScripts(<%= JSON.stringify(htmlWebpackPlugin.files.js || []) %>);
 			<% } else { %>
+				if(typeof updateEnvironment === 'function') {
+					updateEnvironment();
+				}
 				if(typeof iLibLocale === 'object') {
 					iLibLocale.updateLocale();
 				}
