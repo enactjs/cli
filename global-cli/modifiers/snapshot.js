@@ -1,6 +1,7 @@
 var
 	path = require('path'),
 	fs = require('fs'),
+	exists = require('path-exists').sync,
 	helper = require('./util/config-helper'),
 	SnapshotPlugin = require('./util/SnapshotPlugin');
 
@@ -12,6 +13,12 @@ module.exports = function(config, opts) {
 			htmlPlugin.options.snapshot = true;
 		}
 
+		// fallback alias for fbjs in Node 4.x dependency tree
+		var fbjs = path.join(process.cwd(), 'node_modules', 'react', 'node_modules', 'fbjs');
+		if(exists(fbjs)) {
+			config.resolve.alias.fbjs = fbjs;
+		}
+		// Snapshot helper API for the transition from v8 snapshot into the window
 		config.entry.main.splice(config.entry.main.length-1, 0, require.resolve('./util/snapshot-helper'));
 
 		// Expose iLib locale utility function module so we can update the locale on page load, if used
