@@ -1,9 +1,27 @@
-## Unreleased
+## 0.6.0 (February 22, 2017)
+
+All enact-dev dependencies have been updated to latest applicable revisions. If you are using editor-based linting, please update your global dependencies to match.
+
+### create
+
+* Template updated for Enact 1.0.0-beta.3 and React 15.4.2.
+
+### pack
+
+* Transitioned from the iLib-loader to a new iLibPlugin with enhanced support for compilation-unique caching in Enact 1.0.0-beta.3. This is *not* backward compatible; please update to Enact 1.0.0-beta.3 or use an earlier release of enact-dev.
+* Supports code splitting/lazy-loading via ES6 `import()` syntax (limited to static string values).
+* WebOSMetaPlugin updated to support dynamicalling adding `usePrerendering:true` to appinfo.json files as needed.
+
+### test
+
+* Added Map polyfill support
+* Fixes a code interaction issue with WebOSMetaPlugin that caused tests to fail.
 
 ### lint
 
-* Updated dependencies for eslint. If you are using editor-based linting, please update your global dependencies to match.
-* Additional options may be passed to the lint command.  Use the following format:  `npm run lint -- --my-option .`.  When passing additional options you must specify the file or directory to lint.
+* Enact ESLint plugin updated to support `handlers` block in `kind(). Also adds propType validation for props used by handler and computed functions.
+* Enact ESLint config updated to replace deprecated `babel/array-bracket-spacing` with `array-bracket-spacing`.
+* Additional options may be passed to the lint command.
 
 ## 0.5.1 (January 27, 2017)
 
