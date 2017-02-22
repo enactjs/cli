@@ -1,16 +1,41 @@
+## 0.6.0 (February 22, 2017)
+
+All enact-dev dependencies have been updated to latest applicable revisions. If you are using editor-based linting, please update your global dependencies to match.
+
+### create
+
+* Template updated for Enact 1.0.0-beta.3 and React 15.4.2.
+
+### pack
+
+* Transitioned from the iLib-loader to a new iLibPlugin with enhanced support for compilation-unique caching in Enact 1.0.0-beta.3. This is *not* backward compatible; please update to Enact 1.0.0-beta.3 or use an earlier release of enact-dev.
+* Supports code splitting/lazy-loading via ES6 `import()` syntax (limited to static string values).
+* WebOSMetaPlugin updated to support dynamicalling adding `usePrerendering:true` to appinfo.json files as needed.
+
+### test
+
+* Added Map polyfill support
+* Fixes a code interaction issue with WebOSMetaPlugin that caused tests to fail.
+
+### lint
+
+* Enact ESLint plugin updated to support `handlers` block in `kind(). Also adds propType validation for props used by handler and computed functions.
+* Enact ESLint config updated to replace deprecated `babel/array-bracket-spacing` with `array-bracket-spacing`.
+* Additional options may be passed to the lint command.
+
 ## 0.5.1 (January 27, 2017)
 
-## create
+### create
 
 * Template updated for Enact 1.0.0-beta.2 and React 15.4.2.
 * Template's .gitignore file now correctly includes `dist`.
 
-## pack
+### pack
 
 * Added a `node` Enact build option to support polyfilling NodeJS components. See [here](https://github.com/enyojs/enact-dev/blob/master/README.md#enact-build-options) for more info.
 * All localized appinfo.json resources and assets will now be correctly copied to the output directory.
 
-# test
+### test
 
 * Added a polyfill for String.prototype.repeat, as phantomjs lacks the API.
 * Webpack build warnings will no longer spam the console in certain scenarios.

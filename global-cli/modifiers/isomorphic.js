@@ -28,7 +28,7 @@ module.exports = function(config, opts) {
 			}
 			// Prepend react-dom as top level entrypoint so espose-loader will expose
 			// it to window.ReactDOM to allow runtime rendering of the app.
-			config.entry.main.unshift(reactDOM);
+			config.entry.main.splice(-1, 0, reactDOM);
 
 			// Expose the 'react-dom' on a global context for App's rendering
 			// Currently maps the toolset to window.ReactDOM.
