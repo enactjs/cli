@@ -1,4 +1,4 @@
-## 0.6.0 (February 16, 2017)
+## 0.6.0 (February 22, 2017)
 
 All enact-dev dependencies have been updated to latest applicable revisions. If you are using editor-based linting, please update your global dependencies to match.
 
