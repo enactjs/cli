@@ -2,23 +2,30 @@ var
 	path = require('path'),
 	fs = require('fs'),
 	chalk = require('chalk'),
-	requireFromString = require('require-from-string');
+	requireFromString = require('require-from-string'),
+	LocaleHtmlPlugin = require('./LocaleHtmlPlugin'),
+	FileXHR = require('./FileXHR');
+
+require('console.mute');
+
+// Determine if it's a NodeJS output filesystem or if it's a foreign/virtual one.
+function isNodeOutputFS(compiler) {
+	return (compiler.outputFileSystem
+			&& compiler.outputFileSystem.constructor
+			&& compiler.outputFileSystem.constructor.name
+			&& compiler.outputFileSystem.constructor.name === 'NodeOutputFileSystem');
+}
 
 function PrerenderPlugin(options) {
 	this.options = options || {};
 }
-module.exports = PrerenderPlugin;
+
 PrerenderPlugin.prototype.apply = function(compiler) {
-	var NodeOutputFileSystem = null;
-	try {
-		NodeOutputFileSystem = require('webpack/lib/node/NodeOutputFileSystem');
-	} catch(e) {
-		console.error('PrerenderPlugin loader is not compatible with standalone global installs of Webpack.');
-		return;
-	}
+	var opts = this.options;
 	compiler.plugin('compilation', function(compilation) {
-		if(compiler.outputFileSystem.writeFile===NodeOutputFileSystem.prototype.writeFile) {
+		if(isNodeOutputFS(compiler)) {
 			compilation.plugin('html-webpack-plugin-after-html-processing', function(params, callback) {
+				var htmlTemplate = params.html;
 				var appFile = path.join(compiler.context, compiler.options.output.path, 'main.js');
 
 				// Attempt to resolve 'react-dom/server' relative to the project itself with internal as fallback
@@ -41,10 +48,25 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 					if(params.plugin.options.externalFramework) {
 						// Add external Enact framework filepath if it's used
 						src = src.replace(/require\(["']enact_framework["']\)/g, 'require("' + params.plugin.options.externalFramework +  '")');
+
+						// Ensure locale switching  support is loaded globally with external framework usage
+						var framework = require(params.plugin.options.externalFramework);
+						global.iLibLocale = framework('@enact/i18n/src/locale');
 					}
+					console.mute();
 					var App = requireFromString(src, 'main.js');
 					var code = ReactDOMServer.renderToString(App['default'] || App);
-					params.html = params.html.replace('<div id="root"></div>', '<div id="root">' + code + '</div>');
+					console.resume();
+					params.html = htmlTemplate.replace('<div id="root"></div>', '<div id="root">' + code + '</div>');
+
+					if(opts.locales) {
+						compiler.apply(new LocaleHtmlPlugin({
+							locales: opts.locales,
+							template: htmlTemplate,
+							server: ReactDOMServer,
+							code: src
+						}));
+					}
 				} catch(e) {
 					console.log();
 					console.log(chalk.yellow('Unable to generate prerender of app state HTML'));
@@ -60,3 +82,5 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 		}
 	});
 };
+
+module.exports = PrerenderPlugin;

@@ -36,6 +36,16 @@ module.exports = function(config, opts) {
 				test: reactDOM,
 				loader: 'expose?ReactDOM'
 			});
+
+			// Expose iLib locale utility function module so we can update the locale on page load, if used
+			var locale = path.join(process.cwd(), 'node_modules', '@enact', 'i18n', 'src', 'locale.js');
+			if(exists(locale)) {
+				var babel = helper.findLoader(config, 'babel');
+				config.module.loaders.splice((babel>=0 ? babel : 0), 0, {
+					test: fs.realpathSync(locale),
+					loader: 'expose?iLibLocale'
+				});
+			}
 		}
 
 		// If 'isomorphic' value is a string, use custom entrypoint.

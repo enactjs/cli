@@ -153,6 +153,12 @@ function displayHelp() {
 			--framework           Builds the @enact/*, react, and react-dom into an external framework
 			--externals           Specify a local directory path to the standalone external framework
 			--externals-inject    Remote public path to the external framework for use injecting into HTML
+			--locales             Specifies to prerender locales. Can be:
+			                          "used" - Prerender locales used within ./resources/
+			                          "tv" - Prerender locales supported on the TV platform
+			                          "signage" - Prerender locales supported on the signage platform
+			                          "ilib" - Prerender all locales that iLib supports
+			                          <commana-separated-values> - Prerender the specifically listed locales
 	*/
 	process.exit(0);
 }
@@ -160,7 +166,7 @@ function displayHelp() {
 module.exports = function(args) {
 	var opts = minimist(args, {
 		boolean: ['minify', 'framework', 's', 'stats', 'p', 'production', 'i', 'isomorphic', 'snapshot', 'w', 'watch', 'h', 'help'],
-		string: ['externals', 'externals-inject'],
+		string: ['externals', 'externals-inject', 'locales'],
 		default: {minify:true},
 		alias: {s:'stats', p:'production', i:'isomorphic', w:'watch', h:'help'}
 	});

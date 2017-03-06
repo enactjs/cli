@@ -1,4 +1,4 @@
-	// @remove-on-eject-begin
+/* global global, __webpack_public_path__ */
 /**
  * Copyright (c) 2015-present, Facebook, Inc.
  * All rights reserved.
@@ -9,13 +9,16 @@
  */
 // @remove-on-eject-end
 
-if (typeof window === 'object') {
-	if (typeof Promise === 'undefined' && typeof window === 'object') {
+if (typeof global !== 'undefined') {
+	if (typeof __webpack_public_path__ !== 'undefined') {
+		__webpack_public_path__ = global.publicPath || __webpack_public_path__;
+	}
+	if (typeof Promise === 'undefined') {
 		// Rejection tracking prevents a common issue where React gets into an
 		// inconsistent state due to an error, but it gets swallowed by a Promise,
 		// and the user has no idea what causes React's erratic future behavior.
 		require('promise/lib/rejection-tracking').enable();
-		window.Promise = require('promise/lib/es6-extensions');
+		global.Promise = require('promise/lib/es6-extensions');
 	}
 
 	// fetch() polyfill for making API calls.
