@@ -78,8 +78,8 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 
 						// Append a script tag just below the prerendered HTML which can apply the RTL locale class to reduce the amount of 
 						// visual changes when the app renders over the content shell
-						htmlAppend = '\n\t\t<script type="text/javascript">if(document.documentElement.dir==="rtl") {'
-								+ 'document.getElementById("root").className += " enact-locale-right-to-left"; }</script>';
+						htmlAppend = '\n\t\t<script type="text/javascript">if(/^(ar|arc|bcc|bqi|ckb|dv|fa|glk|he|ku|mzn|pnb|ps|sd|ug|ur|yi)/i.test(navigator.language)) {'
+								+ 'document.getElementById("root").firstChild.className += " enact-locale-right-to-left"; }</script>';
 
 						code = ReactDOMServer.renderToStaticMarkup(App['default'] || App).replace(/(<[^<]*>)([^<>]+)</gu, function(match, tag, content) {
 							if(iconRegExp.test(tag)) {
