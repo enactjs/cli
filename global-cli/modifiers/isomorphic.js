@@ -70,7 +70,7 @@ module.exports = function(config, opts) {
 		}
 
 		// Include plugin to prerender the html into the index.html
-		config.plugins.push(new PrerenderPlugin());
+		config.plugins.push(new PrerenderPlugin({locales: opts.locales}));
 
 		// Apply snapshot specialization options if needed
 		if(opts.snapshot && !opts.externals) {

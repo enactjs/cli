@@ -55,18 +55,25 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 					}
 					console.mute();
 					var App = requireFromString(src, 'main.js');
-					var code = ReactDOMServer.renderToString(App['default'] || App);
-					console.resume();
-					params.html = htmlTemplate.replace('<div id="root"></div>', '<div id="root">' + code + '</div>');
+					var code;
 
 					if(opts.locales) {
+						if(global.iLibLocale && global.iLibLocale.updateLocale) {
+							global.iLibLocale.updateLocale('xx-XX');
+						}
+						code = ReactDOMServer.renderToString(App['default'] || App);
+
 						compiler.apply(new LocaleHtmlPlugin({
 							locales: opts.locales,
 							template: htmlTemplate,
 							server: ReactDOMServer,
 							code: src
 						}));
+					} else {
+						code = ReactDOMServer.renderToString(App['default'] || App);
 					}
+					console.resume();
+					params.html = htmlTemplate.replace('<div id="root"></div>', '<div id="root">' + code + '</div>');
 				} catch(e) {
 					console.log();
 					console.log(chalk.yellow('Unable to generate prerender of app state HTML'));

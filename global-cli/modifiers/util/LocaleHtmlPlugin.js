@@ -70,7 +70,7 @@ function prerenderLocale(compilation, html, locale, ReactDOMServer, src) {
 	var code = ReactDOMServer.renderToString(App['default'] || App);
 	console.resume();
 	var i = htmlContents.indexOf(code);
-	fs.mkdirsSync(path.join('resources', locale));
+	fs.mkdirsSync(path.join(compilation.options.output.path, 'resources', locale));
 	if(i>-1) {
 		updateAppinfo(compilation, path.join('resources', locale, 'appinfo.json'),
 				path.relative(path.join('resources', locale), htmlFiles[i]));
@@ -143,6 +143,7 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 				}
 			} catch(e) {
 				err = new Error('Failed to prerender locales: ' + (e.message || e));
+				console.log(e.stack)
 			}
 		}
 		callback && callback(err);
