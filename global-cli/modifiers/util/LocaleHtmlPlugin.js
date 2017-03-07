@@ -24,6 +24,8 @@ function findLocales(context, target) {
 		return localesInManifest(path.join(context, 'resources', 'ilibmanifest.json'));
 	} else if(target === 'all') {
 		return localesInManifest('node_modules/@enact/i18n/ilibmanifest');
+	} else if(/\.json$/i.test(target)) {
+		return JSON.parse(fs.readFileSync(target, {encoding: 'utf8'})).paths;
 	} else {
 		return target.replace(/-/g, '/').split(',');
 	}
@@ -73,7 +75,7 @@ function prerenderLocale(compilation, html, locale, ReactDOMServer, src) {
 	fs.mkdirsSync(path.join(compilation.options.output.path, 'resources', locale));
 	if(i>-1) {
 		updateAppinfo(compilation, path.join('resources', locale, 'appinfo.json'),
-				path.relative(path.join('resources', locale), htmlFiles[i]));
+				path.relative(path.join('resources', locale), htmlFiles[i]), true);
 	} else {
 		var outName = path.join('resources', locale, 'index.html');
 		var outputHTML = '<div id="root">' + code + '</div>\n\t\t<script type="text/javascript">window.publicPath = "'
@@ -95,19 +97,20 @@ function prerenderLocale(compilation, html, locale, ReactDOMServer, src) {
 			map: function() { return null; }
 		};
 		updateAppinfo(compilation, path.join('resources', locale, 'appinfo.json'),
-				path.relative(path.join('resources', locale), outName));
+				path.relative(path.join('resources', locale), outName), true);
 		htmlFiles.push(outName);
 		htmlContents.push(code);
 	}
 }
 
-function updateAppinfo(compilation, file, index) {
+function updateAppinfo(compilation, file, index, usePrerendering) {
 	var outFile = path.join(compilation.options.output.path, file);
 	var appinfo = {}
 	if(exists(outFile)) {
 		appinfo = JSON.parse(fs.readFileSync(outFile, {encoding:'utf8'}));
 	}
 	appinfo.main = index;
+	appinfo.usePrerendering = usePrerendering;
 	var data = JSON.stringify(appinfo, null, '\t');
 	fs.writeFileSync(outFile, data, {encoding:'utf8'});
 	// add to compilation stats
@@ -137,6 +140,7 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			global.XMLHttpRequest = FileXHR;
 
 			try {
+				updateAppinfo(compilation, 'appinfo.json', 'index.html', false);
 				var locales = findLocales(compiler.options.context, opts.locales);
 				for(var i=0; i<locales.length; i++) {
 					prerenderLocale(compilation, opts.template, locales[i], opts.server, opts.code);

@@ -68,27 +68,9 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 						var framework = require(params.plugin.options.externalFramework);
 						global.iLibLocale = framework('@enact/i18n/src/locale');
 					}
-					console.mute();
-					var App, code, htmlAppend = '';
 
 					if(opts.locales) {
-						// Hotwire $L to return empty strings of a matching length
-						App = requireFromString(src.replace('function $L(str) {',
-								'function $L(str) { return " ".repeat((str.value || str).length);'), opts.chunk);
-
-						// Append a script tag just below the prerendered HTML which can apply the RTL locale class to reduce the amount of 
-						// visual changes when the app renders over the content shell
-						htmlAppend = '\n\t\t<script type="text/javascript">if(/^(ar|arc|bcc|bqi|ckb|dv|fa|glk|he|ku|mzn|pnb|ps|sd|ug|ur|yi)/i.test(navigator.language)) {'
-								+ 'document.getElementById("root").firstChild.className += " enact-locale-right-to-left"; }</script>';
-
-						code = ReactDOMServer.renderToStaticMarkup(App['default'] || App).replace(/(<[^<]*>)([^<>]+)</gu, function(match, tag, content) {
-							if(iconRegExp.test(tag)) {
-								return match;
-							} else {
-								return tag + content.replace(spaceRegExp, '&nbsp;') + '<'
-							}
-						});
-
+						// No prerendering is done in fallback root index.html
 						compiler.apply(new LocaleHtmlPlugin({
 							locales: opts.locales,
 							template: htmlTemplate,
@@ -96,11 +78,12 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 							code: src
 						}));
 					} else {
-						App = requireFromString(src, opts.chunk);
-						code = ReactDOMServer.renderToString(App['default'] || App);
+						console.mute();
+						var App = requireFromString(src, opts.chunk);
+						var code = ReactDOMServer.renderToString(App['default'] || App);
+						params.html = htmlTemplate.replace('<div id="root"></div>', '<div id="root">' + code + '</div>' + htmlAppend);
+						console.resume();
 					}
-					console.resume();
-					params.html = htmlTemplate.replace('<div id="root"></div>', '<div id="root">' + code + '</div>' + htmlAppend);
 				} catch(e) {
 					console.log();
 					console.log(chalk.yellow('Unable to generate prerender of app state HTML'));
