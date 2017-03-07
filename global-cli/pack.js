@@ -26,14 +26,14 @@ var
 
 // Input: /User/dan/app/build/static/js/main.js
 // Output: /static/js/main.js
-function shortFilename(fileName) {
+function shortFilename (fileName) {
 	return fileName
 		.replace(path.resolve(path.join(process.cwd(), 'dist')), '');
 }
 
 // Input: 1024, 2048
 // Output: "(+1 KB)"
-function getDifferenceLabel(currentSize, previousSize) {
+function getDifferenceLabel (currentSize, previousSize) {
 	var FIFTY_KILOBYTES = 1024 * 50;
 	var difference = currentSize - previousSize;
 	var fileSize = !Number.isNaN(difference) ? filesize(difference) : 0;
@@ -49,11 +49,10 @@ function getDifferenceLabel(currentSize, previousSize) {
 }
 
 // Print a detailed summary of build files.
-function printFileSizes(stats, previousSizeMap) {
+function printFileSizes (stats, previousSizeMap) {
 	var assets = stats.toJson().assets
 		.filter(asset => /\.(js|css|bin)$/.test(asset.name))
 		.map(asset => {
-			var fileContents = fs.readFileSync('./dist/' + asset.name);
 			var size = fs.statSync('./dist/' + asset.name).size;
 			var previousSize = previousSizeMap[shortFilename(asset.name)];
 			var difference = getDifferenceLabel(size, previousSize);
@@ -83,9 +82,10 @@ function printFileSizes(stats, previousSizeMap) {
 }
 
 // Create the build and optionally, print the deployment instructions.
-function build(config, previousSizeMap, guided) {
-	if(process.env.NODE_ENV === 'development') {
-		console.log('Creating a development build...');
+function build (config, previousSizeMap, guided) {
+	if (process.env.NODE_ENV === 'development') {
+		console.log('Creating a development build that includes debugging information and will ' +
+			'run slower than a production version...');
 	} else {
 		console.log('Creating an optimized production build...');
 	}
@@ -103,7 +103,7 @@ function build(config, previousSizeMap, guided) {
 		console.log(chalk.green('Compiled successfully.'));
 		console.log();
 
-		if(guided) {
+		if (guided) {
 			var openCommand = process.platform === 'win32' ? 'start' : 'open';
 			console.log('The ' + chalk.cyan('dist') + ' directory is ready to be deployed.');
 			console.log('You may also serve it locally with a static server:');
@@ -117,13 +117,14 @@ function build(config, previousSizeMap, guided) {
 }
 
 // Create the build and watch for changes.
-function watch(config) {
-	if(process.env.NODE_ENV === 'development') {
-		console.log('Creating a development build and watching for changes...');
+function watch (config) {
+	if (process.env.NODE_ENV === 'development') {
+		console.log('Creating a development build that includes debugging information and will ' +
+			'run slower than a production version...');
 	} else {
 		console.log('Creating an optimized production build and watching for changes...');
 	}
-	webpack(config).watch({}, (err, stats) => {
+	webpack(config).watch({}, (err) => {
 		if (err) {
 			console.error('Failed to create ' + process.env.NODE_ENV + ' build. Reason:');
 			console.error(err.message || err);
@@ -133,14 +134,16 @@ function watch(config) {
 	});
 }
 
-function displayHelp() {
+function displayHelp () {
 	console.log('  Usage');
 	console.log('    enact pack [options]');
 	console.log();
 	console.log('  Options');
 	console.log('    -s, --stats       Output bundle analysis file');
 	console.log('    -w, --watch       Rebuild on file changes');
+	console.log('    -d, --develop     Build in development mode');
 	console.log('    -p, --production  Build in production mode');
+	console.log('                      (only affects watch mode)');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
 	console.log('                      (Includes prerendering)');
 	console.log('    -v, --version     Display version information');
@@ -157,32 +160,32 @@ function displayHelp() {
 	process.exit(0);
 }
 
-module.exports = function(args) {
+module.exports = function (args) {
 	var opts = minimist(args, {
-		boolean: ['minify', 'framework', 's', 'stats', 'p', 'production', 'i', 'isomorphic', 'snapshot', 'w', 'watch', 'h', 'help'],
+		boolean: ['minify', 'framework', 's', 'stats', 'd', 'develop', 'p', 'production', 'i', 'isomorphic', 'snapshot', 'w', 'watch', 'h', 'help'],
 		string: ['externals', 'externals-inject'],
 		default: {minify:true},
-		alias: {s:'stats', p:'production', i:'isomorphic', w:'watch', h:'help'}
+		alias: {s:'stats', p:'production', d:'develop', i:'isomorphic', w:'watch', h:'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
-	process.env.NODE_ENV = 'development';
-	var config = devConfig;
+	process.env.NODE_ENV = 'production';
+	var config = prodConfig;
 
 	// Do this as the first thing so that any code reading it knows the right env.
-	if(opts.production) {
-		process.env.NODE_ENV = 'production';
-		config = prodConfig;
+	if (opts.develop || (opts.watch && !opts.production)) {
+		process.env.NODE_ENV = 'development';
+		config = devConfig;
 	}
 
 	modifiers.apply(config, opts);
 
 	// Warn and crash if required files are missing
-	if (!opts.framework && !checkRequiredFiles([config.entry.main[config.entry.main.length-1]])) {
+	if (!opts.framework && !checkRequiredFiles([config.entry.main[config.entry.main.length - 1]])) {
 		process.exit(1);
 	}
 
-	if(opts.watch) {
+	if (opts.watch) {
 		watch(config);
 	} else {
 		// Read the current file sizes in dist directory.
@@ -200,9 +203,9 @@ module.exports = function(args) {
 			// if you're in it, you don't end up in Trash
 			try {
 				rimrafSync('dist/*');
-			} catch(e) {
-				console.log(chalk.red('Error: ') + ' Unable to delete existing build files. '
-						+ 'Please close any programs currently accessing files within ./dist/.');
+			} catch (e) {
+				console.log(chalk.red('Error: ') + ' Unable to delete existing build files. ' +
+						'Please close any programs currently accessing files within ./dist/.');
 				console.log();
 				process.exit(1);
 			}
