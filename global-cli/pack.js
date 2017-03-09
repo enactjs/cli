@@ -82,10 +82,9 @@ function printFileSizes (stats, previousSizeMap) {
 }
 
 // Create the build and optionally, print the deployment instructions.
-function build (config, previousSizeMap, guided) {
+function build (config, previousSizeMap) {
 	if (process.env.NODE_ENV === 'development') {
-		console.log('Creating a development build that includes debugging information and will ' +
-			'run slower than a production version...');
+		console.log('Creating a development build...');
 	} else {
 		console.log('Creating an optimized production build...');
 	}
@@ -101,26 +100,18 @@ function build (config, previousSizeMap, guided) {
 		printFileSizes(stats, previousSizeMap);
 		console.log();
 		console.log(chalk.green('Compiled successfully.'));
-		console.log();
-
-		if (guided) {
-			var openCommand = process.platform === 'win32' ? 'start' : 'open';
-			console.log('The ' + chalk.cyan('dist') + ' directory is ready to be deployed.');
-			console.log('You may also serve it locally with a static server:');
-			console.log();
-			console.log('	' + chalk.cyan('npm') +	' install -g pushstate-server');
-			console.log('	' + chalk.cyan('pushstate-server') + ' dist');
-			console.log('	' + chalk.cyan(openCommand) + ' http://localhost:9000');
-			console.log();
+		if (process.env.NODE_ENV === 'development') {
+			console.log(chalk.gray('NOTICE: This build contains debugging functionality and will run' +
+					' slower than in production mode.'));
 		}
+		console.log();
 	});
 }
 
 // Create the build and watch for changes.
 function watch (config) {
 	if (process.env.NODE_ENV === 'development') {
-		console.log('Creating a development build that includes debugging information and will ' +
-			'run slower than a production version...');
+		console.log('Creating a development build and watching for changes...');
 	} else {
 		console.log('Creating an optimized production build and watching for changes...');
 	}
@@ -141,11 +132,9 @@ function displayHelp () {
 	console.log('  Options');
 	console.log('    -s, --stats       Output bundle analysis file');
 	console.log('    -w, --watch       Rebuild on file changes');
-	console.log('    -d, --develop     Build in development mode');
 	console.log('    -p, --production  Build in production mode');
-	console.log('                      (only affects watch mode)');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
-	console.log('                      (Includes prerendering)');
+	console.log('                      (includes prerendering)');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -162,20 +151,20 @@ function displayHelp () {
 
 module.exports = function (args) {
 	var opts = minimist(args, {
-		boolean: ['minify', 'framework', 's', 'stats', 'd', 'develop', 'p', 'production', 'i', 'isomorphic', 'snapshot', 'w', 'watch', 'h', 'help'],
+		boolean: ['minify', 'framework', 's', 'stats', 'p', 'production', 'i', 'isomorphic', 'snapshot', 'w', 'watch', 'h', 'help'],
 		string: ['externals', 'externals-inject'],
 		default: {minify:true},
-		alias: {s:'stats', p:'production', d:'develop', i:'isomorphic', w:'watch', h:'help'}
+		alias: {s:'stats', p:'production', i:'isomorphic', w:'watch', h:'help'}
 	});
 	if (opts.help) displayHelp();
 
-	process.env.NODE_ENV = 'production';
-	var config = prodConfig;
+	process.env.NODE_ENV = 'development';
+	var config = devConfig;
 
 	// Do this as the first thing so that any code reading it knows the right env.
-	if (opts.develop || (opts.watch && !opts.production)) {
-		process.env.NODE_ENV = 'development';
-		config = devConfig;
+	if (opts.production) {
+		process.env.NODE_ENV = 'production';
+		config = prodConfig;
 	}
 
 	modifiers.apply(config, opts);

@@ -45,7 +45,7 @@ The page will reload if you make edits.<br>
 
 ### `npm run pack` and `npm run pack-p`
 
-Builds the project in the working directory. Specifically, `pack` builds in development mode with code un-minified and with debug code include, whereas `pack-p` builds in production mode, with everything minified and optimized for performance.
+Builds the project in the working directory. Specifically, `pack` builds in development mode with code un-minified and with debug code include, whereas `pack-p` builds in production mode, with everything minified and optimized for performance. Be sure to avoid shipping or performance testing on development mode builds.
 
 ### `npm run watch`
 
