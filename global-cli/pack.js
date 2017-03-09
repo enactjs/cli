@@ -101,7 +101,7 @@ function build (config, previousSizeMap) {
 		console.log();
 		console.log(chalk.green('Compiled successfully.'));
 		if (process.env.NODE_ENV === 'development') {
-			console.log(chalk.gray('NOTICE: This build contains debugging functionality and may run' +
+			console.log(chalk.yellow('NOTICE: This build contains debugging functionality and may run' +
 					' slower than in production mode.'));
 		}
 		console.log();
