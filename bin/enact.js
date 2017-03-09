@@ -2,7 +2,7 @@
 
 'use strict';
 
-if(process.argv.indexOf('-v')>=0 || process.argv.indexOf('--version')>=0) {
+if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 	var pkg = require('../package.json');
 	console.log(pkg.name);
 	console.log('version: ' + pkg.version);
@@ -10,12 +10,13 @@ if(process.argv.indexOf('-v')>=0 || process.argv.indexOf('--version')>=0) {
 } else {
 	var command = process.argv[2];
 
-	switch(command) {
+	switch (command) {
 		case 'init':
 			var chalk = require('chalk');
-			console.log(chalk.gray('Warning: \'enact init\' is depreciated.'
-				+ ' Please use \'enact create\''));
+			console.log(chalk.gray('Warning: \'enact init\' is depreciated.' +
+				' Please use \'enact create\''));
 			command = 'create';
+			// Falls through
 		case 'create':
 		case 'serve':
 		case 'transpile':
