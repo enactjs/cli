@@ -25,19 +25,6 @@ function getBlobName(args) {
 	return 'snapshot_blob.bin';
 }
 
-function updateAppInfo(output, blob) {
-	var appInfo = path.join(output, 'appinfo.json');
-	if(exists(appInfo)) {
-		try {
-			var meta = JSON.parse(fs.readFileSync(appInfo, {encoding:'utf8'}));
-			meta.v8SnapshotFile = blob;
-			fs.writeFileSync(appInfo, JSON.stringify(meta, null, '\t'), {encoding:'utf8'});
-		} catch(e) {
-			return new Error('Failed to set "v8SnapshotFile" property in appinfo.json');
-		}
-	}
-}
-
 function SnapshotPlugin(options) {
 	this.options = options || {};
 	this.options.exec = this.options.exec || process.env.V8_MKSNAPSHOT;
@@ -51,6 +38,14 @@ function SnapshotPlugin(options) {
 module.exports = SnapshotPlugin;
 SnapshotPlugin.prototype.apply = function(compiler) {
 	var opts = this.options;
+	opts.blob = getBlobName(opts.args);
+
+	compiler.plugin('compilation', function(compilation) {
+		compilation.plugin('webos-meta-root-appinfo', function(meta, info) {
+			meta.v8SnapshotFile = opts.blob;
+			return meta;
+		});
+	});
 
 	compiler.plugin('after-emit', function(compilation, callback) {
 		if(isNodeOutputFS(compiler) && opts.exec) {
@@ -77,15 +72,13 @@ SnapshotPlugin.prototype.apply = function(compiler) {
 
 			if(child.status === 0) {
 				// Add snapshot to the compilation assets array for stats purposes
-				var blob = getBlobName(opts.args);
 				try {
-					var stat = fs.statSync(path.join(compiler.options.output.path, blob));
+					var stat = fs.statSync(path.join(compiler.options.output.path, opts.blob));
 					if(stat.size>0) {
-						compilation.assets[blob] = {
+						compilation.assets[opts.blob] = {
 							size: function() { return stat.size; },
 							emitted: true
 						};
-						err = updateAppInfo(compiler.options.output.path, blob);
 					} else {
 						// Temporary fix: mksnapshot may create a 0-byte blob on error
 						err = new Error(child.stdout + '\n' + child.stderr);

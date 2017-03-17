@@ -77,17 +77,8 @@ function prerenderLocale(compilation, html, locale, ReactDOMServer, src) {
 		updateAppinfo(compilation, path.join('resources', locale, 'appinfo.json'),
 				path.relative(path.join('resources', locale), htmlFiles[i]), true);
 	} else {
-		var outName = path.join('resources', locale, 'index.html');
-		var outputHTML = '<div id="root">' + code + '</div>\n\t\t<script type="text/javascript">window.publicPath = "'
-				+ global.publicPath + '";</script>';
-		var data = html.replace('<div id="root"></div>', outputHTML);
-		data = data.replace(/"([^'"]*\.(js|css))"/g, function(match, file) {
-			if(!path.isAbsolute(file)) {
-				return '"' + path.relative(path.join('resources', locale), file) + '"';
-			} else {
-				return '"' + file + '"';
-			}
-		});
+		var outName = 'index.' + locale.replace(/[\\\/]/g, '-') + '.html';
+		var data = html.replace('<div id="root"></div>', '<div id="root">' + code + '</div>');
 		fs.writeFileSync(path.join(compilation.options.output.path, outName), data, {encoding:'utf8'});
 		// add to stats
 		compilation.assets[outName] = {

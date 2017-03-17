@@ -2,6 +2,7 @@ var
 	path = require('path'),
 	fs = require('fs'),
 	chalk = require('chalk'),
+	exists = require('path-exists').sync,
 	requireFromString = require('require-from-string'),
 	LocaleHtmlPlugin = require('./LocaleHtmlPlugin'),
 	FileXHR = require('./FileXHR');
@@ -38,6 +39,11 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 					src = compilation.assets[opts.chunk].source();
 				}
 				callback && callback();
+			});
+
+			compilation.plugin('webos-meta-root-appinfo', function(meta, info) {
+				meta.usePrerendering = true;
+				return meta;
 			});
 
 			compilation.plugin('html-webpack-plugin-after-html-processing', function(params, callback) {
@@ -85,11 +91,22 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 						console.resume();
 					}
 				} catch(e) {
+					// Revert any modified appinfo
+					compiler.plugin('after-emit', function(compilation, afterEmitCallback) {
+						var appInfo = path.join(compiler.options.output.path, 'appinfo.json');
+						if(exists(appInfo)) {
+							var meta = JSON.parse(fs.readFileSync(appInfo, {encoding:'utf8'}));
+							meta.usePrerendering = false;
+							fs.writeFileSync(appInfo, JSON.stringify(meta, null, '\t'), {encoding:'utf8'});
+						}
+						afterEmitCallback && afterEmitCallback();
+					});
 					console.log();
 					console.log(chalk.yellow('Unable to generate prerender of app state HTML'));
-					console.log('Reason: ' + e.message || e);
 					if(e.stack) {
 						console.log(e.stack);
+					} else {
+						console.log('Reason: ' + e.message || e);
 					}
 					console.log();
 					console.log('Continuing build without prerendering...');
