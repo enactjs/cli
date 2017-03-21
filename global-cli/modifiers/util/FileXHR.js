@@ -16,15 +16,14 @@ FileXHR.prototype.addEventListener = function(evt, fn) {
 };
 
 FileXHR.prototype.send = function() {
-	if(global.publicPath && this.uri.indexOf(global.publicPath) === 0) {
-		this.uri = this.uri.substring(global.publicPath.length);
-	}
 	if(this.method.toUpperCase() === 'GET' && this.uri && this.sync) {
+		var parsedURI = this.uri.replace(/\\/g, '/').replace(/^(_\/)+/g, function(match) {
+			return match.replace(/_/g, '..');
+		});
 		try {
-			var outUri = path.join(FileXHR.compilation.options.output.path, this.uri);
-			if(!exists(outUri)) throw new Error('File not found: ' + this.uri);
+			if(!exists(parsedURI)) throw new Error('File not found: ' + this.uri);
 
-			this.response = this.responseText = fs.readFileSync(outUri, {encoding:'utf8'});
+			this.response = this.responseText = fs.readFileSync(parsedURI, {encoding:'utf8'});
 			this.status = 200;
 			this.onload && this.onload();
 		} catch(e) {

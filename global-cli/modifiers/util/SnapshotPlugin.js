@@ -6,14 +6,12 @@ var
 	findCacheDir = require('find-cache-dir'),
 	chalk = require('chalk');
 
+// Determine if it's a NodeJS output filesystem or if it's a foreign/virtual one.
 function isNodeOutputFS(compiler) {
-	try {
-		var NodeOutputFileSystem = require('webpack/lib/node/NodeOutputFileSystem');
-		return (compiler.outputFileSystem.writeFile===NodeOutputFileSystem.prototype.writeFile);
-	} catch(e) {
-		console.error('SnapshotPlugin loader is not compatible with standalone global installs of Webpack.');
-		return false;
-	}
+	return (compiler.outputFileSystem
+			&& compiler.outputFileSystem.constructor
+			&& compiler.outputFileSystem.constructor.name
+			&& compiler.outputFileSystem.constructor.name === 'NodeOutputFileSystem');
 }
 
 function getBlobName(args) {
@@ -33,6 +31,9 @@ function SnapshotPlugin(options) {
 		'--random-seed=314159265',
 		'--startup-blob=snapshot_blob.bin'
 	];
+	if(process.env.V8_SNAPSHOT_ARGS) {
+		this.options.args = process.env.V8_SNAPSHOT_ARGS.split(/\s+/);
+	}
 	this.options.args.push(this.options.target || 'main.js');
 }
 module.exports = SnapshotPlugin;
@@ -40,6 +41,7 @@ SnapshotPlugin.prototype.apply = function(compiler) {
 	var opts = this.options;
 	opts.blob = getBlobName(opts.args);
 
+	// Record the v8 blob file in the root appinfo if applicable
 	compiler.plugin('compilation', function(compilation) {
 		compilation.plugin('webos-meta-root-appinfo', function(meta, info) {
 			meta.v8SnapshotFile = opts.blob;
