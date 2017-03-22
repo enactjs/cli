@@ -99,11 +99,10 @@ function LocaleHtmlPlugin(options) {
 LocaleHtmlPlugin.prototype.apply = function(compiler) {
 	var opts = this.options;
 	var status = {prerender:{}, failed:[], err:{}};
+	var jsAssets = [];
 
 	// Determine the target locales and load up the startup scripts.
 	var locales = parseLocales(compiler.options.context, opts.locales);
-	var isoStartup = fs.readFileSync(path.join(__dirname, 'prerendered-startup.js'), {encoding:'utf8'});
-	var stdStartup = fs.readFileSync(path.join(__dirname, 'standard-startup.js'), {encoding:'utf8'});
 
 	// Prerender each locale desired and output an error on failure.
 	compiler.plugin('compilation', function(compilation) {
@@ -155,54 +154,51 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 				return meta;
 			});
 
-			// Force HtmlWebpackPlugin to use body inject format and update the startup scripts to have the correct
-			// js assets array values.
+			// Force HtmlWebpackPlugin to use body inject format and set aside the js assets.
 			compilation.plugin('html-webpack-plugin-before-html-processing', function(htmlPluginData, callback) {
 				htmlPluginData.plugin.options.inject = 'body';
-				isoStartup = '\n\t\t' + isoStartup.replace('%SCREENTYPES%', JSON.stringify(opts.screenTypes))
-						.replace('%JSASSETS%', JSON.stringify(htmlPluginData.assets.js)).replace(/[\n\r]+(.)/g, '\n\t\t$1')
-						.replace(/[\n\r]+$/, '\n\t');
-				stdStartup = '\n\t\t' + stdStartup.replace('%JSASSETS%', JSON.stringify(htmlPluginData.assets.js))
-						.replace(/[\n\r]+(.)/g, '\n\t\t$1').replace(/[\n\r]+$/, '\n\t');
+				jsAssets = htmlPluginData.assets.js;
 				htmlPluginData.assets.js = [];
+				callback(null, htmlPluginData);
+			});
+
+			// Use the prerendered-startup.js to asynchronously add the js assets at load time and embed that
+			// script inline in the HTML head.
+			compilation.plugin('html-webpack-plugin-alter-asset-tags', function(htmlPluginData, callback) {
+					var startup = fs.readFileSync(path.join(__dirname, 'prerendered-startup.js'), {encoding:'utf8'});
+					startup = '\n\t\t' + startup.replace('%SCREENTYPES%', JSON.stringify(opts.screenTypes))
+							.replace('%JSASSETS%', JSON.stringify(jsAssets)).replace(/[\n\r]+(.)/g, '\n\t\t$1')
+							.replace(/[\n\r]+$/, '\n\t');
+					htmlPluginData.head.unshift({
+						tagName: 'script',
+						closeTag: true,
+						attributes: {
+							type: 'text/javascript'
+						},
+						innerHTML: startup
+					});
 				callback(null, htmlPluginData);
 			});
 
 			// Generate an isomorphic HTML template and insert the prerendered locales with it into locale-specific
 			// index.html files. Afterward, generate and updated root HTML template for fallback.
 			compilation.plugin('html-webpack-plugin-after-html-processing', function(htmlPluginData, callback) {
-				var jsTag = {
-					tagName: 'script',
-					closeTag: true,
-					attributes: {
-						type: 'text/javascript'
-					},
-					innerHTML: isoStartup
-				};
-				htmlPluginData.plugin.postProcessHtml(htmlPluginData.html, {}, {body:[], head:[jsTag]})
-					.then(function(isoTemplate) {
-						var tokens = findRootDiv(isoTemplate, 0, isoTemplate.length-6);
-						if(tokens) {
-							compilation.applyPlugins('locale-html-generate', {chunk:opts.chunk, locales:locales});
-							for(var i=0; i<locales.length; i++) {
-								if(!status.err[locales[i]]) {
-									localizedHtmlAsset(compilation, locales[i], tokens.before + '<div id="root">'
-											+ status.prerender[locales[i]] + '</div>' + tokens.after);
-								} else {
-									console.log(status.err[locales[i]])
-								}
-							}
+				var tokens = findRootDiv(htmlPluginData.html, 0, htmlPluginData.html.length-6);
+				if(tokens) {
+					compilation.applyPlugins('locale-html-generate', {chunk:opts.chunk, locales:locales});
+					for(var i=0; i<locales.length; i++) {
+						if(!status.err[locales[i]]) {
+							localizedHtmlAsset(compilation, locales[i], tokens.before + '<div id="root">'
+									+ status.prerender[locales[i]] + '</div>' + tokens.after);
 						} else {
-							compilation.errors.push(new Error('LocaleHtmlPlugin: Unable find root div element. Please '
-									+ 'verify it exists within your HTML template.'));
+							console.log(status.err[locales[i]])
 						}
-						jsTag.innerHTML = stdStartup;
-						htmlPluginData.plugin.postProcessHtml(htmlPluginData.html, {}, {body:[], head:[jsTag]})
-							.then(function(standardTemplate) {
-								htmlPluginData.html = standardTemplate;
-								callback(null, htmlPluginData);
-							});
-					});
+					}
+				} else {
+					compilation.errors.push(new Error('LocaleHtmlPlugin: Unable find root div element. Please '
+							+ 'verify it exists within your HTML template.'));
+				}
+				callback(null, htmlPluginData);
 			});
 		}
 	});
