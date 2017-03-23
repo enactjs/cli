@@ -15,7 +15,7 @@ function isNodeOutputFS(compiler) {
 // Can be a preset like 'tv' or 'signage', 'used' for all used app-level locales, 'all' for
 // all locales supported by ilib, a custom json file input, or a comma-separated lists
 function parseLocales(context, target) {
-	if(!target) {
+	if(!target || target === 'none') {
 		return [];
 	} else if(Array.isArray(target)) {
 		return target;
@@ -127,10 +127,6 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 							status.err[locales[i]] = e;
 						}
 					}
-					if(failed.length>0) {
-						compilation.errors.push(new Error('LocaleHtmlPlugin: Failed to prerender localized HTML for '
-								+ status.failed.join(', ')));
-					}
 				}
 			});
 
@@ -166,9 +162,8 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			// script inline in the HTML head.
 			compilation.plugin('html-webpack-plugin-alter-asset-tags', function(htmlPluginData, callback) {
 					var startup = fs.readFileSync(path.join(__dirname, 'prerendered-startup.js'), {encoding:'utf8'});
-					startup = '\n\t\t' + startup.replace('%SCREENTYPES%', JSON.stringify(opts.screenTypes))
-							.replace('%JSASSETS%', JSON.stringify(jsAssets)).replace(/[\n\r]+(.)/g, '\n\t\t$1')
-							.replace(/[\n\r]+$/, '\n\t');
+					startup = startup.replace('%SCREENTYPES%', JSON.stringify(opts.screenTypes))
+							.replace('%JSASSETS%', JSON.stringify(jsAssets));
 					htmlPluginData.head.unshift({
 						tagName: 'script',
 						closeTag: true,
@@ -190,16 +185,25 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 						if(!status.err[locales[i]]) {
 							localizedHtmlAsset(compilation, locales[i], tokens.before + '<div id="root">'
 									+ status.prerender[locales[i]] + '</div>' + tokens.after);
-						} else {
-							console.log(status.err[locales[i]])
 						}
 					}
+					callback(null, htmlPluginData);
 				} else {
-					compilation.errors.push(new Error('LocaleHtmlPlugin: Unable find root div element. Please '
-							+ 'verify it exists within your HTML template.'));
+					callback(new Error('LocaleHtmlPlugin: Unable find root div element. Please '
+							+ 'verify it exists within your HTML template.'), htmlPluginData);
 				}
-				callback(null, htmlPluginData);
+				
 			});
+		}
+	});
+
+	// Report any failed locale prerenders at the compiler level to fail the build.
+	compiler.plugin('after-compile', function(compilation, callback) {
+		if(status.failed.length>0) {
+			callback(new Error('LocaleHtmlPlugin: Failed to prerender localized HTML for '
+					+ status.failed.join(', ')));
+		} else {
+			callback();
 		}
 	});
 };
