@@ -45,7 +45,7 @@ module.exports = function(opts) {
 			opts.code = opts.code.replace(/require\(["']enact_framework["']\)/g, 'require("' + opts.externals +  '")');
 			// Ensure locale switching  support is loaded globally with external framework usage.
 			var framework = require(opts.externals);
-			global.iLibLocale = framework('@enact/i18n/src/locale');
+			global.iLibLocale = framework('@enact/i18n/locale');
 		}
 
 		var App = requireFromString(opts.code, opts.file);
