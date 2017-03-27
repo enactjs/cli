@@ -20,13 +20,6 @@ module.exports = function(config, opts) {
 		}
 		// Snapshot helper API for the transition from v8 snapshot into the window
 		config.entry.main.splice(-1, 0, require.resolve('./util/snapshot-helper'));
-
-		// Expose iLib locale utility function module so we can update the locale on page load, if used
-		var babel = helper.findLoader(config, 'babel');
-		config.module.loaders.splice((babel>=0 ? babel : 0), 0, {
-			test: fs.realpathSync(path.join(process.cwd(), 'node_modules', '@enact', 'i18n', 'src', 'locale.js')),
-			loader: 'expose?iLibLocale'
-		});
 	}
 
 	// Include plugin to attempt generation of v8 snapshot binary if V8_MKSNAPSHOT env var is set

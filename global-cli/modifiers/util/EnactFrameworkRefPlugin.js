@@ -34,14 +34,12 @@ function normalizePath(dir, file, compiler) {
 	}
 }
 
+// Determine if it's a NodeJS output filesystem or if it's a foreign/virtual one.
 function isNodeOutputFS(compiler) {
-	try {
-		var NodeOutputFileSystem = require('webpack/lib/node/NodeOutputFileSystem');
-		return (compiler.outputFileSystem.writeFile===NodeOutputFileSystem.prototype.writeFile);
-	} catch(e) {
-		console.error('SnapshotPlugin loader is not compatible with standalone global installs of Webpack.');
-		return false;
-	}
+	return (compiler.outputFileSystem
+			&& compiler.outputFileSystem.constructor
+			&& compiler.outputFileSystem.constructor.name
+			&& compiler.outputFileSystem.constructor.name === 'NodeOutputFileSystem');
 }
 
 function updateAppInfo(output, blob) {
@@ -66,9 +64,9 @@ function EnactFrameworkRefPlugin(opts) {
 	this.options.external = this.options.external || {};
 	this.options.external.inject = this.options.external.inject || this.options.external.path;
 
-	if(!process.env.ILIB_LOCALE_PATH) {
-		process.env.ILIB_LOCALE_PATH = path.join(this.options.external.inject, 'node_module',
-				'@enact', 'i18n', 'ilib', 'locale');
+	if(!process.env.ILIB_BASE_PATH) {
+		process.env.ILIB_BASE_PATH = path.join(this.options.external.inject, 'node_module',
+				'@enact', 'i18n', 'ilib');
 	}
 }
 module.exports = EnactFrameworkRefPlugin;
@@ -96,11 +94,15 @@ EnactFrameworkRefPlugin.prototype.apply = function(compiler) {
 				names: ['enact_framework'],
 				files: chunkFiles
 			});
-
-			// Store the absolute filepath to the external framework so the PrerenderPlugin can use it
-			params.plugin.options.externalFramework = path.resolve(path.join(external.path, 'enact.js'));
 			return chunks;
 		});
+
+		if(external.snapshot && isNodeOutputFS(compiler)) {
+			compilation.plugin('webos-meta-root-appinfo', function(meta, info) {
+				meta.v8SnapshotFile = normalizePath(external.inject, 'snapshot_blob.bin', compiler);
+				return meta;
+			});
+		}
 	});
 
 	// Apply the Enact factory plugin to handle the require() delagation/rerouting
