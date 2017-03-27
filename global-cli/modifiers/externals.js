@@ -1,6 +1,4 @@
 var
-	fs = require('fs'),
-	exists = require('path-exists').sync,
 	EnactFrameworkRefPlugin = require('./util/EnactFrameworkRefPlugin');
 
 module.exports = function(config, opts) {

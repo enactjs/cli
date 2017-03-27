@@ -5,7 +5,8 @@
  *  for a given javascript virtualdom Enact codebase.
  */
 
-var FileXHR = require('./FileXHR'),
+var path = require('path'),
+	FileXHR = require('./FileXHR'),
 	nodeFetch = require('node-fetch'),
 	requireFromString = require('require-from-string');
 
