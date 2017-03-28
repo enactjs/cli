@@ -43,7 +43,7 @@ SnapshotPlugin.prototype.apply = function(compiler) {
 
 	// Record the v8 blob file in the root appinfo if applicable
 	compiler.plugin('compilation', function(compilation) {
-		compilation.plugin('webos-meta-root-appinfo', function(meta) {
+		compilation.plugin('webos-meta-root-appinfo', function(meta, info) {
 			meta.v8SnapshotFile = opts.blob;
 			return meta;
 		});
@@ -52,9 +52,9 @@ SnapshotPlugin.prototype.apply = function(compiler) {
 	compiler.plugin('after-emit', function(compilation, callback) {
 		if(isNodeOutputFS(compiler) && opts.exec) {
 			var ssCache = path.join(findCacheDir({
-				name: 'enact-dev',
-				create: true
-			}), 'snapshot-target.js');
+					name: 'enact-dev',
+					create: true
+				}), 'snapshot-target.js');
 
 			// Append anything optional to the js to be included in the snapshot
 			if(opts.prepend || opts.append) {

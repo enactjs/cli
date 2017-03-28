@@ -19,7 +19,9 @@ function replaceRootDiv(html, start, end, replacement) {
 	}
 	var a = html.indexOf('<div', start+4);
 	var b = html.lastIndexOf('</div>', end);
-	if(a>=0 && b>=0 && a<b) {
+	if(a===-1 || b===-1 || a>b) {
+		return;
+	} else {
 		return replaceRootDiv(html, a, b, replacement);
 	}
 }
@@ -64,7 +66,7 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 			});
 
 			// Update any root appinfo to tag as using prerendering to avoid webOS splash screen.
-			compilation.plugin('webos-meta-root-appinfo', function(meta) {
+			compilation.plugin('webos-meta-root-appinfo', function(meta, info) {
 				if(!status.err) {
 					meta.usePrerendering = true;
 				}
@@ -85,7 +87,7 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 			// script inline in the HTML head.
 			compilation.plugin('html-webpack-plugin-alter-asset-tags', function(htmlPluginData, callback) {
 				if(!status.err) {
-					var startup = fs.readFileSync(path.join(__dirname, 'prerendered-startup.txt'), {encoding:'utf8'});
+					var startup = fs.readFileSync(path.join(__dirname, 'prerendered-startup.js'), {encoding:'utf8'});
 					startup = '\n\t\t' + startup.replace('%SCREENTYPES%', JSON.stringify(opts.screenTypes))
 							.replace('%JSASSETS%', JSON.stringify(jsAssets)).replace(/[\n\r]+(.)/g, '\n\t\t$1')
 							.replace(/[\n\r]+$/, '\n\t');

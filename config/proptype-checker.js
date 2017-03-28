@@ -1,4 +1,4 @@
-/* global console, beforeEach, afterEach, expect */
+/* global console */
 /* eslint no-var: off, no-console: ["error", { allow: ["error"] }] */
 
 var spy = require('enyo-console-spy');
@@ -9,7 +9,7 @@ var restoreErrorAndWarnings = spy.restoreErrorAndWarnings;
 
 beforeEach(watchErrorAndWarnings);
 
-afterEach(function(done) {
+afterEach(function (done) {
 	const actual = filterErrorAndWarnings(/(Invalid prop|Failed prop type|Unknown prop)/);
 	const expected = 0;
 	restoreErrorAndWarnings();

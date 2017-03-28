@@ -1,4 +1,5 @@
 var
+	path = require('path'),
 	fs = require('fs'),
 	exists = require('path-exists').sync;
 

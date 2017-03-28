@@ -25,9 +25,9 @@ if (typeof global !== 'undefined') {
 
 if (!Math.sign) {
 	Math.sign = function(x) {
-		// If -0, must return -0.
-		return isNaN(x) ? NaN : x < 0 ? -1 : x > 0 ? 1 : +x;
-	}
+        // If -0, must return -0.
+        return isNaN(x) ? NaN : x < 0 ? -1 : x > 0 ? 1 : +x;
+    }
 }
 
 // Common String ES6 functionalities for character values.

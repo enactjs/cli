@@ -26,14 +26,14 @@ var
 
 // Input: /User/dan/app/build/static/js/main.js
 // Output: /static/js/main.js
-function shortFilename(fileName) {
+function shortFilename (fileName) {
 	return fileName
 		.replace(path.resolve(path.join(process.cwd(), 'dist')), '');
 }
 
 // Input: 1024, 2048
 // Output: "(+1 KB)"
-function getDifferenceLabel(currentSize, previousSize) {
+function getDifferenceLabel (currentSize, previousSize) {
 	var FIFTY_KILOBYTES = 1024 * 50;
 	var difference = currentSize - previousSize;
 	var fileSize = !Number.isNaN(difference) ? filesize(difference) : 0;
@@ -49,7 +49,7 @@ function getDifferenceLabel(currentSize, previousSize) {
 }
 
 // Print a detailed summary of build files.
-function printFileSizes(stats, previousSizeMap) {
+function printFileSizes (stats, previousSizeMap) {
 	var assets = stats.toJson().assets
 		.filter(asset => /\.(js|css|bin)$/.test(asset.name))
 		.map(asset => {
@@ -74,13 +74,15 @@ function printFileSizes(stats, previousSizeMap) {
 			var rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
 			sizeLabel += rightPadding;
 		}
-		console.log('	' + sizeLabel +	'	' + chalk.dim(asset.folder + path.sep)
-				+ chalk.cyan(asset.name));
+		console.log(
+			'	' + sizeLabel +
+			'	' + chalk.dim(asset.folder + path.sep) + chalk.cyan(asset.name)
+		);
 	});
 }
 
 // Create the build and optionally, print the deployment instructions.
-function build(config, previousSizeMap) {
+function build (config, previousSizeMap) {
 	if (process.env.NODE_ENV === 'development') {
 		console.log('Creating a development build...');
 	} else {
@@ -99,15 +101,15 @@ function build(config, previousSizeMap) {
 		console.log();
 		console.log(chalk.green('Compiled successfully.'));
 		if (process.env.NODE_ENV === 'development') {
-			console.log(chalk.yellow('NOTICE: This build contains debugging functionality and may run'
-					+ ' slower than in production mode.'));
+			console.log(chalk.yellow('NOTICE: This build contains debugging functionality and may run' +
+					' slower than in production mode.'));
 		}
 		console.log();
 	});
 }
 
 // Create the build and watch for changes.
-function watch(config) {
+function watch (config) {
 	if (process.env.NODE_ENV === 'development') {
 		console.log('Creating a development build and watching for changes...');
 	} else {
@@ -123,7 +125,7 @@ function watch(config) {
 	});
 }
 
-function displayHelp() {
+function displayHelp () {
 	console.log('  Usage');
 	console.log('    enact pack [options]');
 	console.log();
@@ -153,7 +155,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-module.exports = function(args) {
+module.exports = function (args) {
 	var opts = minimist(args, {
 		boolean: ['minify', 'framework', 's', 'stats', 'p', 'production', 'i', 'isomorphic', 'snapshot', 'w', 'watch', 'h', 'help'],
 		string: ['externals', 'externals-inject', 'locales'],
@@ -197,8 +199,8 @@ module.exports = function(args) {
 			try {
 				rimrafSync('dist/*');
 			} catch (e) {
-				console.log(chalk.red('Error: ') + ' Unable to delete existing build files. '
-						+ 'Please close any programs currently accessing files within ./dist/.');
+				console.log(chalk.red('Error: ') + ' Unable to delete existing build files. ' +
+						'Please close any programs currently accessing files within ./dist/.');
 				console.log();
 				process.exit(1);
 			}

@@ -1,6 +1,6 @@
 var helper = require('./util/config-helper');
 
-module.exports = function(config) {
+module.exports = function(config, opts) {
 	// Allow Uglify's optimizations/debug-code-removal but don't minify
 	var uglifyPlugin = helper.getPluginByName(config, 'UglifyJsPlugin');
 	if(uglifyPlugin) {

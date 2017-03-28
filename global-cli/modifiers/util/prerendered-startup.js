@@ -22,6 +22,7 @@
 			window.onload = function() { setTimeout(function() {
 				if(typeof App === 'undefined') {
 					// Add script nodes, loading the chunks sequentially.
+					var count = 0;
 					var appendScripts = function(js) {
 						if(js.length>0) {
 							var src = js.shift();

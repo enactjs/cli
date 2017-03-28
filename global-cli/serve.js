@@ -63,7 +63,7 @@ function setupCompiler(host, port, protocol) {
 	// "done" event fires when Webpack has finished recompiling the bundle.
 	// Whether or not you have warnings or errors, you will get this event.
 	compiler.plugin('done', function(stats) {
-		// clearConsole();
+		//clearConsole();
 
 		// We have switched off the default Webpack output in WebpackDevServer
 		// options so we are going to "massage" the warnings and errors and present
@@ -115,19 +115,24 @@ function setupCompiler(host, port, protocol) {
 function onProxyError(proxy) {
 	return function(err, req, res){
 		var host = req.headers && req.headers.host;
-		console.log(chalk.red('Proxy error:') + ' Could not proxy request ' + chalk.cyan(req.url)
-				+ ' from ' + chalk.cyan(host) + ' to ' + chalk.cyan(proxy) + '.');
-		console.log('See https://nodejs.org/api/errors.html#errors_common_system_errors for more '
-				+'information (' + chalk.cyan(err.code) + ').');
+		console.log(
+			chalk.red('Proxy error:') + ' Could not proxy request ' + chalk.cyan(req.url) +
+			' from ' + chalk.cyan(host) + ' to ' + chalk.cyan(proxy) + '.'
+		);
+		console.log(
+			'See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (' +
+			chalk.cyan(err.code) + ').'
+		);
 		console.log();
 
 		// And immediately send the proper error response to the client.
 		// Otherwise, the request will eventually timeout with ERR_EMPTY_RESPONSE on the client side.
-		if(res.writeHead && !res.headersSent) {
-			res.writeHead(500);
+		if (res.writeHead && !res.headersSent) {
+				res.writeHead(500);
 		}
-		res.end('Proxy error: Could not proxy request ' + req.url + ' from ' + host + ' to '
-				+ proxy + ' (' + err.code + ').');
+		res.end('Proxy error: Could not proxy request ' + req.url + ' from ' +
+			host + ' to ' + proxy + ' (' + err.code + ').'
+		);
 	};
 }
 
@@ -161,7 +166,9 @@ function addMiddleware(devServer) {
 		// Modern browsers include text/html into `accept` header when navigating.
 		// However API calls like `fetch()` won’t generally accept text/html.
 		// If this heuristic doesn’t work well for you, don’t use `proxy`.
-		htmlAcceptHeaders: proxy ? ['text/html'] : ['text/html', '*/*']
+		htmlAcceptHeaders: proxy ?
+			['text/html'] :
+			['text/html', '*/*']
 	}));
 	if (proxy) {
 		if (typeof proxy !== 'string') {
@@ -219,13 +226,13 @@ function runDevServer(host, port, protocol, shouldOpen) {
 			ignored: /node_modules/
 		},
 		// Enable HTTPS if the HTTPS environment variable is set to 'true'
-		https: protocol === 'https',
+		https: protocol === "https",
 		host: host
 	});
 	// Our custom middleware proxies requests to /index.html or a remote API.
 	addMiddleware(devServer);
 	// Launch WebpackDevServer.
-	devServer.listen(port, function(err) {
+	devServer.listen(port, (err, result) => {
 		if (err) {
 			return console.log(err);
 		}
@@ -244,7 +251,7 @@ function runDevServer(host, port, protocol, shouldOpen) {
 }
 
 function run(port, opts) {
-	var protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
+	var protocol = process.env.HTTPS === 'true' ? "https" : "http";
 	var host = process.env.HOST || opts.host || config.devServer.host || 'localhost';
 	setupCompiler(host, port, protocol);
 	runDevServer(host, port, protocol, opts.browser);
@@ -285,14 +292,15 @@ module.exports = function(args) {
 	// We attempt to use the default port but if it is busy, we offer the user to
 	// run on a different port. `detect()` Promise resolves to the next free port.
 	detect(DEFAULT_PORT).then(port => {
-		if (port === DEFAULT_PORT) {
+		if (port == DEFAULT_PORT) {
 			run(port, opts);
 			return;
 		}
 
 		clearConsole();
-		var question = chalk.yellow('Something is already running on port ' + DEFAULT_PORT + '.')
-				+ '\n\nWould you like to run the app on another port instead?';
+		var question =
+			chalk.yellow('Something is already running on port ' + DEFAULT_PORT + '.') +
+			'\n\nWould you like to run the app on another port instead?';
 
 		prompt(question, true).then(shouldChangePort => {
 			if (shouldChangePort) {
