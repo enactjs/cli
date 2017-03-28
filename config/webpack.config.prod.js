@@ -101,7 +101,7 @@ module.exports = {
 				query: {
 					babelrc: false,
 					extends: path.join(__dirname, '.babelrc')
-				},
+				}
 				// @remove-on-eject-end
 			},
 			// Multiple styling-support features are used together.
@@ -127,7 +127,7 @@ module.exports = {
 				// Webpack 1.x uses Uglify plugin as a signal to minify *all* the assets
 				// including CSS. This is confusing and will be removed in Webpack 2:
 				// https://github.com/webpack/webpack/issues/283
-				loader: ExtractTextPlugin.extract('style', 
+				loader: ExtractTextPlugin.extract('style',
 						'css?-autoprefixer&modules&importLoaders=1!postcss!less')
 				// Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
 			},
@@ -174,7 +174,7 @@ module.exports = {
 					'>1%',
 					'last 4 versions',
 					'Firefox ESR',
-					'not ie < 9', // React doesn't support IE8 anyway
+					'not ie < 9' // React doesn't support IE8 anyway
 				]
 			}),
 			// Remove the development-only CSS class .__DEV__

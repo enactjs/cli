@@ -3,7 +3,7 @@ var
 	fs = require('fs'),
 	DllEntryPlugin = require('webpack/lib/DllEntryPlugin'),
 	DllModule = require('webpack/lib/DllModule'),
-	RawSource = require("webpack/lib/RawSource"),
+	RawSource = require('webpack/lib/RawSource'),
 	exists = require('path-exists').sync;
 
 var pkgCache = {};
@@ -29,12 +29,10 @@ var findParent = function(dir) {
 		var currPkg = path.join(dir, 'package.json');
 		if(exists(currPkg)) {
 			return dir;
+		} else if(dir === '/' || dir === '' || dir === '.') {
+			return null;
 		} else {
-			if(dir === '/' || dir === '' || dir === '.') {
-				return null;
-			} else {
-				return findParent(path.dirname(dir));
-			}
+			return findParent(path.dirname(dir));
 		}
 	}
 };
@@ -113,12 +111,12 @@ EnactFrameworkPlugin.prototype.apply = function(compiler) {
 	// Format the internal module ID to a usable named descriptor
 	compiler.plugin('compilation', function(compilation) {
 		compilation.plugin('before-module-ids', function(modules) {
-			modules.forEach(function(module) {
-				if(module.id === null && module.libIdent) {
-					module.id = module.libIdent({
+			modules.forEach(function(m) {
+				if(m.id === null && m.libIdent) {
+					m.id = m.libIdent({
 						context: this.options.context || compiler.options.context
 					});
-					module.id = normalizeModuleID(module.id)
+					m.id = normalizeModuleID(m.id)
 				}
 			}, this);
 		}.bind(this));

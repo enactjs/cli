@@ -28,7 +28,7 @@ module.exports = function(config, opts) {
 		var reactDOMServer = path.join(process.cwd(), 'node_modules', 'react-dom', 'server.js');
 		if(!exists(reactDOM)) {
 			reactDOM = require.resolve('react-dom');
-			reactDOMServer = require.resolve('react-dom/server');;
+			reactDOMServer = require.resolve('react-dom/server');
 		}
 
 		if(!opts.externals) {
