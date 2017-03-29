@@ -1,6 +1,5 @@
 var
 	path = require('path'),
-	fs = require('fs'),
 	exists = require('path-exists').sync,
 	helper = require('./util/config-helper'),
 	SnapshotPlugin = require('./util/SnapshotPlugin');
@@ -26,6 +25,6 @@ module.exports = function(config, opts) {
 	config.plugins.push(new SnapshotPlugin({
 		target: (opts.framework ? 'enact.js' : 'main.js')
 		// Disabled temporarily until effectiveness is proven
-		//append: (opts.framework ? '\nenact_framework.load();\n' : undefined)
+		// append: (opts.framework ? '\nenact_framework.load();\n' : undefined)
 	}));
 };

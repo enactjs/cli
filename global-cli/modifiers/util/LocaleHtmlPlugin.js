@@ -42,9 +42,7 @@ function findRootDiv(html, start, end) {
 	}
 	var a = html.indexOf('<div', start+4);
 	var b = html.lastIndexOf('</div>', end);
-	if(a===-1 || b===-1 || a>b) {
-		return;
-	} else {
+	if(a>=0 && b>=0 && a<b) {
 		return findRootDiv(html, a, b);
 	}
 }
@@ -54,7 +52,7 @@ function localesInManifest(manifest, includeParents) {
 	try {
 		var meta = JSON.parse(fs.readFileSync(manifest, {encoding:'utf8'}).replace(/-/g, '/'));
 		var locales = [];
-		var curr, name, index;
+		var curr;
 		for(var i=0; meta.files && i<meta.files.length; i++) {
 			if(includeParents) {
 				for(curr = path.dirname(meta.files[i]); curr && curr !== '.'; curr = path.dirname(curr)) {
@@ -161,17 +159,17 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			// Use the prerendered-startup.js to asynchronously add the js assets at load time and embed that
 			// script inline in the HTML head.
 			compilation.plugin('html-webpack-plugin-alter-asset-tags', function(htmlPluginData, callback) {
-					var startup = fs.readFileSync(path.join(__dirname, 'prerendered-startup.js'), {encoding:'utf8'});
-					startup = startup.replace('%SCREENTYPES%', JSON.stringify(opts.screenTypes))
-							.replace('%JSASSETS%', JSON.stringify(jsAssets));
-					htmlPluginData.head.unshift({
-						tagName: 'script',
-						closeTag: true,
-						attributes: {
-							type: 'text/javascript'
-						},
-						innerHTML: startup
-					});
+				var startup = fs.readFileSync(path.join(__dirname, 'prerendered-startup.txt'), {encoding:'utf8'});
+				startup = startup.replace('%SCREENTYPES%', JSON.stringify(opts.screenTypes))
+						.replace('%JSASSETS%', JSON.stringify(jsAssets));
+				htmlPluginData.head.unshift({
+					tagName: 'script',
+					closeTag: true,
+					attributes: {
+						type: 'text/javascript'
+					},
+					innerHTML: startup
+				});
 				callback(null, htmlPluginData);
 			});
 
@@ -192,7 +190,6 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 					callback(new Error('LocaleHtmlPlugin: Unable find root div element. Please '
 							+ 'verify it exists within your HTML template.'), htmlPluginData);
 				}
-				
 			});
 		}
 	});

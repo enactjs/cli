@@ -9,6 +9,9 @@
   "bin": {
     "enact": "./bin/enact.js"
   },
+  "scripts": {
+    "lint": "eslint ."
+  },
   "dependencies": {
     "autoprefixer": "~6.7.3",
     "babel-core": "~6.23.1",

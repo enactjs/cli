@@ -4,7 +4,7 @@ module.exports = {
 		if(config && config.module && config.module.loaders && name) {
 			for(var i=0; i<config.module.loaders.length; i++) {
 				if(config.module.loaders[i].loader) {
-					if(config.module.loaders[i].loader.split(/[?!]/)[0].replace(/-loader$/, '')==name.replace(/-loader$/, '')) {
+					if(config.module.loaders[i].loader.split(/[?!]/)[0].replace(/-loader$/, '')===name.replace(/-loader$/, '')) {
 						index = i;
 						break;
 					}
@@ -22,8 +22,8 @@ module.exports = {
 		var index = -1;
 		if(config && config.plugins && name) {
 			for(var i=0; i<config.plugins.length; i++) {
-				if(config.plugins[i] && config.plugins[i].constructor &&
-						config.plugins[i].constructor.name && config.plugins[i].constructor.name==name) {
+				if(config.plugins[i] && config.plugins[i].constructor
+						&& config.plugins[i].constructor.name && config.plugins[i].constructor.name===name) {
 					index = i;
 					break;
 				}
@@ -42,4 +42,4 @@ module.exports = {
 			config.plugins.splice(i, 1);
 		}
 	}
-}
+};

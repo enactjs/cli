@@ -83,9 +83,9 @@ EnactFrameworkRefPlugin.prototype.apply = function(compiler) {
 	compiler.plugin('compilation', function(compilation, params) {
 		var normalModuleFactory = params.normalModuleFactory;
 		compilation.dependencyFactories.set(DelegatedSourceDependency, normalModuleFactory);
-		
-		compilation.plugin('html-webpack-plugin-alter-chunks', function(chunks, params) {
-			var chunkFiles = [ normalizePath(external.inject, 'enact.css', compiler) ];
+
+		compilation.plugin('html-webpack-plugin-alter-chunks', function(chunks) {
+			var chunkFiles = [normalizePath(external.inject, 'enact.css', compiler)];
 			if(!external.snapshot) {
 				chunkFiles.unshift(normalizePath(external.inject, 'enact.js', compiler));
 			}
@@ -98,7 +98,7 @@ EnactFrameworkRefPlugin.prototype.apply = function(compiler) {
 		});
 
 		if(external.snapshot && isNodeOutputFS(compiler)) {
-			compilation.plugin('webos-meta-root-appinfo', function(meta, info) {
+			compilation.plugin('webos-meta-root-appinfo', function(meta) {
 				meta.v8SnapshotFile = normalizePath(external.inject, 'snapshot_blob.bin', compiler);
 				return meta;
 			});
@@ -109,7 +109,7 @@ EnactFrameworkRefPlugin.prototype.apply = function(compiler) {
 	compiler.plugin('compile', function(params) {
 		params.normalModuleFactory.apply(new DelegatedEnactFactoryPlugin({
 			name: name,
-			libraries: libs,
+			libraries: libs
 		}));
 	});
 

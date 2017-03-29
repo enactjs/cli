@@ -19,7 +19,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-module.exports = function (args) {
+module.exports = function(args) {
 	var opts = minimist(args, {
 		boolean: ['l', 'local', 's', 'strict', 'f', 'framework', 'h', 'help'],
 		alias: {l:'local', s:'strict', f:'framework', h:'help'}
@@ -41,7 +41,7 @@ module.exports = function (args) {
 		eslintArgs.push('.');
 	}
 	var child = cp.fork(require.resolve('eslint/bin/eslint'), eslintArgs, {env:process.env, cwd:process.cwd()});
-	child.on('close', function (code, signal) {
+	child.on('close', function(code) {
 		process.exit(code);
 	});
 };

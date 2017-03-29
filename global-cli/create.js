@@ -7,33 +7,32 @@ var
 	semver = require('semver'),
 	exists = require('path-exists').sync;
 
-// @TODO: switch back to master when 0.2.0 releases
 var ENACT_DEV_NPM = 'enyojs/enact-dev';
-	
+
 function createApp(output, template, link, local, verbose) {
-	var root = path.resolve(output);
-	var appName = path.basename(root);
+	var project = path.resolve(output);
+	var appName = path.basename(project);
 
 	checkNodeVersion();
 	checkAppName(appName, template);
 
-	if (!exists(root)) {
-		fs.mkdirSync(root);
-	} else if (!isSafeToCreateProjectIn(root)) {
+	if (!exists(project)) {
+		fs.mkdirSync(project);
+	} else if (!isSafeToCreateProjectIn(project)) {
 		console.log('The directory "' + output + '" contains file(s) that could conflict. Aborting.');
 		process.exit(1);
 	}
 
-	console.log('Creating a new Enact app in ' + root + '.');
+	console.log('Creating a new Enact app in ' + project + '.');
 	console.log();
 
 	var prevCWD = process.cwd();
-	process.chdir(root);
-	copyTemplate(template, root);
+	process.chdir(project);
+	copyTemplate(template, project);
 
-	installDeps(root, link, local, verbose, function() {
+	installDeps(project, link, local, verbose, function() {
 		console.log();
-		console.log('Success! Created ' + appName + ' at ' + root);
+		console.log('Success! Created ' + appName + ' at ' + project);
 		console.log();
 		console.log('Inside that directory, you can run several NPM commands, including:');
 		console.log(chalk.cyan('	npm run serve'));
@@ -46,16 +45,16 @@ function createApp(output, template, link, local, verbose) {
 		console.log('		Starts the test runner.');
 		console.log();
 		// @TODO
-		//console.log(chalk.cyan('	npm run eject'));
-		//console.log('		Removes this tool and copies build dependencies, configuration files');
-		//console.log('		and scripts into the app directory. If you do this, you can’t go back!');
-		//console.log();
+		// console.log(chalk.cyan('	npm run eject'));
+		// console.log('		Removes this tool and copies build dependencies, configuration files');
+		// console.log('		and scripts into the app directory. If you do this, you can’t go back!');
+		// console.log();
 		console.log('We suggest that you begin by typing:');
-		if(prevCWD!=process.cwd()) {
+		if(prevCWD!==process.cwd()) {
 			console.log(chalk.cyan('	cd'), output);
 		}
 		console.log('	' + chalk.cyan('npm run serve'));
-		if(exists(path.join(root, 'README.old.md'))) {
+		if(exists(path.join(project, 'README.old.md'))) {
 			console.log();
 			console.log(chalk.yellow('You had a `README.md` file, we renamed it to `README.old.md`'));
 		}
@@ -74,7 +73,7 @@ function copyTemplate(template, dest) {
 
 	// Rename gitignore after the fact to prevent npm from renaming it to .npmignore
 	// See: https://github.com/npm/npm/issues/1862
-	fs.move(path.join(dest, 'gitignore'), path.join(dest, '.gitignore'), [], function (err) {
+	fs.move(path.join(dest, 'gitignore'), path.join(dest, '.gitignore'), [], function(err) {
 		if (err) {
 			// Append if there's already a `.gitignore` file there
 			if (err.code === 'EEXIST') {
@@ -108,7 +107,7 @@ function copyTemplate(template, dest) {
 	}
 }
 
-function installDeps(root, link, local, verbose, callback) {
+function installDeps(project, link, local, verbose, callback) {
 	var args = [
 		'--loglevel',
 		(verbose ? 'verbose' : 'error'),
@@ -118,7 +117,7 @@ function installDeps(root, link, local, verbose, callback) {
 
 	console.log('Installing dependencies from npm...');
 
-	var proc = spawn('npm', args, {stdio: 'inherit', cwd:root});
+	var proc = spawn('npm', args, {stdio: 'inherit', cwd:project});
 	proc.on('close', function(code) {
 		if(code!==0) {
 			console.log(chalk.cyan('ERROR: ') + '"npm ' + args.join(' ') + '" failed');
@@ -134,9 +133,9 @@ function installDeps(root, link, local, verbose, callback) {
 				ENACT_DEV_NPM,
 				'--save-dev'
 			].filter(function(e) { return e; });
-			var devProc = spawn('npm', devArgs, {stdio: 'inherit', cwd:root});
-			devProc.on('close', function(code) {
-				if(code!==0) {
+			var devProc = spawn('npm', devArgs, {stdio: 'inherit', cwd:project});
+			devProc.on('close', function(code2) {
+				if(code2!==0) {
 					console.log(chalk.cyan('ERROR: ') + '"npm ' + devArgs.join(' ') + '" failed');
 					process.exit(1);
 				}
@@ -160,14 +159,9 @@ function checkNodeVersion() {
 	}
 
 	if (!semver.satisfies(process.version, packageJson.engines.node)) {
-		console.error(
-			chalk.red(
-				'You are currently running Node %s but enact-dev requires %s.' +
-				' Please use a supported version of Node.\n'
-			),
-			process.version,
-			packageJson.engines.node
-		);
+		console.error(chalk.red('You are currently running Node %s but enact-dev requires %s.'
+				+ ' Please use a supported version of Node.\n'), process.version,
+				packageJson.engines.node);
 		process.exit(1);
 	}
 }
@@ -179,28 +173,24 @@ function checkAppName(appName, template) {
 	var allDependencies = dependencies.concat(devDependencies).sort();
 
 	if (allDependencies.indexOf(appName) >= 0) {
-		console.error(
-			chalk.red(
-				'We cannot create a project called `' + appName + '` because a dependency with the same name exists.\n' +
-				'Due to the way npm works, the following names are not allowed:\n\n'
-			) +
-			chalk.cyan(
-				allDependencies.map(function(depName) {
+		console.error(chalk.red('We cannot create a project called `' + appName
+				+ '` because a dependency with the same name exists.\n'
+				+ 'Due to the way npm works, the following names are not allowed:\n\n')
+				+ chalk.cyan(allDependencies.map(function(depName) {
 					return '	' + depName;
-				}).join('\n')
-			) +
-			chalk.red('\n\nPlease choose a different project name.')
+				}).join('\n'))
+				+ chalk.red('\n\nPlease choose a different project name.')
 		);
 		process.exit(1);
 	}
 }
 
 // If project only contains files generated by GH, it’s safe.
-function isSafeToCreateProjectIn(root) {
+function isSafeToCreateProjectIn(project) {
 	var validFiles = [
 		'.DS_Store', 'Thumbs.db', '.git', '.gitignore', '.idea', 'README.md', 'LICENSE'
 	];
-	return fs.readdirSync(root)
+	return fs.readdirSync(project)
 		.every(function(file) {
 			return validFiles.indexOf(file) >= 0;
 		});
