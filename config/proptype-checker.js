@@ -1,7 +1,7 @@
 /* global console, beforeEach, afterEach, expect */
 /* eslint no-var: off, no-console: ["error", { allow: ["error"] }] */
 
-var spy = require('console-snoop');
+var spy = require('enyo-console-spy');
 
 var watchErrorAndWarnings = spy.watchErrorAndWarnings;
 var filterErrorAndWarnings = spy.filterErrorAndWarnings;
