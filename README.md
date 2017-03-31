@@ -99,3 +99,17 @@ npm install -g eslint eslint-plugin-react eslint-plugin-babel babel-eslint enyoj
 ```
 
 We recognize that this is suboptimal, but it is currently required due to the way we hide the ESLint dependency. The ESLint team is already [working on a solution to this](https://github.com/eslint/eslint/issues/3458) so this may become unnecessary in a couple of months.
+
+## Copyright and License Information
+
+Unless otherwise specified, all content, including all source code files and documentation files in this repository are:
+
+Copyright (c) 2012-2017 LG Electronics
+
+Unless otherwise specified or set forth in the NOTICE file, all content, including all source code files and documentation files in this repository are: Licensed under the BSD License (the "License"); you may not use this content except in compliance with the License. You may obtain a copy of the License at
+
+https://opensource.org/licenses/BSD-3-Clause
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+Portions of this project are based upon [create-react-app](https://github.com/facebookincubator/create-react-app), Copyright (C) 2016-present Facebook, Inc.
