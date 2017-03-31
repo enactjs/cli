@@ -144,8 +144,7 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 				// TODO: update webos-meta-webpack-plugin to replace '\' with '/' in info.locale
 				var locCode = info.locale.replace(/\\/g, '/');
 				if(locales.indexOf(locCode)>=0 && !status.err[locCode]) {
-					meta.main = path.relative(path.join('resources', info.locale),
-							'index.' + info.locale.replace(/[\\\/]/g, '-') + '.html').replace(/\\/g, '/');
+					meta.main = 'index.' + info.locale.replace(/[\\\/]/g, '-') + '.html';
 					meta.usePrerendering = true;
 				}
 				return meta;
