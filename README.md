@@ -18,7 +18,7 @@ enact create [directory]
 
 This will generate a basic App template, complete with npm scripts and dependencies setup. If no directory path is specified, it will be generated within the working directory.
 
->Advanced: If you've used `npm link` on separate installations of the Enact repo, you can include `--link` to the `init` command and NPM will symlink your Enact repo, rather than reinstall.
+>Advanced: If you've used `npm link` on separate installations of the Enact repo, you can include `--link` to the `init` command and NPM will symlink your Enact repo, rather than reinstall. Additionally, you can link in the Enact dependencies post-install via the `enact link` command.
 
 ## Available App Scripts
 
