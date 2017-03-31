@@ -6,11 +6,28 @@
  */
 
 var path = require('path'),
-	FileXHR = require('./FileXHR'),
 	nodeFetch = require('node-fetch'),
-	requireFromString = require('require-from-string');
+	vm = require('vm'),
+	FileXHR = require('./FileXHR');
 
 require('console.mute');
+
+// Setup a generic shared context to run App code within
+var m = {
+	exports:{}
+};
+var sandbox = Object.assign({
+	require: require,
+	module: m,
+	exports: m.exports,
+	__dirname: process.cwd(),
+	__filename: 'main.js',
+	fetch: nodeFetch,
+	Response: nodeFetch.Response,
+	Headers: nodeFetch.Headers,
+	Request: nodeFetch.Request
+}, global);
+var context = vm.createContext(sandbox);
 
 /*
 	Options:
@@ -23,18 +40,10 @@ require('console.mute');
 module.exports = function(opts) {
 	var rendered;
 
-	// Add fetch to the global variables
-	if (!global.fetch) {
-		global.fetch = nodeFetch;
-		global.Response = global.fetch.Response;
-		global.Headers = global.fetch.Headers;
-		global.Request = global.fetch.Request;
-	}
-
 	if(opts.locale) {
-		global.XMLHttpRequest = FileXHR;
+		sandbox.XMLHttpRequest = FileXHR;
 	} else {
-		delete global.XMLHttpRequest;
+		delete sandbox.XMLHttpRequest;
 	}
 
 	try {
@@ -46,17 +55,24 @@ module.exports = function(opts) {
 			opts.code = opts.code.replace(/require\(["']enact_framework["']\)/g, 'require("' + opts.externals +  '")');
 			// Ensure locale switching  support is loaded globally with external framework usage.
 			var framework = require(opts.externals);
-			global.iLibLocale = framework('@enact/i18n/locale');
+			sandbox.iLibLocale = framework('@enact/i18n/locale');
+		} else {
+			delete sandbox.iLibLocale
 		}
 
-		var App = requireFromString(opts.code, opts.file);
+		m.exports = {};
+		vm.runInContext(opts.code, context, {
+			filename: opts.file,
+			displayErrors: true
+		});
 
 		// Update locale if needed.
-		if(opts.locale && global.iLibLocale && global.iLibLocale.updateLocale) {
-			global.iLibLocale.updateLocale(opts.locale);
+		if(opts.locale && sandbox.iLibLocale && sandbox.iLibLocale.updateLocale) {
+			sandbox.iLibLocale.updateLocale(opts.locale);
 		}
 
-		rendered = opts.server.renderToString(App['default'] || App);
+		rendered = opts.server.renderToString(m.exports['default'] || m.exports);
+
 		console.resume();
 	} catch(e) {
 		console.resume();
