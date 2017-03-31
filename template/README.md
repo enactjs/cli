@@ -32,6 +32,9 @@ For the project to build, **these files must exist with exact filenames**:
 
 You can delete or rename the other files.
 
+You can update the `license` entry in `package.json` to match the license of your choice. For more
+information on licenses, please see the [npm documentation](https://docs.npmjs.com/files/package.json#license).
+
 ## Available Scripts
 
 In the project directory, you can run:
