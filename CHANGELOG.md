@@ -1,3 +1,23 @@
+## 0.7.0 (March 31, 2017)
+
+Added support for a link command (`enact link`) as a shorthand to link in Enact library dependencies.
+
+### pack
+
+* Added support for appinfo.json sysAssetsBasePath and $-prefix in webos-meta-webpack-plugin.
+* Will now warn about performance when building in development mode.
+* HTML template will now be used in all situations and can be customized as desired.
+* Vastly rewritten isomorphic app prerendering support with improved reliability and mmemory management.
+* Depreciated prerendering of isomorphic apps within the HTML template has been removed. Please ensure all app entrypoints are able to self-render. See [this example](https://github.com/enyojs/enact-dev/blob/master/template/src/index.js).
+
+### test
+
+* Improved error handling with plugins to prevent certain scenarios that could cause tests to fail.
+
+### lint
+
+* Updated lint rules for disabling `no-spaced-func` and `no-undefined` warnings for non-strict ruleset.
+
 ## 0.6.0 (February 22, 2017)
 
 All enact-dev dependencies have been updated to latest applicable revisions. If you are using editor-based linting, please update your global dependencies to match.

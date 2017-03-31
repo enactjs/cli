@@ -4,7 +4,7 @@ A standalone dev environment for Enact apps using Webpack, Babel, React, and a c
 ## Installation
 All that's needed to install enact-dev is to use npm to install it globally. For Linux `sudo` may be required.
 ```
-npm install -g enyojs/enact-dev
+npm install -g enact-dev
 ```
 
 >Note: Node 6.x+ is highly recommended for optimum speed and efficiency, however anything since Node 4.x is compatible.
@@ -18,7 +18,7 @@ enact create [directory]
 
 This will generate a basic App template, complete with npm scripts and dependencies setup. If no directory path is specified, it will be generated within the working directory.
 
->Advanced: If you've used `npm link` on separate installations of the Enact repo, you can include `--link` to the `init` command and NPM will symlink your Enact repo, rather than reinstall.
+>Advanced: If you've used `npm link` on separate installations of the Enact repo, you can include `--link` to the `init` command and NPM will symlink your Enact repo, rather than reinstall. Additionally, you can link in the Enact dependencies post-install via the `enact link` command.
 
 ## Available App Scripts
 
@@ -33,7 +33,7 @@ The page will reload if you make edits.<br>
 
 ### `npm run pack` and `npm run pack-p`
 
-Builds the project in the working directory. Specifically, `pack` builds in development mode with code un-minified and with debug code include, whereas `pack-p` builds in production mode, with everything minified and optimized for performance.
+Builds the project in the working directory. Specifically, `pack` builds in development mode with code un-minified and with debug code included, whereas `pack-p` builds in production mode, with everything minified and optimized for performance. Be sure to avoid shipping or performance testing on development mode builds.
 
 ### `npm run watch`
 
@@ -99,3 +99,17 @@ npm install -g eslint eslint-plugin-react eslint-plugin-babel babel-eslint enyoj
 ```
 
 We recognize that this is suboptimal, but it is currently required due to the way we hide the ESLint dependency. The ESLint team is already [working on a solution to this](https://github.com/eslint/eslint/issues/3458) so this may become unnecessary in a couple of months.
+
+## Copyright and License Information
+
+Unless otherwise specified, all content, including all source code files and documentation files in this repository are:
+
+Copyright (c) 2012-2017 LG Electronics
+
+Unless otherwise specified or set forth in the NOTICE file, all content, including all source code files and documentation files in this repository are: Licensed under the BSD License (the "License"); you may not use this content except in compliance with the License. You may obtain a copy of the License at
+
+https://opensource.org/licenses/BSD-3-Clause
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+Portions of this project are based upon [create-react-app](https://github.com/facebookincubator/create-react-app), Copyright (C) 2016-present Facebook, Inc.

@@ -5,7 +5,8 @@ var
 	exists = require('path-exists').sync,
 	snapshotSetup = require('./snapshot'),
 	helper = require('./util/config-helper'),
-	PrerenderPlugin = require('./util/PrerenderPlugin');
+	PrerenderPlugin = require('./util/PrerenderPlugin'),
+	LocaleHtmlPlugin = require('./util/LocaleHtmlPlugin');
 
 function readJSON(file) {
 	try {
@@ -19,13 +20,18 @@ module.exports = function(config, opts) {
 	var meta = readJSON('package.json') || {};
 	var enact = meta.enact || {};
 	var iso = enact.isomorphic || enact.prerender;
-	// Only use isomorphic if an isomorphic entrypoint is specified
+
+	// Only use isomorphic if an isomorphic entrypoint is specified.
 	if(iso) {
+		// Resolve ReactDOM and ReactDOMSever relative to the app, with enact-dev's copy as fallback.
+		var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom', 'index.js');
+		var reactDOMServer = path.join(process.cwd(), 'node_modules', 'react-dom', 'server.js');
+		if(!exists(reactDOM)) {
+			reactDOM = require.resolve('react-dom');
+			reactDOMServer = require.resolve('react-dom/server');
+		}
+
 		if(!opts.externals) {
-			var reactDOM = path.join(process.cwd(), 'node_modules', 'react-dom', 'index.js');
-			if(!exists(reactDOM)) {
-				reactDOM = require.resolve('react-dom');
-			}
 			// Prepend react-dom as top level entrypoint so espose-loader will expose
 			// it to window.ReactDOM to allow runtime rendering of the app.
 			config.entry.main.splice(-1, 0, reactDOM);
@@ -36,6 +42,18 @@ module.exports = function(config, opts) {
 				test: reactDOM,
 				loader: 'expose?ReactDOM'
 			});
+
+			// Expose iLib locale utility function module so we can update the locale on page load, if used.
+			if(opts.locales) {
+				var locale = path.join(process.cwd(), 'node_modules', '@enact', 'i18n', 'locale', 'locale.js');
+				if(exists(locale)) {
+					var babel = helper.findLoader(config, 'babel');
+					config.module.loaders.splice((babel>=0 ? babel : 0), 0, {
+						test: fs.realpathSync(locale),
+						loader: 'expose?iLibLocale'
+					});
+				}
+			}
 		}
 
 		// If 'isomorphic' value is a string, use custom entrypoint.
@@ -49,18 +67,19 @@ module.exports = function(config, opts) {
 		// Use universal module definition to allow usage in Node and browser environments.
 		config.output.libraryTarget = 'umd';
 
-		// Update HTML webpack plugin to use the isomorphic template and include screentypes
-		var htmlPlugin = helper.getPluginByName(config, 'HtmlWebpackPlugin');
-		if(htmlPlugin) {
-			htmlPlugin.options.inject = false;
-			htmlPlugin.options.template = path.join(__dirname, 'util', 'html-template-isomorphic.ejs');
-			htmlPlugin.options.screenTypes = enact.screenTypes
-					|| readJSON('./node_modules/@enact/moonstone/MoonstoneDecorator/screenTypes.json')
-					|| readJSON('./node_modules/enact/packages/moonstone/MoonstoneDecorator/screenTypes.json');
-		}
-
 		// Include plugin to prerender the html into the index.html
-		config.plugins.push(new PrerenderPlugin());
+		var prerenderOpts = {
+			server: require(reactDOMServer),
+			locales: opts.locales,
+			externals: opts.externals,
+			screenTypes: enact.screenTypes
+					|| readJSON('./node_modules/@enact/moonstone/MoonstoneDecorator/screenTypes.json')
+		}
+		if(!opts.locales) {
+			config.plugins.push(new PrerenderPlugin(prerenderOpts));
+		} else {
+			config.plugins.push(new LocaleHtmlPlugin(prerenderOpts));
+		}
 
 		// Apply snapshot specialization options if needed
 		if(opts.snapshot && !opts.externals) {

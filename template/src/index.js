@@ -10,7 +10,6 @@ if (typeof window !== 'undefined') {
 		appElement,
 		document.getElementById('root')
 	);
-	appElement = null;
 }
 
 export default appElement;

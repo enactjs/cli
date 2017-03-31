@@ -1,4 +1,5 @@
-	// @remove-on-eject-begin
+/* global global */
+// @remove-on-eject-begin
 /**
  * Copyright (c) 2015-present, Facebook, Inc.
  * All rights reserved.
@@ -9,13 +10,13 @@
  */
 // @remove-on-eject-end
 
-if (typeof window === 'object') {
-	if (typeof Promise === 'undefined' && typeof window === 'object') {
+if (typeof global !== 'undefined') {
+	if (typeof Promise === 'undefined') {
 		// Rejection tracking prevents a common issue where React gets into an
 		// inconsistent state due to an error, but it gets swallowed by a Promise,
 		// and the user has no idea what causes React's erratic future behavior.
 		require('promise/lib/rejection-tracking').enable();
-		window.Promise = require('promise/lib/es6-extensions');
+		global.Promise = require('promise/lib/es6-extensions');
 	}
 
 	// fetch() polyfill for making API calls.
@@ -24,9 +25,9 @@ if (typeof window === 'object') {
 
 if (!Math.sign) {
 	Math.sign = function(x) {
-        // If -0, must return -0.
-        return isNaN(x) ? NaN : x < 0 ? -1 : x > 0 ? 1 : +x;
-    }
+		// If -0, must return -0.
+		return isNaN(x) ? NaN : x < 0 ? -1 : x > 0 ? 1 : +x;
+	}
 }
 
 // Common String ES6 functionalities for character values.

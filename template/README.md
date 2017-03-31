@@ -32,6 +32,9 @@ For the project to build, **these files must exist with exact filenames**:
 
 You can delete or rename the other files.
 
+You can update the `license` entry in `package.json` to match the license of your choice. For more
+information on licenses, please see the [npm documentation](https://docs.npmjs.com/files/package.json#license).
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -45,7 +48,7 @@ The page will reload if you make edits.<br>
 
 ### `npm run pack` and `npm run pack-p`
 
-Builds the project in the working directory. Specifically, `pack` builds in development mode with code un-minified and with debug code include, whereas `pack-p` builds in production mode, with everything minified and optimized for performance.
+Builds the project in the working directory. Specifically, `pack` builds in development mode with code un-minified and with debug code included, whereas `pack-p` builds in production mode, with everything minified and optimized for performance. Be sure to avoid shipping or performance testing on development mode builds.
 
 ### `npm run watch`
 
