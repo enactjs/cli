@@ -4,7 +4,7 @@ A standalone dev environment for Enact apps using Webpack, Babel, React, and a c
 ## Installation
 All that's needed to install enact-dev is to use npm to install it globally. For Linux `sudo` may be required.
 ```
-npm install -g enyojs/enact-dev
+npm install -g enact-dev
 ```
 
 >Note: Node 6.x+ is highly recommended for optimum speed and efficiency, however anything since Node 4.x is compatible.
