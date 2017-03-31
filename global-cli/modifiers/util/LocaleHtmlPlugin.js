@@ -56,13 +56,14 @@ function localesInManifest(manifest, includeParents) {
 		for(var i=0; meta.files && i<meta.files.length; i++) {
 			if(includeParents) {
 				for(curr = path.dirname(meta.files[i]); curr && curr !== '.'; curr = path.dirname(curr)) {
-					if(locales.indexOf(curr) === -1 && (curr.length === 2 || curr.indexOf('/') === 2)) {
-						locales.push(curr);
+					if(locales.indexOf(curr) === -1 && (curr.length === 2 || curr.indexOf('/') === 2
+							|| curr.indexOf('\\') === 2)) {
+						locales.push(curr.replace(/\\/g, '/'));
 					}
 				}
 			} else {
-				curr = path.dirname(meta.files[i]);
-				if(locales.indexOf(curr) === -1 && (curr.length === 2 || curr.indexOf('/') === 2)) {
+				curr = path.dirname(meta.files[i]).replace(/\\/g, '/');
+				if(locales.indexOf(curr) === -1 && (curr.length === 2 || curr.indexOf('/'))) {
 					locales.push(curr);
 				}
 			}
@@ -140,9 +141,11 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 
 			// For each prerendered target locale's appinfo, update the 'main' and 'usePrerendering' values.
 			compilation.plugin('webos-meta-localized-appinfo', function(meta, info) {
-				if(locales.indexOf(info.locale)>=0 && !status.err[info.locale]) {
+				// TODO: update webos-meta-webpack-plugin to replace '\' with '/' in info.locale
+				var locCode = info.locale.replace(/\\/g, '/');
+				if(locales.indexOf(locCode)>=0 && !status.err[locCode]) {
 					meta.main = path.relative(path.join('resources', info.locale),
-							'index.' + info.locale.replace(/[\\\/]/g, '-') + '.html');
+							'index.' + info.locale.replace(/[\\\/]/g, '-') + '.html').replace(/\\/g, '/');
 					meta.usePrerendering = true;
 				}
 				return meta;
