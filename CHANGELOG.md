@@ -1,5 +1,7 @@
 ## 0.7.0 (March 31, 2017)
 
+Added support for a link command (`enact link`) as a shorthand to link in Enact library dependencies.
+
 ### pack
 
 * Added support for appinfo.json sysAssetsBasePath and $-prefix in webos-meta-webpack-plugin.
