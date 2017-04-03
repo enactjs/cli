@@ -19,7 +19,9 @@ function parseLocales(context, target) {
 		return [];
 	} else if(Array.isArray(target)) {
 		return target;
-	} else if(target === 'tv') {
+	} else if(target === 'tv' || target === 'tv-osd') {
+		return JSON.parse(fs.readFileSync(path.join(__dirname, 'locales-tv-osd.json'), {encoding: 'utf8'})).paths;
+	} else if(target === 'tv-full') {
 		return JSON.parse(fs.readFileSync(path.join(__dirname, 'locales-tv.json'), {encoding: 'utf8'})).paths;
 	} else if(target === 'signage') {
 		return JSON.parse(fs.readFileSync(path.join(__dirname, 'locales-signage.json'), {encoding: 'utf8'})).paths;
