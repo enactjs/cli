@@ -280,7 +280,7 @@ module.exports = function(args) {
 	}
 
 	// Tools like Cloud9 rely on this.
-	var DEFAULT_PORT = parseInt(process.env.PORT) || parseInt(opts.port) || config.devServer.port || 8080;
+	var DEFAULT_PORT = parseInt(process.env.PORT || opts.port || config.devServer.port || 8080);
 
 	// We attempt to use the default port but if it is busy, we offer the user to
 	// run on a different port. `detect()` Promise resolves to the next free port.
