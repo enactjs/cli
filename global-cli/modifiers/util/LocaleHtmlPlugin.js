@@ -36,6 +36,10 @@ function parseLocales(context, target) {
 	}
 }
 
+function locCode(locale) {
+	return locale.replace(/[\\\/]/g, '-');
+}
+
 // Find the location of the root div (can be empty or with contents) and return the
 // contents of the HTML before and after it.
 function findRootDiv(html, start, end) {
@@ -79,9 +83,95 @@ function localesInManifest(manifest, includeParents) {
 	}
 }
 
+function simplifyAliases(locales, status) {
+	var links = {};
+	var multiCount = 1;
+	for(var i=0; i<status.alias.length; i++) {
+		if(status.alias[i]) {
+			var lang = locales[i].split(/[\\\/]+/)[0];
+			links[status.alias[i]] = links[status.alias[i]] || status.alias[i].split(/[\\\/]+/)[0];
+			if(links[status.alias[i]]!==lang && links[status.alias[i]].indexOf('multi')!==0) {
+				if(multiCount>1) {
+					links[status.alias[i]] = 'multi' + multiCount;
+				} else {
+					links[status.alias[i]] = 'multi';
+				}
+				multiCount++;
+			}
+		}
+	}
+	for(var j=0; j<status.alias.length; j++) {
+		if(status.alias[j] && links[status.alias[j]]) {
+			status.alias[j] = links[status.alias[j]];
+		}
+	}
+	for(var l in links) {
+		var index = locales.indexOf(l);
+		status.alias[index] = links[l];
+		locales.push(links[l]);
+		status.prerender[locales.length-1] = status.prerender[index];
+		status.prerender[index] = undefined;
+	}
+}
+
+function aliasedLocales(locale, aliases) {
+	var matches = [];
+	for(var i=0; i<aliases.length; i++) {
+		if(aliases[i]===locale) {
+			matches.push(i);
+		}
+	}
+	return matches;
+}
+
 // Add a localized index.html to the compilation assets.
-function localizedHtmlAsset(compilation, locale, data) {
-	compilation.assets['index.' + locale.replace(/[\\\/]/g, '-') + '.html'] = {
+function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callback) {
+	if(i===locales.length) {
+		callback();
+	} else if(!status.prerender[i] || status.alias[i] || status.err[i]) {
+		localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, callback);
+	} else {
+		var locStr = locCode(locales[i]);
+		var rootOpen = '<div id="root">';
+		var rootClose = '</div>';
+		var linked = aliasedLocales(locales[i], status.alias);
+		if(linked.length===0) {
+			// Single locale, re-inject root classes and react checksum/
+			status.prerender[i] = status.prerender[i]
+					.replace(/^(<[^>]*class=")"/i, '$1' + status.details[i].rootClasses + '"')
+					.replace(/^(<[^>]*data-react-checksum=")"/i, '$1' + status.details[i].checksum + '"');
+			addHtmlAsset(compilation, locStr, html.before + rootOpen + status.prerender[i] + rootClose + html.after);
+			localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, callback);
+		} else {
+			// Multiple locales, add script logic to dynamically add root attributes/
+			var map = {};
+			for(var j=0; j<linked.length; j++) {
+				map[locCode(locales[j])] = status.details[j];
+			}
+			if(locStr.indexOf('-')>=0) {
+				// Not a shorthand locale, so include it in the map.
+				map[locStr] = status.details[i];
+			}
+			var script = '\n\t\t<script>(function() {'
+					+ '\n\t\t\tvar details = ' + JSON.stringify(map) + ';'
+					+ '\n\t\t\tvar reactRoot = document.getElementById("root").children[0];'
+					+ '\n\t\t\tif(details[navigator.language] && reactRoot) {'
+					+ '\n\t\t\t\treactRoot.className = details[navigator.language].classAttr;'
+					+ '\n\t\t\t\treactRoot.setAttribute("data-react-checksum", details[navigator.language].checksum);'
+					+ '\n\t\t\t}'
+					+ '\n\t\t})();</script>';
+			htmlPlugin.postProcessHtml(script, {}, {head:[], body:[]}).then(function(procssedScript) {
+				addHtmlAsset(compilation, locStr, html.before + rootOpen + status.prerender[i] + rootClose
+						+ procssedScript + html.after);
+				localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, callback);
+			});
+
+		}
+	}
+}
+
+function addHtmlAsset(compilation, loc, data) {
+	compilation.assets['index.' + loc + '.html'] = {
 		size: function() { return data.length; },
 		source: function() { return data; },
 		updateHash: function(hash) { return hash.update(data); },
@@ -99,7 +189,7 @@ function LocaleHtmlPlugin(options) {
 
 LocaleHtmlPlugin.prototype.apply = function(compiler) {
 	var opts = this.options;
-	var status = {prerender:{}, failed:[], err:{}};
+	var status = {prerender:[], details:[], alias:[], failed:[], err:{}};
 	var jsAssets = [];
 
 	// Determine the target locales and load up the startup scripts.
@@ -114,28 +204,50 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 					var src = compilation.assets[opts.chunk].source(), locStr;
 					for(var i=0; i<locales.length; i++) {
 						try {
-							locStr = locales[i].replace(/[\\\/]/g, '-');
+							locStr = locCode(locales[i]);
 							compilation.applyPlugins('prerender-localized', {chunk:opts.chunk, locale:locStr});
-							status.prerender[locales[i]] = vdomRender({
+							var appHtml = vdomRender({
 								server: opts.server,
 								code: src,
 								locale: locStr,
 								file: opts.chunk.replace(/\.js$/, '.' + locStr + '.js'),
 								externals: opts.externals
 							});
+							status.details[i] = {};
+							appHtml = appHtml.replace(/^(<[^>]*class=")([^"]*)"/i, function(match, before, classAttr) {
+								status.details[i].rootClasses = classAttr;
+								return before + '"';
+							}).replace(/^(<[^>]*data-react-checksum=")([^"]*)"/i, function(match, before, checksum) {
+								status.details[i].checksum = checksum;
+								return before + '"';
+							});
+							var index = status.prerender.indexOf(appHtml);
+							if(index===-1) {
+								status.prerender[i] = appHtml;
+							} else {
+								compilation.applyPlugins('prerender-duplicate', {chunk:opts.chunk, locale:locales[i]});
+								status.alias[i] = locales[index];
+							}
 						} catch(e) {
 							status.failed.push(locStr);
 							status.err[locales[i]] = e;
 						}
 					}
+					simplifyAliases(locales, status);
 				}
 			});
 
 			// For any target locales that don't already have appinfo files, dynamically generate new ones.
 			compilation.plugin('webos-meta-list-localized', function(locList) {
 				for(var i=0; i<locales.length; i++) {
-					if(!status.err[locales[i]] && locList.indexOf(locales[i])===-1) {
-						locList.push({generate:path.join('resources', locales[i], 'appinfo.json')});
+					if(!status.err[locales[i]] && locales[i].indexOf('multi')!==0) {
+						var lang = locales[i].split(/[\\\/]+/);
+						if((status.alias[i]!==lang[0] || status.alias[i].indexOf('multi')===0)
+								&& locList.indexOf(locales[i])===-1) {
+							// Not aliased, or not aliased to parent language
+							// OR aliased to a multi-language index.html, so create appinfo if not exists
+							locList.push({generate:path.join('resources', locales[i], 'appinfo.json')});
+						}
 					}
 				}
 				return locList;
@@ -144,9 +256,13 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			// For each prerendered target locale's appinfo, update the 'main' and 'usePrerendering' values.
 			compilation.plugin('webos-meta-localized-appinfo', function(meta, info) {
 				// TODO: update webos-meta-webpack-plugin to replace '\' with '/' in info.locale
-				var locCode = info.locale.replace(/\\/g, '/');
-				if(locales.indexOf(locCode)>=0 && !status.err[locCode]) {
-					meta.main = 'index.' + info.locale.replace(/[\\\/]/g, '-') + '.html';
+				var loc = info.locale.replace(/\\/g, '/');
+				var index = locales.indexOf(loc);
+				if(index>=0 && !status.err[loc]) {
+					if(status.alias[index]) {
+						loc = status.alias[index];
+					}
+					meta.main = 'index.' + locCode(loc) + '.html';
 					meta.usePrerendering = true;
 				}
 				return meta;
@@ -180,16 +296,12 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			// Generate an isomorphic HTML template and insert the prerendered locales with it into locale-specific
 			// index.html files. Afterward, generate and updated root HTML template for fallback.
 			compilation.plugin('html-webpack-plugin-after-html-processing', function(htmlPluginData, callback) {
-				var tokens = findRootDiv(htmlPluginData.html, 0, htmlPluginData.html.length-6);
-				if(tokens) {
+				var html = findRootDiv(htmlPluginData.html, 0, htmlPluginData.html.length-6);
+				if(html) {
 					compilation.applyPlugins('locale-html-generate', {chunk:opts.chunk, locales:locales});
-					for(var i=0; i<locales.length; i++) {
-						if(!status.err[locales[i]]) {
-							localizedHtmlAsset(compilation, locales[i], tokens.before + '<div id="root">'
-									+ status.prerender[locales[i]] + '</div>' + tokens.after);
-						}
-					}
-					callback(null, htmlPluginData);
+					localizedHtml(0, locales, status, html, compilation, htmlPluginData.plugin, function() {
+						callback(null, htmlPluginData);
+					})
 				} else {
 					callback(new Error('LocaleHtmlPlugin: Unable find root div element. Please '
 							+ 'verify it exists within your HTML template.'), htmlPluginData);
