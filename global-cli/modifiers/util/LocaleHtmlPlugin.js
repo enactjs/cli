@@ -19,9 +19,9 @@ function parseLocales(context, target) {
 		return [];
 	} else if(Array.isArray(target)) {
 		return target;
-	} else if(target === 'tv' || target === 'tv-osd') {
+	} else if(target === 'tv-osd') {
 		return JSON.parse(fs.readFileSync(path.join(__dirname, 'locales-tv-osd.json'), {encoding: 'utf8'})).paths;
-	} else if(target === 'tv-full') {
+	} else if(target === 'tv') {
 		return JSON.parse(fs.readFileSync(path.join(__dirname, 'locales-tv.json'), {encoding: 'utf8'})).paths;
 	} else if(target === 'signage') {
 		return JSON.parse(fs.readFileSync(path.join(__dirname, 'locales-signage.json'), {encoding: 'utf8'})).paths;
@@ -138,7 +138,7 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 		if(linked.length===0) {
 			// Single locale, re-inject root classes and react checksum/
 			status.prerender[i] = status.prerender[i]
-					.replace(/^(<[^>]*class=")"/i, '$1' + status.details[i].rootClasses + '"')
+					.replace(/^(<[^>]*class="[^"]*)"/i, '$1' + status.details[i].rootClasses + '"')
 					.replace(/^(<[^>]*data-react-checksum=")"/i, '$1' + status.details[i].checksum + '"');
 			addHtmlAsset(compilation, locStr, html.before + rootOpen + status.prerender[i] + rootClose + html.after);
 			localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, callback);
@@ -146,17 +146,17 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 			// Multiple locales, add script logic to dynamically add root attributes/
 			var map = {};
 			for(var j=0; j<linked.length; j++) {
-				map[locCode(locales[j])] = status.details[j];
+				map[locCode(locales[linked[j]])] = status.details[linked[j]];
 			}
 			if(locStr.indexOf('-')>=0) {
 				// Not a shorthand locale, so include it in the map.
 				map[locStr] = status.details[i];
 			}
 			var script = '\n\t\t<script>(function() {'
-					+ '\n\t\t\tvar details = ' + JSON.stringify(map) + ';'
+					+ '\n\t\t\tvar details = ' + JSON.stringify(map, null, '\t').replace(/\n+/g, '\n\t\t\t') + ';'
 					+ '\n\t\t\tvar reactRoot = document.getElementById("root").children[0];'
 					+ '\n\t\t\tif(details[navigator.language] && reactRoot) {'
-					+ '\n\t\t\t\treactRoot.className = details[navigator.language].classAttr;'
+					+ '\n\t\t\t\treactRoot.className += details[navigator.language].rootClasses;'
 					+ '\n\t\t\t\treactRoot.setAttribute("data-react-checksum", details[navigator.language].checksum);'
 					+ '\n\t\t\t}'
 					+ '\n\t\t})();</script>';
@@ -169,6 +169,14 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 		}
 	}
 }
+
+/*
+function debug(locales, status) {
+	for(var i=0; i<locales.length; i++) {
+		console.log(i + '\t' + locales[i] + '\t' + status.alias[i]);
+	}
+}
+*/
 
 function addHtmlAsset(compilation, loc, data) {
 	compilation.assets['index.' + loc + '.html'] = {
@@ -214,7 +222,7 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 								externals: opts.externals
 							});
 							status.details[i] = {};
-							appHtml = appHtml.replace(/^(<[^>]*class=")([^"]*)"/i, function(match, before, classAttr) {
+							appHtml = appHtml.replace(/^(<[^>]*class="((?!enact-locale-)[^"])*)(\senact-locale-[^"]*)"/i, function(match, before, s, classAttr) {
 								status.details[i].rootClasses = classAttr;
 								return before + '"';
 							}).replace(/^(<[^>]*data-react-checksum=")([^"]*)"/i, function(match, before, checksum) {
