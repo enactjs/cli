@@ -155,10 +155,11 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 			var script = '\n\t\t<script>(function() {'
 					+ '\n\t\t\tvar details = ' + JSON.stringify(map, null, '\t').replace(/\n+/g, '\n\t\t\t') + ';'
 					+ '\n\t\t\tvar lang = navigator.language.toLowerCase();'
+					+ '\n\t\t\tvar conf = details[lang] || details[lang.substring(0, 2)];'
 					+ '\n\t\t\tvar reactRoot = document.getElementById("root").children[0];'
-					+ '\n\t\t\tif(details[lang] && reactRoot) {'
-					+ '\n\t\t\t\treactRoot.className += details[lang].rootClasses;'
-					+ '\n\t\t\t\treactRoot.setAttribute("data-react-checksum", details[lang].checksum);'
+					+ '\n\t\t\tif(conf && reactRoot) {'
+					+ '\n\t\t\t\treactRoot.className += conf.rootClasses;'
+					+ '\n\t\t\t\treactRoot.setAttribute("data-react-checksum", conf.checksum);'
 					+ '\n\t\t\t}'
 					+ '\n\t\t})();</script>';
 			htmlPlugin.postProcessHtml(script, {}, {head:[], body:[]}).then(function(procssedScript) {
