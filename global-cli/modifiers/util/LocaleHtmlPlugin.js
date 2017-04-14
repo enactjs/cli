@@ -146,18 +146,19 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 			// Multiple locales, add script logic to dynamically add root attributes/
 			var map = {};
 			for(var j=0; j<linked.length; j++) {
-				map[locCode(locales[linked[j]])] = status.details[linked[j]];
+				map[locCode(locales[linked[j]]).toLowerCase()] = status.details[linked[j]];
 			}
 			if(locStr.indexOf('-')>=0) {
 				// Not a shorthand locale, so include it in the map.
-				map[locStr] = status.details[i];
+				map[locStr.toLowerCase()] = status.details[i];
 			}
 			var script = '\n\t\t<script>(function() {'
 					+ '\n\t\t\tvar details = ' + JSON.stringify(map, null, '\t').replace(/\n+/g, '\n\t\t\t') + ';'
+					+ '\n\t\t\tvar lang = navigator.language.toLowerCase();'
 					+ '\n\t\t\tvar reactRoot = document.getElementById("root").children[0];'
-					+ '\n\t\t\tif(details[navigator.language] && reactRoot) {'
-					+ '\n\t\t\t\treactRoot.className += details[navigator.language].rootClasses;'
-					+ '\n\t\t\t\treactRoot.setAttribute("data-react-checksum", details[navigator.language].checksum);'
+					+ '\n\t\t\tif(details[lang] && reactRoot) {'
+					+ '\n\t\t\t\treactRoot.className += details[lang].rootClasses;'
+					+ '\n\t\t\t\treactRoot.setAttribute("data-react-checksum", details[lang].checksum);'
 					+ '\n\t\t\t}'
 					+ '\n\t\t})();</script>';
 			htmlPlugin.postProcessHtml(script, {}, {head:[], body:[]}).then(function(procssedScript) {
