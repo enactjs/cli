@@ -85,6 +85,7 @@ function localesInManifest(manifest, includeParents) {
 
 function simplifyAliases(locales, status) {
 	var links = {};
+	var sharedCSS = {};
 	var multiCount = 1;
 	for(var i=0; i<status.alias.length; i++) {
 		if(status.alias[i]) {
@@ -98,20 +99,63 @@ function simplifyAliases(locales, status) {
 				}
 				multiCount++;
 			}
+
+			status.details[i].rootClasses = status.details[i].rootClasses || '';
+			if(!sharedCSS[status.alias[i]]) {
+				sharedCSS[status.alias[i]] = status.details[i].rootClasses.split(/\s+/);
+			} else {
+				sharedCSS[status.alias[i]] = commonClasses(sharedCSS[status.alias[i]],
+						status.details[i].rootClasses.split(/\s+/));
+			}
 		}
 	}
 	for(var j=0; j<status.alias.length; j++) {
-		if(status.alias[j] && links[status.alias[j]]) {
-			status.alias[j] = links[status.alias[j]];
+		if(status.alias[j]) {
+			if(sharedCSS[status.alias[j]]) {
+				status.details[j].rootClasses = removeClasses(sharedCSS[status.alias[j]],
+						status.details[j].rootClasses);
+			}
+
+			if(links[status.alias[j]]) {
+				status.alias[j] = links[status.alias[j]];
+			}
 		}
 	}
 	for(var l in links) {
 		var index = locales.indexOf(l);
 		status.alias[index] = links[l];
+		status.details[index].rootClasses = removeClasses(sharedCSS[l], status.details[index].rootClasses);
 		locales.push(links[l]);
-		status.prerender[locales.length-1] = status.prerender[index];
+		if(sharedCSS[l] && sharedCSS[l].length>0) {
+			status.prerender[locales.length-1] = status.prerender[index]
+					.replace(/^(<[^>]*class="[^"]*)"/i, '$1 ' + sharedCSS[l].join(' ') + '"');
+		} else {
+			status.prerender[locales.length-1] = status.prerender[index];
+		}
 		status.prerender[index] = undefined;
 	}
+}
+
+function commonClasses(classes1, classes2) {
+	var matches = [];
+	for(var i=0; i<classes1.length; i++) {
+		if(classes2.indexOf(classes1[i])>=0 && classes1[i].length>0) {
+			matches.push(classes1[i]);
+		}
+	}
+	return matches;
+}
+
+function removeClasses(targets, classStr) {
+	var classes = classStr.split(/\s+/);
+	for(var i=0; i<targets.length; i++) {
+		var match = classes.indexOf(targets[i]);
+		if(match>=0) {
+			classes.splice(match, 1);
+			i--;
+		}
+	}
+	return classes.join(' ');
 }
 
 function aliasedLocales(locale, aliases) {
@@ -243,7 +287,11 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 							status.err[locales[i]] = e;
 						}
 					}
-					simplifyAliases(locales, status);
+					try {
+						simplifyAliases(locales, status);
+					} catch(e) {
+						console.log(e);
+					}
 				}
 			});
 
