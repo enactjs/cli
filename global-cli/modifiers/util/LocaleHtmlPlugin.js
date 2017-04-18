@@ -254,13 +254,14 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 	var status = {prerender:[], details:[], alias:[], failed:[], err:{}};
 	var aiOptimize = {groups:{}, coverage:[]};
 	var jsAssets = [];
+	var locales = [];
 
-	// Determine the target locales and load up the startup scripts.
-	var locales = parseLocales(compiler.options.context, opts.locales);
-
-	// Prerender each locale desired and output an error on failure.
 	compiler.plugin('compilation', function(compilation) {
 		if(isNodeOutputFS(compiler)) {
+			// Determine the target locales and load up the startup scripts.
+			locales = parseLocales(compiler.options.context, opts.locales);
+
+			// Prerender each locale desired and output an error on failure.
 			compilation.plugin('chunk-asset', function(chunk, file) {
 				if(file === opts.chunk) {
 					compilation.applyPlugins('prerender-chunk', {chunk:opts.chunk, locales:locales});
@@ -408,7 +409,7 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 					+ status.failed.join(', ')));
 		} else {
 			// Generate a JSON file that maps the locales to their HTML files.
-			if(opts.mapfile) {
+			if(opts.mapfile && isNodeOutputFS(compiler)) {
 				var out = 'locale-map.json';
 				if(typeof opts.mapfile === 'string') {
 					out = opts.mapfile;
