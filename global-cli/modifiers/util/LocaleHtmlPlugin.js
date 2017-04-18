@@ -244,6 +244,7 @@ function LocaleHtmlPlugin(options) {
 LocaleHtmlPlugin.prototype.apply = function(compiler) {
 	var opts = this.options;
 	var status = {prerender:[], details:[], alias:[], failed:[], err:{}};
+	var aiOptimize = {groups:{}, coverage:[]};
 	var jsAssets = [];
 
 	// Determine the target locales and load up the startup scripts.
@@ -299,9 +300,19 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			compilation.plugin('webos-meta-list-localized', function(locList) {
 				for(var i=0; i<locales.length; i++) {
 					if(!status.err[locales[i]] && locales[i].indexOf('multi')!==0) {
-						var lang = locales[i].split(/[\\\/]+/);
-						if((status.alias[i]!==lang[0] || status.alias[i].indexOf('multi')===0)
-								&& locList.indexOf(locales[i])===-1) {
+						var lang = locales[i].split(/[\\\/]+/)[0];
+						if(status.alias[i] && status.alias[i].indexOf('multi')===0) {
+							if(locales.indexOf(lang)>=0 || (aiOptimize.groups[lang] && aiOptimize.groups[lang]!==status.alias[i])) {
+								// Language entry exists, so we have to use full locale appinfo.json
+								if(locList.indexOf(locales[i])===-1) {
+									locList.push({generate:path.join('resources', locales[i], 'appinfo.json')});
+								}
+							} else if(!aiOptimize.groups[lang]) {
+								aiOptimize.groups[lang] = status.alias[i];
+								aiOptimize.coverage.push(locales[i]);
+								locList.push({generate:path.join('resources', lang, 'appinfo.json')});
+							}
+						} else if(status.alias[i]!==lang && locList.indexOf(locales[i])===-1) {
 							// Not aliased, or not aliased to parent language
 							// OR aliased to a multi-language index.html, so create appinfo if not exists
 							locList.push({generate:path.join('resources', locales[i], 'appinfo.json')});
@@ -315,13 +326,17 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			compilation.plugin('webos-meta-localized-appinfo', function(meta, info) {
 				// TODO: update webos-meta-webpack-plugin to replace '\' with '/' in info.locale
 				var loc = info.locale.replace(/\\/g, '/');
-				var index = locales.indexOf(loc);
-				if(index>=0 && !status.err[loc]) {
-					if(status.alias[index]) {
+				if(aiOptimize.coverage.indexOf(loc)===-1) {
+					var index = locales.indexOf(loc);
+					if(index===-1) {
+						loc = aiOptimize.groups[loc];
+					} else if(index>=0 && status.alias[index]) {
 						loc = status.alias[index];
 					}
-					meta.main = 'index.' + locCode(loc) + '.html';
-					meta.usePrerendering = true;
+					if(loc) {
+						meta.main = 'index.' + locCode(loc) + '.html';
+						meta.usePrerendering = true;
+					}
 				}
 				return meta;
 			});
