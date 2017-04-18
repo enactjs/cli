@@ -36,6 +36,7 @@ function parseLocales(context, target) {
 	}
 }
 
+// Converts from a locale path to a locale code identifier
 function locCode(locale) {
 	return locale.replace(/[\\\/]/g, '-');
 }
@@ -54,24 +55,15 @@ function findRootDiv(html, start, end) {
 }
 
 // Scan an ilib manifest and  detect all locales that it uses.
-function localesInManifest(manifest, includeParents) {
+function localesInManifest(manifest) {
 	try {
 		var meta = JSON.parse(fs.readFileSync(manifest, {encoding:'utf8'}).replace(/-/g, '/'));
 		var locales = [];
 		var curr;
 		for(var i=0; meta.files && i<meta.files.length; i++) {
-			if(includeParents) {
-				for(curr = path.dirname(meta.files[i]); curr && curr !== '.'; curr = path.dirname(curr)) {
-					if(locales.indexOf(curr) === -1 && (curr.length === 2 || curr.indexOf('/') === 2
-							|| curr.indexOf('\\') === 2)) {
-						locales.push(curr.replace(/\\/g, '/'));
-					}
-				}
-			} else {
-				curr = path.dirname(meta.files[i]).replace(/\\/g, '/');
-				if(locales.indexOf(curr) === -1 && (curr.length === 2 || curr.indexOf('/'))) {
-					locales.push(curr);
-				}
+			curr = path.dirname(meta.files[i]).replace(/\\/g, '/');
+			if(locales.indexOf(curr) === -1 && (curr.length === 2 || curr.indexOf('/'))) {
+				locales.push(curr);
 			}
 		}
 		locales.sort(function(a, b) {
@@ -83,10 +75,14 @@ function localesInManifest(manifest, includeParents) {
 	}
 }
 
+// Simplifies and groups the locales and aliases to ensure minimal output needed.
 function simplifyAliases(locales, status) {
 	var links = {};
 	var sharedCSS = {};
 	var multiCount = 1;
+
+	// First pass: simplify alias names to language designations or 'multi' for multi-language groupings.
+	// Additionally determines all shared root CSS classes for the groupings.
 	for(var i=0; i<status.alias.length; i++) {
 		if(status.alias[i]) {
 			var lang = locales[i].split(/[\\\/]+/)[0];
@@ -109,6 +105,9 @@ function simplifyAliases(locales, status) {
 			}
 		}
 	}
+
+	// Second pass: with the shared root CSS classes determined, remove from the individual clas strings
+	// and update the alias names to the new simplified names.
 	for(var j=0; j<status.alias.length; j++) {
 		if(status.alias[j]) {
 			if(sharedCSS[status.alias[j]]) {
@@ -121,6 +120,9 @@ function simplifyAliases(locales, status) {
 			}
 		}
 	}
+
+	// For every grouping processed, create new faux-locale entries to generate html files for, and
+	// re-insert the common root CSS classes back into the shared prerendered html code.
 	for(var l in links) {
 		var index = locales.indexOf(l);
 		status.alias[index] = links[l];
@@ -136,6 +138,7 @@ function simplifyAliases(locales, status) {
 	}
 }
 
+// Determine common matching CSS classes between 2 class lists.
 function commonClasses(classes1, classes2) {
 	var matches = [];
 	for(var i=0; i<classes1.length; i++) {
@@ -146,6 +149,7 @@ function commonClasses(classes1, classes2) {
 	return matches;
 }
 
+// Remove target CSS classes from a class string.
 function removeClasses(targets, classStr) {
 	var classes = classStr.split(/\s+/);
 	for(var i=0; i<targets.length; i++) {
@@ -158,6 +162,7 @@ function removeClasses(targets, classStr) {
 	return classes.join(' ');
 }
 
+// List all indices for locales that match the desired alias.
 function aliasedLocales(locale, aliases) {
 	var matches = [];
 	for(var i=0; i<aliases.length; i++) {
@@ -173,6 +178,7 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 	if(i===locales.length) {
 		callback();
 	} else if(!status.prerender[i] || status.alias[i] || status.err[i]) {
+		// Non-actionable locale; skip and move on to next one.
 		localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, callback);
 	} else {
 		var locStr = locCode(locales[i]);
@@ -180,24 +186,25 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 		var rootClose = '</div>';
 		var linked = aliasedLocales(locales[i], status.alias);
 		if(linked.length===0) {
-			// Single locale, re-inject root classes and react checksum/
+			// Single locale, re-inject root classes and react checksum.
 			status.prerender[i] = status.prerender[i]
 					.replace(/^(<[^>]*class="[^"]*)"/i, '$1' + status.details[i].rootClasses + '"')
 					.replace(/^(<[^>]*data-react-checksum=")"/i, '$1' + status.details[i].checksum + '"');
-			addHtmlAsset(compilation, locStr, html.before + rootOpen + status.prerender[i] + rootClose + html.after);
+			emitAsset(compilation, 'index.' + locStr + '.html', html.before + rootOpen + status.prerender[i]
+					+ rootClose + html.after);
 			localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, callback);
 		} else {
-			// Multiple locales, add script logic to dynamically add root attributes/
-			var map = {};
+			// Multiple locales, add script logic to dynamically add root attributes.
+			var mapping = {};
 			for(var j=0; j<linked.length; j++) {
-				map[locCode(locales[linked[j]]).toLowerCase()] = status.details[linked[j]];
+				mapping[locCode(locales[linked[j]]).toLowerCase()] = status.details[linked[j]];
 			}
 			if(locStr.indexOf('-')>=0) {
 				// Not a shorthand locale, so include it in the map.
-				map[locStr.toLowerCase()] = status.details[i];
+				mapping[locStr.toLowerCase()] = status.details[i];
 			}
 			var script = '\n\t\t<script>(function() {'
-					+ '\n\t\t\tvar details = ' + JSON.stringify(map, null, '\t').replace(/\n+/g, '\n\t\t\t') + ';'
+					+ '\n\t\t\tvar details = ' + JSON.stringify(mapping, null, '\t').replace(/\n+/g, '\n\t\t\t') + ';'
 					+ '\n\t\t\tvar lang = navigator.language.toLowerCase();'
 					+ '\n\t\t\tvar conf = details[lang] || details[lang.substring(0, 2)];'
 					+ '\n\t\t\tvar reactRoot = document.getElementById("root").children[0];'
@@ -206,9 +213,10 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 					+ '\n\t\t\t\treactRoot.setAttribute("data-react-checksum", conf.checksum);'
 					+ '\n\t\t\t}'
 					+ '\n\t\t})();</script>';
+			// Process the script node html to minify it as needed.
 			htmlPlugin.postProcessHtml(script, {}, {head:[], body:[]}).then(function(procssedScript) {
-				addHtmlAsset(compilation, locStr, html.before + rootOpen + status.prerender[i] + rootClose
-						+ procssedScript + html.after);
+				emitAsset(compilation, 'index.' + locStr + '.html', html.before + rootOpen + status.prerender[i]
+						+ rootClose + procssedScript + html.after);
 				localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, callback);
 			});
 
@@ -224,8 +232,8 @@ function debug(locales, status) {
 }
 */
 
-function addHtmlAsset(compilation, loc, data) {
-	compilation.assets['index.' + loc + '.html'] = {
+function emitAsset(compilation, file, data) {
+	compilation.assets[file] = {
 		size: function() { return data.length; },
 		source: function() { return data; },
 		updateHash: function(hash) { return hash.update(data); },
@@ -259,6 +267,7 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 					var src = compilation.assets[opts.chunk].source(), locStr;
 					for(var i=0; i<locales.length; i++) {
 						try {
+							// Prerender the locale.
 							locStr = locCode(locales[i]);
 							compilation.applyPlugins('prerender-localized', {chunk:opts.chunk, locale:locStr});
 							var appHtml = vdomRender({
@@ -268,6 +277,8 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 								file: opts.chunk.replace(/\.js$/, '.' + locStr + '.js'),
 								externals: opts.externals
 							});
+
+							// Extract the root CSS classes and react checksum from the prerendered html code.
 							status.details[i] = {};
 							appHtml = appHtml.replace(/^(<[^>]*class="((?!enact-locale-)[^"])*)(\senact-locale-[^"]*)"/i, function(match, before, s, classAttr) {
 								status.details[i].rootClasses = classAttr;
@@ -276,11 +287,13 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 								status.details[i].checksum = checksum;
 								return before + '"';
 							});
+
+							// Dedupe the sanitized html code and alias as needed
 							var index = status.prerender.indexOf(appHtml);
 							if(index===-1) {
 								status.prerender[i] = appHtml;
 							} else {
-								compilation.applyPlugins('prerender-duplicate', {chunk:opts.chunk, locale:locales[i]});
+								compilation.applyPlugins('prerender-duplicate', {chunk:opts.chunk, locale:locStr});
 								status.alias[i] = locales[index];
 							}
 						} catch(e) {
@@ -288,11 +301,8 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 							status.err[locales[i]] = e;
 						}
 					}
-					try {
-						simplifyAliases(locales, status);
-					} catch(e) {
-						console.log(e);
-					}
+					// Simplify out aliases and group together for minimal file output.
+					simplifyAliases(locales, status);
 				}
 			});
 
@@ -300,21 +310,27 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			compilation.plugin('webos-meta-list-localized', function(locList) {
 				for(var i=0; i<locales.length; i++) {
 					if(!status.err[locales[i]] && locales[i].indexOf('multi')!==0) {
+						// Handle each locale that isn't a multi-language group item and hasn't failed prerendering.
 						var lang = locales[i].split(/[\\\/]+/)[0];
 						if(status.alias[i] && status.alias[i].indexOf('multi')===0) {
+							// Locale is part of a multi-language grouping.
 							if(locales.indexOf(lang)>=0 || (aiOptimize.groups[lang] && aiOptimize.groups[lang]!==status.alias[i])) {
-								// Language entry exists, so we have to use full locale appinfo.json
-								if(locList.indexOf(locales[i])===-1) {
+								// Parent language entry already exists, or the appinfo optimization group for this language points
+								// to a different alias, so we can't simplify any further.
+								if(locList.indexOf(locales[i])===-1 && locList.indexOf(locales[i].replace(/\\+/g, '/'))===-1) {
+									// Add full locale appinfo entry if not already there.
 									locList.push({generate:path.join('resources', locales[i], 'appinfo.json')});
 								}
 							} else if(!aiOptimize.groups[lang]) {
+								// No parent language and no existing appinfo optimization group for this language, so let's
+								// create one and simplify the output for the locale.
 								aiOptimize.groups[lang] = status.alias[i];
 								aiOptimize.coverage.push(locales[i]);
 								locList.push({generate:path.join('resources', lang, 'appinfo.json')});
 							}
-						} else if(status.alias[i]!==lang && locList.indexOf(locales[i])===-1) {
-							// Not aliased, or not aliased to parent language
-							// OR aliased to a multi-language index.html, so create appinfo if not exists
+						} else if(status.alias[i]!==lang && locList.indexOf(locales[i])===-1
+								&& locList.indexOf(locales[i].replace(/\\+/g, '/'))===-1) {
+							// Not aliased, or not aliased to parent language so create appinfo if it does not exist.
 							locList.push({generate:path.join('resources', locales[i], 'appinfo.json')});
 						}
 					}
@@ -324,13 +340,15 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 
 			// For each prerendered target locale's appinfo, update the 'main' and 'usePrerendering' values.
 			compilation.plugin('webos-meta-localized-appinfo', function(meta, info) {
-				// TODO: update webos-meta-webpack-plugin to replace '\' with '/' in info.locale
-				var loc = info.locale.replace(/\\/g, '/');
+				var loc = info.locale.replace(/[\\-]+/g, '/');
+				// Exclude appinfo entries covered by appinfo optimization groups.
 				if(aiOptimize.coverage.indexOf(loc)===-1) {
 					var index = locales.indexOf(loc);
 					if(index===-1) {
+						// When not found in our target list, fallback to our appinfo optimization groups.
 						loc = aiOptimize.groups[loc];
 					} else if(index>=0 && status.alias[index]) {
+						// Resolve any locale aliases.
 						loc = status.alias[index];
 					}
 					if(loc) {
@@ -389,31 +407,25 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			callback(new Error('LocaleHtmlPlugin: Failed to prerender localized HTML for '
 					+ status.failed.join(', ')));
 		} else {
+			// Generate a JSON file that maps the locales to their HTML files.
 			if(opts.mapfile) {
 				var out = 'locale-map.json';
 				if(typeof opts.mapfile === 'string') {
 					out = opts.mapfile;
 				}
 
-				var mapping = {};
+				var mapping = {fallback:'index.html', locales:{}};
 				for(var i=0; i<locales.length; i++) {
 					if(status.alias.indexOf(locales[i])===-1) {
 						var code = locCode(locales[i]);
 						if(status.alias[i]) {
-							mapping[code] = 'index.' + locCode(status.alias[i]) + '.html';
+							mapping.locales[code] = 'index.' + locCode(status.alias[i]) + '.html';
 						} else {
-							mapping[code] = 'index.' + code + '.html';
+							mapping.locales[code] = 'index.' + code + '.html';
 						}
 					}
 				}
-
-				var data = JSON.stringify(mapping, null, '\t');
-				compilation.assets[out] = {
-					size: function() { return data.length; },
-					source: function() { return data; },
-					updateHash: function(hash) { return hash.update(data); },
-					map: function() { return null; }
-				};
+				emitAsset(compilation, out, JSON.stringify(mapping, null, '\t'))
 			}
 			callback();
 		}
