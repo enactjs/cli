@@ -62,7 +62,9 @@ function localesInManifest(manifest, deepestOnly) {
 		var curr;
 		for(var i=0; meta.files && i<meta.files.length; i++) {
 			curr = path.dirname(meta.files[i]).replace(/\\/g, '/');
-			if(locales.indexOf(curr) === -1 && (curr.length === 2 || curr.indexOf('/')===2)) {
+			if(locales.indexOf(curr) === -1 && curr.indexOf('mis')!==0 && curr.indexOf('mul')!==0
+					&& curr.indexOf('und')!==0 && curr.indexOf('zxx')!==0  && (curr.length === 2
+					|| curr.indexOf('/')===2 || curr.length === 3 || curr.indexOf('/')===3)) {
 				if(deepestOnly) {
 					// Remove any matches of parent directories.
 					for(var x=curr; x.indexOf('/')!==-1; x=path.dirname(x)) {
