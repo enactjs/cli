@@ -389,6 +389,32 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			callback(new Error('LocaleHtmlPlugin: Failed to prerender localized HTML for '
 					+ status.failed.join(', ')));
 		} else {
+			if(opts.mapfile) {
+				var out = 'locale-map.json';
+				if(typeof opts.mapfile === 'string') {
+					out = opts.mapfile;
+				}
+
+				var mapping = {};
+				for(var i=0; i<locales.length; i++) {
+					if(status.alias.indexOf(locales[i])===-1) {
+						var code = locCode(locales[i]);
+						if(status.alias[i]) {
+							mapping[code] = 'index.' + locCode(status.alias[i]) + '.html';
+						} else {
+							mapping[code] = 'index.' + code + '.html';
+						}
+					}
+				}
+
+				var data = JSON.stringify(mapping, null, '\t');
+				compilation.assets[out] = {
+					size: function() { return data.length; },
+					source: function() { return data; },
+					updateHash: function(hash) { return hash.update(data); },
+					map: function() { return null; }
+				};
+			}
 			callback();
 		}
 	});
