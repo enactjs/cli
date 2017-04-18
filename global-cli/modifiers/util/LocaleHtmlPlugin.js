@@ -28,7 +28,7 @@ function parseLocales(context, target) {
 	} else if(target === 'used') {
 		return localesInManifest(path.join(context, 'resources', 'ilibmanifest.json'));
 	} else if(target === 'all') {
-		return localesInManifest('node_modules/@enact/i18n/ilibmanifest');
+		return localesInManifest(path.join('node_modules', '@enact', 'i18n', 'ilib', 'locale', 'ilibmanifest.json'), true);
 	} else if(/\.json$/i.test(target)) {
 		return JSON.parse(fs.readFileSync(target, {encoding: 'utf8'})).paths;
 	} else {
@@ -54,16 +54,34 @@ function findRootDiv(html, start, end) {
 	}
 }
 
-// Scan an ilib manifest and  detect all locales that it uses.
-function localesInManifest(manifest) {
+// Scan an ilib manifest and detect all locales that it uses.
+function localesInManifest(manifest, deepestOnly) {
 	try {
 		var meta = JSON.parse(fs.readFileSync(manifest, {encoding:'utf8'}).replace(/-/g, '/'));
 		var locales = [];
 		var curr;
 		for(var i=0; meta.files && i<meta.files.length; i++) {
 			curr = path.dirname(meta.files[i]).replace(/\\/g, '/');
-			if(locales.indexOf(curr) === -1 && (curr.length === 2 || curr.indexOf('/'))) {
-				locales.push(curr);
+			if(locales.indexOf(curr) === -1 && (curr.length === 2 || curr.indexOf('/')===2)) {
+				if(deepestOnly) {
+					// Remove any matches of parent directories.
+					for(var x=curr; x.indexOf('/')!==-1; x=path.dirname(x)) {
+						var index = locales.indexOf(x);
+						if(index>=0) {
+							locales.splice(index, 1);
+						}
+					}
+					// Only add the entry if children aren't already in the list.
+					var childFound = false;
+					for(var k=0; k<locales.length && !childFound; k++) {
+						childFound = (locales[k].indexOf(curr)===0);
+					}
+					if(!childFound) {
+						locales.push(curr);
+					}
+				} else {
+					locales.push(curr);
+				}
 			}
 		}
 		locales.sort(function(a, b) {
