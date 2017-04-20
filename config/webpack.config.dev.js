@@ -39,7 +39,7 @@ var enact = pkg.enact || {};
 // The production configuration is different and lives in a separate file.
 module.exports = {
 	// We use sourcemaps to allow devtools to view the original module code data
-	devtool: 'sourcemap',
+	devtool: 'cheap-module-source-map',
 	// These are the "entry points" to our application.
 	// This means they will be the "root" imports that are included in JS bundle.
 	// The first two entry points enable "hot" CSS and auto-refreshes for JS.
