@@ -189,6 +189,7 @@ module.exports = {
 	// Point ESLint to our predefined config.
 	eslint: {
 		configFile: require.resolve('eslint-config-enact'),
+		cache: true,
 		useEslintrc: false,
 		failOnError: true
 	},
