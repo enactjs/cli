@@ -68,7 +68,9 @@ module.exports = function(opts) {
 
 		// Update locale if needed.
 		if(opts.locale && sandbox.iLibLocale && sandbox.iLibLocale.updateLocale) {
+			console.resume();
 			sandbox.iLibLocale.updateLocale(opts.locale);
+			console.mute();
 		}
 
 		rendered = opts.server.renderToString(m.exports['default'] || m.exports);
