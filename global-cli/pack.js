@@ -137,17 +137,18 @@ function displayHelp() {
 	console.log('    -h, --help        Display help information');
 	console.log();
 	/*
-		Hidden Options:
-			--snapshot            Extension of isomorphic code layout which builds for V8 snapshot support
+		Private Options:
+			-v8, --snapshot       Extension of isomorphic code layout which builds for V8 snapshot support
 			--no-minify           Will skip minification during production build
 			--framework           Builds the @enact/*, react, and react-dom into an external framework
 			--externals           Specify a local directory path to the standalone external framework
 			--externals-inject    Remote public path to the external framework for use injecting into HTML
-			--locales             Specifies to prerender locales. Can be:
+			-l, --locales         Extension of isomorphic code layout to prerender locales. Can be:
 			                          "used" - Prerender locales used within ./resources/
 			                          "tv" - Prerender locales supported on the TV platform
 			                          "signage" - Prerender locales supported on the signage platform
-			                          "ilib" - Prerender all locales that iLib supports
+			                          "all" - Prerender all locales that iLib supports
+			                          <JSON-filepath> - Prerender the locales listed within the JSON file
 			                          <commana-separated-values> - Prerender the specifically listed locales
 	*/
 	process.exit(0);
@@ -155,10 +156,10 @@ function displayHelp() {
 
 module.exports = function(args) {
 	var opts = minimist(args, {
-		boolean: ['minify', 'framework', 's', 'stats', 'p', 'production', 'i', 'isomorphic', 'snapshot', 'w', 'watch', 'h', 'help'],
-		string: ['externals', 'externals-inject', 'locales'],
+		boolean: ['minify', 'framework', 's', 'stats', 'p', 'production', 'i', 'isomorphic', 'v8', 'snapshot', 'w', 'watch', 'h', 'help'],
+		string: ['externals', 'externals-inject', 'l', 'locales'],
 		default: {minify:true},
-		alias: {s:'stats', p:'production', i:'isomorphic', w:'watch', h:'help'}
+		alias: {s:'stats', p:'production', i:'isomorphic', l:'locales', v8:'snapshot', w:'watch', h:'help'}
 	});
 	if (opts.help) displayHelp();
 

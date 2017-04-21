@@ -62,7 +62,8 @@ module.exports = function(karma) {
 					path.resolve('./node_modules')
 				],
 				alias: {
-					'ilib':'@enact/i18n/ilib/lib'
+					'ilib':'@enact/i18n/ilib/lib',
+					'react-addons-test-utils':'react-dom/test-utils'
 				}
 			},
 			// @remove-on-eject-begin

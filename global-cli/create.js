@@ -7,7 +7,7 @@ var
 	semver = require('semver'),
 	exists = require('path-exists').sync;
 
-var ENACT_DEV_NPM = 'enyojs/enact-dev';
+var ENACT_DEV_NPM = 'enact-dev';
 
 function createApp(output, template, link, local, verbose) {
 	var project = path.resolve(output);
