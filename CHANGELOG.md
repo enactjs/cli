@@ -1,3 +1,30 @@
+## 0.8.0 (April 21, 2017)
+
+With the exception of webpack2-related packages, all dependencies have been updated to their current releases.
+
+### create
+
+* Template updated for Enact 1.1.0 and React 15.5.4.
+* Added `prop-types` dependency.
+* Fixed `--local` option to use `enact-dev` on NPM rather than git shorthand.
+
+### serve
+
+* Fixed `--port` option parsing along with support for `PORT` environment variable.
+
+### pack
+
+* Improved console output when prerendering in isomorphic code layout.
+* Uses `cheap-module-source-map` instead of `source-map`. See https://github.com/webpack/webpack/issues/2145#issuecomment-294361203
+* Enabled support for eslint caching to improve development mode build speed.
+* Appinfo files will now correctly be ignore by the ilib-webpack-plugin (as they're already handled by webos-meta-webpack-plugin).
+* Improved communication between plugins.
+
+### test
+
+* Updated use react-test-renderer with Enzyme with alias fallback to avoid any compatibility issues.
+
+
 ## 0.7.0 (March 31, 2017)
 
 Added support for a link command (`enact link`) as a shorthand to link in Enact library dependencies.
