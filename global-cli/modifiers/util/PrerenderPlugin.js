@@ -2,7 +2,7 @@ var
 	fs = require('fs'),
 	path = require('path'),
 	chalk = require('chalk'),
-	vdomRender = require('./vdom-server-render');
+	vdomServer = require('./vdom-server-render');
 
 // Determine if it's a NodeJS output filesystem or if it's a foreign/virtual one.
 function isNodeOutputFS(compiler) {
@@ -41,9 +41,9 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 				if(file === opts.chunk) {
 					try {
 						compilation.applyPlugins('prerender-chunk', {chunk:opts.chunk});
-						status.prerender = vdomRender({
+						status.prerender = vdomServer.render({
 							server: opts.server,
-							code: compilation.assets[opts.chunk].source(),
+							code: vdomServer.prepare(compilation.assets[opts.chunk].source(), opts),
 							file: opts.chunk,
 							externals: opts.externals
 						});

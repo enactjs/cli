@@ -1,7 +1,7 @@
 var
 	path = require('path'),
 	fs = require('fs'),
-	vdomRender = require('./vdom-server-render');
+	vdomServer = require('./vdom-server-render');
 
 // Determine if it's a NodeJS output filesystem or if it's a foreign/virtual one.
 function isNodeOutputFS(compiler) {
@@ -285,13 +285,13 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			compilation.plugin('chunk-asset', function(chunk, file) {
 				if(file === opts.chunk) {
 					compilation.applyPlugins('prerender-chunk', {chunk:opts.chunk, locales:locales});
-					var src = compilation.assets[opts.chunk].source(), locStr;
+					var src = vdomServer.prepare(compilation.assets[opts.chunk].source(), opts), locStr;
 					for(var i=0; i<locales.length; i++) {
 						try {
 							// Prerender the locale.
 							locStr = locCode(locales[i]);
 							compilation.applyPlugins('prerender-localized', {chunk:opts.chunk, locale:locStr});
-							var appHtml = vdomRender({
+							var appHtml = vdomServer.render({
 								server: opts.server,
 								code: src,
 								locale: locStr,
