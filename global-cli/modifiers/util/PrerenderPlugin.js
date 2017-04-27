@@ -37,6 +37,11 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 	// Prerender the desired chunk asset when it's created.
 	compiler.plugin('compilation', function(compilation) {
 		if(isNodeOutputFS(compiler)) {
+			// Ensure that any async chunk-loading jsonp functions are isomorphically compatible.
+			compilation.mainTemplate.plugin('bootstrap', function(source) {
+				return source.replace(/window/g, '(function() { return this; }())');
+			});
+
 			compilation.plugin('chunk-asset', function(chunk, file) {
 				if(file === opts.chunk) {
 					try {

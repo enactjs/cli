@@ -39,8 +39,7 @@ var context = vm.createContext(sandbox);
 */
 module.exports = {
 	prepare: function(code, opts) {
-		code = code.replace(/window\["webpackJsonpApp"\]/g, 'global["webpackJsonpApp"]')
-				.replace('return __webpack_require__(0);', '__webpack_require__.e = function() {};\nreturn __webpack_require__(0);');
+		code = code.replace('return __webpack_require__(0);', '__webpack_require__.e = function() {};\nreturn __webpack_require__(0);');
 
 		if(opts.externals) {
 			// Add external Enact framework filepath if it's used.

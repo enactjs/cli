@@ -244,14 +244,6 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 	}
 }
 
-/*
-function debug(locales, status) {
-	for(var i=0; i<locales.length; i++) {
-		console.log(i + '\t' + locales[i] + '\t' + status.alias[i]);
-	}
-}
-*/
-
 function emitAsset(compilation, file, data) {
 	compilation.assets[file] = {
 		size: function() { return data.length; },
@@ -280,6 +272,11 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 		if(isNodeOutputFS(compiler)) {
 			// Determine the target locales and load up the startup scripts.
 			locales = parseLocales(compiler.options.context, opts.locales);
+
+			// Ensure that any async chunk-loading jsonp functions are isomorphically compatible.
+			compilation.mainTemplate.plugin('bootstrap', function(source) {
+				return source.replace(/window/g, '(function() { return this; }())');
+			});
 
 			// Prerender each locale desired and output an error on failure.
 			compilation.plugin('chunk-asset', function(chunk, file) {
