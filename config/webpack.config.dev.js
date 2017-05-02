@@ -10,9 +10,7 @@
 // @remove-on-eject-end
 
 var path = require('path');
-var fs = require('fs');
 var webpack = require('webpack');
-var findCacheDir = require('find-cache-dir');
 var autoprefixer = require('autoprefixer');
 var LessPluginRi = require('resolution-independence');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -23,15 +21,7 @@ var WebOSMetaPlugin = require('webos-meta-webpack-plugin');
 var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 var WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 
-function readJSON(file) {
-	try {
-		return JSON.parse(fs.readFileSync(file, {encoding:'utf8'}));
-	} catch(e) {
-		return null;
-	}
-}
-
-var pkg = readJSON('package.json') || {};
+var pkg = require(path.resolve('./package.json'));
 var enact = pkg.enact || {};
 
 // This is the development configuration.
@@ -60,13 +50,16 @@ module.exports = {
 		// There will be one main bundle, and one file per asynchronous chunk.
 		// We don't currently advertise code splitting but Webpack supports it.
 		filename: '[name].js',
+		// There are also additional JS chunk files if you use code splitting.
+		chunkFilename: 'chunk.[name].js',
 		// Add /* filename */ comments to generated require()s in the output.
 		pathinfo: true
 	},
 	resolve: {
 		// These are the reasonable defaults supported by the React/ES6 ecosystem.
-		extensions: ['', '.js', '.jsx', '.es6'],
-		root: path.resolve('./node_modules'),
+		extensions: ['.js', '.jsx', '.json'],
+		// Allows us to specify paths to check for module resolving.
+		modules: ['node_modules', path.resolve('./node_modules')],
 		alias: {
 			// @remove-on-eject-begin
 			'promise/lib/rejection-tracking': require.resolve('promise/lib/rejection-tracking'),
@@ -82,100 +75,127 @@ module.exports = {
 	// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
 	// directory of `enact-dev` itself rather than the project directory.
 	resolveLoader: {
-		root: path.resolve(__dirname, '../node_modules'),
-		fallback: path.resolve('./node_modules')
+		modules: [
+			path.resolve(__dirname, '../node_modules'),
+			path.resolve('./node_modules')
+		]
 	},
 	// @remove-on-eject-end
-	// Optional configuration for polyfilling NodeJS built-ins.
-	node: enact.node || null,
 	module: {
-		// First, run the linter.
-		// It's important to do this before Babel processes the JS.
-		preLoaders: [
+		rules: [
+			// First, run the linter.
+			// It's important to do this before Babel processes the JS.
 			{
-				test: /\.(js|jsx|es6)$/,
+				test: /\.(js|jsx)$/,
+				enforce: 'pre',
+				// @remove-on-eject-begin
+				// Point ESLint to our predefined config.
+				options: {
+					configFile: require.resolve('eslint-config-enact'),
+					cache: true,
+					useEslintrc: false,
+					failOnError: true
+				},
+				// @remove-on-eject-end
 				loader: 'eslint-loader',
 				include: process.cwd(),
 				exclude: /node_modules/
-			}
-		],
-		loaders: [
+			},
+			// "file" loader makes sure those assets get copied during build
+			// When you `import` an asset, you get its output filename.
+			// Image filetypes get excluded to be handled by the url-loader later.
+			{
+				exclude: /\.(html|js|jsx|css|less|ejs|json|bmp|gif|jpe?g|png|svg)$/,
+				loader: 'file-loader',
+				options: {
+					name: '[path][name].[ext]'
+				}
+			},
+			// "url" loader works just like "file" loader but it also embeds
+			// assets smaller than specified size as data URLs to avoid requests.
+			// Assets bigger than the limit will fallback to the file-loader.
+			{
+				test: /\.(bmp|gif|jpe?g|png|svg)$/,
+				loader: 'url-loader',
+				options: {
+					limit: 10000,
+					name: '[path][name].[ext]'
+				}
+			},
 			// Process JS with Babel.
 			{
-				test: /\.(js|jsx|es6)$/,
-				loader: 'babel',
+				test: /\.(js|jsx)$/,
 				exclude: /node_modules.(?!@enact)/,
-				query: {
+				loader: 'babel-loader',
+				options: {
 					// @remove-on-eject-begin
 					babelrc: false,
 					extends: path.join(__dirname, '.babelrc'),
 					// @remove-on-eject-end
 					// This is a feature of `babel-loader` for webpack (not Babel itself).
-					// It enables caching results in ./node_modules/.cache/enact-dev/
-					// directory for faster rebuilds. So use findCacheDir() because of:
-					// https://github.com/facebookincubator/create-react-app/issues/483
-					cacheDirectory: findCacheDir({
-						name: 'enact-dev'
-					})
+					// It enables caching results in ./node_modules/.cache/babel-loader/
+					// directory for faster rebuilds.
+					cacheDirectory: true
 				}
 			},
 			// Multiple styling-support features are used together.
 			// "less" loader compiles any LESS-formatted syntax into standard CSS.
 			// "postcss" loader applies autoprefixer to our CSS.
 			// "css" loader resolves paths in CSS and adds assets as dependencies.
-			// "style" loader normally turns CSS into JS modules injecting <style>,
-			// but unlike in development configuration, we do something different.
-			// `ExtractTextPlugin` first applies the "postcss" and "css" loaders
-			// (second argument), then grabs the result CSS and puts it into a
-			// separate file in our build process. This way we actually ship
-			// a single CSS file in production instead of JS code injecting <style>
-			// tags. If you use code splitting, however, any async bundles will still
+			// `ExtractTextPlugin` applies the "less", "postcss" and "css" loaders,
+			// then grabs the result CSS and puts it into a separate file in our
+			// build process. If you use code splitting, any async bundles will still
 			// use the "style" loader inside the async code so CSS from them won't be
 			// in the main CSS file.
 			{
 				test: /\.(c|le)ss$/,
-				// "?-autoprefixer" disables autoprefixer in css-loader itself:
-				// https://github.com/webpack/css-loader/issues/281
-				// We already have it thanks to postcss. We only pass this flag in
-				// production because "css" loader only enables autoprefixer-powered
-				// removal of unnecessary prefixes when Uglify plugin is enabled.
-				// Webpack 1.x uses Uglify plugin as a signal to minify *all* the assets
-				// including CSS. This is confusing and will be removed in Webpack 2:
-				// https://github.com/webpack/webpack/issues/283
-				loader: ExtractTextPlugin.extract('style',
-						'css?-autoprefixer&modules&sourceMap&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss!less?sourceMap')
 				// Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
-			},
-			// JSON is not enabled by default in Webpack but both Node and Browserify
-			// allow it implicitly so we also enable it.
-			{
-				test: /\.json$/,
-				loader: 'json'
-			},
-			// "file" loader makes sure those assets get copied during build
-			// When you `import` an asset, you get its output filename.
-			{
-				test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/,
-				loader: 'file',
-				query: {
-					name: '[path][name].[ext]'
-				}
-			},
-			// "url" loader works just like "file" loader but it also embeds
-			// assets smaller than specified size as data URLs to avoid requests.
-			{
-				test: /\.(mp4|webm|wav|mp3|m4a|aac|oga)(\?.*)?$/,
-				loader: 'url',
-				query: {
-					limit: 10000,
-					name: '[path][name].[ext]'
-				}
+				loader: ExtractTextPlugin.extract({
+					fallback: 'style-loader',
+					use: [
+						{
+							loader: 'css-loader',
+							options: {
+								importLoaders: 2,
+								modules: true,
+								sourceMap: true,
+								localIdentName: '[name]__[local]___[hash:base64:5]'
+							}
+						},
+						{
+							loader: 'postcss-loader',
+							options: {
+								ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
+								plugins: () => [
+									// We use PostCSS for autoprefixing only, but others could be added.
+									autoprefixer({
+										browsers: [
+											'>1%',
+											'last 4 versions',
+											'Firefox ESR',
+											'not ie < 9' // React doesn't support IE8 anyway.
+										]
+									})
+								]
+							}
+						},
+						{
+							loader: 'less-loader',
+							options: {
+								sourceMap: true,
+								// If resolution independence options are specified, use the LESS plugin.
+								plugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])
+							}
+						}
+					]
+				})
 			},
 			// Expose the 'react-addons-perf' on a global context for debugging.
 			// Currently maps the toolset to window.ReactPerf.
 			{
 				test: require.resolve('react-addons-perf'),
-				loader: 'expose?ReactPerf'
+				loader: 'expose-loader',
+				options: 'ReactPerf'
 			}
 		]
 	},
@@ -185,32 +205,10 @@ module.exports = {
 		host: '0.0.0.0',
 		port: 8080
 	},
-	// @remove-on-eject-begin
-	// Point ESLint to our predefined config.
-	eslint: {
-		configFile: require.resolve('eslint-config-enact'),
-		cache: true,
-		useEslintrc: false,
-		failOnError: true
-	},
-	// @remove-on-eject-end
-	// We use PostCSS for autoprefixing only.
-	postcss: function() {
-		return [
-			autoprefixer({
-				browsers: [
-					'>1%',
-					'last 4 versions',
-					'Firefox ESR',
-					'not ie < 9' // React doesn't support IE8 anyway
-				]
-			})
-		];
-	},
-	// Options for the LESS loader
-	lessLoader: {
-		// If resolution independence options are specified, use the LESS plugin
-		lessPlugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])
+	// Optional configuration for polyfilling NodeJS built-ins.
+	node: enact.node,
+	performance: {
+		hints: false
 	},
 	plugins: [
 		// Generates an `index.html` file with the js and css tags injected.
@@ -222,7 +220,7 @@ module.exports = {
 			template: enact.template || path.join(__dirname, 'html-template.ejs'),
 			xhtml: true
 		}),
-		// Makes some environment variables available to the JS code, for example:
+		// Make NODE_ENV environment variable available to the JS code, for example:
 		// if (process.env.NODE_ENV === 'development') { ... }.
 		new webpack.DefinePlugin({
 			'process.env': {

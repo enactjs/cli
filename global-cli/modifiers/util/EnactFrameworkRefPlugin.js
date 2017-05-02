@@ -1,7 +1,5 @@
 var
 	path = require('path'),
-	fs = require('fs'),
-	exists = require('path-exists').sync,
 	ExternalsPlugin = require('webpack/lib/ExternalsPlugin'),
 	DelegatedSourceDependency = require('webpack/lib/dependencies/DelegatedSourceDependency'),
 	DelegatedModule = require('webpack/lib/DelegatedModule');
@@ -16,9 +14,9 @@ DelegatedEnactFactoryPlugin.prototype.apply = function(normalModuleFactory) {
 	var libReg = new RegExp('^(' + this.options.libraries.join('|') + ')(?=[\\\\\\/]|$)');
 	normalModuleFactory.plugin('factory', function(factory) {
 		return function(data, callback) {
-			var request = data.dependency.request;
+			var request = data.request;
 			if(request && libReg.test(request)) {
-				return callback(null, new DelegatedModule(name, request, 'require', request));
+				return callback(null, new DelegatedModule(name, {id:request}, 'require', request));
 			}
 			return factory(data, callback);
 		};
@@ -38,23 +36,8 @@ function normalizePath(dir, file, compiler) {
 function isNodeOutputFS(compiler) {
 	return (compiler.outputFileSystem
 			&& compiler.outputFileSystem.constructor
-			&& compiler.outputFileSystem.constructor.name
 			&& compiler.outputFileSystem.constructor.name === 'NodeOutputFileSystem');
 }
-
-function updateAppInfo(output, blob) {
-	var appInfo = path.join(output, 'appinfo.json');
-	if(exists(appInfo)) {
-		try {
-			var meta = JSON.parse(fs.readFileSync(appInfo, {encoding:'utf8'}));
-			meta.v8SnapshotFile = blob;
-			fs.writeFileSync(appInfo, JSON.stringify(meta, null, '\t'), {encoding:'utf8'});
-		} catch(e) {
-			return new Error('Failed to set "v8SnapshotFile" property in appinfo.json');
-		}
-	}
-}
-
 
 // Reference plugin to handle rewiring the external Enact framework requests
 function EnactFrameworkRefPlugin(opts) {
@@ -112,14 +95,4 @@ EnactFrameworkRefPlugin.prototype.apply = function(compiler) {
 			libraries: libs
 		}));
 	});
-
-	if(external.snapshot) {
-		compiler.plugin('after-emit', function(compilation, callback) {
-			var err;
-			if(isNodeOutputFS(compiler)) {
-				err = updateAppInfo(compiler.options.output.path, normalizePath(external.inject, 'snapshot_blob.bin', compiler));
-			}
-			callback(err);
-		});
-	}
 };

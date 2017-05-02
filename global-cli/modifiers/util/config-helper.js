@@ -1,10 +1,10 @@
 module.exports = {
 	findLoader: function(config, name) {
 		var index = -1;
-		if(config && config.module && config.module.loaders && name) {
-			for(var i=0; i<config.module.loaders.length; i++) {
-				if(config.module.loaders[i].loader) {
-					if(config.module.loaders[i].loader.split(/[?!]/)[0].replace(/-loader$/, '')===name.replace(/-loader$/, '')) {
+		if(config && config.module && config.module.rules && name) {
+			for(var i=0; i<config.module.rules.length; i++) {
+				if(config.module.rules[i].loader) {
+					if(config.module.rules[i].loader === name + '-loader') {
 						index = i;
 						break;
 					}
@@ -14,8 +14,8 @@ module.exports = {
 		return index;
 	},
 	getLoaderByName: function(config, name) {
-		if(config && config.module && config.module.loaders && name) {
-			return config.module.loaders[this.findLoader(config, name)];
+		if(config && config.module && config.module.rules && name) {
+			return config.module.rules[this.findLoader(config, name)];
 		}
 	},
 	findPlugin: function(config, name) {

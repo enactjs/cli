@@ -1,6 +1,4 @@
 var
-	path = require('path'),
-	exists = require('path-exists').sync,
 	helper = require('./util/config-helper'),
 	SnapshotPlugin = require('./util/SnapshotPlugin');
 
@@ -12,11 +10,6 @@ module.exports = function(config, opts) {
 			htmlPlugin.options.snapshot = true;
 		}
 
-		// fallback alias for fbjs in Node 4.x dependency tree
-		var fbjs = path.join(process.cwd(), 'node_modules', 'react', 'node_modules', 'fbjs');
-		if(exists(fbjs)) {
-			config.resolve.alias.fbjs = fbjs;
-		}
 		// Snapshot helper API for the transition from v8 snapshot into the window
 		config.entry.main.splice(-1, 0, require.resolve('./util/snapshot-helper'));
 	}

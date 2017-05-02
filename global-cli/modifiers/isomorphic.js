@@ -38,9 +38,10 @@ module.exports = function(config, opts) {
 
 			// Expose the 'react-dom' on a global context for App's rendering
 			// Currently maps the toolset to window.ReactDOM.
-			config.module.loaders.push({
+			config.module.rules.push({
 				test: reactDOM,
-				loader: 'expose?ReactDOM'
+				loader: 'expose-loader',
+				options: 'ReactDOM'
 			});
 
 			// Expose iLib locale utility function module so we can update the locale on page load, if used.
@@ -50,7 +51,8 @@ module.exports = function(config, opts) {
 					var babel = helper.findLoader(config, 'babel');
 					config.module.loaders.splice((babel>=0 ? babel : 0), 0, {
 						test: fs.realpathSync(locale),
-						loader: 'expose?iLibLocale'
+						loader: 'expose-loader',
+						options: 'iLibLocale'
 					});
 				}
 			}
