@@ -3,7 +3,7 @@ var
 	fs = require('fs'),
 	DllEntryPlugin = require('webpack/lib/DllEntryPlugin'),
 	DllModule = require('webpack/lib/DllModule'),
-	RawSource = require('webpack/lib/RawSource'),
+	RawSource = require('webpack-sources').RawSource,
 	exists = require('path-exists').sync;
 
 var pkgCache = {};
