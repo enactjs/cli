@@ -48,6 +48,18 @@ function getDifferenceLabel(currentSize, previousSize) {
 	}
 }
 
+// Print out fatal errors.
+function printErrors(summary, errors) {
+	console.log();
+	console.log(chalk.red(summary));
+	console.log();
+	errors.forEach(err => {
+		console.log(err.message || err);
+		console.log();
+	});
+	process.exit(1);
+}
+
 // Print a detailed summary of build files.
 function printFileSizes(stats, previousSizeMap) {
 	var assets = stats.toJson().assets
@@ -87,12 +99,24 @@ function build(config, previousSizeMap) {
 		console.log('Creating an optimized production build...');
 	}
 	config.bail = true;
-	webpack(config).run((err, stats) => {
-		if (err) {
-			console.log();
-			console.error(chalk.red('Failed to create a ' + process.env.NODE_ENV + ' build.'));
-			console.error(err.message || err);
-			process.exit(1);
+
+	var compiler;
+	try {
+		compiler = webpack(config);
+	} catch (err) {
+		printErrors('Failed to compile.', [err]);
+	}
+
+	compiler.run((err, stats) => {
+		if(err) {
+			printErrors('Failed to create a ' + process.env.NODE_ENV + ' build.', [err]);
+		}
+		if(stats.compilation.errors.length > 0) {
+			printErrors('Failed to create a ' + process.env.NODE_ENV + ' build.', stats.compilation.errors);
+		}
+		if(process.env.CI && stats.compilation.warnings.length > 0) {
+			printErrors('Failed to create a ' + process.env.NODE_ENV + ' build. When process.env.CI = true, warnings '
+					+ 'are treated as failures. Most CI servers set this automatically.', stats.compilation.warnings);
 		}
 
 		printFileSizes(stats, previousSizeMap);
@@ -180,6 +204,8 @@ module.exports = function(args) {
 	}
 
 	if (opts.watch) {
+		// Make sure webpack doesn't immediate bail on errors when watching.
+		config.bail = false;
 		watch(config);
 	} else {
 		// Read the current file sizes in dist directory.
