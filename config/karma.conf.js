@@ -149,7 +149,8 @@ module.exports = function(karma) {
 				timings: false,
 				version: false,
 				children: false,
-				warnings: false
+				warnings: false,
+				moduleTrace: false
 			}
 		},
 
