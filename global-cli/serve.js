@@ -36,6 +36,8 @@ var compiler;
 config.entry.main.unshift(require.resolve('react-dev-utils/webpackHotDevClient'));
 // This is necessary to emit hot updates
 config.plugins.push(new webpack.HotModuleReplacementPlugin());
+// Keep webpack alive when there are any errors, so user can fix and rebuild.
+config.bail = false;
 
 var isFirstClear = true;
 function clearConsole() {
@@ -68,7 +70,7 @@ function setupCompiler(host, port, protocol) {
 		// We have switched off the default Webpack output in WebpackDevServer
 		// options so we are going to "massage" the warnings and errors and present
 		// them in a readable focused way.
-		var messages = formatWebpackMessages(stats.toJson({}, true));
+		var messages = formatWebpackMessages(stats.toJson({moduleTrace:false}, true));
 		if (!messages.errors.length && !messages.warnings.length) {
 			console.log(chalk.green('Compiled successfully!'));
 			console.log();
@@ -78,8 +80,8 @@ function setupCompiler(host, port, protocol) {
 		if (messages.errors.length) {
 			console.log(chalk.red('Failed to compile.'));
 			console.log();
-			messages.errors.forEach(message => {
-				console.log(message);
+			messages.errors.forEach(err => {
+				console.log(err.message || err);
 				console.log();
 			});
 			return;
