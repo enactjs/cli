@@ -28,6 +28,8 @@ var enact = pkg.enact || {};
 // It is focused on developer experience and fast rebuilds.
 // The production configuration is different and lives in a separate file.
 module.exports = {
+	// Don't attempt to continue if there are any errors.
+	bail: true,
 	// We use sourcemaps to allow devtools to view the original module code data
 	devtool: 'cheap-module-source-map',
 	// These are the "entry points" to our application.
