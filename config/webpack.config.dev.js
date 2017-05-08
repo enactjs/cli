@@ -20,7 +20,9 @@ var ILibPlugin = require('ilib-webpack-plugin');
 var WebOSMetaPlugin = require('webos-meta-webpack-plugin');
 var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 var WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
+var findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
 
+process.chdir(findProjectRoot().path);
 var pkg = require(path.resolve('./package.json'));
 var enact = pkg.enact || {};
 
@@ -61,7 +63,7 @@ module.exports = {
 		// These are the reasonable defaults supported by the React/ES6 ecosystem.
 		extensions: ['.js', '.jsx', '.json'],
 		// Allows us to specify paths to check for module resolving.
-		modules: ['node_modules', path.resolve('./node_modules')],
+		modules: [path.resolve('./node_modules'), 'node_modules'],
 		alias: {
 			// @remove-on-eject-begin
 			'promise/lib/rejection-tracking': require.resolve('promise/lib/rejection-tracking'),

@@ -8,8 +8,10 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var GracefulFsPlugin = require('graceful-fs-webpack-plugin');
 var ILibPlugin = require('ilib-webpack-plugin');
 var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+var findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
 
-var pkg = require(path.resolve('./package.json'));
+var appPath = findProjectRoot().path;
+var pkg = require(path.resolve(appPath, './package.json'));
 var enact = pkg.enact || {};
 
 module.exports = function(karma) {
@@ -47,7 +49,7 @@ module.exports = function(karma) {
 			},
 			resolve: {
 				extensions: ['.js', '.jsx', '.json'],
-				modules: ['node_modules', path.resolve('./node_modules')],
+				modules: [path.resolve(appPath, './node_modules'), 'node_modules', path.resolve(__dirname, '../node_modules')],
 				alias: {
 					'ilib':'@enact/i18n/ilib/lib',
 					'react-addons-test-utils':'react-dom/test-utils'
@@ -57,7 +59,7 @@ module.exports = function(karma) {
 			resolveLoader: {
 				modules: [
 					path.resolve(__dirname, '../node_modules'),
-					path.resolve('./node_modules')
+					path.resolve(appPath, './node_modules')
 				]
 			},
 			// @remove-on-eject-end

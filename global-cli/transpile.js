@@ -3,7 +3,8 @@ var
 	glob = require('glob'),
 	babel = require('babel-core'),
 	fs = require('fs-extra'),
-	minimist = require('minimist');
+	minimist = require('minimist'),
+	findProjectRoot = require('./modifiers/util/find-project-root');
 
 function displayHelp() {
 	console.log('  Usage');
@@ -24,6 +25,8 @@ module.exports = function(args) {
 		alias: {o:'output', h:'help'}
 	});
 	opts.help && displayHelp();
+
+	process.chdir(findProjectRoot().path);
 
 	var sourceRoot = '.';
 	var buildRoot = opts.output || './build';
