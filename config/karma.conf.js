@@ -49,7 +49,13 @@ module.exports = function(karma) {
 			},
 			resolve: {
 				extensions: ['.js', '.jsx', '.json'],
-				modules: [path.resolve(appPath, './node_modules'), 'node_modules', path.resolve(__dirname, '../node_modules')],
+				modules: [
+					path.resolve(appPath, './node_modules'),
+					'node_modules',
+					// @remove-on-eject-begin
+					path.resolve(__dirname, '../node_modules')
+					// @remove-on-eject-end
+				],
 				alias: {
 					'ilib':'@enact/i18n/ilib/lib',
 					'react-addons-test-utils':'react-dom/test-utils'
@@ -172,6 +178,7 @@ module.exports = function(karma) {
 		port: 9876,
 		colors: true,
 		logLevel: karma.LOG_INFO,
+		browserNoActivityTimeout : 60000,
 		autoWatch: true,
 		browsers: ['Chrome'],
 		singleRun: false
