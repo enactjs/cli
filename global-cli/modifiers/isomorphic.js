@@ -49,7 +49,7 @@ module.exports = function(config, opts) {
 				var locale = path.join(process.cwd(), 'node_modules', '@enact', 'i18n', 'locale', 'locale.js');
 				if(exists(locale)) {
 					var babel = helper.findLoader(config, 'babel');
-					config.module.loaders.splice((babel>=0 ? babel : 0), 0, {
+					config.module.rules.splice((babel>=0 ? babel : 0), 0, {
 						test: fs.realpathSync(locale),
 						loader: 'expose-loader',
 						options: 'iLibLocale'
