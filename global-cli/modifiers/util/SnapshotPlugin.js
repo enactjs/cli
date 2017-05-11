@@ -25,6 +25,7 @@ function getBlobName(args) {
 
 function SnapshotPlugin(options) {
 	this.options = options || {};
+	this.options.target = this.options.target || 'main.js';
 	this.options.exec = this.options.exec || process.env.V8_MKSNAPSHOT;
 	this.options.args = this.options.args || [
 		'--profile-deserialization',
@@ -34,7 +35,7 @@ function SnapshotPlugin(options) {
 	if(process.env.V8_SNAPSHOT_ARGS) {
 		this.options.args = process.env.V8_SNAPSHOT_ARGS.split(/\s+/);
 	}
-	this.options.args.push(this.options.target || 'main.js');
+	this.options.args.push(this.options.target);
 }
 module.exports = SnapshotPlugin;
 SnapshotPlugin.prototype.apply = function(compiler) {
@@ -66,6 +67,7 @@ SnapshotPlugin.prototype.apply = function(compiler) {
 			}
 
 			// Run mksnapshot utility
+			compiler.applyPlugins('v8-snapshot', {file:opts.target, blob:opts.blob});
 			var err;
 			var child = cp.spawnSync(opts.exec, opts.args, {
 				cwd: compiler.options.output.path,
