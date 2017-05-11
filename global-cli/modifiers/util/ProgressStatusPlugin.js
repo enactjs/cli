@@ -17,16 +17,14 @@ function progressBar(percentage, width, padding, colours) {
 	var barWidth = width - (padding*2) - 6;
 	var bar = Math.round(percentage*barWidth);
 	var back = barWidth - Math.round(percentage*barWidth);
-	return ' '.repeat(padding) + '\u2595' + colourize('\u2588'.repeat(bar), colours.bar)
-			+ colourize(' '.repeat(back), colours.bg, true) + '\u258F '
+	return ' '.repeat(padding) + '\u2595' + colourize(' '.repeat(bar), colours.bar)
+			+ colourize(' '.repeat(back), colours.bg) + '\u258F '
 			+ Math.round(percentage*100) + '%';
 }
 
-function colourize(text, colour, bg) {
+function colourize(text, colour) {
 	if(colour!=='none') {
-		if(bg) {
-			colour = 'bg' + capitalize(colour);
-		}
+		colour = 'bg' + capitalize(colour);
 		text = chalk[colour](text);
 	}
 	return text;
