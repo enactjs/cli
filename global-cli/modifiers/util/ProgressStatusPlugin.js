@@ -3,36 +3,39 @@ var
 	chalk = require('chalk'),
 	webpack = require('webpack');
 
-// TODO: validate if Windows even needs the extra character
-function maxWidth() {
-	/* compute the available space (non-zero) for the bar */
-	var col = process.stdout.columns;
-	if(col && process.platform === 'win32'){
-		col = col - 1;
-	}
-	return col;
-}
+var bright = {
+	black: [90, 39],
+	red: [91, 39],
+	green: [92, 39],
+	yellow: [93, 39],
+	blue: [94, 39],
+	magenta: [95, 39],
+	cyan: [96, 39],
+	white: [97, 39],
+	gray: [90, 39],
+	grey: [90, 39],
 
-function progressBar(percentage, width, padding, colours) {
-	var barWidth = width - (padding*2) - 6;
-	var bar = Math.round(percentage*barWidth);
+	bgBlack: [100, 49],
+	bgRed: [101, 49],
+	bgGreen: [102, 49],
+	bgYellow: [103, 49],
+	bgBlue: [104, 49],
+	bgMagenta: [105, 49],
+	bgCyan: [106, 49],
+	bgWhite: [107, 49]
+};
+
+function progressBar(percentage, width, opts) {
+	var barWidth = width - (opts.padding*2) - 4;
+	var progress = Math.round(percentage*barWidth);
 	var back = barWidth - Math.round(percentage*barWidth);
-	return ' '.repeat(padding) + '\u2595' + colourize(' '.repeat(bar), colours.bar)
-			+ colourize(' '.repeat(back), colours.bg) + '\u258F '
-			+ Math.round(percentage*100) + '%';
-}
-
-function colourize(text, colour) {
-	if(colour!=='none') {
-		colour = 'bg' + capitalize(colour);
-		text = chalk[colour](text);
-	}
-	return text;
+	return ' '.repeat(opts.padding - opts.frameLeft.length) + opts.frameLeft + opts.barStyle(opts.bar.repeat(progress))
+			+ opts.barBgStyle(opts.barBg.repeat(back)) + opts.frameRight + ' ' + Math.round(percentage*100) + '%';
 }
 
 function formatMessage(message, width, padding, details) {
 	var end = width-padding;
-	var out = ' '.repeat(padding) + capitalize(message);
+	var out = ' '.repeat(padding) + message.charAt(0).toUpperCase() + message.substring(1);
 
 	if(details) {
 		out += ': ' + details;
@@ -45,31 +48,49 @@ function formatMessage(message, width, padding, details) {
 	return out;
 }
 
-function capitalize(text) {
-	return text.charAt(0).toUpperCase() + text.substring(1);
+function colourTransformFn(style, useBright) {
+	if(style && style !== 'none') {
+		if(typeof style === 'function') {
+			return style;
+		} else if(useBright && bright[style]) {
+			return function(text) {
+				return '\u001B[' + bright[style][0] + 'm' + text + '\u001B[' + bright[style][1] + 'm';
+			};
+		} else if(chalk[style]) {
+			return chalk[style];
+		}
+	}
+	return function(text) { return text; };
 }
 
 function ProgressStatusPlugin(options) {
 	this.options = options || {};
-	this.options.throttle = 60;
-	this.options.bar = this.options.bar ||  'grey';
-	this.options.barBg = this.options.barBg ||  'none';
+	this.options.throttle = this.options.throttle || 60;
+	this.options.padding = this.options.padding || 8;
+	this.options.frameLeft = (typeof this.options.frameLeft === 'string') ? this.options.frameLeft : '\u2590';
+	this.options.frameRight = (typeof this.options.frameRight === 'string') ? this.options.frameRight : '\u258C';
+	this.options.bar = this.options.bar || '\u2588';
+	this.options.barBg = this.options.barBg || ' ';
+
+	var useBright = process.platform==='win32' && (typeof this.options.brightOnWindows !== 'boolean' || this.options.brightOnWindows);
+	this.options.barStyle = colourTransformFn(this.options.barStyle || 'gray', useBright);
+	this.options.barBgStyle = colourTransformFn(this.options.barBgStyle || 'none', useBright);
 }
 
 ProgressStatusPlugin.prototype.apply = function(compiler) {
 	var opts = this.options;
-	var width = maxWidth();
+	var width = process.stdout.columns;
 	var renderID, active, latest;
 
-	if(!process.stdout.isTTY) return;
+	if(!process.stdout.isTTY || process.env.CI) return;
 
 	var render = function() {
 		if(!active || latest.percent!==active.percent || latest.message!==active.message
 				|| latest.details!==active.details) {
 			var out;
 			if(latest.percent<1) {
-				out = progressBar(latest.percent, width, 7, {bar:opts.bar, bg:opts.barBg})
-						+ '\n' + formatMessage(latest.message, width, 8, latest.details) + '\n';
+				out = progressBar(latest.percent, width, opts)
+						+ '\n' + formatMessage(latest.message, width, opts.padding, latest.details) + '\n';
 			}
 			if(active) {
 				readline.moveCursor(process.stdout, 0, -2);
