@@ -67,8 +67,8 @@ function ProgressStatusPlugin(options) {
 	this.options = options || {};
 	this.options.throttle = this.options.throttle || 60;
 	this.options.padding = this.options.padding || 8;
-	this.options.frameLeft = (typeof this.options.frameLeft === 'string') ? this.options.frameLeft : '\u2595';
-	this.options.frameRight = (typeof this.options.frameRight === 'string') ? this.options.frameRight : '\u258F';
+	this.options.frameLeft = (typeof this.options.frameLeft === 'string') ? this.options.frameLeft : '\u2590';
+	this.options.frameRight = (typeof this.options.frameRight === 'string') ? this.options.frameRight : '\u258C';
 	this.options.bar = this.options.bar || '\u2588';
 	this.options.barBg = this.options.barBg || ' ';
 
