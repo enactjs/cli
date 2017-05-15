@@ -5,24 +5,7 @@ var
 
 var bright = {
 	black: [90, 39],
-	red: [91, 39],
-	green: [92, 39],
-	yellow: [93, 39],
-	blue: [94, 39],
-	magenta: [95, 39],
-	cyan: [96, 39],
-	white: [97, 39],
-	gray: [90, 39],
-	grey: [90, 39],
-
-	bgBlack: [100, 49],
-	bgRed: [101, 49],
-	bgGreen: [102, 49],
-	bgYellow: [103, 49],
-	bgBlue: [104, 49],
-	bgMagenta: [105, 49],
-	bgCyan: [106, 49],
-	bgWhite: [107, 49]
+	bgBlack: [100, 49]
 };
 
 function progressBar(percentage, width, opts) {
@@ -72,7 +55,7 @@ function ProgressStatusPlugin(options) {
 	this.options.bar = this.options.bar || '\u2588';
 	this.options.barBg = this.options.barBg || ' ';
 
-	var useBright = process.platform==='win32' && (typeof this.options.brightOnWindows !== 'boolean' || this.options.brightOnWindows);
+	var useBright = typeof this.options.brightBlack !== 'boolean' || this.options.brightBlack;
 	this.options.barStyle = colourTransformFn(this.options.barStyle || 'gray', useBright);
 	this.options.barBgStyle = colourTransformFn(this.options.barBgStyle || 'none', useBright);
 }
