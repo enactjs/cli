@@ -25,6 +25,8 @@ global.updateEnvironment = function() {
 	// Clear the active resBundle and string cache.
 	var resBundle = require('@enact/i18n/src/resBundle');
 	resBundle.clearResBundle();
+	var moonstoneBundle = require('@enact/moonstone/internal/$L');
+	moonstoneBundle.clearResBundle();
 
 	// Update the iLib/Enact locale to the active window's locale.
 	var locale = require('@enact/i18n/locale');
