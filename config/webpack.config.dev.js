@@ -9,22 +9,22 @@
  */
 // @remove-on-eject-end
 
-var path = require('path');
-var webpack = require('webpack');
-var autoprefixer = require('autoprefixer');
-var LessPluginRi = require('resolution-independence');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var GracefulFsPlugin = require('graceful-fs-webpack-plugin');
-var ILibPlugin = require('ilib-webpack-plugin');
-var WebOSMetaPlugin = require('webos-meta-webpack-plugin');
-var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-var WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
-var findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
+const path = require('path');
+const {DefinePlugin} = require('webpack');
+const autoprefixer = require('autoprefixer');
+const LessPluginRi = require('resolution-independence');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const GracefulFsPlugin = require('graceful-fs-webpack-plugin');
+const ILibPlugin = require('ilib-webpack-plugin');
+const WebOSMetaPlugin = require('webos-meta-webpack-plugin');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
+const findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
 
 process.chdir(findProjectRoot().path);
-var pkg = require(path.resolve('./package.json'));
-var enact = pkg.enact || {};
+const pkg = require(path.resolve('./package.json'));
+const enact = pkg.enact || {};
 
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
@@ -226,7 +226,7 @@ module.exports = {
 		}),
 		// Make NODE_ENV environment variable available to the JS code, for example:
 		// if (process.env.NODE_ENV === 'development') { ... }.
-		new webpack.DefinePlugin({
+		new DefinePlugin({
 			'process.env': {
 				'NODE_ENV': '"development"'
 			}

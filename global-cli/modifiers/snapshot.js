@@ -1,11 +1,11 @@
-var
+const
 	helper = require('./util/config-helper'),
 	SnapshotPlugin = require('./util/SnapshotPlugin');
 
 module.exports = function(config, opts) {
 	if(!opts.framework) {
 		// Update HTML webpack plugin to mark it as snapshot mode for the isomorphic template
-		var htmlPlugin = helper.getPluginByName(config, 'HtmlWebpackPlugin');
+		const htmlPlugin = helper.getPluginByName(config, 'HtmlWebpackPlugin');
 		if(htmlPlugin) {
 			htmlPlugin.options.snapshot = true;
 		}

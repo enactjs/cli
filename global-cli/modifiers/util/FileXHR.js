@@ -1,4 +1,4 @@
-var
+const
 	fs = require('fs'),
 	exists = require('path-exists').sync;
 
@@ -16,9 +16,7 @@ FileXHR.prototype.addEventListener = function(evt, fn) {
 
 FileXHR.prototype.send = function() {
 	if(this.method.toUpperCase() === 'GET' && this.uri && this.sync) {
-		var parsedURI = this.uri.replace(/\\/g, '/').replace(/^(_\/)+/g, function(match) {
-			return match.replace(/_/g, '..');
-		});
+		const parsedURI = this.uri.replace(/\\/g, '/').replace(/^(_\/)+/g, (match) => match.replace(/_/g, '..'));
 		try {
 			if(!exists(parsedURI)) throw new Error('File not found: ' + this.uri);
 

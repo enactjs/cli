@@ -10,8 +10,8 @@ var restoreErrorAndWarnings = spy.restoreErrorAndWarnings;
 beforeEach(watchErrorAndWarnings);
 
 afterEach(function(done) {
-	const actual = filterErrorAndWarnings(/(Invalid prop|Failed prop type|Unknown prop)/);
-	const expected = 0;
+	var actual = filterErrorAndWarnings(/(Invalid prop|Failed prop type|Unknown prop)/);
+	var expected = 0;
 	restoreErrorAndWarnings();
 	if (actual.length > expected) {
 		console.error('PropType Failure:', this.currentTest.parent.title, 'at "', this.currentTest.title, '"');

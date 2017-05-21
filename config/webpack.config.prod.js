@@ -9,21 +9,21 @@
  */
 // @remove-on-eject-end
 
-var path = require('path');
-var webpack = require('webpack');
-var autoprefixer = require('autoprefixer');
-var removeclass = require('postcss-remove-classes').default;
-var LessPluginRi = require('resolution-independence');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var GracefulFsPlugin = require('graceful-fs-webpack-plugin');
-var ILibPlugin = require('ilib-webpack-plugin');
-var WebOSMetaPlugin = require('webos-meta-webpack-plugin');
-var findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
+const path = require('path');
+const {DefinePlugin, optimize:{UglifyJsPlugin}} = require('webpack');
+const autoprefixer = require('autoprefixer');
+const removeclass = require('postcss-remove-classes').default;
+const LessPluginRi = require('resolution-independence');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const GracefulFsPlugin = require('graceful-fs-webpack-plugin');
+const ILibPlugin = require('ilib-webpack-plugin');
+const WebOSMetaPlugin = require('webos-meta-webpack-plugin');
+const findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
 
 process.chdir(findProjectRoot().path);
-var pkg = require(path.resolve('./package.json'));
-var enact = pkg.enact || {};
+const pkg = require(path.resolve('./package.json'));
+const enact = pkg.enact || {};
 
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
@@ -214,13 +214,13 @@ module.exports = {
 		// if (process.env.NODE_ENV === 'production') { ... }.
 		// It is absolutely essential that NODE_ENV was set to production here.
 		// Otherwise React will be compiled in the very slow development mode.
-		new webpack.DefinePlugin({
+		new DefinePlugin({
 			'process.env': {
 				'NODE_ENV': '"production"'
 			}
 		}),
 		// Minify the code.
-		new webpack.optimize.UglifyJsPlugin({
+		new UglifyJsPlugin({
 			compress: {
 				warnings: false
 			},

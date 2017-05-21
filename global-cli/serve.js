@@ -9,7 +9,7 @@
  */
 // @remove-on-eject-end
 
-var
+const
 	path = require('path'),
 	os = require('os'),
 	chalk = require('chalk'),
@@ -24,7 +24,7 @@ var
 	openBrowser = require('react-dev-utils/openBrowser'),
 	prompt = require('react-dev-utils/prompt'),
 	config = require('../config/webpack.config.dev');
-var compiler;
+let compiler;
 
 // Include an alternative client for WebpackDevServer. A client's job is to
 // connect to WebpackDevServer by a socket and get notified about changes.
@@ -39,7 +39,7 @@ config.plugins.push(new webpack.HotModuleReplacementPlugin());
 // Keep webpack alive when there are any errors, so user can fix and rebuild.
 config.bail = false;
 
-var isFirstClear = true;
+let isFirstClear = true;
 function clearConsole() {
 	// On first run, clear completely so it doesn't show half screen on Windows.
 	// On next runs, use a different sequence that properly scrolls back.
@@ -56,7 +56,7 @@ function setupCompiler(host, port, protocol) {
 	// recompiling a bundle. WebpackDevServer takes care to pause serving the
 	// bundle, so if you refresh, it'll wait instead of serving the old one.
 	// "invalid" is short for "bundle invalidated", it doesn't imply any errors.
-	compiler.plugin('invalid', function() {
+	compiler.plugin('invalid', () => {
 		clearConsole();
 		console.log('Compiling...');
 		console.log();
@@ -64,13 +64,13 @@ function setupCompiler(host, port, protocol) {
 
 	// "done" event fires when Webpack has finished recompiling the bundle.
 	// Whether or not you have warnings or errors, you will get this event.
-	compiler.plugin('done', function(stats) {
+	compiler.plugin('done', (stats) => {
 		// clearConsole();
 
 		// We have switched off the default Webpack output in WebpackDevServer
 		// options so we are going to "massage" the warnings and errors and present
 		// them in a readable focused way.
-		var messages = formatWebpackMessages(stats.toJson({moduleTrace:false}, true));
+		const messages = formatWebpackMessages(stats.toJson({moduleTrace:false}, true));
 		if (!messages.errors.length && !messages.warnings.length) {
 			console.log(chalk.green('Compiled successfully!'));
 			console.log();
@@ -116,7 +116,7 @@ function setupCompiler(host, port, protocol) {
 // It allows us to log custom error messages on the console.
 function onProxyError(proxy) {
 	return function(err, req, res){
-		var host = req.headers && req.headers.host;
+		const host = req.headers && req.headers.host;
 		console.log(chalk.red('Proxy error:') + ' Could not proxy request ' + chalk.cyan(req.url)
 				+ ' from ' + chalk.cyan(host) + ' to ' + chalk.cyan(proxy) + '.');
 		console.log('See https://nodejs.org/api/errors.html#errors_common_system_errors for more '
@@ -136,14 +136,14 @@ function onProxyError(proxy) {
 function addMiddleware(devServer) {
 	// `proxy` lets you to specify a fallback server during development.
 	// Every unrecognized request will be forwarded to it.
-	var appPkg;
+	let appPkg;
 	try {
 		appPkg = require(path.join(process.cwd(), 'package.json'));
 	} catch(e) {
 		appPkg = {};
 	}
-	var enact = appPkg.enact || {};
-	var proxy = enact.proxy || appPkg.proxy;
+	const enact = appPkg.enact || {};
+	const proxy = enact.proxy || appPkg.proxy;
 	devServer.use(historyApiFallback({
 		rewrites: [
 			{
@@ -179,7 +179,7 @@ function addMiddleware(devServer) {
 		// - /*.hot-update.json (WebpackDevServer uses this too for hot reloading)
 		// - /sockjs-node/* (WebpackDevServer uses this for hot reloading)
 		// Tip: use https://jex.im/regulex/ to visualize the regex
-		var mayProxy = /^(?!\/(index\.html$|.*\.hot-update\.json$|sockjs-node\/)).*$/;
+		const mayProxy = /^(?!\/(index\.html$|.*\.hot-update\.json$|sockjs-node\/)).*$/;
 		devServer.use(mayProxy,
 			// Pass the scope regex both to Express and to the middleware for proxying
 			// of both HTTP and WebSockets to work without false positives.
@@ -198,7 +198,7 @@ function addMiddleware(devServer) {
 }
 
 function runDevServer(host, port, protocol, shouldOpen) {
-	var devServer = new WebpackDevServer(compiler, {
+	const devServer = new WebpackDevServer(compiler, {
 		contentBase: process.cwd(),
 		// Silence WebpackDevServer's own logs since they're generally not useful.
 		// It will still show compile warnings and errors with this setting.
@@ -227,7 +227,7 @@ function runDevServer(host, port, protocol, shouldOpen) {
 	// Our custom middleware proxies requests to /index.html or a remote API.
 	addMiddleware(devServer);
 	// Launch WebpackDevServer.
-	devServer.listen(port, function(err) {
+	devServer.listen(port, (err) => {
 		if (err) {
 			return console.log(err);
 		}
@@ -246,8 +246,8 @@ function runDevServer(host, port, protocol, shouldOpen) {
 }
 
 function run(port, opts) {
-	var protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
-	var host = process.env.HOST || opts.host || config.devServer.host || 'localhost';
+	const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
+	const host = process.env.HOST || opts.host || config.devServer.host || 'localhost';
 	setupCompiler(host, port, protocol);
 	runDevServer(host, port, protocol, opts.browser);
 }
@@ -267,7 +267,7 @@ function displayHelp() {
 }
 
 module.exports = function(args) {
-	var opts = minimist(args, {
+	const opts = minimist(args, {
 		string: ['i', 'host', 'p', 'port'],
 		boolean: ['b', 'browser', 'h', 'help'],
 		alias: {b:'browser', i:'host', p:'port', h:'help'}
@@ -282,7 +282,7 @@ module.exports = function(args) {
 	}
 
 	// Tools like Cloud9 rely on this.
-	var DEFAULT_PORT = parseInt(process.env.PORT || opts.port || config.devServer.port || 8080);
+	const DEFAULT_PORT = parseInt(process.env.PORT || opts.port || config.devServer.port || 8080);
 
 	// We attempt to use the default port but if it is busy, we offer the user to
 	// run on a different port. `detect()` Promise resolves to the next free port.
@@ -293,7 +293,7 @@ module.exports = function(args) {
 		}
 
 		clearConsole();
-		var question = chalk.yellow('Something is already running on port ' + DEFAULT_PORT + '.')
+		const question = chalk.yellow('Something is already running on port ' + DEFAULT_PORT + '.')
 				+ '\n\nWould you like to run the app on another port instead?';
 
 		prompt(question, true).then(shouldChangePort => {

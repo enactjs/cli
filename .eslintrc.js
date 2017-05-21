@@ -74,6 +74,9 @@ module.exports = {
 		'space-unary-ops': [1, {'words': true, 'nonwords': false}],
 		'spaced-comment': [1, 'always', {'markers': ['*']}],
 		'arrow-spacing': 1,
-		'require-yield': 0
+		'require-yield': 0,
+		'no-var': 1,
+		'prefer-const': 1,
+		'prefer-arrow-callback': [1, {'allowNamedFunctions': true}]
 	}
 };

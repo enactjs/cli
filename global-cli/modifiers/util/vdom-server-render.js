@@ -5,7 +5,7 @@
  *  for a given javascript virtualdom Enact codebase.
  */
 
-var path = require('path'),
+const path = require('path'),
 	nodeFetch = require('node-fetch'),
 	vm = require('vm'),
 	FileXHR = require('./FileXHR');
@@ -13,10 +13,10 @@ var path = require('path'),
 require('console.mute');
 
 // Setup a generic shared context to run App code within
-var m = {
+const m = {
 	exports:{}
 };
-var sandbox = Object.assign({
+const sandbox = Object.assign({
 	require: require,
 	module: m,
 	exports: m.exports,
@@ -27,7 +27,7 @@ var sandbox = Object.assign({
 	Headers: nodeFetch.Headers,
 	Request: nodeFetch.Request
 }, global);
-var context = vm.createContext(sandbox);
+const context = vm.createContext(sandbox);
 
 /*
 	Options:
@@ -50,7 +50,7 @@ module.exports = {
 	},
 
 	render: function(opts) {
-		var rendered;
+		let rendered;
 
 		if(opts.locale) {
 			sandbox.XMLHttpRequest = FileXHR;
@@ -63,7 +63,7 @@ module.exports = {
 
 			if(opts.externals) {
 				// Ensure locale switching  support is loaded globally with external framework usage.
-				var framework = require(path.resolve(path.join(opts.externals, 'enact.js')));
+				const framework = require(path.resolve(path.join(opts.externals, 'enact.js')));
 				sandbox.iLibLocale = framework('@enact/i18n/locale');
 			} else {
 				delete sandbox.iLibLocale

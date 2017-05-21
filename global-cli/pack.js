@@ -9,7 +9,7 @@
  */
 // @remove-on-eject-end
 
-var
+const
 	chalk = require('chalk'),
 	fs = require('fs-extra'),
 	path = require('path'),
@@ -34,9 +34,9 @@ function shortFilename(fileName) {
 // Input: 1024, 2048
 // Output: "(+1 KB)"
 function getDifferenceLabel(currentSize, previousSize) {
-	var FIFTY_KILOBYTES = 1024 * 50;
-	var difference = currentSize - previousSize;
-	var fileSize = !Number.isNaN(difference) ? filesize(difference) : 0;
+	const FIFTY_KILOBYTES = 1024 * 50;
+	const difference = currentSize - previousSize;
+	const fileSize = !Number.isNaN(difference) ? filesize(difference) : 0;
 	if (difference >= FIFTY_KILOBYTES) {
 		return chalk.red('+' + fileSize);
 	} else if (difference < FIFTY_KILOBYTES && difference > 0) {
@@ -62,12 +62,12 @@ function printErrors(summary, errors) {
 
 // Print a detailed summary of build files.
 function printFileSizes(stats, previousSizeMap) {
-	var assets = stats.toJson().assets
+	const assets = stats.toJson().assets
 		.filter(asset => /\.(js|css|bin)$/.test(asset.name))
 		.map(asset => {
-			var size = fs.statSync('./dist/' + asset.name).size;
-			var previousSize = previousSizeMap[shortFilename(asset.name)];
-			var difference = getDifferenceLabel(size, previousSize);
+			const size = fs.statSync('./dist/' + asset.name).size;
+			const previousSize = previousSizeMap[shortFilename(asset.name)];
+			const difference = getDifferenceLabel(size, previousSize);
 			return {
 				folder: path.join('dist', path.dirname(asset.name)),
 				name: path.basename(asset.name),
@@ -76,14 +76,14 @@ function printFileSizes(stats, previousSizeMap) {
 			};
 		});
 	assets.sort((a, b) => b.size - a.size);
-	var longestSizeLabelLength = Math.max.apply(null,
+	const longestSizeLabelLength = Math.max.apply(null,
 		assets.map(a => stripAnsi(a.sizeLabel).length)
 	);
 	assets.forEach(asset => {
-		var sizeLabel = asset.sizeLabel;
-		var sizeLength = stripAnsi(sizeLabel).length;
+		let sizeLabel = asset.sizeLabel;
+		const sizeLength = stripAnsi(sizeLabel).length;
 		if (sizeLength < longestSizeLabelLength) {
-			var rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
+			const rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
 			sizeLabel += rightPadding;
 		}
 		console.log('	' + sizeLabel +	'	' + chalk.dim(asset.folder + path.sep)
@@ -100,7 +100,7 @@ function build(config, previousSizeMap) {
 	}
 	config.bail = true;
 
-	var compiler;
+	let compiler;
 	try {
 		compiler = webpack(config);
 	} catch (err) {
@@ -179,7 +179,7 @@ function displayHelp() {
 }
 
 module.exports = function(args) {
-	var opts = minimist(args, {
+	const opts = minimist(args, {
 		boolean: ['minify', 'framework', 's', 'stats', 'p', 'production', 'i', 'isomorphic', 'v8', 'snapshot', 'w', 'watch', 'h', 'help'],
 		string: ['externals', 'externals-inject', 'l', 'locales'],
 		default: {minify:true},
@@ -188,7 +188,7 @@ module.exports = function(args) {
 	if (opts.help) displayHelp();
 
 	process.env.NODE_ENV = 'development';
-	var config = devConfig;
+	let config = devConfig;
 
 	// Do this as the first thing so that any code reading it knows the right env.
 	if (opts.production) {
@@ -211,10 +211,10 @@ module.exports = function(args) {
 		// Read the current file sizes in dist directory.
 		// This lets us display how much they changed later.
 		recursive('dist', (err, fileNames) => {
-			var previousSizeMap = (fileNames || [])
+			const previousSizeMap = (fileNames || [])
 				.filter(fileName => /\.(js|css|bin)$/.test(fileName))
 				.reduce((memo, fileName) => {
-					var key = shortFilename(fileName);
+					const key = shortFilename(fileName);
 					memo[key] = fs.statSync(fileName).size;
 					return memo;
 				}, {});

@@ -1,4 +1,4 @@
-var
+const
 	path = require('path'),
 	ExternalsPlugin = require('webpack/lib/ExternalsPlugin'),
 	DelegatedSourceDependency = require('webpack/lib/dependencies/DelegatedSourceDependency'),
@@ -10,11 +10,11 @@ function DelegatedEnactFactoryPlugin(options) {
 	this.options = options || {};
 }
 DelegatedEnactFactoryPlugin.prototype.apply = function(normalModuleFactory) {
-	var name = this.options.name;
-	var libReg = new RegExp('^(' + this.options.libraries.join('|') + ')(?=[\\\\\\/]|$)');
-	normalModuleFactory.plugin('factory', function(factory) {
+	const name = this.options.name;
+	const libReg = new RegExp('^(' + this.options.libraries.join('|') + ')(?=[\\\\\\/]|$)');
+	normalModuleFactory.plugin('factory', (factory) => {
 		return function(data, callback) {
-			var request = data.request;
+			const request = data.request;
 			if(request && libReg.test(request)) {
 				return callback(null, new DelegatedModule(name, {id:request}, 'require', request));
 			}
@@ -54,21 +54,21 @@ function EnactFrameworkRefPlugin(opts) {
 }
 module.exports = EnactFrameworkRefPlugin;
 EnactFrameworkRefPlugin.prototype.apply = function(compiler) {
-	var name = this.options.name;
-	var libs = this.options.libraries;
-	var external = this.options.external;
+	const name = this.options.name;
+	const libs = this.options.libraries;
+	const external = this.options.external;
 
 	// Declare enact_framework as an external dependency
-	var externals = {};
+	const externals = {};
 	externals[name] = name;
 	compiler.apply(new ExternalsPlugin(compiler.options.output.libraryTarget || 'var', externals));
 
-	compiler.plugin('compilation', function(compilation, params) {
-		var normalModuleFactory = params.normalModuleFactory;
+	compiler.plugin('compilation', (compilation, params) => {
+		const normalModuleFactory = params.normalModuleFactory;
 		compilation.dependencyFactories.set(DelegatedSourceDependency, normalModuleFactory);
 
-		compilation.plugin('html-webpack-plugin-alter-chunks', function(chunks) {
-			var chunkFiles = [normalizePath(external.inject, 'enact.css', compiler)];
+		compilation.plugin('html-webpack-plugin-alter-chunks', (chunks) => {
+			const chunkFiles = [normalizePath(external.inject, 'enact.css', compiler)];
 			if(!external.snapshot) {
 				chunkFiles.unshift(normalizePath(external.inject, 'enact.js', compiler));
 			}
@@ -81,7 +81,7 @@ EnactFrameworkRefPlugin.prototype.apply = function(compiler) {
 		});
 
 		if(external.snapshot && isNodeOutputFS(compiler)) {
-			compilation.plugin('webos-meta-root-appinfo', function(meta) {
+			compilation.plugin('webos-meta-root-appinfo', (meta) => {
 				meta.v8SnapshotFile = normalizePath(external.inject, 'snapshot_blob.bin', compiler);
 				return meta;
 			});
@@ -89,7 +89,7 @@ EnactFrameworkRefPlugin.prototype.apply = function(compiler) {
 	});
 
 	// Apply the Enact factory plugin to handle the require() delagation/rerouting
-	compiler.plugin('compile', function(params) {
+	compiler.plugin('compile', (params) => {
 		params.normalModuleFactory.apply(new DelegatedEnactFactoryPlugin({
 			name: name,
 			libraries: libs

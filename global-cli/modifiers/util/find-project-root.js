@@ -1,13 +1,12 @@
-var path = require('path');
-var fs = require('fs')
-
-
+const
+	path = require('path'),
+	fs = require('fs');
 
 function findPackageJSON(curr) {
 	if(curr.replace(/(^[.\\\/]+|[\\\/]+$)/g, '').length === 0) {
 		return null;
 	} else {
-		var pkg = path.join(curr, 'package.json');
+		const pkg = path.join(curr, 'package.json');
 		if(fs.existsSync(pkg)) {
 			return {dir:curr, file:pkg};
 		} else {
@@ -16,12 +15,11 @@ function findPackageJSON(curr) {
 	}
 }
 
-
 function findRoot(curr) {
-	var pkg = findPackageJSON(curr);
+	const pkg = findPackageJSON(curr);
 	if(pkg) {
 		try {
-			var meta = require(pkg.file);
+			const meta = require(pkg.file);
 			if(meta.name) {
 				return {path:pkg.dir, meta:meta};
 			} else {
@@ -34,7 +32,6 @@ function findRoot(curr) {
 		return null;
 	}
 }
-
 
 module.exports = function(start) {
 	return findRoot(path.resolve(start || process.cwd()));

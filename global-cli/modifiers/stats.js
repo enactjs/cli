@@ -1,4 +1,4 @@
-var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
 
 module.exports = function(config) {
 	config.plugins.push(new BundleAnalyzerPlugin({
