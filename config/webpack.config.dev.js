@@ -102,8 +102,7 @@ module.exports = {
 					formatter: eslintFormatter,
 					configFile: require.resolve('eslint-config-enact'),
 					cache: true,
-					useEslintrc: false,
-					failOnError: true
+					useEslintrc: false
 				},
 				// @remove-on-eject-end
 				loader: 'eslint-loader',
