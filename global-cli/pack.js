@@ -19,6 +19,7 @@ const
 	modifiers = require('./modifiers'),
 	devConfig = require('../config/webpack.config.dev'),
 	prodConfig = require('../config/webpack.config.prod'),
+	findProjectRoot = require('./modifiers/util/find-project-root'),
 	formatWebpackMessages = require('react-dev-utils/formatWebpackMessages'),
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
 	stripAnsi = require('strip-ansi');
@@ -68,8 +69,8 @@ function details(err, stats) {
 		printFileSizes(statsJSON);
 		console.log();
 		if(messages.warnings.length) {
-			console.log(chalk.yellow('Compiled with warnings.\n'));
-			console.log(messages.warnings.join('\n\n'));
+			console.log(chalk.yellow('Compiled with warnings:\n'));
+			console.log(messages.warnings.join('\n\n') + '\n');
 		} else {
 			console.log(chalk.green('Compiled successfully.'));
 		}
@@ -77,6 +78,7 @@ function details(err, stats) {
 			console.log(chalk.yellow('NOTICE: This build contains debugging functionality and may run'
 					+ ' slower than in production mode.'));
 		}
+		console.log();
 	}
 }
 
@@ -121,6 +123,7 @@ function build(config) {
 	compiler.run((err, stats) => {
 		err = details(err, stats);
 		if(err) {
+			console.log();
 			console.log(chalk.red('Failed to compile.\n'));
 			console.log((err.message || err) + '\n');
 			process.exit(1);
@@ -156,6 +159,7 @@ module.exports = function(args) {
 	});
 	if (opts.help) displayHelp();
 
+	process.chdir(findProjectRoot().path);
 	process.env.NODE_ENV = 'development';
 	let config = devConfig;
 
