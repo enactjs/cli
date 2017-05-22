@@ -1,4 +1,4 @@
-var
+const
 	path = require('path'),
 	glob = require('glob'),
 	exists = require('path-exists').sync,
@@ -8,7 +8,7 @@ var
 
 module.exports = function(config, opts) {
 	// Form list of framework entries; Every @enact/* js file as well as react/react-dom
-	var entry = glob.sync('@enact/**/*.@(js|jsx|es6)', {
+	const entry = glob.sync('@enact/**/*.@(js|jsx|es6)', {
 		cwd: path.resolve('./node_modules'),
 		nodir: true,
 		ignore: [
@@ -33,17 +33,14 @@ module.exports = function(config, opts) {
 	config.output.libraryTarget = 'umd';
 
 	// Modify the iLib plugin options to skip './resources' detection/generation
-	var ilibPlugin = helper.getPluginByName(config, 'ILibPlugin');
+	const ilibPlugin = helper.getPluginByName(config, 'ILibPlugin');
 	if(ilibPlugin) {
 		ilibPlugin.options.create = false;
 		ilibPlugin.options.resources = false;
 	}
 
 	// Remove the HTML generation plugin and webOS-meta plugin
-	var unneeded = ['HtmlWebpackPlugin', 'WebOSMetaPlugin'];
-	for(var i=0; i<unneeded.length; i++) {
-		helper.removePlugin(config, unneeded[i]);
-	}
+	['HtmlWebpackPlugin', 'WebOSMetaPlugin'].forEach((plugin) => helper.removePlugin(config, plugin));
 
 	// Add the framework plugin to build in an externally accessible manner
 	config.plugins.push(new EnactFrameworkPlugin());

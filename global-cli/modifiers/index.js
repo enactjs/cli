@@ -1,4 +1,4 @@
-var
+const
 	path = require('path'),
 	exists = require('path-exists').sync,
 	externalsSetup = require('./externals'),

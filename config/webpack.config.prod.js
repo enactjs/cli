@@ -9,21 +9,23 @@
  */
 // @remove-on-eject-end
 
-var path = require('path');
-var webpack = require('webpack');
-var autoprefixer = require('autoprefixer');
-var removeclass = require('postcss-remove-classes').default;
-var LessPluginRi = require('resolution-independence');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var GracefulFsPlugin = require('graceful-fs-webpack-plugin');
-var ILibPlugin = require('ilib-webpack-plugin');
-var WebOSMetaPlugin = require('webos-meta-webpack-plugin');
-var findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
+const path = require('path');
+const {DefinePlugin, optimize:{UglifyJsPlugin}} = require('webpack');
+const autoprefixer = require('autoprefixer');
+const flexbugfixes = require('postcss-flexbugs-fixes');
+const removeclass = require('postcss-remove-classes').default;
+const LessPluginRi = require('resolution-independence');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const GracefulFsPlugin = require('graceful-fs-webpack-plugin');
+const ILibPlugin = require('ilib-webpack-plugin');
+const WebOSMetaPlugin = require('webos-meta-webpack-plugin');
+const eslintFormatter = require('react-dev-utils/eslintFormatter');
+const findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
 
 process.chdir(findProjectRoot().path);
-var pkg = require(path.resolve('./package.json'));
-var enact = pkg.enact || {};
+const pkg = require(path.resolve('./package.json'));
+const enact = pkg.enact || {};
 
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
@@ -61,6 +63,8 @@ module.exports = {
 			'promise/lib/es6-extensions': require.resolve('promise/lib/es6-extensions'),
 			'whatwg-fetch': require.resolve('whatwg-fetch'),
 			'object-assign': require.resolve('object-assign'),
+			'string.fromcodepoint': require.resolve('string.fromcodepoint'),
+			'string.prototype.codepointat': require.resolve('string.prototype.codepointat'),
 			// @remove-on-eject-end
 			// Support ilib shorthand alias for ilib modules
 			'ilib':'@enact/i18n/ilib/lib'
@@ -86,10 +90,10 @@ module.exports = {
 				// @remove-on-eject-begin
 				// Point ESLint to our predefined config.
 				options: {
+					formatter: eslintFormatter,
 					configFile: require.resolve('eslint-config-enact'),
 					cache: true,
-					useEslintrc: false,
-					failOnError: true
+					useEslintrc: false
 				},
 				// @remove-on-eject-end
 				loader: 'eslint-loader',
@@ -164,8 +168,12 @@ module.exports = {
 											'last 4 versions',
 											'Firefox ESR',
 											'not ie < 9' // React doesn't support IE8 anyway.
-										]
+										],
+										flexbox: 'no-2009'
 									}),
+									// Fix and adjust for known flexbox issues
+									// See https://github.com/philipwalton/flexbugs
+									flexbugfixes,
 									// Remove the development-only CSS class `.__DEV__`.
 									removeclass(['__DEV__'])
 								]
@@ -181,6 +189,8 @@ module.exports = {
 					]
 				})
 			}
+			// ** STOP ** Are you adding a new loader?
+			// Remember to add the new extension(s) to the "file" loader exclusion regex list.
 		]
 	},
 	// Optional configuration for polyfilling NodeJS built-ins.
@@ -214,15 +224,19 @@ module.exports = {
 		// if (process.env.NODE_ENV === 'production') { ... }.
 		// It is absolutely essential that NODE_ENV was set to production here.
 		// Otherwise React will be compiled in the very slow development mode.
-		new webpack.DefinePlugin({
+		new DefinePlugin({
 			'process.env': {
 				'NODE_ENV': '"production"'
 			}
 		}),
 		// Minify the code.
-		new webpack.optimize.UglifyJsPlugin({
+		new UglifyJsPlugin({
 			compress: {
-				warnings: false
+				warnings: false,
+				// This feature has been reported as buggy a few times, such as:
+				// https://github.com/mishoo/UglifyJS2/issues/1964
+				// We'll wait with enabling it by default until it is more solid.
+				reduce_vars: false
 			},
 			output: {
 				comments: false

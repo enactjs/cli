@@ -3,12 +3,12 @@
 'use strict';
 
 if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
-	var pkg = require('../package.json');
+	const pkg = require('../package.json');
 	console.log(pkg.name);
 	console.log('version: ' + pkg.version);
 	console.log();
 } else {
-	var command = process.argv[2];
+	const command = process.argv[2];
 
 	switch (command) {
 		case 'create':
@@ -18,12 +18,14 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 		case 'pack':
 		case 'clean':
 		case 'test':
-		case 'lint':
-			var task = require('../global-cli/' + command);
+		case 'lint': {
+			const task = require('../global-cli/' + command);
 			task(process.argv.slice(3));
 			break;
-		default:
-			var create = require('../global-cli/create');
+		}
+		default: {
+			const create = require('../global-cli/create');
 			create(['--help']);
+		}
 	}
 }

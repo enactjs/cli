@@ -9,22 +9,24 @@
  */
 // @remove-on-eject-end
 
-var path = require('path');
-var webpack = require('webpack');
-var autoprefixer = require('autoprefixer');
-var LessPluginRi = require('resolution-independence');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var GracefulFsPlugin = require('graceful-fs-webpack-plugin');
-var ILibPlugin = require('ilib-webpack-plugin');
-var WebOSMetaPlugin = require('webos-meta-webpack-plugin');
-var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-var WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
-var findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
+const path = require('path');
+const {DefinePlugin} = require('webpack');
+const autoprefixer = require('autoprefixer');
+const flexbugfixes = require('postcss-flexbugs-fixes');
+const LessPluginRi = require('resolution-independence');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const GracefulFsPlugin = require('graceful-fs-webpack-plugin');
+const ILibPlugin = require('ilib-webpack-plugin');
+const WebOSMetaPlugin = require('webos-meta-webpack-plugin');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
+const eslintFormatter = require('react-dev-utils/eslintFormatter');
+const findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
 
 process.chdir(findProjectRoot().path);
-var pkg = require(path.resolve('./package.json'));
-var enact = pkg.enact || {};
+const pkg = require(path.resolve('./package.json'));
+const enact = pkg.enact || {};
 
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
@@ -70,6 +72,8 @@ module.exports = {
 			'promise/lib/es6-extensions': require.resolve('promise/lib/es6-extensions'),
 			'whatwg-fetch': require.resolve('whatwg-fetch'),
 			'object-assign': require.resolve('object-assign'),
+			'string.fromcodepoint': require.resolve('string.fromcodepoint'),
+			'string.prototype.codepointat': require.resolve('string.prototype.codepointat'),
 			// @remove-on-eject-end
 			// Support ilib shorthand alias for ilib modules
 			'ilib':'@enact/i18n/ilib/lib'
@@ -95,10 +99,10 @@ module.exports = {
 				// @remove-on-eject-begin
 				// Point ESLint to our predefined config.
 				options: {
+					formatter: eslintFormatter,
 					configFile: require.resolve('eslint-config-enact'),
 					cache: true,
-					useEslintrc: false,
-					failOnError: true
+					useEslintrc: false
 				},
 				// @remove-on-eject-end
 				loader: 'eslint-loader',
@@ -170,6 +174,7 @@ module.exports = {
 							loader: 'postcss-loader',
 							options: {
 								ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
+								sourceMap: true,
 								plugins: () => [
 									// We use PostCSS for autoprefixing only, but others could be added.
 									autoprefixer({
@@ -179,7 +184,10 @@ module.exports = {
 											'Firefox ESR',
 											'not ie < 9' // React doesn't support IE8 anyway.
 										]
-									})
+									}),
+									// Fix and adjust for known flexbox issues
+									// See https://github.com/philipwalton/flexbugs
+									flexbugfixes
 								]
 							}
 						},
@@ -201,6 +209,8 @@ module.exports = {
 				loader: 'expose-loader',
 				options: 'ReactPerf'
 			}
+			// ** STOP ** Are you adding a new loader?
+			// Remember to add the new extension(s) to the "file" loader exclusion regex list.
 		]
 	},
 	// Specific webpack-dev-server options
@@ -226,7 +236,7 @@ module.exports = {
 		}),
 		// Make NODE_ENV environment variable available to the JS code, for example:
 		// if (process.env.NODE_ENV === 'development') { ... }.
-		new webpack.DefinePlugin({
+		new DefinePlugin({
 			'process.env': {
 				'NODE_ENV': '"development"'
 			}

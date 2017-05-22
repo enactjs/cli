@@ -1,18 +1,16 @@
-/* eslint no-var: "off" */
+const path = require('path');
+const {DefinePlugin} = require('webpack');
+const autoprefixer = require('autoprefixer');
+const LessPluginRi = require('resolution-independence');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const GracefulFsPlugin = require('graceful-fs-webpack-plugin');
+const ILibPlugin = require('ilib-webpack-plugin');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
 
-var path = require('path');
-var webpack = require('webpack');
-var autoprefixer = require('autoprefixer');
-var LessPluginRi = require('resolution-independence');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var GracefulFsPlugin = require('graceful-fs-webpack-plugin');
-var ILibPlugin = require('ilib-webpack-plugin');
-var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-var findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
-
-var appPath = findProjectRoot().path;
-var pkg = require(path.resolve(appPath, './package.json'));
-var enact = pkg.enact || {};
+const appPath = findProjectRoot().path;
+const pkg = require(path.resolve(appPath, './package.json'));
+const enact = pkg.enact || {};
 
 module.exports = function(karma) {
 	karma.set({
@@ -134,7 +132,7 @@ module.exports = function(karma) {
 			},
 			devServer: {host: '0.0.0.0', port: 8080},
 			plugins: [
-				new webpack.DefinePlugin({'process.env': {'NODE_ENV': '"development"'}}),
+				new DefinePlugin({'process.env': {'NODE_ENV': '"development"'}}),
 				new ExtractTextPlugin('[name].css'),
 				new CaseSensitivePathsPlugin(),
 				new GracefulFsPlugin(),
