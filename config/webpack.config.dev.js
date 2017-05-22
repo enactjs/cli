@@ -100,7 +100,9 @@ module.exports = {
 				// Point ESLint to our predefined config.
 				options: {
 					formatter: eslintFormatter,
-					configFile: require.resolve('eslint-config-enact'),
+					baseConfig: {
+						extends: [require.resolve('eslint-config-enact')]
+					},
 					cache: true,
 					useEslintrc: false
 				},
