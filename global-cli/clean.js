@@ -22,9 +22,9 @@ module.exports = function(args) {
 	opts.help && displayHelp();
 
 	process.chdir(findProjectRoot().path);
-	fs.remove('./build', (bErr) => {
+	fs.remove('./build', bErr => {
 		if(bErr) throw bErr;
-		fs.remove('./dist', (dErr) => {
+		fs.remove('./dist', dErr => {
 			if(dErr) throw dErr;
 		});
 	});

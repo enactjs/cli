@@ -41,5 +41,5 @@ module.exports = function(args) {
 		eslintArgs.push('.');
 	}
 	const child = cp.fork(require.resolve('eslint/bin/eslint'), eslintArgs, {env:process.env, cwd:process.cwd()});
-	child.on('close', (code) => process.exit(code));
+	child.on('close', code => process.exit(code));
 };

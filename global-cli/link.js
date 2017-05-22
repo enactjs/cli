@@ -58,7 +58,7 @@ module.exports = function(args) {
 		}
 
 		const proc = spawn('npm', linkArgs, {stdio: 'inherit', cwd:process.cwd()});
-		proc.on('close', (code) => {
+		proc.on('close', code => {
 			if(code!==0) {
 				console.log(chalk.cyan('ERROR: ') + '"npm ' + linkArgs.join(' ') + '" failed');
 				process.exit(1);

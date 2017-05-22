@@ -5,5 +5,5 @@ module.exports = function(args) {
 		args.splice(1, 0, require.resolve('../config/karma.conf.js'));
 	}
 	const child = cp.fork(require.resolve('karma/bin/karma'), args, {env:process.env, cwd:process.cwd()});
-	child.on('close', (code) => process.exit(code));
+	child.on('close', code => process.exit(code));
 };

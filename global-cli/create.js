@@ -73,7 +73,7 @@ function copyTemplate(template, dest) {
 
 	// Rename gitignore after the fact to prevent npm from renaming it to .npmignore
 	// See: https://github.com/npm/npm/issues/1862
-	fs.move(path.join(dest, 'gitignore'), path.join(dest, '.gitignore'), [], (err) => {
+	fs.move(path.join(dest, 'gitignore'), path.join(dest, '.gitignore'), [], err => {
 		if (err) {
 			// Append if there's already a `.gitignore` file there
 			if (err.code === 'EEXIST') {
@@ -113,12 +113,12 @@ function installDeps(project, link, local, verbose, callback) {
 		(verbose ? 'verbose' : 'error'),
 		'install',
 		link && '--link'
-	].filter((e) => e);
+	].filter(e => e);
 
 	console.log('Installing dependencies from npm...');
 
 	const proc = spawn('npm', args, {stdio: 'inherit', cwd:project});
-	proc.on('close', (code) => {
+	proc.on('close', code => {
 		if(code!==0) {
 			console.log(chalk.cyan('ERROR: ') + '"npm ' + args.join(' ') + '" failed');
 			process.exit(1);
@@ -132,9 +132,9 @@ function installDeps(project, link, local, verbose, callback) {
 				link && '--link',
 				ENACT_DEV_NPM,
 				'--save-dev'
-			].filter((e) => e);
+			].filter(e => e);
 			const devProc = spawn('npm', devArgs, {stdio: 'inherit', cwd:project});
-			devProc.on('close', (code2) => {
+			devProc.on('close', code2 => {
 				if(code2!==0) {
 					console.log(chalk.cyan('ERROR: ') + '"npm ' + devArgs.join(' ') + '" failed');
 					process.exit(1);
@@ -176,7 +176,7 @@ function checkAppName(appName, template) {
 		console.error(chalk.red('We cannot create a project called `' + appName
 				+ '` because a dependency with the same name exists.\n'
 				+ 'Due to the way npm works, the following names are not allowed:\n\n')
-				+ chalk.cyan(allDependencies.map((depName) => '\t' + depName).join('\n'))
+				+ chalk.cyan(allDependencies.map(depName => '\t' + depName).join('\n'))
 				+ chalk.red('\n\nPlease choose a different project name.')
 		);
 		process.exit(1);
@@ -188,7 +188,7 @@ function isSafeToCreateProjectIn(project) {
 	const validFiles = [
 		'.DS_Store', 'Thumbs.db', '.git', '.gitignore', '.idea', 'README.md', 'LICENSE'
 	];
-	return fs.readdirSync(project).every((file) => validFiles.indexOf(file) >= 0);
+	return fs.readdirSync(project).every(file => validFiles.indexOf(file) >= 0);
 }
 
 function displayHelp() {

@@ -32,7 +32,7 @@ module.exports = function(args) {
 	const buildRoot = opts.output || './build';
 
 	console.log('Transpiling via Babel to ' + path.resolve(buildRoot));
-	fs.copy(sourceRoot, buildRoot, {filter:function(f) { return /^(?!.*(node_modules|build|dist|\\.git)).*$/.test(f); }, stopOnErr:true}, (cpErr) => {
+	fs.copy(sourceRoot, buildRoot, {filter:function(f) { return /^(?!.*(node_modules|build|dist|\\.git)).*$/.test(f); }, stopOnErr:true}, cpErr => {
 		if(cpErr) {
 			console.error(cpErr);
 		} else {
@@ -41,12 +41,12 @@ module.exports = function(args) {
 					console.error(globErr);
 				} else {
 					const babelrc = path.join(__dirname, '..', 'config', '.babelrc');
-					files.forEach((js) => {
+					files.forEach(js => {
 						babel.transformFile(js, {extends:babelrc}, (babelErr, result) => {
 							if(babelErr) {
 								console.error(babelErr);
 							} else {
-								fs.writeFile(js, result.code, {encoding:'utf8'}, (fsErr) => {
+								fs.writeFile(js, result.code, {encoding:'utf8'}, fsErr => {
 									if(fsErr) {
 										console.error(fsErr);
 									}
