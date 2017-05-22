@@ -152,11 +152,12 @@ function displayHelp() {
 	console.log('    enact pack [options]');
 	console.log();
 	console.log('  Options');
-	console.log('    -s, --stats       Output bundle analysis file');
 	console.log('    -w, --watch       Rebuild on file changes');
 	console.log('    -p, --production  Build in production mode');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
 	console.log('                      (includes prerendering)');
+	console.log('    --stats           Output bundle analysis file');
+	console.log('    --no-progress     Hide progressbar/status text');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -180,10 +181,13 @@ function displayHelp() {
 
 module.exports = function(args) {
 	var opts = minimist(args, {
-		boolean: ['minify', 'framework', 's', 'stats', 'p', 'production', 'i', 'isomorphic', 'v8', 'snapshot', 'w', 'watch', 'h', 'help'],
+		boolean: [
+			'framework', 'stats', 'p', 'production', 'i', 'isomorphic', 's', 'snapshot',
+			'progress', 'minify', 'w', 'watch', 'h', 'help'
+		],
 		string: ['externals', 'externals-inject', 'l', 'locales'],
-		default: {minify:true},
-		alias: {s:'stats', p:'production', i:'isomorphic', l:'locales', v8:'snapshot', w:'watch', h:'help'}
+		default: {minify:true, progress:true},
+		alias: {p:'production', i:'isomorphic', l:'locales', s:'snapshot', w:'watch', h:'help'}
 	});
 	if (opts.help) displayHelp();
 

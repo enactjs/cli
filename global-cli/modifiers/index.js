@@ -4,6 +4,7 @@ var
 	externalsSetup = require('./externals'),
 	frameworkSetup = require('./framework'),
 	isomorphicSetup = require('./isomorphic'),
+	progressSetup = require('./progress'),
 	statsSetup = require('./stats'),
 	unmangledSetup = require('./unmangled');
 
@@ -28,6 +29,10 @@ module.exports = {
 			}
 		}
 
+		if(opts.progress) {
+			progressSetup(config, opts);
+		}
+
 		if(opts.stats) {
 			statsSetup(config, opts);
 		}
@@ -35,6 +40,7 @@ module.exports = {
 	externals: externalsSetup,
 	framework: frameworkSetup,
 	isomorphic: isomorphicSetup,
+	progress: progressSetup,
 	stats: statsSetup,
 	unmangled: unmangledSetup
 };
