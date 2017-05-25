@@ -51,6 +51,10 @@ Runs the Enact configuration of Eslint on the project for syntax analysis.
 
 These tasks will execute all valid tests (files that end in `-specs.js`) that are within the project directory. The `test` is a standard execution pass, `test-json` uses a json reporter for output, and `test-watch` will set up a watcher to re-execute tests when files change.
 
+### `npm run license`
+
+Outputs a JSON representation of the licenses for modules referenced by the current project as well as any licenses of modules used by `enact-dev` that may be included in a production build of an app.
+
 
 ## Enact Build Options
 

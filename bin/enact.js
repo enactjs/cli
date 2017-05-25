@@ -19,6 +19,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 		case 'clean':
 		case 'test':
 		case 'lint':
+		case 'license':
 			var task = require('../global-cli/' + command);
 			task(process.argv.slice(3));
 			break;
