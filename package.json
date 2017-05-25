@@ -70,6 +70,7 @@
     "karma-webpack": "~2.0.3",
     "less": "~2.7.2",
     "less-loader": "~4.0.3",
+    "license-checker": "~10.0.0",
     "minimist": "~1.2.0",
     "mocha": "~3.4.1",
     "ncp": "~2.0.0",
