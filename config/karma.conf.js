@@ -82,7 +82,7 @@ module.exports = function(karma) {
 			module: {
 				rules: [
 					{
-						exclude: /\.(html|js|jsx|css|less|ejs|json|bmp|gif|jpe?g|png|svg)$/,
+						exclude: /\.(html|js|jsx|css|less|ejs|json|bmp|gif|jpe?g|png|svg|txt)$/,
 						loader: 'file-loader',
 						options: {name: '[path][name].[ext]'}
 					},
@@ -90,6 +90,10 @@ module.exports = function(karma) {
 						test: /\.(bmp|gif|jpe?g|png|svg)$/,
 						loader: 'url-loader',
 						options: {limit: 10000, name: '[path][name].[ext]'}
+					},
+					{
+						test: /\.(html|txt)$/,
+						loader: 'raw-loader'
 					},
 					{
 						test: /\.(js|jsx)$/,
