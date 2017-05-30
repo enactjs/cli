@@ -4,7 +4,6 @@ const
 	minimist = require('minimist'),
 	spawn = require('cross-spawn'),
 	chalk = require('chalk'),
-	semver = require('semver'),
 	exists = require('path-exists').sync;
 
 const ENACT_DEV_NPM = 'enact-dev';
@@ -13,7 +12,6 @@ function createApp(output, template, link, local, verbose) {
 	const project = path.resolve(output);
 	const appName = path.basename(project);
 
-	checkNodeVersion();
 	checkAppName(appName, template);
 
 	if (!exists(project)) {
@@ -147,25 +145,6 @@ function installDeps(project, link, local, verbose, callback) {
 	});
 }
 
-function checkNodeVersion() {
-	const localPath = path.resolve(process.cwd(), 'node_modules', 'enact-dev', 'package.json');
-	const globalPath = path.join(__dirname, '..', 'package.json');
-	let packageJson = fs.readJsonSync(globalPath, {throws:false}) || {};
-	if(exists(localPath)) {
-		packageJson = fs.readJsonSync(localPath, {throws:false}) || packageJson;
-	}
-	if (!packageJson.engines || !packageJson.engines.node) {
-		return;
-	}
-
-	if (!semver.satisfies(process.version, packageJson.engines.node)) {
-		console.error(chalk.red('You are currently running Node %s but enact-dev requires %s.'
-				+ ' Please use a supported version of Node.\n'), process.version,
-				packageJson.engines.node);
-		process.exit(1);
-	}
-}
-
 function checkAppName(appName, template) {
 	const templateMeta = fs.readJsonSync(path.join(template, 'package.json'), {throws: false}) || {};
 	const dependencies = Object.keys(templateMeta.dependencies || {});
@@ -217,6 +196,6 @@ module.exports = function(args) {
 	opts.help && displayHelp();
 
 	const template = path.join(__dirname, '..', 'template');
-	const output = opts._[0] || process.cwd();
+	const output = (typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
 	createApp(output, template, opts.link, opts.local, opts.verbose);
 };
