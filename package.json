@@ -1,6 +1,6 @@
 {
   "name": "enact-dev",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Full-featured build environment for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
@@ -53,7 +53,7 @@
     "graceful-fs-webpack-plugin": "~0.1.0",
     "html-webpack-plugin": "~2.28.0",
     "http-proxy-middleware": "~0.17.4",
-    "ilib-webpack-plugin": "~0.1.3",
+    "ilib-webpack-plugin": "~0.2.0",
     "json-loader": "~0.5.4",
     "karma": "~1.5.0",
     "karma-babel-preprocessor": "~6.0.1",

@@ -1,3 +1,7 @@
+## 0.8.2 (May 31, 2017)
+
+Updated `ilib-webpack-plugin` dependency to correctly support moonstone internal localization and associated fixes.
+
 ## 0.8.1 (May 31, 2017)
 
 ### create
