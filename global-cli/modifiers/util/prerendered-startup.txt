@@ -1,7 +1,7 @@
 
 		(function() {
 			// Initialize font scaling for resolution independence.
-			var screenTypes = %SCREENTYPES%;
+			var screenTypes = %SCREENTYPES% || [];
 			var defaultType = {name: 'standard', pxPerRem: 16, width: window.innerWidth, height: window.innerHeight, aspectRatioName: 'standard', base: true};
 			if(screenTypes.length===0) {
 				screenTypes.push(defaultType);

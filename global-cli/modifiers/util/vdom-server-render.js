@@ -37,48 +37,58 @@ var context = vm.createContext(sandbox);
 		locale 			Specific locale to use in rendering
 		externals		filepath to external Enact framework to use with rendering
 */
-module.exports = function(opts) {
-	var rendered;
-
-	if(opts.locale) {
-		sandbox.XMLHttpRequest = FileXHR;
-	} else {
-		delete sandbox.XMLHttpRequest;
-	}
-
-	try {
-		console.mute();
+module.exports = {
+	prepare: function(code, opts) {
+		code = code.replace('return __webpack_require__(0);', '__webpack_require__.e = function() {};\nreturn __webpack_require__(0);');
 
 		if(opts.externals) {
-			opts.externals = path.resolve(path.join(opts.externals, 'enact.js'));
 			// Add external Enact framework filepath if it's used.
-			opts.code = opts.code.replace(/require\(["']enact_framework["']\)/g, 'require("' + opts.externals +  '")');
-			// Ensure locale switching  support is loaded globally with external framework usage.
-			var framework = require(opts.externals);
-			sandbox.iLibLocale = framework('@enact/i18n/locale');
+			code = code.replace(/require\(["']enact_framework["']\)/g, 'require("'
+					+ path.resolve(path.join(opts.externals, 'enact.js')) +  '")');
+		}
+		return code;
+	},
+
+	render: function(opts) {
+		var rendered;
+
+		if(opts.locale) {
+			sandbox.XMLHttpRequest = FileXHR;
 		} else {
-			delete sandbox.iLibLocale
+			delete sandbox.XMLHttpRequest;
 		}
 
-		m.exports = {};
-		vm.runInContext(opts.code, context, {
-			filename: opts.file,
-			displayErrors: true
-		});
-
-		// Update locale if needed.
-		if(opts.locale && sandbox.iLibLocale && sandbox.iLibLocale.updateLocale) {
-			console.resume();
-			sandbox.iLibLocale.updateLocale(opts.locale);
+		try {
 			console.mute();
+
+			if(opts.externals) {
+				// Ensure locale switching  support is loaded globally with external framework usage.
+				var framework = require(path.resolve(path.join(opts.externals, 'enact.js')));
+				sandbox.iLibLocale = framework('@enact/i18n/locale');
+			} else {
+				delete sandbox.iLibLocale
+			}
+
+			m.exports = {};
+			vm.runInContext(opts.code, context, {
+				filename: opts.file,
+				displayErrors: true
+			});
+
+			// Update locale if needed.
+			if(opts.locale && sandbox.iLibLocale && sandbox.iLibLocale.updateLocale) {
+				console.resume();
+				sandbox.iLibLocale.updateLocale(opts.locale);
+				console.mute();
+			}
+
+			rendered = opts.server.renderToString(m.exports['default'] || m.exports);
+
+			console.resume();
+		} catch(e) {
+			console.resume();
+			throw e;
 		}
-
-		rendered = opts.server.renderToString(m.exports['default'] || m.exports);
-
-		console.resume();
-	} catch(e) {
-		console.resume();
-		throw e;
+		return rendered;
 	}
-	return rendered;
 };

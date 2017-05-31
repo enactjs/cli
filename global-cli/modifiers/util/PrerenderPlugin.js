@@ -2,7 +2,7 @@ var
 	fs = require('fs'),
 	path = require('path'),
 	chalk = require('chalk'),
-	vdomRender = require('./vdom-server-render');
+	vdomServer = require('./vdom-server-render');
 
 // Determine if it's a NodeJS output filesystem or if it's a foreign/virtual one.
 function isNodeOutputFS(compiler) {
@@ -37,13 +37,18 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 	// Prerender the desired chunk asset when it's created.
 	compiler.plugin('compilation', function(compilation) {
 		if(isNodeOutputFS(compiler)) {
+			// Ensure that any async chunk-loading jsonp functions are isomorphically compatible.
+			compilation.mainTemplate.plugin('bootstrap', function(source) {
+				return source.replace(/window/g, '(function() { return this; }())');
+			});
+
 			compilation.plugin('chunk-asset', function(chunk, file) {
 				if(file === opts.chunk) {
 					try {
 						compilation.applyPlugins('prerender-chunk', {chunk:opts.chunk});
-						status.prerender = vdomRender({
+						status.prerender = vdomServer.render({
 							server: opts.server,
-							code: compilation.assets[opts.chunk].source(),
+							code: vdomServer.prepare(compilation.assets[opts.chunk].source(), opts),
 							file: opts.chunk,
 							externals: opts.externals
 						});

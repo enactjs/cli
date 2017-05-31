@@ -11,6 +11,7 @@
     "watch": "enact pack --watch",
     "clean": "enact clean",
     "lint": "enact lint .",
+    "license": "enact license",
     "test": "enact test start --single-run --browsers PhantomJS",
     "test-json": "enact test start --single-run --browsers PhantomJS --reporters json",
     "test-watch": "enact test start --browsers PhantomJS"
@@ -28,12 +29,12 @@
     "extends": "enact"
   },
   "dependencies": {
-    "@enact/core": "^1.1.0",
-    "@enact/ui": "^1.1.0",
-    "@enact/moonstone": "^1.1.0",
-    "@enact/spotlight": "^1.1.0",
-    "@enact/i18n": "^1.1.0",
-    "@enact/webos": "^1.1.0",
+    "@enact/core": "^1.2.2",
+    "@enact/ui": "^1.2.2",
+    "@enact/moonstone": "^1.2.2",
+    "@enact/spotlight": "^1.2.2",
+    "@enact/i18n": "^1.2.2",
+    "@enact/webos": "^1.2.2",
     "prop-types": "^15.5.8",
     "react": "^15.5.4",
     "react-dom": "^15.5.4"

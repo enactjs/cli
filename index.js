@@ -7,5 +7,6 @@ module.exports = {
 	clean: require('./global-cli/clean'),
 	lint: require('./global-cli/lint'),
 	test: require('./global-cli/test'),
-	transpile: require('./global-cli/transpile')
+	transpile: require('./global-cli/transpile'),
+	license: require('./global-cli/license')
 };

@@ -29,6 +29,7 @@ module.exports = function(karma) {
 		files: [
 			require.resolve('./polyfills'),
 			require.resolve('string.prototype.repeat'),
+			require.resolve('phantomjs-polyfill-array-from'),
 			require.resolve('es6-map/implement'),
 			require.resolve('./proptype-checker'),
 			'./!(node_modules|dist|build)/**/*-specs.js'
@@ -39,6 +40,7 @@ module.exports = function(karma) {
 			'./!(node_modules|dist|build)/**/*.js': ['webpack'],
 			[require.resolve('./polyfills')]: ['webpack'],
 			[require.resolve('string.prototype.repeat')]: ['webpack'],
+			[require.resolve('phantomjs-polyfill-array-from')]: ['webpack'],
 			[require.resolve('es6-map/implement')]: ['webpack'],
 			[require.resolve('./proptype-checker')]: ['webpack']
 		},
