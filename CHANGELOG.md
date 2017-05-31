@@ -1,3 +1,26 @@
+## 0.8.1 (May 31, 2017)
+
+### create
+
+* Template updated for Enact 1.2.2
+
+### pack
+
+* Fixed prerendering of apps that use lazy loaded chunks.
+* Support for moonstone internal localization.
+
+### serve
+
+* Disable host checks to allow IP serving.
+
+### test
+
+* Added Array.from to the list of polyfills used with Phantomjs in tests.
+
+### license
+
+* Added license checker command to detect all licenses used by content within an app.
+
 ## 0.8.0 (April 21, 2017)
 
 With the exception of webpack2-related packages, all dependencies have been updated to their current releases.
