@@ -1,19 +1,17 @@
-var
+const
 	path = require('path'),
 	fs = require('fs-extra'),
 	minimist = require('minimist'),
 	spawn = require('cross-spawn'),
 	chalk = require('chalk'),
-	semver = require('semver'),
 	exists = require('path-exists').sync;
 
-var ENACT_DEV_NPM = 'enact-dev';
+const ENACT_DEV_NPM = 'enact-dev';
 
 function createApp(output, template, link, local, verbose) {
-	var project = path.resolve(output);
-	var appName = path.basename(project);
+	const project = path.resolve(output);
+	const appName = path.basename(project);
 
-	checkNodeVersion();
 	checkAppName(appName, template);
 
 	if (!exists(project)) {
@@ -26,11 +24,11 @@ function createApp(output, template, link, local, verbose) {
 	console.log('Creating a new Enact app in ' + project + '.');
 	console.log();
 
-	var prevCWD = process.cwd();
+	const prevCWD = process.cwd();
 	process.chdir(project);
 	copyTemplate(template, project);
 
-	installDeps(project, link, local, verbose, function() {
+	installDeps(project, link, local, verbose, () => {
 		console.log();
 		console.log('Success! Created ' + appName + ' at ' + project);
 		console.log();
@@ -73,11 +71,11 @@ function copyTemplate(template, dest) {
 
 	// Rename gitignore after the fact to prevent npm from renaming it to .npmignore
 	// See: https://github.com/npm/npm/issues/1862
-	fs.move(path.join(dest, 'gitignore'), path.join(dest, '.gitignore'), [], function(err) {
+	fs.move(path.join(dest, 'gitignore'), path.join(dest, '.gitignore'), [], err => {
 		if (err) {
 			// Append if there's already a `.gitignore` file there
 			if (err.code === 'EEXIST') {
-				var data = fs.readFileSync(path.join(dest, 'gitignore'));
+				const data = fs.readFileSync(path.join(dest, 'gitignore'));
 				fs.appendFileSync(path.join(dest, '.gitignore'), data);
 				fs.unlinkSync(path.join(dest, 'gitignore'));
 			} else {
@@ -87,13 +85,13 @@ function copyTemplate(template, dest) {
 	});
 
 	// Update package.json name
-	var pkgJSON = path.join(dest, 'package.json');
-	var meta = JSON.parse(fs.readFileSync(pkgJSON, {encoding:'utf8'}));
+	const pkgJSON = path.join(dest, 'package.json');
+	const meta = JSON.parse(fs.readFileSync(pkgJSON, {encoding:'utf8'}));
 	meta.name = path.basename(dest).replace(/ /g, '-').toLowerCase();
 	fs.writeFileSync(pkgJSON, JSON.stringify(meta, null, '\t'), {encoding:'utf8'});
 
 	// Update appinfo.json if it exists in the template
-	var appinfo = path.join(dest, 'appinfo.json');
+	let appinfo = path.join(dest, 'appinfo.json');
 	if(!exists(appinfo)) {
 		appinfo = path.join(dest, 'webos-meta', 'appinfo.json');
 		if(!exists(appinfo)) {
@@ -101,40 +99,40 @@ function copyTemplate(template, dest) {
 		}
 	}
 	if(appinfo) {
-		var aiMeta = JSON.parse(fs.readFileSync(appinfo, {encoding:'utf8'}));
+		const aiMeta = JSON.parse(fs.readFileSync(appinfo, {encoding:'utf8'}));
 		aiMeta.id = meta.name;
 		fs.writeFileSync(appinfo, JSON.stringify(aiMeta, null, '\t'), {encoding:'utf8'});
 	}
 }
 
 function installDeps(project, link, local, verbose, callback) {
-	var args = [
+	const args = [
 		'--loglevel',
 		(verbose ? 'verbose' : 'error'),
 		'install',
 		link && '--link'
-	].filter(function(e) { return e; });
+	].filter(e => e);
 
 	console.log('Installing dependencies from npm...');
 
-	var proc = spawn('npm', args, {stdio: 'inherit', cwd:project});
-	proc.on('close', function(code) {
+	const proc = spawn('npm', args, {stdio: 'inherit', cwd:project});
+	proc.on('close', code => {
 		if(code!==0) {
 			console.log(chalk.cyan('ERROR: ') + '"npm ' + args.join(' ') + '" failed');
 			process.exit(1);
 		}
 		if(local) {
 			console.log('Installing enact-dev locally. This might take a couple minutes.');
-			var devArgs = [
+			const devArgs = [
 				'--loglevel',
 				(verbose ? 'verbose' : 'error'),
 				'install',
 				link && '--link',
 				ENACT_DEV_NPM,
 				'--save-dev'
-			].filter(function(e) { return e; });
-			var devProc = spawn('npm', devArgs, {stdio: 'inherit', cwd:project});
-			devProc.on('close', function(code2) {
+			].filter(e => e);
+			const devProc = spawn('npm', devArgs, {stdio: 'inherit', cwd:project});
+			devProc.on('close', code2 => {
 				if(code2!==0) {
 					console.log(chalk.cyan('ERROR: ') + '"npm ' + devArgs.join(' ') + '" failed');
 					process.exit(1);
@@ -147,38 +145,17 @@ function installDeps(project, link, local, verbose, callback) {
 	});
 }
 
-function checkNodeVersion() {
-	var localPath = path.resolve(process.cwd(), 'node_modules', 'enact-dev', 'package.json');
-	var globalPath = path.join(__dirname, '..', 'package.json');
-	var packageJson = fs.readJsonSync(globalPath, {throws:false}) || {};
-	if(exists(localPath)) {
-		packageJson = fs.readJsonSync(localPath, {throws:false}) || packageJson;
-	}
-	if (!packageJson.engines || !packageJson.engines.node) {
-		return;
-	}
-
-	if (!semver.satisfies(process.version, packageJson.engines.node)) {
-		console.error(chalk.red('You are currently running Node %s but enact-dev requires %s.'
-				+ ' Please use a supported version of Node.\n'), process.version,
-				packageJson.engines.node);
-		process.exit(1);
-	}
-}
-
 function checkAppName(appName, template) {
-	var templateMeta = fs.readJsonSync(path.join(template, 'package.json'), {throws: false}) || {};
-	var dependencies = Object.keys(templateMeta.dependencies || {});
-	var devDependencies = Object.keys(templateMeta.devDependencies || {});
-	var allDependencies = dependencies.concat(devDependencies).sort();
+	const templateMeta = fs.readJsonSync(path.join(template, 'package.json'), {throws: false}) || {};
+	const dependencies = Object.keys(templateMeta.dependencies || {});
+	const devDependencies = Object.keys(templateMeta.devDependencies || {});
+	const allDependencies = dependencies.concat(devDependencies).sort();
 
 	if (allDependencies.indexOf(appName) >= 0) {
 		console.error(chalk.red('We cannot create a project called `' + appName
 				+ '` because a dependency with the same name exists.\n'
 				+ 'Due to the way npm works, the following names are not allowed:\n\n')
-				+ chalk.cyan(allDependencies.map(function(depName) {
-					return '	' + depName;
-				}).join('\n'))
+				+ chalk.cyan(allDependencies.map(depName => '\t' + depName).join('\n'))
 				+ chalk.red('\n\nPlease choose a different project name.')
 		);
 		process.exit(1);
@@ -187,13 +164,10 @@ function checkAppName(appName, template) {
 
 // If project only contains files generated by GH, it’s safe.
 function isSafeToCreateProjectIn(project) {
-	var validFiles = [
+	const validFiles = [
 		'.DS_Store', 'Thumbs.db', '.git', '.gitignore', '.idea', 'README.md', 'LICENSE'
 	];
-	return fs.readdirSync(project)
-		.every(function(file) {
-			return validFiles.indexOf(file) >= 0;
-		});
+	return fs.readdirSync(project).every(file => validFiles.indexOf(file) >= 0);
 }
 
 function displayHelp() {
@@ -215,13 +189,13 @@ function displayHelp() {
 }
 
 module.exports = function(args) {
-	var opts = minimist(args, {
+	const opts = minimist(args, {
 		boolean: ['link', 'local', 'verbose', 'h', 'help'],
 		alias: {h:'help'}
 	});
 	opts.help && displayHelp();
 
-	var template = path.join(__dirname, '..', 'template');
-	var output = opts._[0] || process.cwd();
+	const template = path.join(__dirname, '..', 'template');
+	const output = (typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
 	createApp(output, template, opts.link, opts.local, opts.verbose);
 };

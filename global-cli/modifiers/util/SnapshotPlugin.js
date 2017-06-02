@@ -1,4 +1,4 @@
-var
+const
 	path = require('path'),
 	fs = require('fs'),
 	cp = require('child_process'),
@@ -15,7 +15,7 @@ function isNodeOutputFS(compiler) {
 }
 
 function getBlobName(args) {
-	for(var i=0; i<args.length; i++) {
+	for(let i=0; i<args.length; i++) {
 		if(args[i].indexOf('--startup-blob=')===0) {
 			return args[i].replace('--startup-blob=', '');
 		}
@@ -38,27 +38,27 @@ function SnapshotPlugin(options) {
 }
 module.exports = SnapshotPlugin;
 SnapshotPlugin.prototype.apply = function(compiler) {
-	var opts = this.options;
+	const opts = this.options;
 	opts.blob = getBlobName(opts.args);
 
 	// Record the v8 blob file in the root appinfo if applicable
-	compiler.plugin('compilation', function(compilation) {
-		compilation.plugin('webos-meta-root-appinfo', function(meta) {
+	compiler.plugin('compilation', (compilation) => {
+		compilation.plugin('webos-meta-root-appinfo', (meta) => {
 			meta.v8SnapshotFile = opts.blob;
 			return meta;
 		});
 	});
 
-	compiler.plugin('after-emit', function(compilation, callback) {
+	compiler.plugin('after-emit', (compilation, callback) => {
 		if(isNodeOutputFS(compiler) && opts.exec) {
-			var ssCache = path.join(findCacheDir({
+			const ssCache = path.join(findCacheDir({
 				name: 'enact-dev',
 				create: true
 			}), 'snapshot-target.js');
 
 			// Append anything optional to the js to be included in the snapshot
 			if(opts.prepend || opts.append) {
-				var text = opts.prepend || '';
+				let text = opts.prepend || '';
 				text += fs.readFileSync(path.join(compiler.options.output.path, opts.target), {encoding:'utf8'});
 				text += opts.append || '';
 				fs.writeFileSync(ssCache, text, {encoding:'utf8'});
@@ -66,8 +66,8 @@ SnapshotPlugin.prototype.apply = function(compiler) {
 			}
 
 			// Run mksnapshot utility
-			var err;
-			var child = cp.spawnSync(opts.exec, opts.args, {
+			let err;
+			const child = cp.spawnSync(opts.exec, opts.args, {
 				cwd: compiler.options.output.path,
 				encoding: 'utf8'
 			});
@@ -75,7 +75,7 @@ SnapshotPlugin.prototype.apply = function(compiler) {
 			if(child.status === 0) {
 				// Add snapshot to the compilation assets array for stats purposes
 				try {
-					var stat = fs.statSync(path.join(compiler.options.output.path, opts.blob));
+					const stat = fs.statSync(path.join(compiler.options.output.path, opts.blob));
 					if(stat.size>0) {
 						compilation.assets[opts.blob] = {
 							size: function() { return stat.size; },

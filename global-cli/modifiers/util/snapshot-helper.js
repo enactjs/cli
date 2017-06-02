@@ -1,3 +1,4 @@
+/* eslint no-var: off */
 /*
  *  snapshot-helper.js
  *

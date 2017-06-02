@@ -1,26 +1,16 @@
-/* eslint no-var: "off" */
+const path = require('path');
+const {DefinePlugin} = require('webpack');
+const autoprefixer = require('autoprefixer');
+const LessPluginRi = require('resolution-independence');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const GracefulFsPlugin = require('graceful-fs-webpack-plugin');
+const ILibPlugin = require('ilib-webpack-plugin');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
 
-var path = require('path');
-var fs = require('fs');
-var webpack = require('webpack');
-var findCacheDir = require('find-cache-dir');
-var autoprefixer = require('autoprefixer');
-var LessPluginRi = require('resolution-independence');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var GracefulFsPlugin = require('graceful-fs-webpack-plugin');
-var ILibPlugin = require('ilib-webpack-plugin');
-var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-
-function readJSON(file) {
-	try {
-		return JSON.parse(fs.readFileSync(file, {encoding:'utf8'}));
-	} catch(e) {
-		return null;
-	}
-}
-
-var pkg = readJSON('package.json') || {};
-var enact = pkg.enact || {};
+const appPath = findProjectRoot().path;
+const pkg = require(path.resolve(appPath, './package.json'));
+const enact = pkg.enact || {};
 
 module.exports = function(karma) {
 	karma.set({
@@ -50,18 +40,19 @@ module.exports = function(karma) {
 		webpack: {
 			// Use essentially the same webpack config as from the development build setup.
 			// We do not include an entry value as Karma will control that.
-			devtool: null,
+			devtool: false,
 			output: {
 				path: './dist',
 				filename: '[name].js'
 			},
 			resolve: {
-				extensions: ['', '.js', '.jsx', '.es6'],
-				root: [
+				extensions: ['.js', '.jsx', '.json'],
+				modules: [
+					path.resolve(appPath, './node_modules'),
+					'node_modules',
 					// @remove-on-eject-begin
-					path.join(__dirname, '..', 'node_modules'),
+					path.resolve(__dirname, '../node_modules')
 					// @remove-on-eject-end
-					path.resolve('./node_modules')
 				],
 				alias: {
 					'ilib':'@enact/i18n/ilib/lib',
@@ -70,7 +61,10 @@ module.exports = function(karma) {
 			},
 			// @remove-on-eject-begin
 			resolveLoader: {
-				root: path.resolve(__dirname, '../node_modules')
+				modules: [
+					path.resolve(__dirname, '../node_modules'),
+					path.resolve(appPath, './node_modules')
+				]
 			},
 			// @remove-on-eject-end
 			externals: {
@@ -86,49 +80,63 @@ module.exports = function(karma) {
 				tls: 'empty'
 			}),
 			module: {
-				loaders: [
-					{test: /\.(js|jsx|es6)$/, loader: 'babel', exclude: /node_modules.(?!@enact)/,
-						query: {
+				rules: [
+					{
+						exclude: /\.(html|js|jsx|css|less|ejs|json|bmp|gif|jpe?g|png|svg|txt)$/,
+						loader: 'file-loader',
+						options: {name: '[path][name].[ext]'}
+					},
+					{
+						test: /\.(bmp|gif|jpe?g|png|svg)$/,
+						loader: 'url-loader',
+						options: {limit: 10000, name: '[path][name].[ext]'}
+					},
+					{
+						test: /\.(html|txt)$/,
+						loader: 'raw-loader'
+					},
+					{
+						test: /\.(js|jsx)$/,
+						exclude: /node_modules.(?!@enact)/,
+						loader: 'babel-loader',
+						options: {
 							// @remove-on-eject-begin
 							babelrc: false,
 							extends: path.join(__dirname, '.babelrc'),
 							// @remove-on-eject-end
-							cacheDirectory: findCacheDir({
-								name: 'enact-dev'
-							})
+							cacheDirectory: true
 						}
 					},
-					{test: /\.(c|le)ss$/, loader: ExtractTextPlugin.extract('style',
-							'css?-autoprefixer&modules&sourceMap&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss!less?sourceMap')
-					},
-					{test: /\.json$/, loader: 'json'},
-					{test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/, loader: 'file',
-						query: {
-							name: '[path][name].[ext]'
-						}
-					},
-					{test: /\.(mp4|webm|wav|mp3|m4a|aac|oga)(\?.*)?$/, loader: 'url',
-						query: {
-							limit: 10000,
-							name: '[path][name].[ext]'
-						}
+					{
+						test: /\.(c|le)ss$/,
+						// Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
+						loader: ExtractTextPlugin.extract({
+							fallback: 'style-loader',
+							use: [
+								{
+									loader: 'css-loader',
+									options: {importLoaders: 2, modules: true, localIdentName: '[name]__[local]___[hash:base64:5]'}
+								},
+								{
+									loader: 'postcss-loader',
+									options: {
+										ident: 'postcss',
+										plugins: () => [autoprefixer({browsers: ['>1%', 'last 4 versions', 'Firefox ESR', 'not ie < 9']})]
+									}
+								},
+								{
+									loader: 'less-loader',
+									options: {plugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])}
+								}
+							]
+						})
 					}
 				],
 				noParse: /node_modules\/json-schema\/lib\/validate\.js/
 			},
 			devServer: {host: '0.0.0.0', port: 8080},
-			postcss: function() {
-				return [autoprefixer({browsers: ['>1%', 'last 4 versions', 'Firefox ESR', 'not ie < 9']})];
-			},
-			lessLoader: {
-				lessPlugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])
-			},
 			plugins: [
-				new webpack.DefinePlugin({
-					'process.env': {
-						'NODE_ENV': '"development"'
-					}
-				}),
+				new DefinePlugin({'process.env': {'NODE_ENV': '"development"'}}),
 				new ExtractTextPlugin('[name].css'),
 				new CaseSensitivePathsPlugin(),
 				new GracefulFsPlugin(),
@@ -151,7 +159,8 @@ module.exports = function(karma) {
 				timings: false,
 				version: false,
 				children: false,
-				warnings: false
+				warnings: false,
+				moduleTrace: false
 			}
 		},
 
@@ -171,6 +180,7 @@ module.exports = function(karma) {
 		port: 9876,
 		colors: true,
 		logLevel: karma.LOG_INFO,
+		browserNoActivityTimeout : 60000,
 		autoWatch: true,
 		browsers: ['Chrome'],
 		singleRun: false

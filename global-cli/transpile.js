@@ -1,9 +1,10 @@
-var
+const
 	path = require('path'),
 	glob = require('glob'),
 	babel = require('babel-core'),
 	fs = require('fs-extra'),
-	minimist = require('minimist');
+	minimist = require('minimist'),
+	findProjectRoot = require('./modifiers/util/find-project-root');
 
 function displayHelp() {
 	console.log('  Usage');
@@ -18,32 +19,34 @@ function displayHelp() {
 }
 
 module.exports = function(args) {
-	var opts = minimist(args, {
+	const opts = minimist(args, {
 		string: ['o', 'output'],
 		boolean: ['h', 'help'],
 		alias: {o:'output', h:'help'}
 	});
 	opts.help && displayHelp();
 
-	var sourceRoot = '.';
-	var buildRoot = opts.output || './build';
+	process.chdir(findProjectRoot().path);
+
+	const sourceRoot = '.';
+	const buildRoot = opts.output || './build';
 
 	console.log('Transpiling via Babel to ' + path.resolve(buildRoot));
-	fs.copy(sourceRoot, buildRoot, {filter:function(f) { return /^(?!.*(node_modules|build|dist|\\.git)).*$/.test(f); }, stopOnErr:true}, function(cpErr) {
+	fs.copy(sourceRoot, buildRoot, {filter:function(f) { return /^(?!.*(node_modules|build|dist|\\.git)).*$/.test(f); }, stopOnErr:true}, cpErr => {
 		if(cpErr) {
 			console.error(cpErr);
 		} else {
-			glob(buildRoot + '/**/*.js', {nodir:true}, function(globErr, files) {
+			glob(buildRoot + '/**/*.js', {nodir:true}, (globErr, files) => {
 				if(globErr) {
 					console.error(globErr);
 				} else {
-					var babelrc = path.join(__dirname, '..', 'config', '.babelrc');
-					files.forEach(function(js) {
-						babel.transformFile(js, {extends:babelrc}, function(babelErr, result) {
+					const babelrc = path.join(__dirname, '..', 'config', '.babelrc');
+					files.forEach(js => {
+						babel.transformFile(js, {extends:babelrc}, (babelErr, result) => {
 							if(babelErr) {
 								console.error(babelErr);
 							} else {
-								fs.writeFile(js, result.code, {encoding:'utf8'}, function(fsErr) {
+								fs.writeFile(js, result.code, {encoding:'utf8'}, fsErr => {
 									if(fsErr) {
 										console.error(fsErr);
 									}
