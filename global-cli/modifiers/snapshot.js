@@ -1,4 +1,6 @@
 const
+	path = require('path'),
+	fs = require('fs'),
 	helper = require('./util/config-helper'),
 	SnapshotPlugin = require('./util/SnapshotPlugin'),
 	IgnorePlugin = require('webpack').IgnorePlugin;
@@ -22,12 +24,12 @@ module.exports = function(config, opts) {
 		// append: (opts.framework ? '\nenact_framework.load();\n' : undefined)
 	}));
 
-	var ssHelperDeps = [
+	const ssHelperDeps = [
 		'@enact/i18n',
 		'@enact/moonstone'
 	];
-	for(var i=0; i<ssHelperDeps.length; i++) {
-		if(!exists(path.join(process.cwd(), 'node_modules', ssHelperDeps[i]))) {
+	for(let i=0; i<ssHelperDeps.length; i++) {
+		if(!fs.existsSync(path.join(process.cwd(), 'node_modules', ssHelperDeps[i]))) {
 			config.plugins.push(new IgnorePlugin(new RegExp(ssHelperDeps[i])));
 		}
 	}
