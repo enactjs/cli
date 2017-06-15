@@ -27,7 +27,7 @@ const findProjectRoot = require('../global-cli/modifiers/util/find-project-root'
 process.chdir(findProjectRoot().path);
 const pkg = require(path.resolve('./package.json'));
 const enact = pkg.enact || {};
-const reactPerf = path.resolve(path.join('node_modules', 'react-dom', 'lib', 'ReactPerf'));
+const reactPerf = path.resolve(path.join('node_modules', 'react-dom', 'lib', 'ReactPerf.js'));
 
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
