@@ -328,26 +328,29 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 					if(!status.err[locales[i]] && locales[i].indexOf('multi')!==0) {
 						// Handle each locale that isn't a multi-language group item and hasn't failed prerendering.
 						const lang = locales[i].split(/[\\\/]+/)[0];
+						let aiFile = path.join('resources', locales[i], 'appinfo.json');
 						if(status.alias[i] && status.alias[i].indexOf('multi')===0) {
 							// Locale is part of a multi-language grouping.
 							if(locales.indexOf(lang)>=0 || (aiOptimize.groups[lang] && aiOptimize.groups[lang]!==status.alias[i])) {
 								// Parent language entry already exists, or the appinfo optimization group for this language points
 								// to a different alias, so we can't simplify any further.
-								if(locList.indexOf(locales[i])===-1 && locList.indexOf(locales[i].replace(/\\+/g, '/'))===-1) {
+								if(locList.indexOf(aiFile)===-1) {
 									// Add full locale appinfo entry if not already there.
-									locList.push({generate:path.join('resources', locales[i], 'appinfo.json')});
+									locList.push({generate: aiFile});
 								}
 							} else if(!aiOptimize.groups[lang]) {
 								// No parent language and no existing appinfo optimization group for this language, so let's
 								// create one and simplify the output for the locale.
 								aiOptimize.groups[lang] = status.alias[i];
 								aiOptimize.coverage.push(locales[i]);
-								locList.push({generate:path.join('resources', lang, 'appinfo.json')});
+								aiFile = path.join('resources', lang, 'appinfo.json');
+								if(locList.indexOf(aiFile)===-1) {
+									locList.push({generate: aiFile});
+								}
 							}
-						} else if(status.alias[i]!==lang && locList.indexOf(locales[i])===-1
-								&& locList.indexOf(locales[i].replace(/\\+/g, '/'))===-1) {
+						} else if(status.alias[i]!==lang && locList.indexOf(aiFile)===-1) {
 							// Not aliased, or not aliased to parent language so create appinfo if it does not exist.
-							locList.push({generate:path.join('resources', locales[i], 'appinfo.json')});
+							locList.push({generate: aiFile});
 						}
 					}
 				}
