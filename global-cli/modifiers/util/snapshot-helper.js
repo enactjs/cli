@@ -6,6 +6,17 @@
  *  launch-time issues when using code created in a snapshot blob.
  */
 
+var ReactDOM = {};
+function checkEnvironment() {
+	if(typeof window !== 'undefined') {
+		var realReactDOM = require('SNAPSHOT_REACT_DOM');
+		for(var x in realReactDOM) {
+			ReactDOM[x] = realReactDOM[x];
+		}
+	}
+	return ReactDOM;
+}
+
 function handleException(e) {
 	// We allow 'Cannot find module' errors, which throw when the libraries are not used in the app.
 	// @enact/i18n and @enact/moonstone are considered optional dependencies.
@@ -24,6 +35,8 @@ global.updateEnvironment = function() {
 	ExecutionEnvironment.canUseEventListeners = canUseDOM && !!(window.addEventListener || window.attachEvent);
 	ExecutionEnvironment.canUseViewport = canUseDOM && !!window.screen;
 	ExecutionEnvironment.isInWorker = !canUseDOM; // For now, this is true - might change in the future.
+
+	global.ReactDOM = checkEnvironment();
 
 	try {
 		// Mark the iLib localestorage cache as needing re-validation.
@@ -49,3 +62,5 @@ global.updateEnvironment = function() {
 		handleException(e1);
 	}
 };
+
+module.exports = checkEnvironment();

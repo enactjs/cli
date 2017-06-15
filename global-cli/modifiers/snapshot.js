@@ -24,6 +24,10 @@ module.exports = function(config, opts) {
 		// append: (opts.framework ? '\nenact_framework.load();\n' : undefined)
 	}));
 
+	config.resolve.alias['SNAPSHOT_REACT_DOM'] = path.resolve(path.join(process.cwd(),
+			'node_modules', 'react-dom'));
+	config.resolve.alias['react-dom'] = require.resolve('./util/snapshot-helper');
+
 	const ssHelperDeps = [
 		'@enact/i18n',
 		'@enact/moonstone'
