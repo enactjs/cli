@@ -60,7 +60,7 @@ module.exports = function(args) {
 
 process.on('exit', () => {
 	if (Object.keys(output).length) {
-		console.log(output);
+		console.log(JSON.stringify(output, null, 2));
 	}
 });
 
