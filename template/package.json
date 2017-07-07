@@ -29,14 +29,14 @@
     "extends": "enact"
   },
   "dependencies": {
-    "@enact/core": "^1.2.2",
-    "@enact/ui": "^1.2.2",
-    "@enact/moonstone": "^1.2.2",
-    "@enact/spotlight": "^1.2.2",
-    "@enact/i18n": "^1.2.2",
-    "@enact/webos": "^1.2.2",
-    "prop-types": "^15.5.8",
-    "react": "^15.5.4",
-    "react-dom": "^15.5.4"
+    "@enact/core": "^1.4.1",
+    "@enact/ui": "^1.4.1",
+    "@enact/moonstone": "^1.4.1",
+    "@enact/spotlight": "^1.4.1",
+    "@enact/i18n": "^1.4.1",
+    "@enact/webos": "^1.4.1",
+    "prop-types": "^15.5.10",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1"
   }
 }
