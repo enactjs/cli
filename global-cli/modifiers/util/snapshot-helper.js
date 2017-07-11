@@ -6,7 +6,20 @@
  *  launch-time issues when using code created in a snapshot blob.
  */
 
-var ReactDOM = {};
+var findDOMNode = require('SNAPSHOT_REACT_DOM/lib/findDOMNode');
+var ReactMount = require('SNAPSHOT_REACT_DOM/lib/ReactMount');
+var ReactVersion = require('SNAPSHOT_REACT_DOM/lib/ReactVersion');
+var renderSubtreeIntoContainer = require('SNAPSHOT_REACT_DOM/lib/renderSubtreeIntoContainer');
+var ReactUpdates = require('SNAPSHOT_REACT_DOM/lib/ReactUpdates');
+
+var ReactDOM = {
+	findDOMNode: findDOMNode,
+	render: ReactMount.render,
+	unmountComponentAtNode: ReactMount.unmountComponentAtNode,
+	version: ReactVersion,
+	unstable_batchedUpdates: ReactUpdates.batchedUpdates,
+	unstable_renderSubtreeIntoContainer: renderSubtreeIntoContainer
+};
 function checkEnvironment() {
 	if(typeof window !== 'undefined') {
 		var realReactDOM = require('SNAPSHOT_REACT_DOM');
