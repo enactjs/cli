@@ -358,7 +358,7 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 
 			// Update any root appinfo to tag as using prerendering to avoid webOS splash screen.
 			compilation.plugin('webos-meta-root-appinfo', (meta) => {
-				if(locales.length>0) {
+				if(typeof meta.usePrerendering === 'undefined' && locales.length>0) {
 					meta.usePrerendering = true;
 				}
 				return meta;

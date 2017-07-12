@@ -67,7 +67,7 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 
 			// Update any root appinfo to tag as using prerendering to avoid webOS splash screen.
 			compilation.plugin('webos-meta-root-appinfo', (meta) => {
-				if(!status.err) {
+				if(!status.err && typeof meta.usePrerendering === 'undefined') {
 					meta.usePrerendering = true;
 				}
 				return meta;
