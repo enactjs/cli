@@ -104,8 +104,20 @@ function simplifyAliases(locales, status) {
 	for(let i=0; i<status.alias.length; i++) {
 		if(status.alias[i]) {
 			const lang = locales[i].split(/[\\\/]+/)[0];
-			links[status.alias[i]] = links[status.alias[i]] || status.alias[i].split(/[\\\/]+/)[0];
-			if(links[status.alias[i]]!==lang && links[status.alias[i]].indexOf('multi')!==0) {
+			if(!links[status.alias[i]]) {
+				const alias = status.alias[i].split(/[\\\/]+/)[0];
+				if (Object.keys(links).find(key => links[key] === alias)) {
+					if(multiCount>1) {
+						links[status.alias[i]] = `${alias}-multi`;
+					} else {
+						links[status.alias[i]] = `${alias}-multi${multiCount}`;
+					}
+					multiCount++;
+				} else {
+					links[status.alias[i]] = alias;
+				}
+			}
+			if(links[status.alias[i]].indexOf(lang)!==0 && links[status.alias[i]].indexOf('multi')!==0) {
 				if(multiCount>1) {
 					links[status.alias[i]] = 'multi' + multiCount;
 				} else {
@@ -124,7 +136,7 @@ function simplifyAliases(locales, status) {
 		}
 	}
 
-	// Second pass: with the shared root CSS classes determined, remove from the individual clas strings
+	// Second pass: with the shared root CSS classes determined, remove from the individual class strings
 	// and update the alias names to the new simplified names.
 	for(let j=0; j<status.alias.length; j++) {
 		if(status.alias[j]) {
@@ -324,11 +336,11 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			// For any target locales that don't already have appinfo files, dynamically generate new ones.
 			compilation.plugin('webos-meta-list-localized', (locList) => {
 				for(let i=0; i<locales.length; i++) {
-					if(!status.err[locales[i]] && locales[i].indexOf('multi')!==0) {
+					if(!status.err[locales[i]] && locales[i].indexOf('multi')===-1) {
 						// Handle each locale that isn't a multi-language group item and hasn't failed prerendering.
 						const lang = locales[i].split(/[\\\/]+/)[0];
 						let aiFile = path.join('resources', locales[i], 'appinfo.json');
-						if(status.alias[i] && status.alias[i].indexOf('multi')===0) {
+						if(status.alias[i] && status.alias[i].indexOf('multi')>=0) {
 							// Locale is part of a multi-language grouping.
 							if(locales.indexOf(lang)>=0 || (aiOptimize.groups[lang] && aiOptimize.groups[lang]!==status.alias[i])) {
 								// Parent language entry already exists, or the appinfo optimization group for this language points
