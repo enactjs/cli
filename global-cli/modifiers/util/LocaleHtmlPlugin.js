@@ -106,20 +106,17 @@ function simplifyAliases(locales, status) {
 			const lang = locales[i].split(/[\\\/]+/)[0];
 			if(!links[status.alias[i]]) {
 				const alias = status.alias[i].split(/[\\\/]+/)[0];
-				if (Object.keys(links).find(key => links[key] === alias)) {
-					if(multiCount>1) {
-						links[status.alias[i]] = `${alias}-multi`;
-					} else {
-						links[status.alias[i]] = `${alias}-multi${multiCount}`;
+				let regionCount = 0;
+				for(const x in links) {
+					if(links[x]===alias || links[x].indexOf(alias + '.') === 0) {
+						regionCount++;
 					}
-					multiCount++;
-				} else {
-					links[status.alias[i]] = alias;
 				}
+				links[status.alias[i]] = regionCount>0 ? alias + '.' + (regionCount+1) : alias;
 			}
 			if(links[status.alias[i]].indexOf(lang)!==0 && links[status.alias[i]].indexOf('multi')!==0) {
 				if(multiCount>1) {
-					links[status.alias[i]] = 'multi' + multiCount;
+					links[status.alias[i]] = 'multi.' + multiCount;
 				} else {
 					links[status.alias[i]] = 'multi';
 				}
@@ -336,11 +333,11 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			// For any target locales that don't already have appinfo files, dynamically generate new ones.
 			compilation.plugin('webos-meta-list-localized', (locList) => {
 				for(let i=0; i<locales.length; i++) {
-					if(!status.err[locales[i]] && locales[i].indexOf('multi')===-1) {
+					if(!status.err[locales[i]] && locales[i].indexOf('multi')!==0 && !/\.\d+$/.test(locales[i])) {
 						// Handle each locale that isn't a multi-language group item and hasn't failed prerendering.
 						const lang = locales[i].split(/[\\\/]+/)[0];
 						let aiFile = path.join('resources', locales[i], 'appinfo.json');
-						if(status.alias[i] && status.alias[i].indexOf('multi')>=0) {
+						if(status.alias[i] && status.alias[i].indexOf('multi')===0) {
 							// Locale is part of a multi-language grouping.
 							if(locales.indexOf(lang)>=0 || (aiOptimize.groups[lang] && aiOptimize.groups[lang]!==status.alias[i])) {
 								// Parent language entry already exists, or the appinfo optimization group for this language points
