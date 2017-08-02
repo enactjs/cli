@@ -3,7 +3,7 @@ const
 	fs = require('fs');
 
 function findPackageJSON(curr) {
-	if(curr.replace(/(^[.\\\/]+|[\\\/]+$)/g, '').length === 0) {
+	if(curr.replace(/(^[.\\/]+|[\\/]+$)/g, '').length === 0) {
 		return null;
 	} else {
 		const pkg = path.join(curr, 'package.json');

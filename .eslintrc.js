@@ -55,7 +55,7 @@ module.exports = {
 		'comma-style': 1,
 		'computed-property-spacing': 1,
 		'eol-last': 1,
-		'indent': [1, 'tab', {'SwitchCase': 1}],
+		'indent': [1, 'tab', {'SwitchCase': 1, 'CallExpression': {'arguments': 2}, 'MemberExpression': 'off', "flatTernaryExpressions": true}],
 		'jsx-quotes': 1,
 		'linebreak-style': 1,
 		'new-cap': [2, {'newIsCap': true, 'capIsNew': false}],

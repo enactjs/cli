@@ -32,9 +32,9 @@ process.on('unhandledRejection', err => {
 // "npm run build" with no way to modify it yet, we provide a basic override
 // to console.log to ensure the correct output is displayed to the user.
 console.log = (log => (data, ...rest) =>
-		typeof data==='undefined' ? log()
-		: (typeof data==='string') ? log(data.replace(/npm run build/, 'npm run pack-p'), ...rest)
-		: log.call(this, data, ...rest))(console.log);
+	typeof data==='undefined' ? log()
+	: (typeof data==='string') ? log(data.replace(/npm run build/, 'npm run pack-p'), ...rest)
+	: log.call(this, data, ...rest))(console.log);
 
 function displayHelp() {
 	console.log('	Usage');

@@ -38,7 +38,7 @@ function parseLocales(context, target) {
 
 // Converts from a locale path to a locale code identifier
 function locCode(locale) {
-	return locale.replace(/[\\\/]/g, '-');
+	return locale.replace(/[\\/]/g, '-');
 }
 
 // Find the location of the root div (can be empty or with contents) and return the
@@ -103,9 +103,9 @@ function simplifyAliases(locales, status) {
 	// Additionally determines all shared root CSS classes for the groupings.
 	for(let i=0; i<status.alias.length; i++) {
 		if(status.alias[i]) {
-			const lang = locales[i].split(/[\\\/]+/)[0];
+			const lang = locales[i].split(/[\\/]+/)[0];
 			if(!links[status.alias[i]]) {
-				const alias = status.alias[i].split(/[\\\/]+/)[0];
+				const alias = status.alias[i].split(/[\\/]+/)[0];
 				let regionCount = 0;
 				for(const x in links) {
 					if(links[x]===alias || links[x].indexOf(alias + '.') === 0) {
@@ -335,7 +335,7 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 				for(let i=0; i<locales.length; i++) {
 					if(!status.err[locales[i]] && locales[i].indexOf('multi')!==0 && !/\.\d+$/.test(locales[i])) {
 						// Handle each locale that isn't a multi-language group item and hasn't failed prerendering.
-						const lang = locales[i].split(/[\\\/]+/)[0];
+						const lang = locales[i].split(/[\\/]+/)[0];
 						let aiFile = path.join('resources', locales[i], 'appinfo.json');
 						if(status.alias[i] && status.alias[i].indexOf('multi')===0) {
 							// Locale is part of a multi-language grouping.
