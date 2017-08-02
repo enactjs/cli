@@ -49,7 +49,7 @@ function EnactFrameworkRefPlugin(opts) {
 
 	if(!process.env.ILIB_BASE_PATH) {
 		process.env.ILIB_BASE_PATH = path.join(this.options.external.inject, 'node_module',
-			'@enact', 'i18n', 'ilib');
+				'@enact', 'i18n', 'ilib');
 	}
 }
 module.exports = EnactFrameworkRefPlugin;
