@@ -38,7 +38,7 @@ function parseLocales(context, target) {
 
 // Converts from a locale path to a locale code identifier
 function locCode(locale) {
-	return locale.replace(/[\\\/]/g, '-');
+	return locale.replace(/[\\/]/g, '-');
 }
 
 // Find the location of the root div (can be empty or with contents) and return the
@@ -103,9 +103,9 @@ function simplifyAliases(locales, status) {
 	// Additionally determines all shared root CSS classes for the groupings.
 	for(let i=0; i<status.alias.length; i++) {
 		if(status.alias[i]) {
-			const lang = locales[i].split(/[\\\/]+/)[0];
+			const lang = locales[i].split(/[\\/]+/)[0];
 			if(!links[status.alias[i]]) {
-				const alias = status.alias[i].split(/[\\\/]+/)[0];
+				const alias = status.alias[i].split(/[\\/]+/)[0];
 				let regionCount = 0;
 				for(const x in links) {
 					if(links[x]===alias || links[x].indexOf(alias + '.') === 0) {
@@ -128,7 +128,7 @@ function simplifyAliases(locales, status) {
 				sharedCSS[status.alias[i]] = status.details[i].rootClasses.split(/\s+/);
 			} else {
 				sharedCSS[status.alias[i]] = commonClasses(sharedCSS[status.alias[i]],
-						status.details[i].rootClasses.split(/\s+/));
+					status.details[i].rootClasses.split(/\s+/));
 			}
 		}
 	}
@@ -139,7 +139,7 @@ function simplifyAliases(locales, status) {
 		if(status.alias[j]) {
 			if(sharedCSS[status.alias[j]]) {
 				status.details[j].rootClasses = removeClasses(sharedCSS[status.alias[j]],
-						status.details[j].rootClasses);
+					status.details[j].rootClasses);
 			}
 
 			if(links[status.alias[j]]) {
@@ -157,7 +157,7 @@ function simplifyAliases(locales, status) {
 		locales.push(links[l]);
 		if(sharedCSS[l] && sharedCSS[l].length>0) {
 			status.prerender[locales.length-1] = status.prerender[index]
-					.replace(/^(<[^>]*class="[^"]*)"/i, '$1 ' + sharedCSS[l].join(' ') + '"');
+				.replace(/^(<[^>]*class="[^"]*)"/i, '$1 ' + sharedCSS[l].join(' ') + '"');
 		} else {
 			status.prerender[locales.length-1] = status.prerender[index];
 		}
@@ -215,8 +215,8 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 		if(linked.length===0) {
 			// Single locale, re-inject root classes and react checksum.
 			status.prerender[i] = status.prerender[i]
-					.replace(/^(<[^>]*class="[^"]*)"/i, '$1' + status.details[i].rootClasses + '"')
-					.replace(/^(<[^>]*data-react-checksum=")"/i, '$1' + status.details[i].checksum + '"');
+				.replace(/^(<[^>]*class="[^"]*)"/i, '$1' + status.details[i].rootClasses + '"')
+				.replace(/^(<[^>]*data-react-checksum=")"/i, '$1' + status.details[i].checksum + '"');
 			emitAsset(compilation, 'index.' + locStr + '.html', html.before + rootOpen + status.prerender[i]
 					+ rootClose + html.after);
 			localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, callback);
@@ -335,7 +335,7 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 				for(let i=0; i<locales.length; i++) {
 					if(!status.err[locales[i]] && locales[i].indexOf('multi')!==0 && !/\.\d+$/.test(locales[i])) {
 						// Handle each locale that isn't a multi-language group item and hasn't failed prerendering.
-						const lang = locales[i].split(/[\\\/]+/)[0];
+						const lang = locales[i].split(/[\\/]+/)[0];
 						let aiFile = path.join('resources', locales[i], 'appinfo.json');
 						if(status.alias[i] && status.alias[i].indexOf('multi')===0) {
 							// Locale is part of a multi-language grouping.
@@ -406,7 +406,7 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 			compilation.plugin('html-webpack-plugin-alter-asset-tags', (htmlPluginData, callback) => {
 				let startup = fs.readFileSync(path.join(__dirname, 'prerendered-startup.txt'), {encoding:'utf8'});
 				startup = startup.replace('%SCREENTYPES%', JSON.stringify(opts.screenTypes))
-						.replace('%JSASSETS%', JSON.stringify(jsAssets));
+					.replace('%JSASSETS%', JSON.stringify(jsAssets));
 				htmlPluginData.head.unshift({
 					tagName: 'script',
 					closeTag: true,

@@ -89,8 +89,8 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 				if(!status.err) {
 					let startup = fs.readFileSync(path.join(__dirname, 'prerendered-startup.txt'), {encoding:'utf8'});
 					startup = '\n\t\t' + startup.replace('%SCREENTYPES%', JSON.stringify(opts.screenTypes))
-							.replace('%JSASSETS%', JSON.stringify(jsAssets)).replace(/[\n\r]+(.)/g, '\n\t\t$1')
-							.replace(/[\n\r]+$/, '\n\t');
+						.replace('%JSASSETS%', JSON.stringify(jsAssets)).replace(/[\n\r]+(.)/g, '\n\t\t$1')
+						.replace(/[\n\r]+$/, '\n\t');
 					htmlPluginData.head.unshift({
 						tagName: 'script',
 						closeTag: true,

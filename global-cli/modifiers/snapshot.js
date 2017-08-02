@@ -25,7 +25,7 @@ module.exports = function(config, opts) {
 	}));
 
 	config.resolve.alias['SNAPSHOT_REACT_DOM'] = path.resolve(path.join(process.cwd(),
-			'node_modules', 'react-dom'));
+		'node_modules', 'react-dom'));
 	config.resolve.alias['react-dom'] = require.resolve('./util/snapshot-helper');
 
 	const ssHelperDeps = [
