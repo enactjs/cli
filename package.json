@@ -106,6 +106,7 @@
     "webpack": "~3.4.1",
     "webpack-bundle-analyzer": "~2.8.3",
     "webpack-dev-server": "~2.6.1",
+    "webpack-sources": "~1.0.1",
     "whatwg-fetch": "~2.0.3"
   }
 }
