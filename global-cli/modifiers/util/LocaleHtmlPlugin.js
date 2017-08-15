@@ -212,12 +212,13 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 		const rootOpen = '<div id="root">';
 		const rootClose = '</div>';
 		const linked = aliasedLocales(locales[i], status.alias);
+		const content = handleHooks(html.before, status.prerender[i]);
 		if(linked.length===0) {
 			// Single locale, re-inject root classes and react checksum.
-			status.prerender[i] = status.prerender[i]
+			content.prerender = content.prerender
 					.replace(/^(<[^>]*class="[^"]*)"/i, '$1' + status.details[i].rootClasses + '"')
 					.replace(/^(<[^>]*data-react-checksum=")"/i, '$1' + status.details[i].checksum + '"');
-			emitAsset(compilation, 'index.' + locStr + '.html', html.before + rootOpen + status.prerender[i]
+			emitAsset(compilation, 'index.' + locStr + '.html', content.html + rootOpen + content.prerender
 					+ rootClose + html.after);
 			localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, callback);
 		} else {
@@ -241,14 +242,22 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 					+ '\n\t\t\t}'
 					+ '\n\t\t})();</script>';
 			// Process the script node html to minify it as needed.
-			htmlPlugin.postProcessHtml(script, {}, {head:[], body:[]}).then((procssedScript) => {
-				emitAsset(compilation, 'index.' + locStr + '.html', html.before + rootOpen + status.prerender[i]
-						+ rootClose + procssedScript + html.after);
+			htmlPlugin.postProcessHtml(script, {}, {head:[], body:[]}).then((processedScript) => {
+				emitAsset(compilation, 'index.' + locStr + '.html', content.html + rootOpen + content.prerender
+						+ rootClose + processedScript + html.after);
 				localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, callback);
 			});
 
 		}
 	}
+}
+
+function handleHooks(html, prerender) {
+	prerender = prerender.replace(/<!-- head append start -->([\s\S]*)<!-- head append end -->/, (m, head) => {
+		html = html.replace(/(\s*<\/head>)/, '\n' + head + '$1');
+		return '';
+	});
+	return {html, prerender};
 }
 
 function emitAsset(compilation, file, data) {
@@ -303,10 +312,10 @@ LocaleHtmlPlugin.prototype.apply = function(compiler) {
 
 							// Extract the root CSS classes and react checksum from the prerendered html code.
 							status.details[i] = {};
-							appHtml = appHtml.replace(/^(<[^>]*class="((?!enact-locale-)[^"])*)(\senact-locale-[^"]*)"/i, (match, before, s, classAttr) => {
+							appHtml = appHtml.replace(/(<div[^>]*class="((?!enact-locale-)[^"])*)(\senact-locale-[^"]*)"/i, (match, before, s, classAttr) => {
 								status.details[i].rootClasses = classAttr;
 								return before + '"';
-							}).replace(/^(<[^>]*data-react-checksum=")([^"]*)"/i, (match, before, checksum) => {
+							}).replace(/(<div[^>]*data-react-checksum=")([^"]*)"/i, (match, before, checksum) => {
 								status.details[i].checksum = checksum;
 								return before + '"';
 							});
