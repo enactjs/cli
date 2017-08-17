@@ -15,6 +15,7 @@ const autoprefixer = require('autoprefixer');
 const flexbugfixes = require('postcss-flexbugs-fixes');
 const LessPluginRi = require('resolution-independence');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const GracefulFsPlugin = require('graceful-fs-webpack-plugin');
 const ILibPlugin = require('ilib-webpack-plugin');
 const WebOSMetaPlugin = require('webos-meta-webpack-plugin');
@@ -160,48 +161,50 @@ module.exports = {
 			{
 				test: /\.(c|le)ss$/,
 				// Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
-				use: [
-					require.resolve('style-loader'),
-					{
-						loader: require.resolve('css-loader'),
-						options: {
-							importLoaders: 2,
-							modules: true,
-							sourceMap: true,
-							localIdentName: '[name]__[local]___[hash:base64:5]'
+				loader: ExtractTextPlugin.extract({
+					fallback: require.resolve('style-loader'),
+					use: [
+						{
+							loader: require.resolve('css-loader'),
+							options: {
+								importLoaders: 2,
+								modules: true,
+								sourceMap: true,
+								localIdentName: '[name]__[local]___[hash:base64:5]'
+							}
+						},
+						{
+							loader: require.resolve('postcss-loader'),
+							options: {
+								ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
+								sourceMap: true,
+								plugins: () => [
+									// We use PostCSS for autoprefixing only, but others could be added.
+									autoprefixer({
+										browsers: [
+											'>1%',
+											'last 4 versions',
+											'Firefox ESR',
+											'not ie < 9' // React doesn't support IE8 anyway.
+										],
+										flexbox: 'no-2009'
+									}),
+									// Fix and adjust for known flexbox issues
+									// See https://github.com/philipwalton/flexbugs
+									flexbugfixes
+								]
+							}
+						},
+						{
+							loader: require.resolve('less-loader'),
+							options: {
+								sourceMap: true,
+								// If resolution independence options are specified, use the LESS plugin.
+								plugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])
+							}
 						}
-					},
-					{
-						loader: require.resolve('postcss-loader'),
-						options: {
-							ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
-							sourceMap: true,
-							plugins: () => [
-								// We use PostCSS for autoprefixing only, but others could be added.
-								autoprefixer({
-									browsers: [
-										'>1%',
-										'last 4 versions',
-										'Firefox ESR',
-										'not ie < 9' // React doesn't support IE8 anyway.
-									],
-									flexbox: 'no-2009'
-								}),
-								// Fix and adjust for known flexbox issues
-								// See https://github.com/philipwalton/flexbugs
-								flexbugfixes
-							]
-						}
-					},
-					{
-						loader: require.resolve('less-loader'),
-						options: {
-							sourceMap: true,
-							// If resolution independence options are specified, use the LESS plugin.
-							plugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])
-						}
-					}
-				]
+					]
+				})
 			},
 			// Expose the 'react-addons-perf' on a global context for debugging.
 			// Currently maps the toolset to window.ReactPerf.
@@ -242,6 +245,8 @@ module.exports = {
 				'NODE_ENV': '"development"'
 			}
 		}),
+		// Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
+		new ExtractTextPlugin('[name].css'),
 		// Watcher doesn't work well if you mistype casing in a path so this is
 		// a plugin that prints an error when you attempt to do this.
 		// See https://github.com/facebookincubator/create-react-app/issues/240

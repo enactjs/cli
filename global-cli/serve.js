@@ -196,6 +196,45 @@ module.exports = function(args) {
 
 	const config = hotDevServer(devConfig);
 
+	// Temporary workaround until https://github.com/webpack-contrib/extract-text-webpack-plugin/issues/579 is fixed
+	const enact = require(path.resolve('./package.json')).enact || {};
+	const autoprefixer = require('autoprefixer');
+	const LessPluginRi = require('resolution-independence');
+	config.module.rules[4] = {
+		test: /\.(c|le)ss$/,
+		use: [
+			require.resolve('style-loader'),
+			{
+				loader: require.resolve('css-loader'),
+				options: {
+					importLoaders: 2,
+					modules: true,
+					sourceMap: true,
+					localIdentName: '[name]__[local]___[hash:base64:5]'
+				}
+			},
+			{
+				loader: require.resolve('postcss-loader'),
+				options: {
+					ident: 'postcss',
+					sourceMap: true,
+					plugins: () => [
+						autoprefixer({browsers:['>1%', 'last 4 versions', 'Firefox ESR', 'not ie < 9'], flexbox:'no-2009'}),
+						require('postcss-flexbugs-fixes')
+					]
+				}
+			},
+			{
+				loader: require.resolve('less-loader'),
+				options: {
+					sourceMap: true,
+					plugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])
+				}
+			}
+		]
+	};
+	config.plugins.splice(2, 1);
+
 	// Warn and crash if required files are missing
 	if (!checkRequiredFiles([config.entry.main[config.entry.main.length-1]])) {
 		process.exit(1);
