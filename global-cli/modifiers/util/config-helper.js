@@ -4,7 +4,8 @@ module.exports = {
 		if(config && config.module && config.module.rules && name) {
 			for(let i=0; i<config.module.rules.length; i++) {
 				if(config.module.rules[i].loader) {
-					if(config.module.rules[i].loader === name + '-loader') {
+					if(config.module.rules[i].loader === name + '-loader'
+							|| new RegExp('node_modules[/\\\\]+' + name + '-loader').test(config.module.rules[i].loader)) {
 						index = i;
 						break;
 					}

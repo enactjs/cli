@@ -98,7 +98,7 @@ module.exports = {
 					useEslintrc: false
 				},
 				// @remove-on-eject-end
-				loader: 'eslint-loader',
+				loader: require.resolve('eslint-loader'),
 				include: process.cwd(),
 				exclude: /node_modules/
 			},
@@ -107,7 +107,7 @@ module.exports = {
 			// Image filetypes get excluded to be handled by the url-loader later.
 			{
 				exclude: /\.(html|js|jsx|css|less|ejs|json|bmp|gif|jpe?g|png|svg)$/,
-				loader: 'file-loader',
+				loader: require.resolve('file-loader'),
 				options: {
 					name: '[path][name].[ext]'
 				}
@@ -117,7 +117,7 @@ module.exports = {
 			// Assets bigger than the limit will fallback to the file-loader.
 			{
 				test: /\.(bmp|gif|jpe?g|png|svg)$/,
-				loader: 'url-loader',
+				loader: require.resolve('url-loader'),
 				options: {
 					limit: 10000,
 					name: '[path][name].[ext]'
@@ -127,7 +127,7 @@ module.exports = {
 			{
 				test: /\.(js|jsx)$/,
 				exclude: /node_modules.(?!@enact)/,
-				loader: 'babel-loader',
+				loader: require.resolve('babel-loader'),
 				// @remove-on-eject-begin
 				options: {
 					babelrc: false,
@@ -148,10 +148,10 @@ module.exports = {
 				test: /\.(c|le)ss$/,
 				// Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
 				loader: ExtractTextPlugin.extract({
-					fallback: 'style-loader',
+					fallback: require.resolve('style-loader'),
 					use: [
 						{
-							loader: 'css-loader',
+							loader: require.resolve('css-loader'),
 							options: {
 								importLoaders: 2,
 								modules: true,
@@ -159,7 +159,7 @@ module.exports = {
 							}
 						},
 						{
-							loader: 'postcss-loader',
+							loader: require.resolve('postcss-loader'),
 							options: {
 								ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
 								plugins: () => [
@@ -182,7 +182,7 @@ module.exports = {
 							}
 						},
 						{
-							loader: 'less-loader',
+							loader: require.resolve('less-loader'),
 							options: {
 								// If resolution independence options are specified, use the LESS plugin.
 								plugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])
