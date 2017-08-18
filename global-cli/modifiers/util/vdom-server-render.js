@@ -60,6 +60,7 @@ module.exports = {
 	*/
 	render: function(opts) {
 		if(!chunkTarget) throw new Error('Source code not staged, unable render vdom into HTML string.');
+		const head = [];
 		let rendered;
 
 		if(opts.locale) {
@@ -70,6 +71,13 @@ module.exports = {
 
 		try {
 			console.mute();
+
+			global.enactHooks = global.enactHooks || {};
+			global.enactHooks.prerender = function(hook) {
+				if(hook.appendToHead) {
+					head.push(hook.appendToHead);
+				}
+			};
 
 			if(opts.externals) {
 				// Ensure locale switching  support is loaded globally with external framework usage.
@@ -89,6 +97,15 @@ module.exports = {
 			}
 
 			rendered = opts.server.renderToString(chunk['default'] || chunk);
+			if(head.length>0) {
+				let prepend = '<!-- head append start -->';
+				for(let i=0; i<head.length; i++) {
+					prepend += '\t' + head[i].replace(/\n/g, '\n\t') + '\n';
+				}
+				prepend += '<!-- head append end -->';
+				rendered = prepend + rendered;
+			}
+
 
 			// If --expose-gc is used in NodeJS, force garbage collect after prerender for minimal memory usage.
 			if(global.gc) global.gc();
