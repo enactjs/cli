@@ -104,22 +104,10 @@ module.exports = {
 			},
 			// "file" loader makes sure those assets get copied during build
 			// When you `import` an asset, you get its output filename.
-			// Image filetypes get excluded to be handled by the url-loader later.
 			{
-				exclude: /\.(html|js|jsx|css|less|ejs|json|bmp|gif|jpe?g|png|svg)$/,
+				exclude: /\.(html|js|jsx|css|less|ejs|json)$/,
 				loader: require.resolve('file-loader'),
 				options: {
-					name: '[path][name].[ext]'
-				}
-			},
-			// "url" loader works just like "file" loader but it also embeds
-			// assets smaller than specified size as data URLs to avoid requests.
-			// Assets bigger than the limit will fallback to the file-loader.
-			{
-				test: /\.(bmp|gif|jpe?g|png|svg)$/,
-				loader: require.resolve('url-loader'),
-				options: {
-					limit: 10000,
 					name: '[path][name].[ext]'
 				}
 			},
@@ -171,7 +159,8 @@ module.exports = {
 											'Firefox ESR',
 											'not ie < 9' // React doesn't support IE8 anyway.
 										],
-										flexbox: 'no-2009'
+										flexbox: 'no-2009',
+										remove: false
 									}),
 									// Fix and adjust for known flexbox issues
 									// See https://github.com/philipwalton/flexbugs
