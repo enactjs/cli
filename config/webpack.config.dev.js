@@ -175,7 +175,8 @@ module.exports = {
 											'Firefox ESR',
 											'not ie < 9' // React doesn't support IE8 anyway.
 										],
-										flexbox: 'no-2009'
+										flexbox: 'no-2009',
+										remove: false
 									}),
 									// Fix and adjust for known flexbox issues
 									// See https://github.com/philipwalton/flexbugs
