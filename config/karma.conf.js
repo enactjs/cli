@@ -3,7 +3,6 @@ const {DefinePlugin} = require('webpack');
 const autoprefixer = require('autoprefixer');
 const flexbugfixes = require('postcss-flexbugs-fixes');
 const LessPluginRi = require('resolution-independence');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const GracefulFsPlugin = require('graceful-fs-webpack-plugin');
 const ILibPlugin = require('ilib-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
