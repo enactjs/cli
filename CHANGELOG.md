@@ -1,3 +1,40 @@
+## 0.9.0 (August 21, 2017)
+
+Dependencies updated to latestly release, including support for Webpack 3.x.
+Codebased updated for ES6 syntax and the minimum version is NodeJS is now 6.4.0.
+
+### create
+
+* Template updated for Enact 1.7.0 and React 15.6.1
+
+### pack
+
+* Upgraded to Webpack 3 and associated loaders/config layout.
+* Removed `url-loader` usage in favour of strictly `file-loader` only.
+* Switched from implicit string loader names to explicit relative loader filepath resolving.
+* Prevent removal of outdated CSS properties by `autoprefixer` in `postcss`
+* Prerenders moonstone font-face declarations into HTML head to preload fonts.
+* Output error messages after build and have watcher mode disable bailing to ensure webpack doesn't exit during watching.
+* Properly bail on error and properly avoid bailing on `--watch` flag.
+* Disable module traces when errors occur.
+* Show any warnings sucessful `pack` executions (not just when there are errors).
+* Uses the `react-dev-utils` eslint formatter for displaying eslint warnings and errors.
+* Limited `autoprefixer` flexbox prefixing to final and IE versions of flexbox implementation.
+* Added support for `postcss-flexbugs-fixes` to automatically fix known platform-specific flexbox issues with workarounds.
+* Disabled webpack performance output.
+
+### serve
+
+* Support greater dev server functionality and UI from `react-dev-utils`.
+* Integrated support for `react-error-overlay`.
+* Fixed module access failure when rebuilding after editing LESS/CSS.
+
+### test
+
+* Activity timeout extended for larger testbases to 60 seconds.
+* Removed unneeded `extract-text-webpack-plugin` usage.
+* Carried over `url-loader` and `postcss` changes from `pack` configuration.
+
 ## 0.8.2 (May 31, 2017)
 
 Updated `ilib-webpack-plugin` dependency to correctly support moonstone internal localization and associated fixes.
@@ -50,7 +87,6 @@ With the exception of webpack2-related packages, all dependencies have been upda
 ### test
 
 * Updated use react-test-renderer with Enzyme with alias fallback to avoid any compatibility issues.
-
 
 ## 0.7.0 (March 31, 2017)
 
