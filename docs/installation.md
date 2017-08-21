@@ -3,7 +3,7 @@ title: Installing enact-dev
 ---
 ## Requirements
 
-Node 4.0 or later.  Node 6.x/7.x is significantly faster on some machines and is highly recommended.
+Node 6.4 or later.
 
 ## Installation via NPM
 

@@ -21,7 +21,7 @@ Within your **package.json** file, add an `isomorphic` property to the `enact` o
     ...
 } 
 ```
-If the value is a string filepath instead, it will use that file as the main app entrypoint instead of the default. Whatever the entrypoint, ensure it exports the `ReactElement` in non-browser environments.  An example **index.js** entrypoint can be see [here](https://github.com/enyojs/enact-dev/blob/master/template/src/index.js) and is the default included in the Enact app template.
+If the value is a string filepath instead, it will use that file as the main app entrypoint instead of the default. Whatever the entrypoint, ensure it exports the `ReactElement` in non-browser environments. Additionally, ensure the entrypoint also conditionally renders to to the DOM if the `window` is available.  An example **index.js** entrypoint can be see [here](https://github.com/enyojs/enact-dev/blob/master/template/src/index.js) and is the default included in the Enact app template.
 
 Then, you can choose to build with isomorphic code layout by adding the `--isomorphic` flag to the pack command:
 ```
