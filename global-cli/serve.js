@@ -200,7 +200,7 @@ module.exports = function(args) {
 	const enact = require(path.resolve('./package.json')).enact || {};
 	const autoprefixer = require('autoprefixer');
 	const LessPluginRi = require('resolution-independence');
-	config.module.rules[4] = {
+	config.module.rules[3] = {
 		test: /\.(c|le)ss$/,
 		use: [
 			require.resolve('style-loader'),

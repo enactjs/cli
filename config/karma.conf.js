@@ -1,8 +1,8 @@
 const path = require('path');
 const {DefinePlugin} = require('webpack');
 const autoprefixer = require('autoprefixer');
+const flexbugfixes = require('postcss-flexbugs-fixes');
 const LessPluginRi = require('resolution-independence');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const GracefulFsPlugin = require('graceful-fs-webpack-plugin');
 const ILibPlugin = require('ilib-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
@@ -82,23 +82,18 @@ module.exports = function(karma) {
 			module: {
 				rules: [
 					{
-						exclude: /\.(html|js|jsx|css|less|ejs|json|bmp|gif|jpe?g|png|svg|txt)$/,
-						loader: 'file-loader',
+						exclude: /\.(html|js|jsx|css|less|ejs|json|txt)$/,
+						loader: require.resolve('file-loader'),
 						options: {name: '[path][name].[ext]'}
 					},
 					{
-						test: /\.(bmp|gif|jpe?g|png|svg)$/,
-						loader: 'url-loader',
-						options: {limit: 10000, name: '[path][name].[ext]'}
-					},
-					{
 						test: /\.(html|txt)$/,
-						loader: 'raw-loader'
+						loader: require.resolve('raw-loader')
 					},
 					{
 						test: /\.(js|jsx)$/,
 						exclude: /node_modules.(?!@enact)/,
-						loader: 'babel-loader',
+						loader: require.resolve('babel-loader'),
 						options: {
 							// @remove-on-eject-begin
 							babelrc: false,
@@ -109,27 +104,26 @@ module.exports = function(karma) {
 					},
 					{
 						test: /\.(c|le)ss$/,
-						// Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
-						loader: ExtractTextPlugin.extract({
-							fallback: 'style-loader',
-							use: [
-								{
-									loader: 'css-loader',
-									options: {importLoaders: 2, modules: true, localIdentName: '[name]__[local]___[hash:base64:5]'}
-								},
-								{
-									loader: 'postcss-loader',
-									options: {
-										ident: 'postcss',
-										plugins: () => [autoprefixer({browsers: ['>1%', 'last 4 versions', 'Firefox ESR', 'not ie < 9']})]
-									}
-								},
-								{
-									loader: 'less-loader',
-									options: {plugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])}
+						use: [
+							require.resolve('style-loader'),
+							{
+								loader: require.resolve('css-loader'),
+								options: {importLoaders: 2, modules: true, localIdentName: '[name]__[local]___[hash:base64:5]'}
+							},
+							{
+								loader: require.resolve('postcss-loader'),
+								options: {
+									ident: 'postcss',
+									plugins: () => [autoprefixer({
+										browsers: ['>1%', 'last 4 versions', 'Firefox ESR', 'not ie < 9'], flexbox: 'no-2009', remove:false
+									}), flexbugfixes]
 								}
-							]
-						})
+							},
+							{
+								loader: require.resolve('less-loader'),
+								options: {plugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])}
+							}
+						]
 					}
 				],
 				noParse: /node_modules\/json-schema\/lib\/validate\.js/
@@ -137,7 +131,6 @@ module.exports = function(karma) {
 			devServer: {host: '0.0.0.0', port: 8080},
 			plugins: [
 				new DefinePlugin({'process.env': {'NODE_ENV': '"development"'}}),
-				new ExtractTextPlugin('[name].css'),
 				new CaseSensitivePathsPlugin(),
 				new GracefulFsPlugin(),
 				new ILibPlugin({create: false})
