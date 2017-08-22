@@ -1,4 +1,4 @@
-var
+const
 	spawn = require('cross-spawn'),
 	path = require('path'),
 	dir = require('global-modules'),
@@ -6,7 +6,7 @@ var
 	exists = require('path-exists').sync,
 	minimist = require('minimist');
 
-var enact = [
+const enact = [
 	'core',
 	'ui',
 	'moonstone',
@@ -28,20 +28,20 @@ function displayHelp() {
 }
 
 module.exports = function(args) {
-	var opts = minimist(args, {
+	const opts = minimist(args, {
 		boolean: ['verbose', 'h', 'help'],
 		alias: {h:'help'}
 	});
 	opts.help && displayHelp();
 
-	var linkArgs = [
+	const linkArgs = [
 		'--loglevel',
 		(opts.verbose ? 'verbose' : 'error'),
 		'link'
 	];
 
-	var missing = [];
-	for(var i=0; i<enact.length; i++) {
+	const missing = [];
+	for(let i=0; i<enact.length; i++) {
 		if(exists(path.join(dir, '@enact', enact[i]))) {
 			linkArgs.push('@enact/' + enact[i]);
 		} else {
@@ -53,12 +53,12 @@ module.exports = function(args) {
 		console.log(chalk.red('Unable to detect any Enact global modules. Please ensure they\'ve been correctly linked.'));
 		process.exit(1);
 	} else {
-		for(var j=0; j<missing.length; j++) {
+		for(let j=0; j<missing.length; j++) {
 			console.log(chalk.yellow('Unable to locate global module ' + missing[j] + '. Skipping...'));
 		}
 
-		var proc = spawn('npm', linkArgs, {stdio: 'inherit', cwd:process.cwd()});
-		proc.on('close', function(code) {
+		const proc = spawn('npm', linkArgs, {stdio: 'inherit', cwd:process.cwd()});
+		proc.on('close', code => {
 			if(code!==0) {
 				console.log(chalk.cyan('ERROR: ') + '"npm ' + linkArgs.join(' ') + '" failed');
 				process.exit(1);

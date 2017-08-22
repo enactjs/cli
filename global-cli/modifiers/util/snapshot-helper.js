@@ -1,9 +1,34 @@
+/* eslint no-var: off */
 /*
  *  snapshot-helper.js
  *
  *  An exposed utility function to update the javascript environment to the active window to account for any
  *  launch-time issues when using code created in a snapshot blob.
  */
+
+var findDOMNode = require('SNAPSHOT_REACT_DOM/lib/findDOMNode');
+var ReactMount = require('SNAPSHOT_REACT_DOM/lib/ReactMount');
+var ReactVersion = require('SNAPSHOT_REACT_DOM/lib/ReactVersion');
+var renderSubtreeIntoContainer = require('SNAPSHOT_REACT_DOM/lib/renderSubtreeIntoContainer');
+var ReactUpdates = require('SNAPSHOT_REACT_DOM/lib/ReactUpdates');
+
+var ReactDOM = {
+	findDOMNode: findDOMNode,
+	render: ReactMount.render,
+	unmountComponentAtNode: ReactMount.unmountComponentAtNode,
+	version: ReactVersion,
+	unstable_batchedUpdates: ReactUpdates.batchedUpdates,
+	unstable_renderSubtreeIntoContainer: renderSubtreeIntoContainer
+};
+function checkEnvironment() {
+	if(typeof window !== 'undefined') {
+		var realReactDOM = require('SNAPSHOT_REACT_DOM');
+		for(var x in realReactDOM) {
+			ReactDOM[x] = realReactDOM[x];
+		}
+	}
+	return ReactDOM;
+}
 
 function handleException(e) {
 	// We allow 'Cannot find module' errors, which throw when the libraries are not used in the app.
@@ -23,6 +48,8 @@ global.updateEnvironment = function() {
 	ExecutionEnvironment.canUseEventListeners = canUseDOM && !!(window.addEventListener || window.attachEvent);
 	ExecutionEnvironment.canUseViewport = canUseDOM && !!window.screen;
 	ExecutionEnvironment.isInWorker = !canUseDOM; // For now, this is true - might change in the future.
+
+	global.ReactDOM = checkEnvironment();
 
 	try {
 		// Mark the iLib localestorage cache as needing re-validation.
@@ -48,3 +75,5 @@ global.updateEnvironment = function() {
 		handleException(e1);
 	}
 };
+
+module.exports = checkEnvironment();

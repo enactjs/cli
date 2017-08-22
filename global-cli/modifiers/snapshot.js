@@ -1,6 +1,6 @@
-var
+const
 	path = require('path'),
-	exists = require('path-exists').sync,
+	fs = require('fs'),
 	helper = require('./util/config-helper'),
 	SnapshotPlugin = require('./util/SnapshotPlugin'),
 	IgnorePlugin = require('webpack').IgnorePlugin;
@@ -8,16 +8,11 @@ var
 module.exports = function(config, opts) {
 	if(!opts.framework) {
 		// Update HTML webpack plugin to mark it as snapshot mode for the isomorphic template
-		var htmlPlugin = helper.getPluginByName(config, 'HtmlWebpackPlugin');
+		const htmlPlugin = helper.getPluginByName(config, 'HtmlWebpackPlugin');
 		if(htmlPlugin) {
 			htmlPlugin.options.snapshot = true;
 		}
 
-		// fallback alias for fbjs in Node 4.x dependency tree
-		var fbjs = path.join(process.cwd(), 'node_modules', 'react', 'node_modules', 'fbjs');
-		if(exists(fbjs)) {
-			config.resolve.alias.fbjs = fbjs;
-		}
 		// Snapshot helper API for the transition from v8 snapshot into the window
 		config.entry.main.splice(-1, 0, require.resolve('./util/snapshot-helper'));
 	}
@@ -29,12 +24,16 @@ module.exports = function(config, opts) {
 		// append: (opts.framework ? '\nenact_framework.load();\n' : undefined)
 	}));
 
-	var ssHelperDeps = [
+	config.resolve.alias['SNAPSHOT_REACT_DOM'] = path.resolve(path.join(process.cwd(),
+			'node_modules', 'react-dom'));
+	config.resolve.alias['react-dom'] = require.resolve('./util/snapshot-helper');
+
+	const ssHelperDeps = [
 		'@enact/i18n',
 		'@enact/moonstone'
 	];
-	for(var i=0; i<ssHelperDeps.length; i++) {
-		if(!exists(path.join(process.cwd(), 'node_modules', ssHelperDeps[i]))) {
+	for(let i=0; i<ssHelperDeps.length; i++) {
+		if(!fs.existsSync(path.join(process.cwd(), 'node_modules', ssHelperDeps[i]))) {
 			config.plugins.push(new IgnorePlugin(new RegExp(ssHelperDeps[i])));
 		}
 	}

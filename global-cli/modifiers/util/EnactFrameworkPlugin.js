@@ -1,18 +1,18 @@
-var
+const
 	path = require('path'),
 	fs = require('fs'),
 	DllEntryPlugin = require('webpack/lib/DllEntryPlugin'),
 	DllModule = require('webpack/lib/DllModule'),
-	RawSource = require('webpack/lib/RawSource'),
+	RawSource = require('webpack-sources').RawSource,
 	exists = require('path-exists').sync;
 
-var pkgCache = {};
-var checkPkgMain = function(dir) {
+const pkgCache = {};
+const checkPkgMain = function(dir) {
 	if(pkgCache[dir]) {
 		return pkgCache[dir].main;
 	} else {
 		try {
-			var text = fs.readFileSync(path.join(dir, 'package.json'), {encoding:'utf8'});
+			const text = fs.readFileSync(path.join(dir, 'package.json'), {encoding:'utf8'});
 			pkgCache[dir] = JSON.parse(text);
 			return pkgCache[dir].main;
 		} catch(e) {
@@ -21,12 +21,12 @@ var checkPkgMain = function(dir) {
 	}
 };
 
-var parentCache = {};
-var findParent = function(dir) {
+const parentCache = {};
+const findParent = function(dir) {
 	if(parentCache[dir]) {
 		return parentCache[dir];
 	} else {
-		var currPkg = path.join(dir, 'package.json');
+		const currPkg = path.join(dir, 'package.json');
 		if(exists(currPkg)) {
 			return dir;
 		} else if(dir === '/' || dir === '' || dir === '.') {
@@ -38,10 +38,10 @@ var findParent = function(dir) {
 };
 
 function normalizeModuleID(id) {
-	var dir = exists(id) && fs.statSync(id).isDirectory() ? id : path.dirname(id);
+	const dir = exists(id) && fs.statSync(id).isDirectory() ? id : path.dirname(id);
 	parentCache[dir] = findParent(dir);
 	if(parentCache[dir]) {
-		var main = checkPkgMain(parentCache[dir]);
+		const main = checkPkgMain(parentCache[dir]);
 		if(main && path.resolve(id)===path.resolve(path.join(parentCache[dir], main))) {
 			id = parentCache[dir];
 		}
@@ -49,7 +49,7 @@ function normalizeModuleID(id) {
 	id = id.replace(/\\/g, '/');
 
 	// Remove any leading ./node_modules prefix
-	var nodeModulesPrefix = './node_modules/';
+	const nodeModulesPrefix = './node_modules/';
 	if(id.indexOf(nodeModulesPrefix)===0) {
 		id = id.substring(nodeModulesPrefix.length);
 	}
@@ -67,11 +67,11 @@ function normalizeModuleID(id) {
 }
 
 DllModule.prototype.source = function() {
-	var header = '';
+	let header = '';
 	if(DllModule.entries[this.name]) {
 		header += '__webpack_require__.load = function(loader) {\n';
 		header += '\tloader = loader || __webpack_require__;'
-		for(var i=0; i<DllModule.entries[this.name].length; i++) {
+		for(let i=0; i<DllModule.entries[this.name].length; i++) {
 			header += '\tloader(\'' + DllModule.entries[this.name][i] + '\');\n';
 		}
 		header += '};\n';
@@ -86,11 +86,11 @@ module.exports = EnactFrameworkPlugin;
 EnactFrameworkPlugin.prototype.apply = function(compiler) {
 	// Map entries to the DLLEntryPlugin
 	DllModule.entries = {};
-	compiler.plugin('entry-option', function(context, entry) {
+	compiler.plugin('entry-option', (context, entry) => {
 		function itemToPlugin(item, name) {
 			if(Array.isArray(item)) {
 				DllModule.entries[name] = [];
-				for(var i=0; i<item.length; i++) {
+				for(let i=0; i<item.length; i++) {
 					DllModule.entries[name].push(normalizeModuleID('./node_modules/' + item[i]));
 				}
 				return new DllEntryPlugin(context, item, name);
@@ -99,9 +99,7 @@ EnactFrameworkPlugin.prototype.apply = function(compiler) {
 			}
 		}
 		if(typeof entry === 'object') {
-			Object.keys(entry).forEach(function(name) {
-				compiler.apply(itemToPlugin(entry[name], name));
-			});
+			Object.keys(entry).forEach((name) => compiler.apply(itemToPlugin(entry[name], name)));
 		} else {
 			compiler.apply(itemToPlugin(entry, 'main'));
 		}
@@ -109,9 +107,9 @@ EnactFrameworkPlugin.prototype.apply = function(compiler) {
 	});
 
 	// Format the internal module ID to a usable named descriptor
-	compiler.plugin('compilation', function(compilation) {
-		compilation.plugin('before-module-ids', function(modules) {
-			modules.forEach(function(m) {
+	compiler.plugin('compilation', (compilation) => {
+		compilation.plugin('before-module-ids', (modules) => {
+			modules.forEach((m) => {
 				if(m.id === null && m.libIdent) {
 					m.id = m.libIdent({
 						context: this.options.context || compiler.options.context
@@ -119,6 +117,6 @@ EnactFrameworkPlugin.prototype.apply = function(compiler) {
 					m.id = normalizeModuleID(m.id)
 				}
 			}, this);
-		}.bind(this));
-	}.bind(this));
+		});
+	});
 };

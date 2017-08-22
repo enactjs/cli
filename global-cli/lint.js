@@ -1,4 +1,4 @@
-var
+const
 	cp = require('child_process'),
 	minimist = require('minimist');
 
@@ -20,13 +20,13 @@ function displayHelp() {
 }
 
 module.exports = function(args) {
-	var opts = minimist(args, {
+	const opts = minimist(args, {
 		boolean: ['l', 'local', 's', 'strict', 'f', 'framework', 'h', 'help'],
 		alias: {l:'local', s:'strict', f:'framework', h:'help'}
 	});
 	opts.help && displayHelp();
 
-	var eslintArgs = [];
+	let eslintArgs = [];
 	if (opts.strict || opts.framework) {
 		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact/strict'));
 	} else if (!opts.local) {
@@ -40,8 +40,6 @@ module.exports = function(args) {
 	} else {
 		eslintArgs.push('.');
 	}
-	var child = cp.fork(require.resolve('eslint/bin/eslint'), eslintArgs, {env:process.env, cwd:process.cwd()});
-	child.on('close', function(code) {
-		process.exit(code);
-	});
+	const child = cp.fork(require.resolve('eslint/bin/eslint'), eslintArgs, {env:process.env, cwd:process.cwd()});
+	child.on('close', code => process.exit(code));
 };

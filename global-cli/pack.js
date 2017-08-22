@@ -9,130 +9,31 @@
  */
 // @remove-on-eject-end
 
-var
+const
 	chalk = require('chalk'),
 	fs = require('fs-extra'),
 	path = require('path'),
 	minimist = require('minimist'),
 	filesize = require('filesize'),
-	rimrafSync = require('rimraf').sync,
 	webpack = require('webpack'),
 	modifiers = require('./modifiers'),
 	devConfig = require('../config/webpack.config.dev'),
 	prodConfig = require('../config/webpack.config.prod'),
+	findProjectRoot = require('./modifiers/util/find-project-root'),
+	formatWebpackMessages = require('react-dev-utils/formatWebpackMessages'),
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
-	recursive = require('recursive-readdir'),
 	stripAnsi = require('strip-ansi');
-
-// Input: /User/dan/app/build/static/js/main.js
-// Output: /static/js/main.js
-function shortFilename(fileName) {
-	return fileName
-		.replace(path.resolve(path.join(process.cwd(), 'dist')), '');
-}
-
-// Input: 1024, 2048
-// Output: "(+1 KB)"
-function getDifferenceLabel(currentSize, previousSize) {
-	var FIFTY_KILOBYTES = 1024 * 50;
-	var difference = currentSize - previousSize;
-	var fileSize = !Number.isNaN(difference) ? filesize(difference) : 0;
-	if (difference >= FIFTY_KILOBYTES) {
-		return chalk.red('+' + fileSize);
-	} else if (difference < FIFTY_KILOBYTES && difference > 0) {
-		return chalk.yellow('+' + fileSize);
-	} else if (difference < 0) {
-		return chalk.green(fileSize);
-	} else {
-		return '';
-	}
-}
-
-// Print a detailed summary of build files.
-function printFileSizes(stats, previousSizeMap) {
-	var assets = stats.toJson().assets
-		.filter(asset => /\.(js|css|bin)$/.test(asset.name))
-		.map(asset => {
-			var size = fs.statSync('./dist/' + asset.name).size;
-			var previousSize = previousSizeMap[shortFilename(asset.name)];
-			var difference = getDifferenceLabel(size, previousSize);
-			return {
-				folder: path.join('dist', path.dirname(asset.name)),
-				name: path.basename(asset.name),
-				size: size,
-				sizeLabel: filesize(size) + (difference ? ' (' + difference + ')' : '')
-			};
-		});
-	assets.sort((a, b) => b.size - a.size);
-	var longestSizeLabelLength = Math.max.apply(null,
-		assets.map(a => stripAnsi(a.sizeLabel).length)
-	);
-	assets.forEach(asset => {
-		var sizeLabel = asset.sizeLabel;
-		var sizeLength = stripAnsi(sizeLabel).length;
-		if (sizeLength < longestSizeLabelLength) {
-			var rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
-			sizeLabel += rightPadding;
-		}
-		console.log('	' + sizeLabel +	'	' + chalk.dim(asset.folder + path.sep)
-				+ chalk.cyan(asset.name));
-	});
-}
-
-// Create the build and optionally, print the deployment instructions.
-function build(config, previousSizeMap) {
-	if (process.env.NODE_ENV === 'development') {
-		console.log('Creating a development build...');
-	} else {
-		console.log('Creating an optimized production build...');
-	}
-	config.bail = true;
-	webpack(config).run((err, stats) => {
-		if (err) {
-			console.log();
-			console.error(chalk.red('Failed to create a ' + process.env.NODE_ENV + ' build.'));
-			console.error(err.message || err);
-			process.exit(1);
-		}
-
-		printFileSizes(stats, previousSizeMap);
-		console.log();
-		console.log(chalk.green('Compiled successfully.'));
-		if (process.env.NODE_ENV === 'development') {
-			console.log(chalk.yellow('NOTICE: This build contains debugging functionality and may run'
-					+ ' slower than in production mode.'));
-		}
-		console.log();
-	});
-}
-
-// Create the build and watch for changes.
-function watch(config) {
-	if (process.env.NODE_ENV === 'development') {
-		console.log('Creating a development build and watching for changes...');
-	} else {
-		console.log('Creating an optimized production build and watching for changes...');
-	}
-	webpack(config).watch({}, (err) => {
-		if (err) {
-			console.error('Failed to create ' + process.env.NODE_ENV + ' build. Reason:');
-			console.error(err.message || err);
-		}
-		console.log(chalk.green('Compiled successfully.'));
-		console.log();
-	});
-}
 
 function displayHelp() {
 	console.log('  Usage');
 	console.log('    enact pack [options]');
 	console.log();
 	console.log('  Options');
-	console.log('    -s, --stats       Output bundle analysis file');
 	console.log('    -w, --watch       Rebuild on file changes');
 	console.log('    -p, --production  Build in production mode');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
 	console.log('                      (includes prerendering)');
+	console.log('    --stats           Output bundle analysis file');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -154,17 +55,111 @@ function displayHelp() {
 	process.exit(0);
 }
 
+function details(err, stats) {
+	if(err) return err;
+	const statsJSON = stats.toJson({}, true);
+	const messages = formatWebpackMessages(statsJSON);
+	if(messages.errors.length) {
+		return new Error(messages.errors.join('\n\n'));
+	} else if(process.env.CI && messages.warnings.length) {
+		console.log(chalk.yellow('Treating warnings as errors because process.env.CI = true. '
+				+ 'Most CI servers set it automatically.\n'));
+		return new Error(messages.warnings.join('\n\n'));
+	} else {
+		printFileSizes(statsJSON);
+		console.log();
+		if(messages.warnings.length) {
+			console.log(chalk.yellow('Compiled with warnings:\n'));
+			console.log(messages.warnings.join('\n\n') + '\n');
+		} else {
+			console.log(chalk.green('Compiled successfully.'));
+		}
+		if (process.env.NODE_ENV === 'development') {
+			console.log(chalk.yellow('NOTICE: This build contains debugging functionality and may run'
+					+ ' slower than in production mode.'));
+		}
+		console.log();
+	}
+}
+
+// Print a detailed summary of build files.
+function printFileSizes(stats) {
+	const assets = stats.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
+		.map(asset => {
+			const size = fs.statSync('./dist/' + asset.name).size;
+			return {
+				folder: path.join('dist', path.dirname(asset.name)),
+				name: path.basename(asset.name),
+				size: size,
+				sizeLabel: filesize(size)
+			};
+		});
+	assets.sort((a, b) => b.size - a.size);
+	const longestSizeLabelLength = Math.max.apply(null, assets.map(a => stripAnsi(a.sizeLabel).length));
+	assets.forEach(asset => {
+		let sizeLabel = asset.sizeLabel;
+		const sizeLength = stripAnsi(sizeLabel).length;
+		if (sizeLength < longestSizeLabelLength) {
+			const rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
+			sizeLabel += rightPadding;
+		}
+		console.log('	' + sizeLabel +	'	' + chalk.dim(asset.folder + path.sep)
+				+ chalk.cyan(asset.name));
+	});
+}
+
+
+// Create the production build and print the deployment instructions.
+function build(config) {
+	if (process.env.NODE_ENV === 'development') {
+		console.log('Creating a development build...');
+	} else {
+		console.log('Creating an optimized production build...');
+	}
+
+	const compiler = webpack(config);
+	compiler.run((err, stats) => {
+		err = details(err, stats);
+		if(err) {
+			console.log();
+			console.log(chalk.red('Failed to compile.\n'));
+			console.log((err.message || err) + '\n');
+			process.exit(1);
+		}
+	});
+}
+
+// Create the build and watch for changes.
+function watch(config) {
+	// Make sure webpack doesn't immediate bail on errors when watching.
+	config.bail = false;
+	if (process.env.NODE_ENV === 'development') {
+		console.log('Creating a development build and watching for changes...');
+	} else {
+		console.log('Creating an optimized production build and watching for changes...');
+	}
+	webpack(config).watch({}, (err, stats) => {
+		err = details(err, stats);
+		if (err) {
+			console.log(chalk.red('Failed to compile.\n'));
+			console.log((err.message || err) + '\n');
+		}
+		console.log();
+	});
+}
+
 module.exports = function(args) {
-	var opts = minimist(args, {
-		boolean: ['minify', 'framework', 's', 'stats', 'p', 'production', 'i', 'isomorphic', 'v8', 'snapshot', 'w', 'watch', 'h', 'help'],
+	const opts = minimist(args, {
+		boolean: ['minify', 'framework', 'stats', 'p', 'production', 'i', 'isomorphic', 's', 'snapshot', 'w', 'watch', 'h', 'help'],
 		string: ['externals', 'externals-inject', 'l', 'locales'],
 		default: {minify:true},
-		alias: {s:'stats', p:'production', i:'isomorphic', l:'locales', v8:'snapshot', w:'watch', h:'help'}
+		alias: {p:'production', i:'isomorphic', l:'locales', s:'snapshot', w:'watch', h:'help'}
 	});
 	if (opts.help) displayHelp();
 
+	process.chdir(findProjectRoot().path);
 	process.env.NODE_ENV = 'development';
-	var config = devConfig;
+	let config = devConfig;
 
 	// Do this as the first thing so that any code reading it knows the right env.
 	if (opts.production) {
@@ -179,33 +174,15 @@ module.exports = function(args) {
 		process.exit(1);
 	}
 
+	// Remove all content but keep the directory so that
+	// if you're in it, you don't end up in Trash
+	fs.emptyDirSync('./dist');
+
+	// Start the webpack build
 	if (opts.watch) {
+		config.bail = false;
 		watch(config);
 	} else {
-		// Read the current file sizes in dist directory.
-		// This lets us display how much they changed later.
-		recursive('dist', (err, fileNames) => {
-			var previousSizeMap = (fileNames || [])
-				.filter(fileName => /\.(js|css|bin)$/.test(fileName))
-				.reduce((memo, fileName) => {
-					var key = shortFilename(fileName);
-					memo[key] = fs.statSync(fileName).size;
-					return memo;
-				}, {});
-
-			// Remove all content but keep the directory so that
-			// if you're in it, you don't end up in Trash
-			try {
-				rimrafSync('dist/*');
-			} catch (e) {
-				console.log(chalk.red('Error: ') + ' Unable to delete existing build files. '
-						+ 'Please close any programs currently accessing files within ./dist/.');
-				console.log();
-				process.exit(1);
-			}
-
-			// Start the webpack build
-			build(config, previousSizeMap);
-		});
+		build(config);
 	}
 };

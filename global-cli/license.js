@@ -1,4 +1,4 @@
-var
+const
 	minimist = require('minimist'),
 	checker = require('license-checker'),
 	path = require('path');
@@ -48,7 +48,7 @@ module.exports = function(args) {
 	modules.forEach(package => {
 		checker.init({
 			start: package
-		}, function(err, json) {
+		}, (err, json) => {
 			if (err) {
 				console.warn(`Unable to process licenses for ${path}: `, err);
 			} else {
@@ -60,7 +60,7 @@ module.exports = function(args) {
 
 process.on('exit', () => {
 	if (Object.keys(output).length) {
-		console.log(output);
+		console.log(JSON.stringify(output, null, 2));
 	}
 });
 

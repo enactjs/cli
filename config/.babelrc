@@ -1,6 +1,6 @@
 {
-	"presets": ["es2015", "stage-0", "react"],
-	"plugins": ["dev-expression", "dynamic-import-webpack"],
+	"presets": [["es2015", {"modules": false}], "stage-0", "react"],
+	"plugins": ["dev-expression", "syntax-dynamic-import"],
 	"env": {
 		"production": {
 			"plugins": ["transform-react-inline-elements","transform-react-constant-elements"]

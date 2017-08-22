@@ -20,7 +20,7 @@ npm install
 ## Available NPM Tasks
 NPM tasks vary by package and are defined within a `scripts` object in the **package.json** file. If the app was created via enact-dev, then it should support the following:
 
-* `npm run serve` - Packages and hosts the app on a local http server using [webpack-dev-server](https://webpack.github.io/docs/webpack-dev-server.html). Supports hot module replacement and inline updates as the source code changes.
+* `npm run serve` - Packages and hosts the app on a local http server using [webpack-dev-server](https://github.com/webpack/webpack-dev-server). Supports hot module replacement and inline updates as the source code changes.
 * `npm run pack` - Packages the app into **./dist** in development mode (unminified code, with any applicable development code).
 * `npm run pack-p` - Packages the app into **./dist** in production mode (minified code, with development code dropped).
 * `npm run watch` - Packages in development mode and sets up a watcher that will rebuild the app whenever the source code changes.

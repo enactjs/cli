@@ -1,6 +1,7 @@
-var
+const
 	fs = require('fs-extra'),
-	minimist = require('minimist');
+	minimist = require('minimist'),
+	findProjectRoot = require('./modifiers/util/find-project-root');
 
 function displayHelp() {
 	console.log('  Usage');
@@ -14,15 +15,16 @@ function displayHelp() {
 }
 
 module.exports = function(args) {
-	var opts = minimist(args, {
+	const opts = minimist(args, {
 		boolean: ['h', 'help'],
 		alias: {h:'help'}
 	});
 	opts.help && displayHelp();
 
-	fs.remove('./build', function(bErr) {
+	process.chdir(findProjectRoot().path);
+	fs.remove('./build', bErr => {
 		if(bErr) throw bErr;
-		fs.remove('./dist', function(dErr) {
+		fs.remove('./dist', dErr => {
 			if(dErr) throw dErr;
 		});
 	});
