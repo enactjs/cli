@@ -68,7 +68,7 @@ module.exports = function(config, opts) {
 			screenTypes:
 					(typeof enact.screenTypes === 'object' ? enact.screenTypes : null)
 					|| readJSON(screenTypes[(enact.screenTypes || 'moonstone').replace(/^@enact\//, '')])
-					|| readJSON(path.join(enact.screenTypes))
+					|| readJSON(enact.screenTypes)
 					|| readJSON(path.join('node_modules', enact.screenTypes))
 		}
 		if(!opts.locales) {
