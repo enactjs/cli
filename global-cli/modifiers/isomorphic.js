@@ -8,6 +8,11 @@ const
 	PrerenderPlugin = require('./util/PrerenderPlugin'),
 	LocaleHtmlPlugin = require('./util/LocaleHtmlPlugin');
 
+const screenTypes = {
+	'moonstone': path.join('node_modules', '@enact', 'moonstone', 'MoonstoneDecorator', 'screenTypes.json'),
+	'zircon': path.join('node_modules', '@enact', 'zircon', 'ZirconDecorator', 'screenTypes.json')
+};
+
 function readJSON(file) {
 	try {
 		return JSON.parse(fs.readFileSync(file, {encoding:'utf8'}));
@@ -60,8 +65,11 @@ module.exports = function(config, opts) {
 			server: require(reactDOMServer),
 			locales: opts.locales,
 			externals: opts.externals,
-			screenTypes: enact.screenTypes
-					|| readJSON('./node_modules/@enact/moonstone/MoonstoneDecorator/screenTypes.json')
+			screenTypes:
+					(typeof enact.screenTypes === 'object' ? enact.screenTypes : null)
+					|| readJSON(screenTypes[(enact.screenTypes || 'moonstone').replace(/^@enact\//, '')])
+					|| readJSON(path.join(enact.screenTypes))
+					|| readJSON(path.join('node_modules', enact.screenTypes))
 		}
 		if(!opts.locales) {
 			config.plugins.push(new PrerenderPlugin(prerenderOpts));
