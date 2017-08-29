@@ -69,7 +69,8 @@ module.exports = function(config, opts) {
 			externals: opts.externals,
 			screenTypes:
 					(Array.isArray(enact.screenTypes) && enact.screenTypes)
-					|| (enact.screenTypes && (readJSON(enact.screenTypes) || readJSON(path.join('node_modules', enact.screenTypes))))
+					|| (typeof enact.screenTypes === 'string'
+						&& (readJSON(enact.screenTypes) || readJSON(path.join('node_modules', enact.screenTypes))))
 					|| readJSON(screenTypes(enact.gui || enact.theme || 'moonstone'))
 		}
 		if(!opts.locales) {
