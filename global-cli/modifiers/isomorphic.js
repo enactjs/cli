@@ -59,6 +59,7 @@ module.exports = function(config, opts) {
 		const prerenderOpts = {
 			server: require(reactDOMServer),
 			locales: opts.locales,
+			deep: enact.deep,
 			externals: opts.externals,
 			screenTypes: enact.screenTypes
 					|| readJSON('./node_modules/@enact/moonstone/MoonstoneDecorator/screenTypes.json')
