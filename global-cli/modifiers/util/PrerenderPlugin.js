@@ -112,8 +112,7 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 					let appendContent = '';
 					if(opts.deep) {
 						appendContent = '\n\t\t<script>(function() {'
-								+ '\n\t\t\tif(typeof ' + opts.deep.match(/([^.]+)[.]*/)[1] + ' !== \'undefined\''
-								+ opts.deep.replace(/([^.]+)[.]*/g, ' && $`$1') + ') {'
+								+ '\n\t\t\tif(' + (Array.isArray(opts.deep) ? opts.deep.join(' && ') : opts.deep) + ') {'
 								+ '\n\t\t\t\tvar div = document.getElementById("root");'
 								+ '\n\t\t\t\twhile(div && div.firstChild) { div.removeChild(div.firstChild); }'
 								+ '\n\t\t\t}\n\t\t})();</script>';

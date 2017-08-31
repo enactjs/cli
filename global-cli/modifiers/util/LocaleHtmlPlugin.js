@@ -247,8 +247,7 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, deep, 
 					+ '\n\t\t})();</script>';
 			if(deep) {
 				script += '\n\t\t<script>(function() {'
-						+ '\n\t\t\tif(typeof ' + deep.match(/([^.]+)[.]*/)[1] + ' !== \'undefined\''
-						+ deep.replace(/([^.]+)[.]*/g, ' && $`$1') + ') {'
+						+ '\n\t\t\tif(' + (Array.isArray(deep) ? deep.join(' && ') : deep) + ') {'
 						+ '\n\t\t\t\tvar div = document.getElementById("root");'
 						+ '\n\t\t\t\twhile(div && div.firstChild) { div.removeChild(div.firstChild); }'
 						+ '\n\t\t\t}\n\t\t})();</script>';
