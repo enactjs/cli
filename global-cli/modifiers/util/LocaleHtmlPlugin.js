@@ -157,7 +157,7 @@ function simplifyAliases(locales, status) {
 		locales.push(links[l]);
 		if(sharedCSS[l] && sharedCSS[l].length>0) {
 			status.prerender[locales.length-1] = status.prerender[index]
-					.replace(/^(<[^>]*class="[^"]*)"/i, '$1 ' + sharedCSS[l].join(' ') + '"');
+					.replace(/(<div[^>]*class="[^"]*)"/i, '$1 ' + sharedCSS[l].join(' ') + '"');
 		} else {
 			status.prerender[locales.length-1] = status.prerender[index];
 		}
