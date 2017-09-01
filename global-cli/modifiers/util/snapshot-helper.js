@@ -6,7 +6,7 @@
  *  launch-time issues when using code created in a snapshot blob.
  */
 
-//var mockWindow = require('./mock-window');
+var mockWindow = require('./mock-window');
 var ExecutionEnvironment = require('fbjs/lib/ExecutionEnvironment');
 
 function handleException(e) {
@@ -53,14 +53,14 @@ global.updateEnvironment = function() {
 
 if(typeof window == 'undefined'
 		&& (typeof process === 'undefined' || !process.versions || !process.versions.node)) {
-	/*mockWindow.activate();
+	mockWindow.activate();
 	ExecutionEnvironment.canUseDOM = true;
 	ExecutionEnvironment.canUseWorkers = false;
 	ExecutionEnvironment.canUseEventListeners = true;
 	ExecutionEnvironment.canUseViewport = true;
-	ExecutionEnvironment.isInWorker = false;*/
+	ExecutionEnvironment.isInWorker = false;
 	module.exports = global.ReactDOM = require('SNAPSHOT_REACT_DOM');
-	//mockWindow.deactivate();
+	mockWindow.deactivate();
 } else {
 	module.exports = global.ReactDOM = require('SNAPSHOT_REACT_DOM');
 }
