@@ -42,7 +42,7 @@ module.exports = function(args) {
 				} else {
 					const babelrc = path.join(__dirname, '..', 'config', '.babelrc');
 					files.forEach(js => {
-						babel.transformFile(js, {extends:babelrc}, (babelErr, result) => {
+						babel.transformFile(js, {extends:babelrc, plugins:[require.resolve('babel-plugin-transform-es2015-modules-commonjs')]}, (babelErr, result) => {
 							if(babelErr) {
 								console.error(babelErr);
 							} else {
