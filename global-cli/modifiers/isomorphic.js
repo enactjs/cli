@@ -66,6 +66,7 @@ module.exports = function(config, opts) {
 		const prerenderOpts = {
 			server: require(reactDOMServer),
 			locales: opts.locales,
+			deep: enact.deep,
 			externals: opts.externals,
 			screenTypes:
 					(Array.isArray(enact.screenTypes) && enact.screenTypes)

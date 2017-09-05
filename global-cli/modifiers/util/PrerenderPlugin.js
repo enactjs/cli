@@ -109,8 +109,16 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 						htmlPluginData.html = htmlPluginData.html.replace(/(\s*<\/head>)/, '\n' + head + '$1');
 						return '';
 					});
+					let appendContent = '';
+					if(opts.deep) {
+						appendContent = '\n\t\t<script>(function() {'
+								+ '\n\t\t\tif(' + (Array.isArray(opts.deep) ? opts.deep.join(' && ') : opts.deep) + ') {'
+								+ '\n\t\t\t\tvar div = document.getElementById("root");'
+								+ '\n\t\t\t\twhile(div && div.firstChild) { div.removeChild(div.firstChild); }'
+								+ '\n\t\t\t}\n\t\t})();</script>';
+					}
 					const html = replaceRootDiv(htmlPluginData.html, 0, htmlPluginData.html.length-6, '<div id="root">'
-							+ status.prerender + '</div>');
+							+ status.prerender + '</div>' + appendContent);
 					if(html) {
 						htmlPluginData.html = html;
 					} else {
