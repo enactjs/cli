@@ -125,7 +125,8 @@ function simplifyAliases(locales, status) {
 
 			status.details[i].rootClasses = status.details[i].rootClasses || '';
 			if(!sharedCSS[status.alias[i]]) {
-				sharedCSS[status.alias[i]] = status.details[i].rootClasses.split(/\s+/);
+				sharedCSS[status.alias[i]] = commonClasses(status.details[i].rootClasses.split(/\s+/),
+						status.details[locales.indexOf(status.alias[i])].rootClasses.split(/\s+/));
 			} else {
 				sharedCSS[status.alias[i]] = commonClasses(sharedCSS[status.alias[i]],
 						status.details[i].rootClasses.split(/\s+/));
@@ -157,7 +158,7 @@ function simplifyAliases(locales, status) {
 		locales.push(links[l]);
 		if(sharedCSS[l] && sharedCSS[l].length>0) {
 			status.prerender[locales.length-1] = status.prerender[index]
-					.replace(/^(<[^>]*class="[^"]*)"/i, '$1 ' + sharedCSS[l].join(' ') + '"');
+					.replace(/(<div[^>]*class="[^"]*)"/i, '$1 ' + sharedCSS[l].join(' ') + '"');
 		} else {
 			status.prerender[locales.length-1] = status.prerender[index];
 		}
@@ -220,8 +221,8 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, callba
 		if(linked.length===0) {
 			// Single locale, re-inject root classes and react checksum.
 			status.prerender[i] = status.prerender[i]
-					.replace(/^(<[^>]*class="[^"]*)"/i, '$1' + status.details[i].rootClasses + '"')
-					.replace(/^(<[^>]*data-react-checksum=")"/i, '$1' + status.details[i].checksum + '"');
+					.replace(/(<div[^>]*class="[^"]*)"/i, '$1' + status.details[i].rootClasses + '"')
+					.replace(/(<div[^>]*data-react-checksum=")"/i, '$1' + status.details[i].checksum + '"');
 			emitAsset(compilation, 'index.' + locStr + '.html', htmlBefore + rootOpen + status.prerender[i]
 					+ rootClose + html.after);
 			localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, callback);
