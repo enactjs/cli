@@ -1,3 +1,22 @@
+## 0.9.2 (September 7, 2017)
+
+### create
+
+* Template updated for Enact 1.8.0.
+
+### transpile
+
+* Fixed ES6 module format not being transpiled to CommonJS standard.
+
+### pack
+
+* Improved support for `screenTypes` within the `enact` object in the `package.json`. Can now be:
+	* Array of screen literal values (empty array fo no screen types to pass)
+	* String filepath to a local project json file
+	* String path to a dependency module json file
+	* Undefined/falsey to fallback to default Moonstone
+* Added support for `deep` option within the `enact` object in the `package.json`. It represents 1 or more javascript conditions that, when met, indicate the page load was originating from an external deep link, and the prerender should not be shown (as the initial state of the window will not be the prerendered content). This can be a string or a string array.
+
 ## 0.9.0 (August 21, 2017)
 
 Dependencies updated to latestly release, including support for Webpack 3.x.
