@@ -8,6 +8,13 @@ const
 	PrerenderPlugin = require('./util/PrerenderPlugin'),
 	LocaleHtmlPlugin = require('./util/LocaleHtmlPlugin');
 
+function screenTypes(gui) {
+	const decorator = gui.charAt(0).toUpperCase() + gui.slice(1) + 'Decorator';
+	const scoped = path.join('node_modules', '@enact', gui, decorator, 'screenTypes.json');
+	const basic = path.join('node_modules', gui, decorator, 'screenTypes.json');
+	return fs.existsSync(scoped) ? scoped : (fs.existsSync(basic) ? basic : null);
+}
+
 function readJSON(file) {
 	try {
 		return JSON.parse(fs.readFileSync(file, {encoding:'utf8'}));
@@ -59,9 +66,13 @@ module.exports = function(config, opts) {
 		const prerenderOpts = {
 			server: require(reactDOMServer),
 			locales: opts.locales,
+			deep: enact.deep,
 			externals: opts.externals,
-			screenTypes: enact.screenTypes
-					|| readJSON('./node_modules/@enact/moonstone/MoonstoneDecorator/screenTypes.json')
+			screenTypes:
+					(Array.isArray(enact.screenTypes) && enact.screenTypes)
+					|| (typeof enact.screenTypes === 'string'
+						&& (readJSON(enact.screenTypes) || readJSON(path.join('node_modules', enact.screenTypes))))
+					|| readJSON(screenTypes(enact.gui || enact.theme || 'moonstone'))
 		}
 		if(!opts.locales) {
 			config.plugins.push(new PrerenderPlugin(prerenderOpts));

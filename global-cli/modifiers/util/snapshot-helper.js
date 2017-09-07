@@ -6,29 +6,8 @@
  *  launch-time issues when using code created in a snapshot blob.
  */
 
-var findDOMNode = require('SNAPSHOT_REACT_DOM/lib/findDOMNode');
-var ReactMount = require('SNAPSHOT_REACT_DOM/lib/ReactMount');
-var ReactVersion = require('SNAPSHOT_REACT_DOM/lib/ReactVersion');
-var renderSubtreeIntoContainer = require('SNAPSHOT_REACT_DOM/lib/renderSubtreeIntoContainer');
-var ReactUpdates = require('SNAPSHOT_REACT_DOM/lib/ReactUpdates');
-
-var ReactDOM = {
-	findDOMNode: findDOMNode,
-	render: ReactMount.render,
-	unmountComponentAtNode: ReactMount.unmountComponentAtNode,
-	version: ReactVersion,
-	unstable_batchedUpdates: ReactUpdates.batchedUpdates,
-	unstable_renderSubtreeIntoContainer: renderSubtreeIntoContainer
-};
-function checkEnvironment() {
-	if(typeof window !== 'undefined') {
-		var realReactDOM = require('SNAPSHOT_REACT_DOM');
-		for(var x in realReactDOM) {
-			ReactDOM[x] = realReactDOM[x];
-		}
-	}
-	return ReactDOM;
-}
+var mockWindow = require('./mock-window');
+var ExecutionEnvironment = require('fbjs/lib/ExecutionEnvironment');
 
 function handleException(e) {
 	// We allow 'Cannot find module' errors, which throw when the libraries are not used in the app.
@@ -40,16 +19,12 @@ function handleException(e) {
 
 global.updateEnvironment = function() {
 	// Update fbjs to have the correct execution environment for the active window.
-	var ExecutionEnvironment = require('fbjs/lib/ExecutionEnvironment');
 	var canUseDOM = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
-
 	ExecutionEnvironment.canUseDOM = canUseDOM;
 	ExecutionEnvironment.canUseWorkers = typeof Worker !== 'undefined';
 	ExecutionEnvironment.canUseEventListeners = canUseDOM && !!(window.addEventListener || window.attachEvent);
 	ExecutionEnvironment.canUseViewport = canUseDOM && !!window.screen;
 	ExecutionEnvironment.isInWorker = !canUseDOM; // For now, this is true - might change in the future.
-
-	global.ReactDOM = checkEnvironment();
 
 	try {
 		// Mark the iLib localestorage cache as needing re-validation.
@@ -76,4 +51,16 @@ global.updateEnvironment = function() {
 	}
 };
 
-module.exports = checkEnvironment();
+if(typeof window == 'undefined'
+		&& (typeof process === 'undefined' || !process.versions || !process.versions.node)) {
+	mockWindow.activate();
+	ExecutionEnvironment.canUseDOM = true;
+	ExecutionEnvironment.canUseWorkers = false;
+	ExecutionEnvironment.canUseEventListeners = true;
+	ExecutionEnvironment.canUseViewport = true;
+	ExecutionEnvironment.isInWorker = false;
+	module.exports = global.ReactDOM = require('SNAPSHOT_REACT_DOM');
+	mockWindow.deactivate();
+} else {
+	module.exports = global.ReactDOM = require('SNAPSHOT_REACT_DOM');
+}
