@@ -2,8 +2,8 @@ const
 	spawn = require('cross-spawn'),
 	path = require('path'),
 	dir = require('global-modules'),
+	fs = require('fs'),
 	chalk = require('chalk'),
-	exists = require('path-exists').sync,
 	minimist = require('minimist');
 
 const enact = [
@@ -42,7 +42,7 @@ module.exports = function(args) {
 
 	const missing = [];
 	for(let i=0; i<enact.length; i++) {
-		if(exists(path.join(dir, '@enact', enact[i]))) {
+		if(fs.existsSync(path.join(dir, '@enact', enact[i]))) {
 			linkArgs.push('@enact/' + enact[i]);
 		} else {
 			missing.push('@enact/' + enact[i]);

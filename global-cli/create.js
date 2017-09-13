@@ -3,8 +3,7 @@ const
 	fs = require('fs-extra'),
 	minimist = require('minimist'),
 	spawn = require('cross-spawn'),
-	chalk = require('chalk'),
-	exists = require('path-exists').sync;
+	chalk = require('chalk');
 
 const ENACT_DEV_NPM = 'enact-dev';
 
@@ -14,7 +13,7 @@ function createApp(output, template, link, local, verbose) {
 
 	checkAppName(appName, template);
 
-	if (!exists(project)) {
+	if (!fs.existsSync(project)) {
 		fs.mkdirSync(project);
 	} else if (!isSafeToCreateProjectIn(project)) {
 		console.log('The directory "' + output + '" contains file(s) that could conflict. Aborting.');
@@ -52,7 +51,7 @@ function createApp(output, template, link, local, verbose) {
 			console.log(chalk.cyan('	cd'), output);
 		}
 		console.log('	' + chalk.cyan('npm run serve'));
-		if(exists(path.join(project, 'README.old.md'))) {
+		if(fs.existsSync(path.join(project, 'README.old.md'))) {
 			console.log();
 			console.log(chalk.yellow('You had a `README.md` file, we renamed it to `README.old.md`'));
 		}
@@ -62,7 +61,7 @@ function createApp(output, template, link, local, verbose) {
 }
 
 function copyTemplate(template, dest) {
-	if(exists(path.join(dest, 'README.md'))) {
+	if(fs.existsSync(path.join(dest, 'README.md'))) {
 		fs.renameSync(path.join(dest, 'README.md'), path.join(dest, 'README.old.md'));
 	}
 
@@ -92,9 +91,9 @@ function copyTemplate(template, dest) {
 
 	// Update appinfo.json if it exists in the template
 	let appinfo = path.join(dest, 'appinfo.json');
-	if(!exists(appinfo)) {
+	if(!fs.existsSync(appinfo)) {
 		appinfo = path.join(dest, 'webos-meta', 'appinfo.json');
-		if(!exists(appinfo)) {
+		if(!fs.existsSync(appinfo)) {
 			appinfo = undefined;
 		}
 	}

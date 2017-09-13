@@ -16,7 +16,7 @@ const
 	WebpackDevServer = require('webpack-dev-server'),
 	minimist = require('minimist'),
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
-	findProjectRoot = require('./modifiers/util/find-project-root'),
+	packageRoot = require('@enact/dev-utils/package-root'),
 	{choosePort, createCompiler, prepareProxy, prepareUrls} = require('react-dev-utils/WebpackDevServerUtils'),
 	errorOverlayMiddleware = require('react-error-overlay/middleware'),
 	clearConsole = require('react-dev-utils/clearConsole'),
@@ -191,7 +191,7 @@ module.exports = function(args) {
 	});
 	opts.help && displayHelp();
 
-	process.chdir(findProjectRoot().path);
+	process.chdir(packageRoot().path);
 	process.env.NODE_ENV = 'development';
 
 	const config = hotDevServer(devConfig);
