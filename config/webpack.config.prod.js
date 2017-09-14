@@ -186,6 +186,9 @@ module.exports = {
 	},
 	// Optional configuration for polyfilling NodeJS built-ins.
 	node: enact.node,
+	// Build for 'web' unless otherwise specified.
+	target: enact.target || 'web',
+	// Ignore noisy performance warnings.
 	performance: {
 		hints: false
 	},
