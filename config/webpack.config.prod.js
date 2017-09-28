@@ -17,13 +17,14 @@ const removeclass = require('postcss-remove-classes').default;
 const LessPluginRi = require('resolution-independence');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const GracefulFsPlugin = require('graceful-fs-webpack-plugin');
-const ILibPlugin = require('ilib-webpack-plugin');
-const WebOSMetaPlugin = require('webos-meta-webpack-plugin');
+const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
+const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
+const WebOSMetaPlugin = require('@enact/dev-utils/plugins/WebOSMetaPlugin');
+const packageRoot = require('@enact/dev-utils/package-root');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
-const findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
 
-process.chdir(findProjectRoot().path);
+process.chdir(packageRoot().path);
 const pkg = require(path.resolve('./package.json'));
 const enact = pkg.enact || {};
 
@@ -235,6 +236,8 @@ module.exports = {
 		}),
 		// Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
 		new ExtractTextPlugin('[name].css'),
+		// Ensure correct casing in module filepathes
+		new CaseSensitivePathsPlugin(),
 		// Switch the internal NodeOutputFilesystem to use graceful-fs to avoid
 		// EMFILE errors when hanndling mass amounts of files at once, such as
 		// what happens when using ilib bundles/resources.

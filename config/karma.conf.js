@@ -3,12 +3,12 @@ const {DefinePlugin} = require('webpack');
 const autoprefixer = require('autoprefixer');
 const flexbugfixes = require('postcss-flexbugs-fixes');
 const LessPluginRi = require('resolution-independence');
-const GracefulFsPlugin = require('graceful-fs-webpack-plugin');
-const ILibPlugin = require('ilib-webpack-plugin');
+const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
+const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
+const packageRoot = require('@enact/dev-utils/package-root');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
 
-const appPath = findProjectRoot().path;
+const appPath = packageRoot().path;
 const pkg = require(path.resolve(appPath, './package.json'));
 const enact = pkg.enact || {};
 

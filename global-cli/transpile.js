@@ -4,7 +4,7 @@ const
 	babel = require('babel-core'),
 	fs = require('fs-extra'),
 	minimist = require('minimist'),
-	findProjectRoot = require('./modifiers/util/find-project-root');
+	packageRoot = require('@enact/dev-utils/package-root');
 
 function displayHelp() {
 	console.log('  Usage');
@@ -26,7 +26,7 @@ module.exports = function(args) {
 	});
 	opts.help && displayHelp();
 
-	process.chdir(findProjectRoot().path);
+	process.chdir(packageRoot().path);
 
 	const sourceRoot = '.';
 	const buildRoot = opts.output || './build';

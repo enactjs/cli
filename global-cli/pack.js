@@ -16,10 +16,10 @@ const
 	minimist = require('minimist'),
 	filesize = require('filesize'),
 	webpack = require('webpack'),
-	modifiers = require('./modifiers'),
 	devConfig = require('../config/webpack.config.dev'),
 	prodConfig = require('../config/webpack.config.prod'),
-	findProjectRoot = require('./modifiers/util/find-project-root'),
+	mixins = require('@enact/dev-utils/mixins'),
+	packageRoot = require('@enact/dev-utils/package-root'),
 	formatWebpackMessages = require('react-dev-utils/formatWebpackMessages'),
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
 	stripAnsi = require('strip-ansi');
@@ -157,7 +157,7 @@ module.exports = function(args) {
 	});
 	if (opts.help) displayHelp();
 
-	process.chdir(findProjectRoot().path);
+	process.chdir(packageRoot().path);
 	process.env.NODE_ENV = 'development';
 	let config = devConfig;
 
@@ -167,7 +167,7 @@ module.exports = function(args) {
 		config = prodConfig;
 	}
 
-	modifiers.apply(config, opts);
+	mixins.apply(config, opts);
 
 	// Warn and crash if required files are missing
 	if (!opts.framework && !checkRequiredFiles([config.entry.main[config.entry.main.length - 1]])) {
