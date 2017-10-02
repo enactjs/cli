@@ -70,13 +70,12 @@ module.exports = function(karma) {
 				'react/lib/ReactContext': true
 			},
 			target: app.environment,
-			node: Object.assign({}, app.nodePolyfill || {}, {
+			node: Object.assign({}, app.nodeBuiltins || {}, {
 				console: true,
 				fs: 'empty',
 				net: 'empty',
 				tls: 'empty'
 			}),
-			target: enact.target || 'web',
 			module: {
 				rules: [
 					{

@@ -208,7 +208,7 @@ module.exports = {
 	// Target app to build for a specific environment (default 'web')
 	target: app.environment,
 	// Optional configuration for polyfilling NodeJS built-ins.
-	node: app.nodePolyfill,
+	node: app.nodeBuiltins,
 	performance: {
 		hints: false
 	},
