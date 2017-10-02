@@ -19,14 +19,12 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
 const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
 const WebOSMetaPlugin = require('@enact/dev-utils/plugins/WebOSMetaPlugin');
-const packageRoot = require('@enact/dev-utils/package-root');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
+const app = require('@enact/dev-utils/option-parser');
 
-process.chdir(packageRoot().path);
-const pkg = require(path.resolve('./package.json'));
-const enact = pkg.enact || {};
+process.chdir(app.context);
 const reactPerf = path.resolve(path.join('node_modules', 'react-dom', 'lib', 'ReactPerf.js'));
 
 // This is the development configuration.
@@ -47,7 +45,7 @@ module.exports = {
 			// Include React performance tools for debugging/optimization testing
 			reactPerf,
 			// Finally, this is your app's code
-			path.resolve(pkg.main || 'index.js')
+			path.resolve(app.main || 'index.js')
 		]
 	},
 	output: {
@@ -169,12 +167,7 @@ module.exports = {
 								plugins: () => [
 									// We use PostCSS for autoprefixing only, but others could be added.
 									autoprefixer({
-										browsers: [
-											'>1%',
-											'last 4 versions',
-											'Firefox ESR',
-											'not ie < 9' // React doesn't support IE8 anyway.
-										],
+										browsers: app.browsers,
 										flexbox: 'no-2009',
 										remove: false
 									}),
@@ -189,7 +182,7 @@ module.exports = {
 							options: {
 								sourceMap: true,
 								// If resolution independence options are specified, use the LESS plugin.
-								plugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])
+								plugins: ((app.ri) ? [new LessPluginRi(app.ri)] : [])
 							}
 						}
 					]
@@ -212,8 +205,10 @@ module.exports = {
 		host: '0.0.0.0',
 		port: 8080
 	},
+	// Target app to build for a specific environment (usually 'web')
+	target: app.environment,
 	// Optional configuration for polyfilling NodeJS built-ins.
-	node: enact.node,
+	node: app.nodePolyfill,
 	performance: {
 		hints: false
 	},
@@ -222,9 +217,9 @@ module.exports = {
 		new HtmlWebpackPlugin({
 			// Title can be specified in the package.json enact options or will
 			// be determined automatically from any appinfo.json files discovered.
-			title: enact.title || '',
+			title: app.title || '',
 			inject: 'body',
-			template: enact.template || path.join(__dirname, 'html-template.ejs'),
+			template: app.template || path.join(__dirname, 'html-template.ejs'),
 			xhtml: true
 		}),
 		// Make NODE_ENV environment variable available to the JS code, for example:
