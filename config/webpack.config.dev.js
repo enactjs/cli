@@ -205,7 +205,7 @@ module.exports = {
 		host: '0.0.0.0',
 		port: 8080
 	},
-	// Target app to build for a specific environment (usually 'web')
+	// Target app to build for a specific environment (default 'web')
 	target: app.environment,
 	// Optional configuration for polyfilling NodeJS built-ins.
 	node: app.nodePolyfill,

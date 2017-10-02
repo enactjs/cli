@@ -76,6 +76,7 @@ module.exports = function(karma) {
 				net: 'empty',
 				tls: 'empty'
 			}),
+			target: enact.target || 'web',
 			module: {
 				rules: [
 					{

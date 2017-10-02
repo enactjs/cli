@@ -178,7 +178,7 @@ module.exports = {
 			// Remember to add the new extension(s) to the "file" loader exclusion regex list.
 		]
 	},
-	// Target app to build for a specific environment (usually 'web')
+	// Target app to build for a specific environment (default 'web')
 	target: app.environment,
 	// Optional configuration for polyfilling NodeJS built-ins.
 	node: app.nodePolyfill,
