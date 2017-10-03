@@ -187,6 +187,11 @@ module.exports = function(args) {
 	});
 	opts.help && displayHelp();
 
+	if(app.environment!=='web') {
+		console.log(chalk.red('Serving is not supported for non-browser apps.'))
+		process.exit(1);
+	}
+
 	process.chdir(app.context);
 	process.env.NODE_ENV = 'development';
 
