@@ -16,7 +16,7 @@ const
 	minimist = require('minimist'),
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
 	{choosePort, createCompiler, prepareProxy, prepareUrls} = require('react-dev-utils/WebpackDevServerUtils'),
-	errorOverlayMiddleware = require('react-error-overlay/middleware'),
+	errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware'),
 	clearConsole = require('react-dev-utils/clearConsole'),
 	openBrowser = require('react-dev-utils/openBrowser'),
 	app = require('@enact/dev-utils/option-parser'),
@@ -58,9 +58,6 @@ function hotDevServer(config) {
 	// Note: instead of the default WebpackDevServer client, we use a custom one
 	// to bring better experience.
 	config.entry.main.unshift(require.resolve('react-dev-utils/webpackHotDevClient'));
-	// Inject the crash overlay client-side code. This is not part of the dev config by
-	// default as it is not isomorphic-friendly.
-	config.entry.main.splice(-1, 0, require.resolve('react-error-overlay'));
 	// This is necessary to emit hot updates
 	config.plugins.push(new webpack.HotModuleReplacementPlugin());
 	// Keep webpack alive when there are any errors, so user can fix and rebuild.
