@@ -18,6 +18,7 @@ const
 	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
 	packageRoot = require('@enact/dev-utils/package-root'),
 	{choosePort, createCompiler, prepareProxy, prepareUrls} = require('react-dev-utils/WebpackDevServerUtils'),
+	errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware'),
 	clearConsole = require('react-dev-utils/clearConsole'),
 	openBrowser = require('react-dev-utils/openBrowser'),
 	devConfig = require('../config/webpack.config.dev');
@@ -125,7 +126,11 @@ function devServerConfig(host, protocol, proxy, allowedHost, publicPath) {
 			disableDotRule: true
 		},
 		public: allowedHost,
-		proxy
+		proxy,
+		setup(app) {
+			// This lets us open files from the runtime error overlay.
+			app.use(errorOverlayMiddleware());
+		}
 	};
 }
 
