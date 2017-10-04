@@ -126,9 +126,9 @@ function devServerConfig(host, protocol, proxy, allowedHost, publicPath) {
 		},
 		public: allowedHost,
 		proxy,
-		setup(app) {
+		setup(build) {
 			// This lets us open files from the runtime error overlay.
-			app.use(errorOverlayMiddleware());
+			build.use(errorOverlayMiddleware());
 		}
 	};
 }
