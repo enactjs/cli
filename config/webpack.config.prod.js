@@ -20,13 +20,11 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
 const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
 const WebOSMetaPlugin = require('@enact/dev-utils/plugins/WebOSMetaPlugin');
-const packageRoot = require('@enact/dev-utils/package-root');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
+const app = require('@enact/dev-utils/option-parser');
 
-process.chdir(packageRoot().path);
-const pkg = require(path.resolve('./package.json'));
-const enact = pkg.enact || {};
+process.chdir(app.context);
 
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
@@ -40,7 +38,7 @@ module.exports = {
 	entry: {
 		main: [
 			require.resolve('./polyfills'),
-			path.resolve(pkg.main || 'index.js')
+			path.resolve(app.main || 'index.js')
 		]
 	},
 	output: {
@@ -154,12 +152,7 @@ module.exports = {
 								plugins: () => [
 									// Automatically add vendor CSS prefixes.
 									autoprefixer({
-										browsers: [
-											'>1%',
-											'last 4 versions',
-											'Firefox ESR',
-											'not ie < 9' // React doesn't support IE8 anyway.
-										],
+										browsers: app.browsers,
 										flexbox: 'no-2009',
 										remove: false
 									}),
@@ -175,7 +168,7 @@ module.exports = {
 							loader: require.resolve('less-loader'),
 							options: {
 								// If resolution independence options are specified, use the LESS plugin.
-								plugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])
+								plugins: ((app.ri) ? [new LessPluginRi(app.ri)] : [])
 							}
 						}
 					]
@@ -185,11 +178,10 @@ module.exports = {
 			// Remember to add the new extension(s) to the "file" loader exclusion regex list.
 		]
 	},
+	// Target app to build for a specific environment (default 'web')
+	target: app.environment,
 	// Optional configuration for polyfilling NodeJS built-ins.
-	node: enact.node,
-	// Build for 'web' unless otherwise specified.
-	target: enact.target || 'web',
-	// Ignore noisy performance warnings.
+	node: app.nodeBuiltins,
 	performance: {
 		hints: false
 	},
@@ -198,9 +190,9 @@ module.exports = {
 		new HtmlWebpackPlugin({
 			// Title can be specified in the package.json enact options or will
 			// be determined automatically from any appinfo.json files discovered.
-			title: enact.title || '',
+			title: app.title || '',
 			inject: 'body',
-			template: enact.template || path.join(__dirname, 'html-template.ejs'),
+			template: app.template || path.join(__dirname, 'html-template.ejs'),
 			xhtml: true,
 			minify: {
 				removeComments: true,

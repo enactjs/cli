@@ -5,12 +5,8 @@ const flexbugfixes = require('postcss-flexbugs-fixes');
 const LessPluginRi = require('resolution-independence');
 const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
 const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
-const packageRoot = require('@enact/dev-utils/package-root');
+const app = require('@enact/dev-utils/option-parser');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-
-const appPath = packageRoot().path;
-const pkg = require(path.resolve(appPath, './package.json'));
-const enact = pkg.enact || {};
 
 module.exports = function(karma) {
 	karma.set({
@@ -48,7 +44,7 @@ module.exports = function(karma) {
 			resolve: {
 				extensions: ['.js', '.jsx', '.json'],
 				modules: [
-					path.resolve(appPath, './node_modules'),
+					path.resolve(app.context, './node_modules'),
 					'node_modules',
 					// @remove-on-eject-begin
 					path.resolve(__dirname, '../node_modules')
@@ -63,7 +59,7 @@ module.exports = function(karma) {
 			resolveLoader: {
 				modules: [
 					path.resolve(__dirname, '../node_modules'),
-					path.resolve(appPath, './node_modules')
+					path.resolve(app.context, './node_modules')
 				]
 			},
 			// @remove-on-eject-end
@@ -73,13 +69,13 @@ module.exports = function(karma) {
 				'react/lib/ExecutionEnvironment': true,
 				'react/lib/ReactContext': true
 			},
-			node: Object.assign({}, enact.node || {}, {
+			target: app.environment,
+			node: Object.assign({}, app.nodeBuiltins || {}, {
 				console: true,
 				fs: 'empty',
 				net: 'empty',
 				tls: 'empty'
 			}),
-			target: enact.target || 'web',
 			module: {
 				rules: [
 					{
@@ -116,13 +112,13 @@ module.exports = function(karma) {
 								options: {
 									ident: 'postcss',
 									plugins: () => [autoprefixer({
-										browsers: ['>1%', 'last 4 versions', 'Firefox ESR', 'not ie < 9'], flexbox: 'no-2009', remove:false
+										browsers: app.browsers, flexbox: 'no-2009', remove:false
 									}), flexbugfixes]
 								}
 							},
 							{
 								loader: require.resolve('less-loader'),
-								options: {plugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])}
+								options: {plugins: ((app.ri) ? [new LessPluginRi(app.ri)] : [])}
 							}
 						]
 					}
