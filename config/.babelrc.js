@@ -10,6 +10,7 @@ const env = process.env.BABEL_ENV || process.env.NODE_ENV;
 
 module.exports = {
 	presets: [
+		// 
 		['env', {
 			targets: Object.assign({uglify:true},
 					app.browsers && {browsers:app.browsers},
@@ -23,6 +24,8 @@ module.exports = {
 	],
 	plugins: [
 		'dev-expression',
+		env !== 'production' && 'transform-react-jsx-self',
+		env !== 'production' && 'transform-react-jsx-source',
 		env === 'production' && 'transform-react-inline-elements'
 	].filter(Boolean)
 };
