@@ -14,7 +14,7 @@ module.exports = {
 			targets: Object.assign({uglify:true},
 					app.browsers && {browsers:app.browsers},
 					app.node && {node: app.node}),
-			exclude: ['web.timers', 'web.immediate'],
+			exclude: ['transform-regenerator', 'web.timers', 'web.immediate'],
 			useBuiltIns: true,
 			modules: false
 		}],
