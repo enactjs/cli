@@ -153,7 +153,7 @@ module.exports = function(args) {
 		boolean: ['minify', 'framework', 'stats', 'p', 'production', 'i', 'isomorphic', 's', 'snapshot', 'w', 'watch', 'h', 'help'],
 		string: ['externals', 'externals-inject', 'l', 'locales'],
 		default: {minify:true},
-		alias: {p:'production', i:'isomorphic', l:'locales', s:'snapshot', webOS:'webos', w:'watch', h:'help'}
+		alias: {p:'production', i:'isomorphic', l:'locales', s:'snapshot', w:'watch', h:'help'}
 	});
 	if (opts.help) displayHelp();
 
