@@ -33,7 +33,6 @@ function displayHelp() {
 	console.log('    -p, --production  Build in production mode');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
 	console.log('                      (includes prerendering)');
-	console.log('    --webOS           Target webOS compatibility');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
@@ -151,8 +150,7 @@ function watch(config) {
 
 module.exports = function(args) {
 	const opts = minimist(args, {
-		boolean: ['minify', 'framework', 'stats', 'p', 'production', 'i', 'isomorphic', 's', 'snapshot',
-			'webOS', 'webos', 'w', 'watch', 'h', 'help'],
+		boolean: ['minify', 'framework', 'stats', 'p', 'production', 'i', 'isomorphic', 's', 'snapshot', 'w', 'watch', 'h', 'help'],
 		string: ['externals', 'externals-inject', 'l', 'locales'],
 		default: {minify:true},
 		alias: {p:'production', i:'isomorphic', l:'locales', s:'snapshot', webOS:'webos', w:'watch', h:'help'}
