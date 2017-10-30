@@ -1,6 +1,6 @@
 var chai = require('chai');
 var dirtyChai = require('dirty-chai');
-var consoleSpy = require('enyo-console-spy');
+var consoleSpy = require('console-snoop');
 
 var {restoreErrorAndWarnings, filterErrorAndWarnings, watchErrorAndWarnings} = consoleSpy;
 

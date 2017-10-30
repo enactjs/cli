@@ -1,4 +1,3 @@
-// TODO: Move this to jest.conf.js
 const config = JSON.stringify({
 	testRegex: '-specs.jsx?$',
 	verbose: false,
@@ -8,9 +7,9 @@ const config = JSON.stringify({
 	moduleNameMapper: {
 		enzyme: require.resolve('enzyme'),
 		sinon: require.resolve('sinon'),
-		'enyo-console-spy': require.resolve('enyo-console-spy'),
+		'console-snoop': require.resolve('console-snoop'),
 		'ilibmanifest.json': 'ilib',
-		'\\.(css|less)$': require.resolve('identity-obj-proxy'),
+		'\\.(css|less)$': require.resolve('identity-obj-proxy')
 	}
 });
 
