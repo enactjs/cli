@@ -16,7 +16,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@enact/dev-utils": "~0.2.0",
+    "@enact/dev-utils": "~0.3.0",
     "autoprefixer": "~7.1.4",
     "babel-core": "~6.26.0",
     "babel-eslint": "~8.0.1",
