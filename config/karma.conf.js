@@ -96,7 +96,14 @@ module.exports = function(karma) {
 							babelrc: false,
 							extends: path.join(__dirname, '.babelrc'),
 							// @remove-on-eject-end
-							cacheDirectory: true
+							cacheDirectory: true,
+							// Generate a unique identifier string based off versons of components and app config.
+							cacheIdentifier: JSON.stringify({
+								'babel-loader': require('babel-loader/package.json').version,
+								'babel-core': require('babel-core/package.json').version,
+								browsers: app.browsers,
+								node: app.node
+							})
 						}
 					},
 					{
