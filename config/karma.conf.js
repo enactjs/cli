@@ -8,6 +8,8 @@ const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
 const app = require('@enact/dev-utils/option-parser');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 
+process.env.CHROME_BIN = require('puppeteer').executablePath();
+
 module.exports = function(karma) {
 	karma.set({
 		basePath: process.cwd(),
@@ -160,7 +162,6 @@ module.exports = function(karma) {
 			'karma-chai',
 			'karma-dirty-chai',
 			'karma-chrome-launcher',
-			'karma-phantomjs-launcher',
 			'karma-json-reporter'
 		],
 
@@ -172,7 +173,13 @@ module.exports = function(karma) {
 		logLevel: karma.LOG_INFO,
 		browserNoActivityTimeout : 60000,
 		autoWatch: true,
-		browsers: ['Chrome'],
+		browsers: ['InsecureChromeHeadless'],
+		customLaunchers: {
+			InsecureChromeHeadless: {
+				base: 'ChromeHeadless',
+				flags: ['--disable-web-security', '--no-sandbox', '--window-size=640,480']
+			}
+		},
 		singleRun: false
 	});
 };
