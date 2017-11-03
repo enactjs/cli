@@ -4,7 +4,7 @@
 	"env": {
 		"production": {
 			"plugins": ["transform-react-inline-elements","transform-react-constant-elements"]
-		}
+		},
 		"test": {
 			"plugins": ["transform-es2015-modules-commonjs"]
 		}
