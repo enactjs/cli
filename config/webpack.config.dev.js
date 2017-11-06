@@ -66,14 +66,6 @@ module.exports = {
 		// Allows us to specify paths to check for module resolving.
 		modules: [path.resolve('./node_modules'), 'node_modules'],
 		alias: {
-			// @remove-on-eject-begin
-			'promise/lib/rejection-tracking': require.resolve('promise/lib/rejection-tracking'),
-			'promise/lib/es6-extensions': require.resolve('promise/lib/es6-extensions'),
-			'whatwg-fetch': require.resolve('whatwg-fetch'),
-			'object-assign': require.resolve('object-assign'),
-			'string.fromcodepoint': require.resolve('string.fromcodepoint'),
-			'string.prototype.codepointat': require.resolve('string.prototype.codepointat'),
-			// @remove-on-eject-end
 			// Support ilib shorthand alias for ilib modules
 			'ilib':'@enact/i18n/ilib/lib'
 		}
