@@ -10,7 +10,8 @@
 // @remove-on-eject-end
 
 const path = require('path');
-const {DefinePlugin, optimize:{UglifyJsPlugin}} = require('webpack');
+const {DefinePlugin} = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const autoprefixer = require('autoprefixer');
 const flexbugfixes = require('postcss-flexbugs-fixes');
 const removeclass = require('postcss-remove-classes').default;
@@ -210,15 +211,17 @@ module.exports = {
 		}),
 		// Minify the code.
 		new UglifyJsPlugin({
-			compress: {
-				warnings: false,
-				// This feature has been reported as buggy a few times, such as:
-				// https://github.com/mishoo/UglifyJS2/issues/1964
-				// We'll wait with enabling it by default until it is more solid.
-				reduce_vars: false
-			},
-			output: {
-				comments: false
+			uglifyOptions: {
+				compress: {
+					warnings: false,
+					// This feature has been reported as buggy a few times, such as:
+					// https://github.com/mishoo/UglifyJS2/issues/1964
+					// We'll wait with enabling it by default until it is more solid.
+					reduce_vars: false
+				},
+				output: {
+					comments: false
+				}
 			}
 		}),
 		// Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
