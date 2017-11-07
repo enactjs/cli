@@ -5,18 +5,23 @@
  *  for Enact development environment on target platforms.
  */
 
-const app = require('@enact/dev-utils/option-parser');
+let {browsers, node} = require('@enact/dev-utils/option-parser');
 const env = process.env.BABEL_ENV || process.env.NODE_ENV;
+
+if(env === 'test') {
+	browsers = [];
+	node = 'current';
+}
 
 module.exports = {
 	presets: [
 		['env', {
 			targets: Object.assign({uglify:true},
-					app.browsers && {browsers:app.browsers},
-					app.node && {node: app.node}),
+					browsers && {browsers:browsers},
+					node && {node: node}),
 			exclude: ['transform-regenerator', 'web.dom.iterable', 'web.timers', 'web.immediate'],
 			useBuiltIns: true,
-			modules: false
+			modules: (env === 'test') && 'commonjs'
 		}],
 		'stage-0',
 		'react'
