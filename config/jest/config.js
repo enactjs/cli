@@ -1,9 +1,12 @@
-const config = JSON.stringify({
+module.exports = {
 	testRegex: '-specs.jsx?$',
 	verbose: false,
-	transform: {'.*': require.resolve('./jest.transform')},
+	rootDir: process.cwd(),
+	transform: {
+		'.*': require.resolve('./transform')
+	},
 	transformIgnorePatterns: ['node_modules.(?!@enact)'],
-	setupTestFrameworkScriptFile: require.resolve('./jestTestSetup'),
+	setupTestFrameworkScriptFile: require.resolve('./test-setup'),
 	moduleNameMapper: {
 		enzyme: require.resolve('enzyme'),
 		sinon: require.resolve('sinon'),
@@ -11,6 +14,4 @@ const config = JSON.stringify({
 		'ilibmanifest.json': 'ilib',
 		'\\.(css|less)$': require.resolve('identity-obj-proxy')
 	}
-});
-
-module.exports = ['--config', config];
+};

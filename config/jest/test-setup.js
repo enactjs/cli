@@ -1,8 +1,10 @@
-var chai = require('chai');
-var dirtyChai = require('dirty-chai');
-var consoleSpy = require('console-snoop');
+/* global expect, beforeEach, afterEach */
+/* eslint no-global-assign:0  no-native-reassign:0 */
 
-var {restoreErrorAndWarnings, filterErrorAndWarnings, watchErrorAndWarnings} = consoleSpy;
+const chai = require('chai');
+const dirtyChai = require('dirty-chai');
+const consoleSpy = require('console-snoop');
+const {restoreErrorAndWarnings, filterErrorAndWarnings, watchErrorAndWarnings} = consoleSpy;
 
 chai.should();
 chai.use(dirtyChai);
@@ -13,7 +15,7 @@ global.__DEV__ = true;
 
 beforeEach(watchErrorAndWarnings);
 
-afterEach(function (done) {
+afterEach(function(done) {
 	const actual = filterErrorAndWarnings(/(Invalid prop|Failed prop type|Unknown prop)/);
 	const expected = 0;
 	restoreErrorAndWarnings();

@@ -1,13 +1,10 @@
-const cp = require('child_process');
+const jest = require('jest');
 
 module.exports = function(args) {
-	if(args[0]==='start' || args[0]==='init') {
-		const jestArgs = require('../config/jest.conf.js');
-		args.splice(0, 1, ...jestArgs);
-	}
+	process.env.BABEL_ENV = 'test';
+	process.env.NODE_ENV = 'test';
 
-	const child = cp.fork(require.resolve('jest/bin/jest'), args, {env:process.env, cwd:process.cwd()});
-	child.on('close', code => {
-		process.exit(code);
-	});
+	args.unshift('--config', require.resolve('../config/jest/config'));
+
+	jest.run(args);
 };
