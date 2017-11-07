@@ -66,14 +66,6 @@ module.exports = {
 		// Allows us to specify paths to check for module resolving.
 		modules: [path.resolve('./node_modules'), 'node_modules'],
 		alias: {
-			// @remove-on-eject-begin
-			'promise/lib/rejection-tracking': require.resolve('promise/lib/rejection-tracking'),
-			'promise/lib/es6-extensions': require.resolve('promise/lib/es6-extensions'),
-			'whatwg-fetch': require.resolve('whatwg-fetch'),
-			'object-assign': require.resolve('object-assign'),
-			'string.fromcodepoint': require.resolve('string.fromcodepoint'),
-			'string.prototype.codepointat': require.resolve('string.prototype.codepointat'),
-			// @remove-on-eject-end
 			// Support ilib shorthand alias for ilib modules
 			'ilib':'@enact/i18n/ilib/lib'
 		}
@@ -132,7 +124,14 @@ module.exports = {
 					// This is a feature of `babel-loader` for webpack (not Babel itself).
 					// It enables caching results in ./node_modules/.cache/babel-loader/
 					// directory for faster rebuilds.
-					cacheDirectory: true
+					cacheDirectory: true,
+					// Generate a unique identifier string based off versons of components and app config.
+					cacheIdentifier: JSON.stringify({
+						'babel-loader': require('babel-loader/package.json').version,
+						'babel-core': require('babel-core/package.json').version,
+						browsers: app.browsers,
+						node: app.node
+					})
 				}
 			},
 			// Multiple styling-support features are used together.
