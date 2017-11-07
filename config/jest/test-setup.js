@@ -11,8 +11,6 @@ chai.use(dirtyChai);
 
 expect = chai.expect;
 
-global.__DEV__ = true;
-
 beforeEach(watchErrorAndWarnings);
 
 afterEach(function(done) {
