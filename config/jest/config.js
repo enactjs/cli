@@ -1,7 +1,14 @@
+const path = require('path');
+const pkgRoot = require('@enact/dev-utils/package-root');
+
 module.exports = {
 	testRegex: '-specs.jsx?$',
 	verbose: false,
 	rootDir: process.cwd(),
+	modulePaths: [
+		path.join(pkgRoot().path, 'node_modules'),
+		path.resolve(path.join(__dirname, '..', '..', 'node_modules'))
+	],
 	transform: {
 		'.*': require.resolve('./transform')
 	},
@@ -13,9 +20,6 @@ module.exports = {
 	],
 	setupTestFrameworkScriptFile: require.resolve('./test-setup'),
 	moduleNameMapper: {
-		enzyme: require.resolve('enzyme'),
-		sinon: require.resolve('sinon'),
-		'console-snoop': require.resolve('console-snoop'),
 		'\\.(css|less)$': require.resolve('identity-obj-proxy')
 	},
 	globals: {

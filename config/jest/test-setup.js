@@ -1,4 +1,4 @@
-/* global expect, beforeEach, afterEach */
+/* global expect, beforeEach, afterEach, window */
 /* eslint no-global-assign:0  no-native-reassign:0 */
 
 const chai = require('chai');
@@ -10,6 +10,12 @@ chai.should();
 chai.use(dirtyChai);
 
 expect = chai.expect;
+
+global.XMLHttpRequest = require('@enact/dev-utils/plugins/PrerenderPlugin/FileXHR');
+
+window.innerWidth = 480;
+window.innerHeight = 640;
+window.devicePixelRatio = 1;
 
 beforeEach(watchErrorAndWarnings);
 
