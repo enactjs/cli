@@ -112,10 +112,12 @@ PrerenderPlugin.prototype.apply = function(compiler) {
 					let appendContent = '';
 					if(opts.deep) {
 						appendContent = '\n\t\t<script>(function() {'
-								+ '\n\t\t\tif(' + (Array.isArray(opts.deep) ? opts.deep.join(' && ') : opts.deep) + ') {'
-								+ '\n\t\t\t\tvar div = document.getElementById("root");'
-								+ '\n\t\t\t\twhile(div && div.firstChild) { div.removeChild(div.firstChild); }'
-								+ '\n\t\t\t}\n\t\t})();</script>';
+								+ '\n\t\t\tif(!(' + (Array.isArray(opts.deep) ? opts.deep.join(' && ') : opts.deep) + ')) {'
+								+ '\n\t\t\t\tvar divRoot = document.getElementById("root");'
+								+ '\n\t\t\t\tif(divRoot) divRoot.innerHTML = ' + JSON.stringify(status.prerender) +  ';'
+								+ '\n\t\t\t}'
+								+ '\n\t\t})();</script>';
+						status.prerender = '';
 					}
 					const html = replaceRootDiv(htmlPluginData.html, 0, htmlPluginData.html.length-6, '<div id="root">'
 							+ status.prerender + '</div>' + appendContent);
