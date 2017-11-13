@@ -201,6 +201,19 @@ function aliasedLocales(locale, aliases) {
 	return matches;
 }
 
+function deepWrap(deep, prerender, extra) {
+	extra = extra || '';
+	return {
+		prerender: (deep ? '' : prerender),
+		script: (deep ? '\n\t\t\tif(!(' + (Array.isArray(deep) ? deep.join(' && ') : deep) + ')) {'
+			+ '\n\t\t\t\tvar divRoot = document.getElementById("root");'
+			+ '\n\t\t\t\tif(divRoot) divRoot.innerHTML = ' + JSON.stringify(prerender) +  ';'
+			+ extra.replace(/\n/g, '\n\t')
+			+ '\n\t\t\t}'
+			: (extra || ''))
+	}
+}
+
 // Add a localized index.html to the compilation assets.
 function localizedHtml(i, locales, status, html, compilation, htmlPlugin, deep, callback) {
 	if(i===locales.length) {
@@ -218,21 +231,14 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, deep, 
 			htmlBefore = htmlBefore.replace(/(\s*<\/head>)/, '\n' + head + '$1');
 			return '';
 		});
-		let deepScript = '';
-		if(deep) {
-			deepScript = '(function() {'
-					+ '\n\t\t\tif(' + (Array.isArray(deep) ? deep.join(' && ') : deep) + ') {'
-					+ '\n\t\t\t\tvar div = document.getElementById("root");'
-					+ '\n\t\t\t\twhile(div && div.firstChild) { div.removeChild(div.firstChild); }'
-					+ '\n\t\t\t}\n\t\t})();';
-		}
 		if(linked.length===0) {
 			// Single locale, re-inject root classes and react checksum.
 			status.prerender[i] = status.prerender[i]
 					.replace(/(<div[^>]*class="[^"]*)"/i, '$1' + status.details[i].rootClasses + '"')
 					.replace(/(<div[^>]*data-react-checksum=")"/i, '$1' + status.details[i].checksum + '"');
-			emitAsset(compilation, 'index.' + locStr + '.html', htmlBefore + rootOpen + status.prerender[i]
-					+ rootClose + (deepScript ? '\n\t\t<script>' + deepScript + '</script>' : '') + html.after);
+			const result = deepWrap(deep, status.prerender[i]);
+			emitAsset(compilation, 'index.' + locStr + '.html', htmlBefore + rootOpen + result.prerender
+					+ rootClose + (result.script ? '\n\t\t<script>(function() {' + result.script + '\n\t\t})();</script>' : '') + html.after);
 			localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, deep, callback);
 		} else {
 			// Multiple locales, add script logic to dynamically add root attributes.
@@ -244,19 +250,19 @@ function localizedHtml(i, locales, status, html, compilation, htmlPlugin, deep, 
 				// Not a shorthand locale, so include it in the map.
 				mapping[locStr.toLowerCase()] = status.details[i];
 			}
-			const script = '\n\t\t<script>(function() {'
-					+ '\n\t\t\tvar details = ' + JSON.stringify(mapping, null, '\t').replace(/\n+/g, '\n\t\t\t') + ';'
+			const wrapped = deepWrap(deep, status.prerender[i],
+					'\n\t\t\tvar details = ' + JSON.stringify(mapping, null, '\t').replace(/\n+/g, '\n\t\t\t') + ';'
 					+ '\n\t\t\tvar lang = navigator.language.toLowerCase();'
 					+ '\n\t\t\tvar conf = details[lang] || details[lang.substring(0, 2)];'
 					+ '\n\t\t\tvar reactRoot = document.getElementById("root").children[0];'
 					+ '\n\t\t\tif(conf && reactRoot) {'
 					+ '\n\t\t\t\treactRoot.className += conf.rootClasses;'
 					+ '\n\t\t\t\treactRoot.setAttribute("data-react-checksum", conf.checksum);'
-					+ '\n\t\t\t}'
-					+ '\n\t\t})();' + (deepScript ? '\n\t\t' + deepScript : '') + '</script>';
+					+ '\n\t\t\t}');
+
 			// Process the script node html to minify it as needed.
-			htmlPlugin.postProcessHtml(script, {}, {head:[], body:[]}).then((processedScript) => {
-				emitAsset(compilation, 'index.' + locStr + '.html', htmlBefore + rootOpen + status.prerender[i]
+			htmlPlugin.postProcessHtml('\n\t\t<script>(function() {' + wrapped.script + '\n\t\t})();</script>', {}, {head:[], body:[]}).then((processedScript) => {
+				emitAsset(compilation, 'index.' + locStr + '.html', htmlBefore + rootOpen + wrapped.prerender
 						+ rootClose + processedScript + html.after);
 				localizedHtml(i+1, locales, status, html, compilation, htmlPlugin, deep, callback);
 			});
