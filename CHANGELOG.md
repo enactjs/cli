@@ -1,3 +1,10 @@
+## 0.9.2 (November 13, 2017)
+
+### pack
+
+* Improved prerender base font detection on irregular screens.
+* Deep linking now injects prerendered app HTML dynamically, rather than removing prerendered HTML nodes.
+
 ## 0.9.2 (September 7, 2017)
 
 ### create
