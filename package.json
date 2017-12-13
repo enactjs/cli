@@ -74,7 +74,6 @@
     "postcss-remove-classes": "~1.0.4",
     "raw-loader": "~1.0.0-beta.0",
     "react": "~16.2.0",
-    "react-addons-perf": "~15.4.2",
     "react-dev-utils": "~4.2.1",
     "react-dom": "~16.2.0",
     "react-test-renderer": "~16.2.0",
