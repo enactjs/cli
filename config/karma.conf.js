@@ -15,13 +15,13 @@ module.exports = function(karma) {
 		files: [
 			require.resolve('babel-polyfill/dist/polyfill'),
 			require.resolve('./proptype-checker'),
-			'./!(node_modules|dist|build)/**/*-specs.js'
+			require.resolve('./setup-tests')
 		],
 
 		preprocessors: {
 			// add webpack as preprocessor
-			'./!(node_modules|dist|build)/**/*.js': ['webpack'],
-			[require.resolve('./proptype-checker')]: ['webpack']
+			[require.resolve('./proptype-checker')]: ['webpack'],
+			[require.resolve('./setup-tests')]: ['webpack']
 		},
 
 		failOnEmptyTestSuite: true,
@@ -127,7 +127,7 @@ module.exports = function(karma) {
 			},
 			devServer: {host: '0.0.0.0', port: 8080},
 			plugins: [
-				new DefinePlugin({'process.env': {'NODE_ENV': '"development"'}}),
+				new DefinePlugin({'process.env': {'NODE_ENV': '"development"'}, 'TEST_WORKSPACE_CONTEXT': JSON.stringify(process.cwd())}),
 				new CaseSensitivePathsPlugin(),
 				new GracefulFsPlugin(),
 				new ILibPlugin({create: false})
