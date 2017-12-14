@@ -1,4 +1,8 @@
-## 0.9.2 (November 13, 2017)
+## 0.9.5 (December 14, 2017)
+
+Locked down dependencies to avoid potential regressions in patch updates to dependencies (as was the case with [2.0.8 karma-webpack](https://github.com/webpack-contrib/karma-webpack/issues/284)).
+
+## 0.9.4 (November 13, 2017)
 
 ### pack
 
