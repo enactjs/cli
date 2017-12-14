@@ -11,11 +11,11 @@ const env = process.env.BABEL_ENV || process.env.NODE_ENV;
 module.exports = {
 	presets: [
 		['env', {
-			targets: Object.assign({uglify:true},
+			targets: Object.assign({uglify:(env === 'test')},
 					app.browsers && {browsers:app.browsers},
 					app.node && {node: app.node}),
 			exclude: ['transform-regenerator', 'web.dom.iterable', 'web.timers', 'web.immediate'],
-			useBuiltIns: true,
+			useBuiltIns: (env !== 'test'),
 			modules: false
 		}],
 		'stage-0',

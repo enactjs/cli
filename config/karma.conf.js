@@ -8,6 +8,9 @@ const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
 const app = require('@enact/dev-utils/option-parser');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 
+process.env.BABEL_ENV = 'test';
+process.env.NODE_ENV = 'test';
+
 module.exports = function(karma) {
 	karma.set({
 		basePath: process.cwd(),

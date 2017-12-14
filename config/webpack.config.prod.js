@@ -10,7 +10,8 @@
 // @remove-on-eject-end
 
 const path = require('path');
-const {DefinePlugin, optimize:{UglifyJsPlugin}} = require('webpack');
+const {DefinePlugin} = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const autoprefixer = require('autoprefixer');
 const flexbugfixes = require('postcss-flexbugs-fixes');
 const removeclass = require('postcss-remove-classes').default;
@@ -210,15 +211,21 @@ module.exports = {
 		}),
 		// Minify the code.
 		new UglifyJsPlugin({
-			compress: {
-				warnings: false,
-				// This feature has been reported as buggy a few times, such as:
-				// https://github.com/mishoo/UglifyJS2/issues/1964
-				// We'll wait with enabling it by default until it is more solid.
-				reduce_vars: false
-			},
-			output: {
-				comments: false
+			uglifyOptions: {
+				compress: {
+					warnings: false,
+					// Disabled because of an issue with Uglify breaking seemingly valid code:
+					// https://github.com/facebookincubator/create-react-app/issues/2376
+					// Pending further investigation:
+					// https://github.com/mishoo/UglifyJS2/issues/2011
+					comparisons: false
+				},
+				output: {
+					comments: false,
+					// Turned on because emoji and regex is not minified properly using default
+					// https://github.com/facebookincubator/create-react-app/issues/2488
+					ascii_only: true
+				}
 			}
 		}),
 		// Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
