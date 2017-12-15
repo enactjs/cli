@@ -27,6 +27,7 @@ module.exports = function(args) {
 	opts.help && displayHelp();
 
 	process.chdir(packageRoot().path);
+	process.env.ES5 = 'true';
 
 	const sourceRoot = '.';
 	const buildRoot = opts.output || './build';
