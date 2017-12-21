@@ -2,18 +2,25 @@
 title: Starting a New App
 ---
 ## Generating the Base App Template
-With the enact-dev tool installed, you can quickly create a new project with the following command:
-
 ```
-enact init [directory]
-```
-Where `[directory]` is the directory for the new project (or the working directory if omitted). This will generate a basic Moonstone template, complete with Enact, its libraries, React, and a fully configured **package.json**.
+  Usage
+    enact create [options] [<directory>]
 
-## Enact Build Settings
-The enact-dev tool will check the project's **package.json** looking for an optional `enact` object for a few customization options:
+  Arguments
+    directory         Optional project destination directory
+                          (default: current working directory)
+
+  Options
+    -local            Include @enact/cli locally in the project
+    -verbose          Verbose output logging
+```
+This will generate a basic app based on the Moonstone project template, complete with Enact libraries, React, and a fully configured **package.json**.
+
+## Enact App Settings
+The enact cli tool will check the project's **package.json** looking for an optional `enact` object for a few customization options:
 
 * `template` _[string]_ - Filepath to an alternate HTML template to use with the [Webpack html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin).
-* `isomorphic` _[boolean|string]_ - If `true`, it indicates the default entrypoint is isomorphic-compatible (and can be built via the `--isomorphic` enact-dev flag). If the value is a string, then it will use that value as a filepath to a custom isomorphic-compatible entrypoint.
+* `isomorphic` _[boolean|string]_ - If `true`, it indicates the default entrypoint is isomorphic-compatible (and can be built via the `--isomorphic` build flag). If the value is a string, then it will use that value as a filepath to a custom isomorphic-compatible entrypoint.
 * `title` _[string]_ - Title text that should be put within the HTML's `<title></title>` tags. Note: if this is a webOS-project, the title, by default, will be auto-detected from the **appinfo.json** content.
 * `ri` _[object]_ - Resolution independence options to be forwarded to the [LESS plugin](https://github.com/enyojs/less-plugin-resolution-independence).
 * `screenTypes` _[array|string]_ - Array of 1 or more screentype definitions to be used with prerender HTML initialization. Can alternatively reference a json filepath to read for screentype definitons. Defaults to moonstone definitions.
@@ -37,7 +44,7 @@ For example:
 The `ri` value here (`baseSize=24`) is designed for 1080p TVs and similar resolutions.
 
 ## Available NPM Tasks
-Included within the app template are a number of NPM tasks available to build/run the app:
+Included within the project template are a number of NPM tasks available, with each mapped to enact cli commands:
 
 * `npm run serve` - Packages and hosts the app on a local http server using [webpack-dev-server](https://github.com/webpack/webpack-dev-server). Supports hot module replacement and inline updates as the source code changes.
 * `npm run pack` - Packages the app into **./dist** in development mode (unminified code, with any applicable development code).

@@ -1,3 +1,29 @@
+/**
+ * Portions of this source code file are from create-react-app, used under the
+ * following MIT license:
+ *
+ * Copyright (c) 2013-present, Facebook, Inc.
+ * https://github.com/facebookincubator/create-react-app
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 const
 	path = require('path'),
 	fs = require('fs-extra'),
@@ -6,7 +32,7 @@ const
 	chalk = require('chalk'),
 	exists = require('path-exists').sync;
 
-const ENACT_DEV_NPM = 'enact-dev';
+const ENACT_DEV_NPM = '@enact/cli';
 
 function createApp(output, template, link, local, verbose) {
 	const project = path.resolve(output);
@@ -122,7 +148,7 @@ function installDeps(project, link, local, verbose, callback) {
 			process.exit(1);
 		}
 		if(local) {
-			console.log('Installing enact-dev locally. This might take a couple minutes.');
+			console.log('Installing @enact/cli locally. This might take a couple minutes.');
 			const devArgs = [
 				'--loglevel',
 				(verbose ? 'verbose' : 'error'),
@@ -180,7 +206,7 @@ function displayHelp() {
 	console.log();
 	console.log('  Options');
 	console.log('    -link             Link in any applicable dependencies');
-	console.log('    -local            Include enact-dev locally in the project');
+	console.log('    -local            Include @enact/cli locally in the project');
 	console.log('    -verbose          Verbose output logging');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');

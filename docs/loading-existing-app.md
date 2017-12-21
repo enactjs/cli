@@ -18,7 +18,7 @@ npm install
 ```
 
 ## Available NPM Tasks
-NPM tasks vary by package and are defined within a `scripts` object in the **package.json** file. If the app was created via enact-dev, then it should support the following:
+NPM tasks vary by package and are defined within a `scripts` object in the **package.json** file. If the app was created via enact cli, then it should support the following NPM task aliases:
 
 * `npm run serve` - Packages and hosts the app on a local http server using [webpack-dev-server](https://github.com/webpack/webpack-dev-server). Supports hot module replacement and inline updates as the source code changes.
 * `npm run pack` - Packages the app into **./dist** in development mode (unminified code, with any applicable development code).

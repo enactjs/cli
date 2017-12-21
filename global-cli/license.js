@@ -17,7 +17,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-// The following modules reside in `enact-dev` but end up in production builds of apps
+// The following modules reside in `@enact/cli` but end up in production builds of apps
 const enactDevProdModules = [
 	'babel-core',
 	'string.fromcodepoint',
@@ -64,7 +64,7 @@ process.on('exit', () => {
 	}
 });
 
-// Resolve module directories relative to `enact-dev`
+// Resolve module directories relative to `@enact/cli`
 function resolveModulePath(modules) {
 	return modules.map(mod => path.dirname(require.resolve(mod)));
 }

@@ -30,7 +30,7 @@ module.exports = function(config, opts) {
 
 	// Only use isomorphic if an isomorphic entrypoint is specified.
 	if(iso) {
-		// Resolve ReactDOMSever relative to the app, with enact-dev's copy as fallback.
+		// Resolve ReactDOMSever relative to the app, with @enact/cli's copy as fallback.
 		let reactDOMServer = path.join(process.cwd(), 'node_modules', 'react-dom', 'server.js');
 		if(!exists(reactDOMServer)) {
 			reactDOMServer = require.resolve('react-dom/server');
