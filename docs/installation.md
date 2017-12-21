@@ -9,7 +9,7 @@ Node 6.4 or later.
 
 Standard global installation of `@enact/cli` via NPM. For Linux `sudo` may be required.
 
-```
+```sh
 npm install -g @enact/cli
 ```
 

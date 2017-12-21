@@ -28,3 +28,5 @@ For example:
 } 
 ```
 See [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware) for details on available configurations.
+
+> **NOTE** The `serve` command opens a port for connections from outside the current machine. Firewall software may block or be used to block access to this port.

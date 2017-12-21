@@ -14,7 +14,7 @@ title: Starting a New App
     -local            Include @enact/cli locally in the project
     -verbose          Verbose output logging
 ```
-This will generate a basic Moonstone project template, complete with Enact libraries, React, and a fully configured **package.json**.
+This will generate a basic app based on the Moonstone project template, complete with Enact libraries, React, and a fully configured **package.json**.
 
 ## Enact App Settings
 The enact cli tool will check the project's **package.json** looking for an optional `enact` object for a few customization options:

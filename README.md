@@ -1,7 +1,9 @@
 # @enact/cli
+
 A standalone dev environment for Enact apps using Webpack, Babel, React, and a collection of other tools.
 
 ## Installation
+
 All that's needed to install @enact/cli is to use npm to install it globally. For Linux `sudo` may be required.
 ```
 npm install -g @enact/cli
@@ -10,6 +12,7 @@ npm install -g @enact/cli
 >Note: Node 6.x or greater required.
 
 ## Creating a new App
+
 The only time you're ever want to directly use the Enact CLI is when you want to create a new project.
 
 ```sh
@@ -22,7 +25,7 @@ This will generate a basic App template, complete with npm scripts and dependenc
 
 ## Available Commands
 
-Within the project directory, you can run:
+Enact supports several commands, each accessible through the `enact` command and through npm aliases in `package.json`. For help on individual commands, add `--help` following the command name. The commands are:
 
 ### `enact serve` (aliased as `npm run serve`)
 
@@ -41,7 +44,7 @@ Deletes previous build fragments from ./dist.
 
 ### `enact lint` (aliased as `npm run lint`)
 
-Runs the Enact configuration of Eslint on the project for syntax analysis.
+Runs the Enact configuration of ESLint on the project for syntax analysis.
 
 ### `enact test` (aliased as `npm run test`, `npm run test-json`, and `npm run test-watch`)
 
