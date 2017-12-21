@@ -1,7 +1,8 @@
-This project was bootstrapped with [enact-dev](https://github.com/enyojs/enact-dev).
+This project was bootstrapped with [@enact/cli](https://github.com/enyojs/enact-cli).
 
 Below you will find some information on how to perform common tasks.  
-You can find the most recent version of this guide [here](https://github.com/enyojs/enact-dev/blob/master/global-cli/template/README.md).
+You can find the most recent version of this guide [here](https://github.com/enyojs/enact-cli/blob/master/template/README.md).
+Additional documentation on @enact/cli can be found [here](https://github.com/enyojs/enact-cli/blob/master/docs/index.md).
 
 ## Folder Structure
 
@@ -68,10 +69,10 @@ These tasks will execute all valid tests (files that end in `-specs.js`) that ar
 
 ## Enact Build Options
 
-The enact-dev tool will check the project's `package.json` looking for an optional `enact` object for a few customization options:
+The @enact/cli tool will check the project's `package.json` looking for an optional `enact` object for a few customization options:
 
 * `template` _[string]_ - Filepath to an alternate HTML template to use with the [Webpack html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin).
-* `isomorphic` _[boolean|string]_ - If `true`, it indicates the default entrypoint is isomorphic-compatible (and can be built via the `--isomorphic` enact-dev flag). If the value is a string, then it will use that value as a filepath to a custom isomorphic-compatible entrypoint.
+* `isomorphic` _[boolean|string]_ - If `true`, it indicates the default entrypoint is isomorphic-compatible (and can be built via the `--isomorphic` @enact/cli flag). If the value is a string, then it will use that value as a filepath to a custom isomorphic-compatible entrypoint.
 * `title` _[string]_ - Title text that should be put within the HTML's `<title></title>` tags. Note: if this is a webOS-project, the title by default will be auto-detected from the appinfo.json content.
 * `ri` _[object]_ - Resolution independence options to be forwarded to the [LESS plugin](https://github.com/enyojs/less-plugin-resolution-independence).
 * `screenTypes` _[array|string]_ - Array of 1 or more screentype definitions to be used with prerender HTML initialization. Can alternatively reference a json filepath to read for screentype definitons. Defaults to moonstone definitions.
@@ -113,8 +114,6 @@ Then, you will need to install some packages *globally*:
 npm install -g eslint eslint-config-enact eslint-plugin-enact eslint-plugin-react eslint-plugin-babel babel-eslint
 
 ```
-
-We recognize that this is suboptimal, but it is currently required due to the way we hide the ESLint dependency. The ESLint team is already [working on a solution to this](https://github.com/eslint/eslint/issues/3458) so this may become unnecessary in a couple of months.
 
 ## Installing a Dependency
 

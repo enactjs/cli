@@ -1,5 +1,5 @@
 ---
-title: Installing enact-dev
+title: Installation
 ---
 ## Requirements
 
@@ -7,10 +7,10 @@ Node 6.4 or later.
 
 ## Installation via NPM
 
-All that's needed to install enact-dev is to use npm to install it globally. For Linux `sudo` may be required.
+Standard global installation of `@enact/cli` via NPM. For Linux `sudo` may be required.
 
 ```
-npm install -g enact-dev
+npm install -g @enact/cli
 ```
 
-This preceding command will install the latest stable version.  You can also use tagged versions (for example `enyojs/enact-dev#0.3.0`) or the potentially-unstable development branch (`enyojs/enact-dev#develop`).
+All releases are published, with the default (and `latest` tag) being the current stable release. Unreleased and development builds can be installed by installing from the git repository directly (for example, `enyojs/enact-cli#develop`).
