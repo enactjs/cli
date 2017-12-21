@@ -13,7 +13,24 @@ if(active[0] < minimum[0] || (active[0] === minimum[0] && active[1] < minimum[1]
 }
 
 // Handle tasks/arguments
-if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
+if (process.argv.indexOf('-h') >= 0 || process.argv.indexOf('--help') >= 0) {
+	console.log('  Usage');
+	console.log('    enact <command> [...]');
+	console.log();
+	console.log('  Commands');
+	console.log('    create            Create a new project');
+	console.log('    link              Link @enact dependencies');
+	console.log('    serve             Development server');
+	console.log('    pack              Bundle source code');
+	console.log('    test              Test specs runner');
+	console.log('    transpile         Transpile to ES5');
+	console.log('    license           Detect all used licenses');
+	console.log('    lint              Lint source code');
+	console.log('    clean             Clean build directory');
+	console.log();
+	console.log('  Refer to each command\'s --help for more details.');
+	console.log();
+} else if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 	const pkg = require('../package.json');
 	console.log(pkg.name);
 	console.log('version: ' + pkg.version);
