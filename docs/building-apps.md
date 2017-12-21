@@ -42,7 +42,7 @@ Similarly, in css/less:
 In development mode, the css/less remains intact and usable, but in production mode, the `.__DEV__` css class stylings are removed. This allows for custom development-only styling.
 
 ## Isomorphic Support & Prerendering
-By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The enact cli takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**
+By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The enact cli takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
 
 ## Watcher Option
 Similar to the [`enact serve`](./serving-apps.md) command, the watcher will build the project and wait for any detected source code changes. When a change is detected, it will rebuild the project. The rebuild time will be significantly faster since the process can actively cache and build only what has changed.
