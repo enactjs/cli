@@ -1,3 +1,18 @@
+## 0.9.6 (December 21, 2017)
+
+Renamed from `enact-dev` to `@enact/cli` for consistency, along with updated documentation.
+
+## 0.9.5 (December 14, 2017)
+
+Locked down dependencies to avoid potential regressions in patch updates to dependencies (as was the case with [2.0.8 karma-webpack](https://github.com/webpack-contrib/karma-webpack/issues/284)).
+
+## 0.9.4 (November 13, 2017)
+
+### pack
+
+* Improved prerender base font detection on irregular screens.
+* Deep linking now injects prerendered app HTML dynamically, rather than removing prerendered HTML nodes.
+
 ## 0.9.2 (September 7, 2017)
 
 ### create

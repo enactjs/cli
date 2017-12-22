@@ -1,15 +1,18 @@
-# enact-dev
+# @enact/cli
+
 A standalone dev environment for Enact apps using Webpack, Babel, React, and a collection of other tools.
 
 ## Installation
-All that's needed to install enact-dev is to use npm to install it globally. For Linux `sudo` may be required.
+
+All that's needed to install @enact/cli is to use npm to install it globally. For Linux `sudo` may be required.
 ```
-npm install -g enact-dev
+npm install -g @enact/cli
 ```
 
->Note: Node 6.x+ is highly recommended for optimum speed and efficiency, however anything since Node 4.x is compatible.
+>Note: Node 6.x or greater required.
 
 ## Creating a new App
+
 The only time you're ever want to directly use the Enact CLI is when you want to create a new project.
 
 ```sh
@@ -18,47 +21,43 @@ enact create [directory]
 
 This will generate a basic App template, complete with npm scripts and dependencies setup. If no directory path is specified, it will be generated within the working directory.
 
->Advanced: If you've used `npm link` on separate installations of the Enact repo, you can include `--link` to the `init` command and NPM will symlink your Enact repo, rather than reinstall. Additionally, you can link in the Enact dependencies post-install via the `enact link` command.
+>Advanced: If you've used `npm link` on separate installations of the Enact repo, you can run `enact link` afterwards to link in any available enact libraries.
 
-## Available App Scripts
+## Available Commands
 
-Within the project directory, you can run:
+Enact supports several commands, each accessible through the `enact` command and through npm aliases in `package.json`. For help on individual commands, add `--help` following the command name. The commands are:
 
-### `npm run serve`
+### `enact serve` (aliased as `npm run serve`)
 
 Builds and serves the app in the development mode.<br>
 Open [http://localhost:8080](http://localhost:8080) to view it in the browser.
 
 The page will reload if you make edits.<br>
 
-### `npm run pack` and `npm run pack-p`
+### `enact pack` (aliased as `npm run pack`, `npm run pack-p`, and `npm run watch`)
 
 Builds the project in the working directory. Specifically, `pack` builds in development mode with code un-minified and with debug code included, whereas `pack-p` builds in production mode, with everything minified and optimized for performance. Be sure to avoid shipping or performance testing on development mode builds.
 
-### `npm run watch`
-
-Builds the project in development mode and keeps watch over the project directory. Whenever files are changed, added, or deleted, the project will automatically get rebuilt using an active shared cache to speed up the process. This is similar to the `serve` task, but without the http server.
-
-### `npm run clean`
+### `enact clean` (aliased as `npm run clean`)
 
 Deletes previous build fragments from ./dist.
 
-### `npm run lint`
+### `enact lint` (aliased as `npm run lint`)
 
-Runs the Enact configuration of Eslint on the project for syntax analysis.
+Runs the Enact configuration of ESLint on the project for syntax analysis.
 
-### `npm run test`, `npm run test-json`, and `npm run test-watch`
+### `enact test` (aliased as `npm run test`, `npm run test-json`, and `npm run test-watch`)
 
 These tasks will execute all valid tests (files that end in `-specs.js`) that are within the project directory. The `test` is a standard execution pass, `test-json` uses a json reporter for output, and `test-watch` will set up a watcher to re-execute tests when files change.
 
-### `npm run license`
+### `enact license` (aliased as `npm run license`)
 
-Outputs a JSON representation of the licenses for modules referenced by the current project as well as any licenses of modules used by `enact-dev` that may be included in a production build of an app.
+Outputs a JSON representation of the licenses for modules referenced by the current project as well as any licenses of modules used by `@enact/cli` that may be included in a production build of an app.
 
 
 ## Enact Build Options
 
-The enact-dev tool will check the project's `package.json` looking for an optional `enact` object for a few customization options:
+The @enact/cli tool will check the project's `package.json` looking for an optional `enact` object for a few customization options:
 
 * `template` _[string]_ - Filepath to an alternate HTML template to use with the [Webpack html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin).
 * `isomorphic` _[string]_ - Alternate filepath to a custom isomorphic-compatible entrypoint. Not needed if main entrypoint is already isomorphic-compatible.
@@ -109,8 +108,6 @@ Then, you will need to install some packages *globally*:
 npm install -g eslint eslint-plugin-react eslint-plugin-babel babel-eslint eslint-plugin-enact eslint-config-enact
 ```
 
-We recognize that this is suboptimal, but it is currently required due to the way we hide the ESLint dependency. The ESLint team is already [working on a solution to this](https://github.com/eslint/eslint/issues/3458) so this may become unnecessary in a couple of months.
-
 ## Copyright and License Information
 
 Unless otherwise specified, all content, including all source code files and documentation files in this repository are:
@@ -119,7 +116,7 @@ Copyright (c) 2012-2017 LG Electronics
 
 Unless otherwise specified or set forth in the NOTICE file, all content, including all source code files and documentation files in this repository are: Licensed under the BSD License (the "License"); you may not use this content except in compliance with the License. You may obtain a copy of the License at
 
-https://opensource.org/licenses/BSD-3-Clause
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
