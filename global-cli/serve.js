@@ -1,13 +1,28 @@
-// @remove-on-eject-begin
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
+ * Portions of this source code file are from create-react-app, used under the
+ * following MIT license:
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright (c) 2013-present, Facebook, Inc.
+ * https://github.com/facebookincubator/create-react-app
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
-// @remove-on-eject-end
 
 const
 	chalk = require('chalk'),
@@ -36,15 +51,15 @@ console.log = (log => (data, ...rest) =>
 	: log.call(this, data, ...rest))(console.log);
 
 function displayHelp() {
-	console.log('	Usage');
-	console.log('		enact serve [options]');
+	console.log('  Usage');
+	console.log('    enact serve [options]');
 	console.log();
-	console.log('	Options');
-	console.log('		-b, --browser		 Automatically open browser');
-	console.log('		-i, --host				Server host IP address');
-	console.log('		-p, --port				Server port number');
-	console.log('		-v, --version		 Display version information');
-	console.log('		-h, --help				Display help information');
+	console.log('  Options');
+	console.log('    -b, --browser     Automatically open browser');
+	console.log('    -i, --host        Server host IP address');
+	console.log('    -p, --port        Server port number');
+	console.log('    -v, --version     Display version information');
+	console.log('    -h, --help        Display help information');
 	console.log();
 	process.exit(0);
 }

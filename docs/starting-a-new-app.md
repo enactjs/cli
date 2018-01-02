@@ -2,15 +2,22 @@
 title: Starting a New App
 ---
 ## Generating the Base App Template
-With the enact-dev tool installed, you can quickly create a new project with the following command:
-
 ```
-enact init [directory]
-```
-Where `[directory]` is the directory for the new project (or the working directory if omitted). This will generate a basic Moonstone template, complete with Enact, its libraries, React, and a fully configured **package.json**.
+  Usage
+    enact create [options] [<directory>]
 
-## Enact Build Settings
-The enact-dev tool will check the project's **package.json** looking for an optional `enact` object for a few customization options:
+  Arguments
+    directory         Optional project destination directory
+                          (default: current working directory)
+
+  Options
+    -local            Include @enact/cli locally in the project
+    -verbose          Verbose output logging
+```
+This will generate a basic app based on the Moonstone project template, complete with Enact libraries, React, and a fully configured **package.json**.
+
+## Enact Project Settings
+The enact cli tool will check the project's **package.json** looking for an optional `enact` object for a few customization options:
 
 * `template` _[string]_ - Filepath to an alternate HTML template to use with the [Webpack html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin).
 * `isomorphic` _[string]_ - Alternate filepath to a custom isomorphic-compatible entrypoint. Not needed if main entrypoint is already isomorphic-compatible.
@@ -41,7 +48,7 @@ For example:
 ```
 
 ## Available NPM Tasks
-Included within the app template are a number of NPM tasks available to build/run the app:
+Included within the project template are a number of NPM tasks available, with each mapped to enact cli commands:
 
 * `npm run serve` - Packages and hosts the app on a local http server using [webpack-dev-server](https://github.com/webpack/webpack-dev-server). Supports hot module replacement and inline updates as the source code changes.
 * `npm run pack` - Packages the app into **./dist** in development mode (unminified code, with any applicable development code).

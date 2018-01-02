@@ -7,15 +7,16 @@
 
 const app = require('@enact/dev-utils/option-parser');
 const env = process.env.BABEL_ENV || process.env.NODE_ENV;
+const es5Standalone = process.env.ES5 && process.env.ES5 !== 'false';
 
 module.exports = {
 	presets: [
 		['env', {
-			targets: Object.assign({uglify:true},
+			targets: Object.assign({uglify:es5Standalone},
 					app.browsers && {browsers:app.browsers},
 					app.node && {node: app.node}),
 			exclude: ['transform-regenerator', 'web.dom.iterable', 'web.timers', 'web.immediate'],
-			useBuiltIns: true,
+			useBuiltIns: !es5Standalone,
 			modules: false
 		}],
 		'stage-0',
