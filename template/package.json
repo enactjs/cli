@@ -26,12 +26,12 @@
     "extends": "enact"
   },
   "dependencies": {
-    "@enact/core": "^1.13.1",
-    "@enact/ui": "^1.13.1",
-    "@enact/moonstone": "^1.13.1",
-    "@enact/spotlight": "^1.13.1",
-    "@enact/i18n": "^1.13.1",
-    "@enact/webos": "^1.13.1",
+    "@enact/core": "^2.0.0-alpha.2",
+    "@enact/i18n": "^2.0.0-alpha.2",
+    "@enact/moonstone": "^2.0.0-alpha.2",
+    "@enact/spotlight": "^2.0.0-alpha.2",
+    "@enact/ui": "^2.0.0-alpha.2",
+    "@enact/webos": "^2.0.0-alpha.2",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"
