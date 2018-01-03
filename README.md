@@ -107,7 +107,7 @@ npm install -g eslint eslint-plugin-react eslint-plugin-babel babel-eslint eslin
 
 Unless otherwise specified, all content, including all source code files and documentation files in this repository are:
 
-Copyright (c) 2012-2017 LG Electronics
+Copyright (c) 2012-2018 LG Electronics
 
 Unless otherwise specified or set forth in the NOTICE file, all content, including all source code files and documentation files in this repository are: Licensed under the BSD License (the "License"); you may not use this content except in compliance with the License. You may obtain a copy of the License at
 
