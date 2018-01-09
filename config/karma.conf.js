@@ -5,6 +5,7 @@ const flexbugfixes = require('postcss-flexbugs-fixes');
 const LessPluginRi = require('resolution-independence');
 const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
 const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
+const EnzymeAdapterPlugin = require('@enact/dev-utils/plugins/EnzymeAdapterPlugin');
 const app = require('@enact/dev-utils/option-parser');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 
@@ -132,7 +133,8 @@ module.exports = function(karma) {
 				new DefinePlugin({'process.env': {'NODE_ENV': '"development"'}}),
 				new CaseSensitivePathsPlugin(),
 				new GracefulFsPlugin(),
-				new ILibPlugin({create: false})
+				new ILibPlugin({create: false}),
+				new EnzymeAdapterPlugin({adapter:'enzyme-adapter-react-15'})
 			]
 		},
 
