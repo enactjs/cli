@@ -134,7 +134,7 @@ module.exports = function(karma) {
 				new CaseSensitivePathsPlugin(),
 				new GracefulFsPlugin(),
 				new ILibPlugin({create: false}),
-				new EnzymeAdapterPlugin({adapter:'enzyme-adapter-react-15'})
+				new EnzymeAdapterPlugin()
 			]
 		},
 
