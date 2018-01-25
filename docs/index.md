@@ -12,4 +12,4 @@ The following sections describe its installation and usage:
 * [Building Apps](./building-apps.md)
   * [Isomorphic Support](./isomorphic-support.md)
 * [Serving Apps](./serving-apps.md)
-* [Testing Apps](./test-apps.md)
+* [Testing Apps](./testing-apps.md)

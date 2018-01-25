@@ -1,3 +1,9 @@
+## 0.9.7 (January 11, 2018)
+
+Updated copyright and license information for 2018 year.
+Minor updates to documentation phrasing.
+Fixed root-level `-h`/`--help` overriding command-level help information.
+
 ## 0.9.6 (December 21, 2017)
 
 Renamed from `enact-dev` to `@enact/cli` for consistency, along with updated documentation.
