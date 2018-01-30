@@ -1,8 +1,8 @@
-This project was bootstrapped with [@enact/cli](https://github.com/enyojs/enact-cli).
+This project was bootstrapped with [@enact/cli](https://github.com/enactjs/cli).
 
 Below you will find some information on how to perform common tasks.  
-You can find the most recent version of this guide [here](https://github.com/enyojs/enact-cli/blob/master/template/README.md).
-Additional documentation on @enact/cli can be found [here](https://github.com/enyojs/enact-cli/blob/master/docs/index.md).
+You can find the most recent version of this guide [here](https://github.com/enactjs/cli/blob/master/template/README.md).
+Additional documentation on @enact/cli can be found [here](https://github.com/enactjs/cli/blob/master/docs/index.md).
 
 ## Folder Structure
 
