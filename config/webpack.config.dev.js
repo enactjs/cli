@@ -42,7 +42,6 @@ const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const app = require('@enact/dev-utils/option-parser');
 
 process.chdir(app.context);
-const reactPerf = path.resolve(path.join('node_modules', 'react-dom', 'lib', 'ReactPerf.js'));
 
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
@@ -59,8 +58,6 @@ module.exports = {
 		main: [
 			// Include a few polyfills by default (Promise, Object.assign, and fetch)
 			require.resolve('./polyfills'),
-			// Include React performance tools for debugging/optimization testing
-			reactPerf,
 			// Finally, this is your app's code
 			path.resolve(app.main || 'index.js')
 		]
@@ -203,13 +200,6 @@ module.exports = {
 						}
 					]
 				})
-			},
-			// Expose the 'react-addons-perf' on a global context for debugging.
-			// Currently maps the toolset to window.ReactPerf.
-			{
-				test: reactPerf,
-				loader: require.resolve('expose-loader'),
-				options: 'ReactPerf'
 			}
 			// ** STOP ** Are you adding a new loader?
 			// Remember to add the new extension(s) to the "file" loader exclusion regex list.
