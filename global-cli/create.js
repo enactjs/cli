@@ -33,6 +33,57 @@ const
 
 const ENACT_DEV_NPM = '@enact/cli';
 
+const defaultTemplateHandler = {
+	outputPath: '.',
+	overwrite: false,
+	clean: true,
+	prepare: ({directory, name}) => {
+		// Do stuff after the directory is created but before template is copied
+		const validFiles = [
+			'.DS_Store', 'Thumbs.db', '.git', '.gitignore', '.idea', 'README.md', 'LICENSE'
+		];
+		if (!fs.readdirSync(project).every(f => validFiles.indexOf(f) >= 0)) {
+			console.log('The directory "' + name + '" contains file(s) that could conflict. Aborting.');
+			process.exit(1);
+		}
+	},
+	setup: ({directory, name}) => {
+		// Do stuff to setup the directory workspace after template is copied
+	},
+	message: ({directory, name}) => {
+		// After everything is complete, output message to user
+		console.log();
+		console.log('Success! Created ' + name + ' at ' + directory);
+		console.log();
+		console.log('Inside that directory, you can run several NPM commands, including:');
+		console.log(chalk.cyan('	npm run serve'));
+		console.log('		Starts the development server.');
+		console.log(chalk.cyan('	npm run pack'));
+		console.log('		Bundles the app into static files in development mode.');
+		console.log(chalk.cyan('	npm run pack-p'));
+		console.log('		Bundles the app into static files in production mode.');
+		console.log(chalk.cyan('	npm run test'));
+		console.log('		Starts the test runner.');
+		console.log();
+		// @TODO
+		// console.log(chalk.cyan('	npm run eject'));
+		// console.log('		Removes this tool and copies build dependencies, configuration files');
+		// console.log('		and scripts into the app directory. If you do this, you can’t go back!');
+		// console.log();
+		console.log('We suggest that you begin by typing:');
+		if(path.resolve(process.cwd())!==path.resolve(directory)) {
+			console.log(chalk.cyan('	cd'), path.relative(process.cwd(), directory));
+		}
+		console.log('	' + chalk.cyan('npm run serve'));
+		if(fs.existsSync(path.join(directory, 'README.old.md'))) {
+			console.log();
+			console.log(chalk.yellow('You had a `README.md` file, we renamed it to `README.old.md`'));
+		}
+		console.log();
+		console.log('Have fun!');
+	};
+}
+
 function createApp(output, template, link, local, verbose) {
 	const project = path.resolve(output);
 	const appName = path.basename(project);
@@ -54,35 +105,7 @@ function createApp(output, template, link, local, verbose) {
 	copyTemplate(template, project);
 
 	installDeps(project, link, local, verbose, () => {
-		console.log();
-		console.log('Success! Created ' + appName + ' at ' + project);
-		console.log();
-		console.log('Inside that directory, you can run several NPM commands, including:');
-		console.log(chalk.cyan('	npm run serve'));
-		console.log('		Starts the development server.');
-		console.log(chalk.cyan('	npm run pack'));
-		console.log('		Bundles the app into static files in development mode.');
-		console.log(chalk.cyan('	npm run pack-p'));
-		console.log('		Bundles the app into static files in production mode.');
-		console.log(chalk.cyan('	npm run test'));
-		console.log('		Starts the test runner.');
-		console.log();
-		// @TODO
-		// console.log(chalk.cyan('	npm run eject'));
-		// console.log('		Removes this tool and copies build dependencies, configuration files');
-		// console.log('		and scripts into the app directory. If you do this, you can’t go back!');
-		// console.log();
-		console.log('We suggest that you begin by typing:');
-		if(prevCWD!==process.cwd()) {
-			console.log(chalk.cyan('	cd'), output);
-		}
-		console.log('	' + chalk.cyan('npm run serve'));
-		if(fs.existsSync(path.join(project, 'README.old.md'))) {
-			console.log();
-			console.log(chalk.yellow('You had a `README.md` file, we renamed it to `README.old.md`'));
-		}
-		console.log();
-		console.log('Have fun!');
+		
 	});
 }
 

@@ -29,6 +29,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 		case 'pack':
 		case 'clean':
 		case 'test':
+		case 'template':
 		case 'lint':
 		case 'license':{
 			const task = require('../global-cli/' + command);
@@ -46,6 +47,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 			console.log('    pack              Bundle source code');
 			console.log('    test              Test specs runner');
 			console.log('    transpile         Transpile to ES5');
+			console.log('    template          Manage Enact templates');
 			console.log('    license           Detect all used licenses');
 			console.log('    lint              Lint source code');
 			console.log('    clean             Clean build directory');
