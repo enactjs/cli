@@ -1,57 +1,18 @@
 const chalk = require('chalk');
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
+const inquirer = require('react-dev-utils/inquirer');
 const minimist = require('minimist');
 const os = require('os');
 const path = require('path');
 const tar = require('tar');
 
-const TEMPLATE_DIR = process.platform.includes('win')
-	? path.join(process.env.APPDATA, 'enact-cli')
-	: path.join(os.homedir(), '.enact');
+const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 const DEFAULT_LINK = path.join(TEMPLATE_DIR, 'default');
-const GITHUB_SHORTHAND = /(^\w+\/\w+)(#\w+)?$/;
-const GIT_URL = /(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|#[-\d\w._]+?)$/;
-const GIT_BRANCH = /^(?:(^.*)#(\w+)?|(^.*))$/
-
-function displayHelp() {
-	console.log('  Usage');
-	console.log('    enact template <action> ...');
-	console.log();
-	console.log('  Actions');
-	console.log('    enact template install <name> [source]');
-	console.log(chalk.dim('    Install a template from a local or remote source'));
-	console.log('    name              Name for the template to install as');
-	console.log('    source            Git, NPM or local directory path');
-	console.log('                          (default: cwd)');
-	console.log();
-	console.log('    enact template link <name> [directory]');
-	console.log(chalk.dim('    Symlink a directory into template management'));
-	console.log('    name              Name for the template');
-	console.log('    directory         Local directory path to link');
-	console.log('                          (default: cwd)');
-	console.log();
-	console.log('    enact template remove <name>');
-	console.log(chalk.dim('    Remove a template by name'));
-	console.log('    name              Name of template to remove');
-	console.log();
-	console.log('    enact template default <name>');
-	console.log(chalk.dim('    Set a template as the default for "enact create"'));
-	console.log('    name              Name of template to set default');
-	console.log();
-	console.log('    enact template list');
-	console.log(chalk.dim('    List all templates installed/linked'));
-	console.log();
-	console.log('  Options');
-	console.log('    -v, --version     Display version information');
-	console.log('    -h, --help        Display help information');
-	console.log();
-	process.exit(0);
-}
 
 function validateArgs(action, name) {
 	return new Promise((resolve, reject) => {
-		if(!name && action!=='list') {
+		if(!name && !['list', 'default'].includes(action)) {
 			reject(new Error('Invalid or missing template name.'))
 		} else if(name === 'default') {
 			reject(new Error('Template "default" name is reserved. '
@@ -68,19 +29,20 @@ function initTemplateArea() {
 		console.log(path.join(__dirname, '..', 'template'))
 	}
 	const init = doLink('moonstone', path.join(__dirname, '..', 'template'));
-	return init.then(() => !fs.existsSync(DEFAULT_LINK) && doDefault('moonstone'));
+	const moonstoneLink = path.join(TEMPLATE_DIR, 'moonstone');
+	return init.then(() => !fs.existsSync(DEFAULT_LINK) && doLink('default', moonstoneLink));
 }
 
 function doInstall(name, target) {
 	const output = path.join(TEMPLATE_DIR, name);
 	return doRemove(name).then(() => {
-		const github = target.match(GITHUB_SHORTHAND);
+		const github = target.match(/(^\w+\/\w+)(#\w+)?$/);
 		if(github) {
 			// If target is GitHub shorthand, resolve to full HTTPS URI
 			target = 'https://github.com/' + github[1] + '.git' + (github[2] || '');
 		}
 
-		if(GIT_URL.test(target)) {
+		if(/(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|#[-\d\w._]+?)$/.test(target)) {
 			return installFromGit(name, target);
 		} else if(fs.existsSync(target)) {
 			return installFromLocal(output, target);
@@ -110,7 +72,7 @@ function doInstall(name, target) {
 // Clone Git repository using specific branch if desired
 function installFromGit(name, target) {
 	return new Promise((resolve, reject) => {
-		const git = target.match(GIT_BRANCH);
+		const git = target.match(/^(?:(^.*)#(\w+)?|(^.*))$/);
 		const args = ['clone', (git[1] || git[3]), name];
 		if(git[2]) args.splice(2, 0, '-b', git[2]);
 		const child = spawn('git', args, {stdio:'inherit', cwd:TEMPLATE_DIR});
@@ -186,7 +148,7 @@ function doLink(name, target) {
 				if(err) {
 					reject(new Error(`Unable to create symlink to ${target}.\n${err.message}`))
 				} else {
-					resolve();
+					resolve({name, target});
 				}
 			});
 		});
@@ -196,9 +158,9 @@ function doLink(name, target) {
 function doRemove(name) {
 	return new Promise((resolve, reject) => {
 		const output = path.join(TEMPLATE_DIR, name);
-		const realTemplate = fs.existsSync(output) && fs.realpathSync(output);
-		const isDefault = fs.existsSync(DEFAULT_LINK) && realTemplate === fs.realpathSync(DEFAULT_LINK);
-		if(realTemplate) {
+		if(fs.existsSync(output)) {
+			const isDefault = fs.existsSync(DEFAULT_LINK)
+					&& fs.realpathSync(output) === fs.realpathSync(DEFAULT_LINK);
 			fs.remove(output, err => {
 				if(err) {
 					reject(new Error(`Failed to delete template ${name}.\n${err.message}`));
@@ -215,21 +177,21 @@ function doRemove(name) {
 	});
 }
 
-function doDefault(name) {
-	const t = path.join(TEMPLATE_DIR, name);
-	return new Promise((resolve, reject) => {
-		if(fs.existsSync(t)) {
-			resolve();
-		} else {
-			reject(new Error(`Template ${name} not found. Unable to set as default.`))
-		}
-	}).then(() => doLink('default', t));
+function doDefault() {
+	const all = fs.readdirSync(TEMPLATE_DIR).filter(t => t !== 'default');
+	const i = all.find(t => fs.realpathSync(path.join(TEMPLATE_DIR, t)) === fs.realpathSync(DEFAULT_LINK));
+	return inquirer.prompt([{
+		name: 'template',
+		type: 'list',
+		choices: all,
+		default: i,
+		message: 'Which template would you like as the default?'
+	}]).then(response => doLink('default', path.join(TEMPLATE_DIR, response.template)));
 }
 
 function doList() {
 	const realDefault = fs.realpathSync(DEFAULT_LINK);
-	const all = fs.readdirSync(TEMPLATE_DIR);
-	all.splice(all.indexOf('default'), 1);
+	const all = fs.readdirSync(TEMPLATE_DIR).filter(t => t !== 'default');
 	console.log(chalk.bold('Available Templates'))
 	all.forEach(t => {
 		let item = '  ' + t;
@@ -245,10 +207,43 @@ function doList() {
 	});
 }
 
+function displayHelp() {
+	console.log('  Usage');
+	console.log('    enact template <action> ...');
+	console.log();
+	console.log('  Actions');
+	console.log('    enact template install <name> [source]');
+	console.log(chalk.dim('    Install a template from a local or remote source'));
+	console.log('    name              Name for the template to install as');
+	console.log('    source            Git, NPM or local directory path');
+	console.log('                          (default: cwd)');
+	console.log();
+	console.log('    enact template link <name> [directory]');
+	console.log(chalk.dim('    Symlink a directory into template management'));
+	console.log('    name              Name for the template');
+	console.log('    directory         Local directory path to link');
+	console.log('                          (default: cwd)');
+	console.log();
+	console.log('    enact template remove <name>');
+	console.log(chalk.dim('    Remove a template by name'));
+	console.log('    name              Name of template to remove');
+	console.log();
+	console.log('    enact template default');
+	console.log(chalk.dim('    Choose a default template for "enact create"'));
+	console.log();
+	console.log('    enact template list');
+	console.log(chalk.dim('    List all templates installed/linked'));
+	console.log();
+	console.log('  Options');
+	console.log('    -v, --version     Display version information');
+	console.log('    -h, --help        Display help information');
+	console.log();
+	process.exit(0);
+}
 
 module.exports = function(args) {
 	const opts = minimist(args, {
-		boolean: ['h', 'help'],
+		boolean: ['help'],
 		alias: {h:'help'}
 	});
 	opts.help && displayHelp();
@@ -258,7 +253,7 @@ module.exports = function(args) {
 	const target = opts._[2] || process.cwd();
 	if(!action) displayHelp();
 
-	validateArgs(action, name).then(() => initTemplateArea()).then(() => {
+	validateArgs(action, name).then(initTemplateArea).then(() => {
 		let actionPromise;
 		switch (action) {
 			case 'install':
@@ -278,7 +273,7 @@ module.exports = function(args) {
 				break;
 			case 'default':
 				actionPromise = doDefault(name).then(() => {
-					console.log(`Template "${name}" set as default.`);
+					console.log('Template successfully set as default.');
 				});
 				break;
 			case 'list':

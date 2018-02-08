@@ -84,6 +84,7 @@
     "style-loader": "0.19.1",
     "tar": "4.3.3",
     "uglifyjs-webpack-plugin": "1.1.6",
+    "validate-npm-package-name": "3.0.0",
     "webpack": "3.10.0",
     "webpack-dev-server": "2.10.1"
   }

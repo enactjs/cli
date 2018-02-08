@@ -24,33 +24,99 @@
  * SOFTWARE.
  */
 
-const
-	path = require('path'),
-	fs = require('fs-extra'),
-	minimist = require('minimist'),
-	spawn = require('cross-spawn'),
-	chalk = require('chalk');
+const chalk = require('chalk');
+const fs = require('fs-extra');
+const minimist = require('minimist');
+const os = require('os');
+const path = require('path');
+const spawn = require('cross-spawn');
+const validatePackageName = require('validate-npm-package-name');
 
 const ENACT_DEV_NPM = '@enact/cli';
+const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 
 const defaultTemplateHandler = {
 	outputPath: '.',
 	overwrite: false,
-	clean: true,
+	validateName: ({template, name}) => {
+		const validation = validatePackageName(name);
+
+		if(!validation.validForNewPackages) {
+			throw new Error('Could not create a project called ' + chalk.bold(name)
+					+ 'because of NPM naming restrictions:\n'
+					+ validation.errors.concat(validation.warnings).map(r => '  * ' + r).join('/n'));
+		} else {
+			const meta = fs.readJsonSync(path.join(template, 'package.json'), {throws:false}) || {};
+			const deps = Object.keys(meta.dependencies || {}).concat(Object.keys(meta.devDependencies || {}));
+			deps.sort()
+
+			if(deps.includes(name)) {
+				throw new Error('Cannot create a project called ' + chalk.bold(name)
+						+ ' because a dependency with the same name exists.\n'
+						+ 'Due to the way npm works, the following names are not allowed:\n\n'
+						+ chalk.cyan(deps.map(d => '\t' + d).join('\n'))
+						+ '\n\nPlease choose a different project name.');
+			}
+		}
+	},
 	prepare: ({directory, name}) => {
-		// Do stuff after the directory is created but before template is copied
+		// After the workspace is ensured to exist, but before template is copied
 		const validFiles = [
-			'.DS_Store', 'Thumbs.db', '.git', '.gitignore', '.idea', 'README.md', 'LICENSE'
+			// Generic project fragments and outside tool configs.
+			'.DS_Store',
+			'Thumbs.db',
+			'.git',
+			'.gitignore',
+			'.idea',
+			'README.md',
+			'LICENSE',
+			'web.iml',
+			'.hg',
+			'.hgignore',
+			'.hgcheck',
+			'.npmignore',
+			'mkdocs.yml',
+			'docs',
+			'.travis.yml',
+			'.gitlab-ci.yml',
+			'.gitattributes',
+			// Error fragments that can be ignored safely.
+			'npm-debug.log',
+			'npm-debug.log',
+			'yarn-error.log',
+			'yarn-debug.log'
 		];
-		if (!fs.readdirSync(project).every(f => validFiles.indexOf(f) >= 0)) {
-			console.log('The directory "' + name + '" contains file(s) that could conflict. Aborting.');
-			process.exit(1);
+
+		console.log('Creating a new Enact app in ' + path.relative(process.cwd(), directory) + '.');
+		console.log();
+
+		if (!fs.readdirSync(directory).every(f => validFiles.includes(f))) {
+			throw new Error(`The directory ${chalk.bold(name)} contains file(s) that could conflict. Aborting.`);
 		}
 	},
 	setup: ({directory, name}) => {
 		// Do stuff to setup the directory workspace after template is copied
+		// Update package.json name
+		const pkgJSON = path.join(directory, 'package.json');
+		const meta = fs.readJsonSync(pkgJSON, {encoding:'UTF8', throws:false}) || {};
+		meta.name = name.replace(/ /g, '-').toLowerCase();
+		fs.writeJsonSync(pkgJSON, meta, {encoding:'UTF8', spaces:'\t'});
+
+		// Update appinfo.json if it exists in the template
+		let appinfo = path.join(directory, 'appinfo.json');
+		if(!fs.existsSync(appinfo)) {
+			appinfo = path.join(directory, 'webos-meta', 'appinfo.json');
+			if(!fs.existsSync(appinfo)) {
+				appinfo = undefined;
+			}
+		}
+		if(appinfo) {
+			const aiMeta = fs.readJsonSync(appinfo, {encoding:'UTF8', throws:false}) || {};
+			aiMeta.id = meta.name;
+			fs.writeJsonSync(appinfo, aiMeta, {encoding:'UTF8', spaces:'\t'});
+		}
 	},
-	message: ({directory, name}) => {
+	complete: ({directory, name}) => {
 		// After everything is complete, output message to user
 		console.log();
 		console.log('Success! Created ' + name + ' at ' + directory);
@@ -72,150 +138,88 @@ const defaultTemplateHandler = {
 		// console.log();
 		console.log('We suggest that you begin by typing:');
 		if(path.resolve(process.cwd())!==path.resolve(directory)) {
-			console.log(chalk.cyan('	cd'), path.relative(process.cwd(), directory));
+			console.log(chalk.cyan('	cd ' + path.relative(process.cwd(), directory)));
 		}
 		console.log('	' + chalk.cyan('npm run serve'));
-		if(fs.existsSync(path.join(directory, 'README.old.md'))) {
-			console.log();
-			console.log(chalk.yellow('You had a `README.md` file, we renamed it to `README.old.md`'));
-		}
 		console.log();
 		console.log('Have fun!');
-	};
-}
-
-function createApp(output, template, link, local, verbose) {
-	const project = path.resolve(output);
-	const appName = path.basename(project);
-
-	checkAppName(appName, template);
-
-	if (!fs.existsSync(project)) {
-		fs.mkdirSync(project);
-	} else if (!isSafeToCreateProjectIn(project)) {
-		console.log('The directory "' + output + '" contains file(s) that could conflict. Aborting.');
-		process.exit(1);
 	}
+};
 
-	console.log('Creating a new Enact app in ' + project + '.');
-	console.log();
-
-	const prevCWD = process.cwd();
-	process.chdir(project);
-	copyTemplate(template, project);
-
-	installDeps(project, link, local, verbose, () => {
-		
+function resolveTemplateHandler(template) {
+	return new Promise((resolve, reject) => {
+		let templatePath = path.join(TEMPLATE_DIR, template);
+		if(!fs.existsSync(templatePath)) {
+			if(['default', 'moonstone'].includes(template)) {
+				templatePath = path.join(__dirname, '..', 'template');
+			} else {
+				reject(new Error(`Template ${chalk.bold(template)} not found.`));
+			}
+		}
+		templatePath = fs.realpathSync(templatePath);
+		if(fs.existsSync(path.join(templatePath, 'template'))) {
+			try {
+				const handler = require(templatePath);
+				resolve({handler, templatePath});
+			} catch(e) {
+				reject(new Error(`Failed to load ${chalk.bold(template)} template handler.`));
+			}
+		} else {
+			resolve({handler:defaultTemplateHandler, templatePath});
+		}
 	});
 }
 
-function copyTemplate(template, dest) {
-	if(fs.existsSync(path.join(dest, 'README.md'))) {
-		fs.renameSync(path.join(dest, 'README.md'), path.join(dest, 'README.old.md'));
+function copyTemplate(template, output, overwrite) {
+	const outputReadme = path.join(output, 'README.md');
+	const outputGitIgnore = path.join(output, '.gitignore');
+	let templateGitIgnore = fs.readdirSync(template).filter(f => ['.gitignore', 'gitignore'].includes(f))[0];
+	templateGitIgnore = templateGitIgnore && path.join(template, templateGitIgnore);
+
+	if(overwrite && fs.existsSync(outputReadme) && fs.existsSync(path.join(template, 'README.md'))) {
+		console.log(chalk.yellow('Found an existing README.md file. Renaming to README.old.md'
+				+ ' to avoid overwriting.'));
+		console.log();
+		fs.moveSync(outputReadme, path.join(output, 'README.old.md'));
 	}
 
 	// Copy the files for the user
-	fs.copySync(template, dest);
-
-	// Rename gitignore after the fact to prevent npm from renaming it to .npmignore
-	// See: https://github.com/npm/npm/issues/1862
-	fs.move(path.join(dest, 'gitignore'), path.join(dest, '.gitignore'), [], err => {
-		if (err) {
-			// Append if there's already a `.gitignore` file there
-			if (err.code === 'EEXIST') {
-				const data = fs.readFileSync(path.join(dest, 'gitignore'));
-				fs.appendFileSync(path.join(dest, '.gitignore'), data);
-				fs.unlinkSync(path.join(dest, 'gitignore'));
+	const filter = (src) => src!==templateGitIgnore;
+	return fs.copy(template, output, {overwrite:overwrite, errorOnExist:!overwrite, filter:filter}).then(() => {
+		// Handle gitignore after the fact to prevent npm from renaming it to .npmignore
+		// See: https://github.com/npm/npm/issues/1862
+		if(templateGitIgnore) {
+			if(fs.existsSync(outputGitIgnore)) {
+				// Append if there's already a `.gitignore` file there
+				const data = fs.readFileSync(templateGitIgnore, {encoding:'UTF8'});
+				fs.appendFileSync(outputGitIgnore, data, {encoding:'UTF8'});
 			} else {
-				throw err;
+				fs.copySync(templateGitIgnore, outputGitIgnore);
 			}
 		}
+	}).catch(err => {
+		throw new Error(`Failed to copy template files to ${output}\n${err.message}`);
 	});
-
-	// Update package.json name
-	const pkgJSON = path.join(dest, 'package.json');
-	const meta = JSON.parse(fs.readFileSync(pkgJSON, {encoding:'utf8'}));
-	meta.name = path.basename(dest).replace(/ /g, '-').toLowerCase();
-	fs.writeFileSync(pkgJSON, JSON.stringify(meta, null, '\t'), {encoding:'utf8'});
-
-	// Update appinfo.json if it exists in the template
-	let appinfo = path.join(dest, 'appinfo.json');
-	if(!fs.existsSync(appinfo)) {
-		appinfo = path.join(dest, 'webos-meta', 'appinfo.json');
-		if(!fs.existsSync(appinfo)) {
-			appinfo = undefined;
-		}
-	}
-	if(appinfo) {
-		const aiMeta = JSON.parse(fs.readFileSync(appinfo, {encoding:'utf8'}));
-		aiMeta.id = meta.name;
-		fs.writeFileSync(appinfo, JSON.stringify(aiMeta, null, '\t'), {encoding:'utf8'});
-	}
 }
 
-function installDeps(project, link, local, verbose, callback) {
+function npmInstall(directory, verbose, ...rest) {
 	const args = [
 		'--loglevel',
 		(verbose ? 'verbose' : 'error'),
 		'install',
-		link && '--link'
-	].filter(e => e);
-
-	console.log('Installing dependencies from npm...');
-
-	const proc = spawn('npm', args, {stdio: 'inherit', cwd:project});
-	proc.on('close', code => {
-		if(code!==0) {
-			console.log(chalk.cyan('ERROR: ') + '"npm ' + args.join(' ') + '" failed');
-			process.exit(1);
-		}
-		if(local) {
-			console.log('Installing @enact/cli locally. This might take a couple minutes.');
-			const devArgs = [
-				'--loglevel',
-				(verbose ? 'verbose' : 'error'),
-				'install',
-				link && '--link',
-				ENACT_DEV_NPM,
-				'--save-dev'
-			].filter(e => e);
-			const devProc = spawn('npm', devArgs, {stdio: 'inherit', cwd:project});
-			devProc.on('close', code2 => {
-				if(code2!==0) {
-					console.log(chalk.cyan('ERROR: ') + '"npm ' + devArgs.join(' ') + '" failed');
-					process.exit(1);
-				}
-				callback();
-			});
-		} else {
-			callback();
-		}
-	});
-}
-
-function checkAppName(appName, template) {
-	const templateMeta = fs.readJsonSync(path.join(template, 'package.json'), {throws: false}) || {};
-	const dependencies = Object.keys(templateMeta.dependencies || {});
-	const devDependencies = Object.keys(templateMeta.devDependencies || {});
-	const allDependencies = dependencies.concat(devDependencies).sort();
-
-	if (allDependencies.indexOf(appName) >= 0) {
-		console.error(chalk.red('We cannot create a project called `' + appName
-				+ '` because a dependency with the same name exists.\n'
-				+ 'Due to the way npm works, the following names are not allowed:\n\n')
-				+ chalk.cyan(allDependencies.map(depName => '\t' + depName).join('\n'))
-				+ chalk.red('\n\nPlease choose a different project name.')
-		);
-		process.exit(1);
-	}
-}
-
-// If project only contains files generated by GH, it’s safe.
-function isSafeToCreateProjectIn(project) {
-	const validFiles = [
-		'.DS_Store', 'Thumbs.db', '.git', '.gitignore', '.idea', 'README.md', 'LICENSE'
+		...rest
 	];
-	return fs.readdirSync(project).every(file => validFiles.indexOf(file) >= 0);
+
+	return new Promise((resolve, reject) => {
+		const proc = spawn('npm', args, {stdio:'inherit', cwd:directory});
+		proc.on('close', code => {
+			if(code!==0) {
+				reject(new Error('NPM install failed.'));
+			} else {
+				resolve();
+			}
+		});
+	});
 }
 
 function displayHelp() {
@@ -223,12 +227,12 @@ function displayHelp() {
 	console.log('    enact create [options] [<directory>]');
 	console.log();
 	console.log('  Arguments');
-	console.log('    directory         Optional project destination directory');
+	console.log('    directory         Optional destination directory');
 	console.log('                          (default: cwd)');
 	console.log();
 	console.log('  Options');
-	console.log('    -link             Link in any applicable dependencies');
-	console.log('    -local            Include @enact/cli locally in the project');
+	console.log('    -t, --template    Specific template to use');
+	console.log('    -local            Include @enact/cli locally');
 	console.log('    -verbose          Verbose output logging');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
@@ -238,12 +242,33 @@ function displayHelp() {
 
 module.exports = function(args) {
 	const opts = minimist(args, {
-		boolean: ['link', 'local', 'verbose', 'h', 'help'],
-		alias: {h:'help'}
+		boolean: ['local', 'verbose', 'help'],
+		string: ['template'],
+		default: {template:'default'},
+		alias: {t:'template', h:'help'}
 	});
 	opts.help && displayHelp();
 
-	const template = path.join(__dirname, '..', 'template');
-	const output = (typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
-	createApp(output, template, opts.link, opts.local, opts.verbose);
+	const directory = path.resolve(typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
+	const name = path.basename(directory);
+
+	resolveTemplateHandler(opts.template).then(({handler, templatePath}) => {
+		const params = {template:opts.template, directory, name};
+		const templateOutput = path.join(directory, handler.outputPath || '.');
+		const overwrite = handler.overwrite || (typeof handler.overwrite === 'undefined');
+
+		return new Promise(resolve => resolve(handler.validateName && handler.validateName(params)))
+				.then(() => fs.ensureDir(templateOutput))
+				.then(() => handler.prepare && handler.prepare(params))
+				.then(() => copyTemplate(templatePath, templateOutput, overwrite))
+				.then(() => handler.setup && handler.setup(params))
+				.then(() => npmInstall(directory, opts.verbose))
+				.then(() => {
+					if(opts.local) {
+						console.log('Installing @enact/cli locally. This might take a couple minutes.');
+						return npmInstall(directory, opts.verbose, '--save-dev', ENACT_DEV_NPM);
+					}
+				})
+				.then(() => handler.complete && handler.complete(params))
+	}).catch(err => console.log(chalk.red('ERROR: ') + err.message));
 };
