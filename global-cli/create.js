@@ -159,7 +159,8 @@ function resolveTemplateHandler(template) {
 		templatePath = fs.realpathSync(templatePath);
 		if(fs.existsSync(path.join(templatePath, 'template'))) {
 			try {
-				const handler = require(templatePath);
+				let handler = require(templatePath) || {};
+				if(handler.useDefault)  handler = defaultTemplateHandler;
 				resolve({handler, templatePath});
 			} catch(e) {
 				reject(new Error(`Failed to load ${chalk.bold(template)} template handler.`));
