@@ -56,7 +56,7 @@ module.exports = {
 	entry: {
 		main: [
 			require.resolve('./polyfills'),
-			path.resolve(app.main || 'index.js')
+			app.context
 		]
 	},
 	output: {

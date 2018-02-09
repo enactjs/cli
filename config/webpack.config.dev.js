@@ -59,7 +59,7 @@ module.exports = {
 			// Include a few polyfills by default (Promise, Object.assign, and fetch)
 			require.resolve('./polyfills'),
 			// Finally, this is your app's code
-			path.resolve(app.main || 'index.js')
+			app.context
 		]
 	},
 	output: {
