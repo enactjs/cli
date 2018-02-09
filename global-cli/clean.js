@@ -26,6 +26,9 @@ module.exports = function(args) {
 		if(bErr) throw bErr;
 		fs.remove('./dist', dErr => {
 			if(dErr) throw dErr;
+			fs.remove('./bin', binErr => {
+				if(binErr) throw binErr;
+			});
 		});
 	});
 };
