@@ -199,7 +199,7 @@ module.exports = function(args) {
 	});
 	opts.help && displayHelp();
 
-	if(app.environment!=='web') {
+	if(app.environment==='node') {
 		console.log(chalk.red('Serving is not supported for non-browser apps.'))
 		process.exit(1);
 	}
