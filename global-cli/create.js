@@ -35,10 +35,10 @@ const validatePackageName = require('validate-npm-package-name');
 const ENACT_DEV_NPM = '@enact/cli';
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 
-const defaultTemplateHandler = {
+const defaultGenerator = {
 	outputPath: '.',
 	overwrite: false,
-	validateName: ({template, name}) => {
+	validate: ({template, name}) => {
 		const validation = validatePackageName(name);
 
 		if(!validation.validForNewPackages) {
@@ -87,7 +87,7 @@ const defaultTemplateHandler = {
 			'yarn-debug.log'
 		];
 
-		console.log('Creating a new Enact app in ' + path.relative(process.cwd(), directory) + '.');
+		console.log('Creating a new Enact app in ' + path.relative(process.cwd(), directory) + '...');
 		console.log();
 
 		if (!fs.readdirSync(directory).every(f => validFiles.includes(f))) {
@@ -99,7 +99,7 @@ const defaultTemplateHandler = {
 		// Update package.json name
 		const pkgJSON = path.join(directory, 'package.json');
 		const meta = fs.readJsonSync(pkgJSON, {encoding:'UTF8', throws:false}) || {};
-		meta.name = name.replace(/ /g, '-').toLowerCase();
+		meta.name = name;
 		fs.writeJsonSync(pkgJSON, meta, {encoding:'UTF8', spaces:'\t'});
 
 		// Update appinfo.json if it exists in the template
@@ -146,7 +146,7 @@ const defaultTemplateHandler = {
 	}
 };
 
-function resolveTemplateHandler(template) {
+function resolveTemplategenerator(template) {
 	return new Promise((resolve, reject) => {
 		let templatePath = path.join(TEMPLATE_DIR, template);
 		if(!fs.existsSync(templatePath)) {
@@ -157,16 +157,25 @@ function resolveTemplateHandler(template) {
 			}
 		}
 		templatePath = fs.realpathSync(templatePath);
-		if(fs.existsSync(path.join(templatePath, 'template'))) {
+		const subDir = path.join(templatePath, 'template');
+		if(fs.existsSync(subDir)) {
 			try {
-				let handler = require(templatePath) || {};
-				if(handler.useDefault)  handler = defaultTemplateHandler;
-				resolve({handler, templatePath});
+				const generator = require(templatePath) || {};
+				Object.keys(defaultGenerator).forEach(k => {
+					if(generator[k]===undefined || generator[k]===true) {
+						generator[k] = defaultGenerator[k];
+					}
+				});
+				resolve({generator, templatePath:subDir});
 			} catch(e) {
-				reject(new Error(`Failed to load ${chalk.bold(template)} template handler.`));
+				if(e.message === `Cannot find module '${templatePath}'`) {
+					resolve({generator:defaultGenerator, templatePath:subDir});
+				} else {
+					reject(new Error(`Failed to load ${chalk.bold(template)} template generator.\n${e}`));
+				}
 			}
 		} else {
-			resolve({handler:defaultTemplateHandler, templatePath});
+			resolve({generator:defaultGenerator, templatePath});
 		}
 	});
 }
@@ -199,7 +208,7 @@ function copyTemplate(template, output, overwrite) {
 			}
 		}
 	}).catch(err => {
-		throw new Error(`Failed to copy template files to ${output}\n${err.message}`);
+		throw new Error(`Failed to copy template files to ${output}\n${err.stack}`);
 	});
 }
 
@@ -251,18 +260,17 @@ module.exports = function(args) {
 	opts.help && displayHelp();
 
 	const directory = path.resolve(typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
-	const name = path.basename(directory);
+	const name = path.basename(directory).replace(/ /g, '-').toLowerCase();
 
-	resolveTemplateHandler(opts.template).then(({handler, templatePath}) => {
-		const params = {template:opts.template, directory, name};
-		const templateOutput = path.join(directory, handler.outputPath || '.');
-		const overwrite = handler.overwrite || (typeof handler.overwrite === 'undefined');
+	resolveTemplategenerator(opts.template).then(({generator, templatePath}) => {
+		const params = {opts,  defaultGenerator, template:opts.template, directory, name};
+		const overwrite = generator.overwrite || (typeof generator.overwrite === 'undefined');
 
-		return new Promise(resolve => resolve(handler.validateName && handler.validateName(params)))
-				.then(() => fs.ensureDir(templateOutput))
-				.then(() => handler.prepare && handler.prepare(params))
-				.then(() => copyTemplate(templatePath, templateOutput, overwrite))
-				.then(() => handler.setup && handler.setup(params))
+		return new Promise(resolve => resolve(generator.validate && generator.validate(params)))
+				.then(() => fs.ensureDir(directory))
+				.then(() => generator.prepare(params))
+				.then(() => copyTemplate(templatePath, directory, overwrite))
+				.then(() => generator.setup(params))
 				.then(() => npmInstall(directory, opts.verbose))
 				.then(() => {
 					if(opts.local) {
@@ -270,6 +278,6 @@ module.exports = function(args) {
 						return npmInstall(directory, opts.verbose, '--save-dev', ENACT_DEV_NPM);
 					}
 				})
-				.then(() => handler.complete && handler.complete(params))
+				.then(() => generator.complete(params))
 	}).catch(err => console.log(chalk.red('ERROR: ') + err.message));
 };
