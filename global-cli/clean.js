@@ -5,7 +5,10 @@ const
 
 function displayHelp() {
 	console.log('  Usage');
-	console.log('    enact clean [options]');
+	console.log('    enact clean [options] [paths...]');
+	console.log();
+	console.log('  Arguments');
+	console.log('    paths             Additional path(s) to delete');
 	console.log();
 	console.log('  Options');
 	console.log('    -v, --version     Display version information');
@@ -22,13 +25,11 @@ module.exports = function(args) {
 	opts.help && displayHelp();
 
 	process.chdir(packageRoot().path);
-	fs.remove('./build', bErr => {
-		if(bErr) throw bErr;
-		fs.remove('./dist', dErr => {
-			if(dErr) throw dErr;
-			fs.remove('./bin', binErr => {
-				if(binErr) throw binErr;
-			});
-		});
-	});
+	fs.removeSync('./build');
+	fs.removeSync('./dist');
+	opts._.forEach(d => {
+		if(fs.existsSync(d)) {
+			fs.removeSync(d);
+		}
+	})
 };
