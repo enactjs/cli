@@ -54,7 +54,8 @@ function doInstall(name, target) {
 		return new Promise((resolve, reject) => {
 			if(fs.existsSync(path.join(output, 'template'))
 					&& fs.existsSync(path.join(output, 'package.json'))) {
-				const child = spawn('npm', ['--loglevel', 'error', 'install'], {stdio: 'inherit', cwd:output});
+				const child = spawn('npm', ['--loglevel', 'error', 'install', '--production'],
+						{stdio: 'inherit', cwd:output});
 				child.on('close', code => {
 					if(code !== 0) {
 						reject(new Error('Failed to NPM install dynamic template. Ensure package.json is valid.'));
