@@ -44,6 +44,7 @@ function displayHelp() {
 	console.log('    enact pack [options]');
 	console.log();
 	console.log('  Options');
+	console.log('    -o, --output      Specify an output directory');
 	console.log('    -w, --watch       Rebuild on file changes');
 	console.log('    -p, --production  Build in production mode');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
@@ -70,7 +71,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-function details(err, stats) {
+function details(err, stats, output) {
 	if(err) return err;
 	const statsJSON = stats.toJson({}, true);
 	const messages = formatWebpackMessages(statsJSON);
@@ -81,7 +82,7 @@ function details(err, stats) {
 				+ 'Most CI servers set it automatically.\n'));
 		return new Error(messages.warnings.join('\n\n'));
 	} else {
-		printFileSizes(statsJSON);
+		printFileSizes(statsJSON, output);
 		console.log();
 		if(messages.warnings.length) {
 			console.log(chalk.yellow('Compiled with warnings:\n'));
@@ -98,12 +99,12 @@ function details(err, stats) {
 }
 
 // Print a detailed summary of build files.
-function printFileSizes(stats) {
+function printFileSizes(stats, output) {
 	const assets = stats.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
 		.map(asset => {
-			const size = fs.statSync('./dist/' + asset.name).size;
+			const size = fs.statSync(path.join(output, asset.name)).size;
 			return {
-				folder: path.join('dist', path.dirname(asset.name)),
+				folder: path.relative(packageRoot().path, path.join(output, path.dirname(asset.name))),
 				name: path.basename(asset.name),
 				size: size,
 				sizeLabel: filesize(size)
@@ -134,7 +135,7 @@ function build(config) {
 
 	const compiler = webpack(config);
 	compiler.run((err, stats) => {
-		err = details(err, stats);
+		err = details(err, stats, config.output.path);
 		if(err) {
 			console.log();
 			console.log(chalk.red('Failed to compile.\n'));
@@ -166,9 +167,9 @@ function watch(config) {
 module.exports = function(args) {
 	const opts = minimist(args, {
 		boolean: ['minify', 'framework', 'stats', 'p', 'production', 'i', 'isomorphic', 's', 'snapshot', 'w', 'watch', 'h', 'help'],
-		string: ['externals', 'externals-inject', 'l', 'locales'],
+		string: ['externals', 'externals-inject', 'l', 'locales', 'output'],
 		default: {minify:true},
-		alias: {p:'production', i:'isomorphic', l:'locales', s:'snapshot', w:'watch', h:'help'}
+		alias: {o:'output', p:'production', i:'isomorphic', l:'locales', s:'snapshot', w:'watch', h:'help'}
 	});
 	if (opts.help) displayHelp();
 
@@ -181,6 +182,8 @@ module.exports = function(args) {
 		process.env.NODE_ENV = 'production';
 		config = prodConfig;
 	}
+
+	if(opts.output) config.output.path = path.resolve(opts.output);
 
 	mixins.apply(config, opts);
 
