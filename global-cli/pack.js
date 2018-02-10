@@ -194,7 +194,7 @@ module.exports = function(args) {
 
 	// Remove all content but keep the directory so that
 	// if you're in it, you don't end up in Trash
-	fs.emptyDirSync('./dist');
+	fs.emptyDirSync(config.output.path);
 
 	// Start the webpack build
 	if (opts.watch) {
