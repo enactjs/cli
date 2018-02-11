@@ -36,7 +36,6 @@ const ENACT_DEV_NPM = '@enact/cli';
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 
 const defaultGenerator = {
-	outputPath: '.',
 	overwrite: false,
 	validate: ({template, name}) => {
 		const validation = validatePackageName(name);
@@ -146,7 +145,7 @@ const defaultGenerator = {
 	}
 };
 
-function resolveTemplategenerator(template) {
+function resolveTemplateGenerator(template) {
 	return new Promise((resolve, reject) => {
 		let templatePath = path.join(TEMPLATE_DIR, template);
 		if(!fs.existsSync(templatePath)) {
@@ -262,7 +261,7 @@ module.exports = function(args) {
 	const directory = path.resolve(typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
 	const name = path.basename(directory).replace(/ /g, '-').toLowerCase();
 
-	resolveTemplategenerator(opts.template).then(({generator, templatePath}) => {
+	resolveTemplateGenerator(opts.template).then(({generator, templatePath}) => {
 		const params = {opts,  defaultGenerator, template:opts.template, directory, name};
 		const overwrite = generator.overwrite || (typeof generator.overwrite === 'undefined');
 
