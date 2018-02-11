@@ -199,7 +199,7 @@ module.exports = function(args) {
 	});
 	opts.help && displayHelp();
 
-	if(app.environment==='node') {
+	if(['node', 'async-node', 'webworker'].includes(app.environment)) {
 		console.log(chalk.red('Serving is not supported for non-browser apps.'))
 		process.exit(1);
 	}
