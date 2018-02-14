@@ -1,7 +1,7 @@
-const
-	fs = require('fs-extra'),
-	minimist = require('minimist'),
-	packageRoot = require('@enact/dev-utils/package-root');
+const fs = require('fs-extra');
+const minimist = require('minimist');
+const chalk = require('chalk');
+const packageRoot = require('@enact/dev-utils/package-root');
 
 function displayHelp() {
 	console.log('  Usage');
@@ -17,19 +17,22 @@ function displayHelp() {
 	process.exit(0);
 }
 
-module.exports = function(args) {
+function api({paths = []} = {}) {
+	return Promise.all(paths.concat('./build', './dist').map(d => fs.remove(d)));
+}
+
+function cli(args) {
 	const opts = minimist(args, {
-		boolean: ['h', 'help'],
+		boolean: ['help'],
 		alias: {h:'help'}
 	});
 	opts.help && displayHelp();
 
 	process.chdir(packageRoot().path);
-	fs.removeSync('./build');
-	fs.removeSync('./dist');
-	opts._.forEach(d => {
-		if(fs.existsSync(d)) {
-			fs.removeSync(d);
-		}
-	})
-};
+	api({paths:opts._}).catch(err => {
+		console.error(chalk.red('ERROR: ') + 'Failed to clean project.\n' + err.message);
+		process.exit(1);
+	});
+}
+
+module.exports = {api, cli};

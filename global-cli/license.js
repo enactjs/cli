@@ -1,7 +1,13 @@
-const
-	minimist = require('minimist'),
-	checker = require('license-checker'),
-	path = require('path');
+const minimist = require('minimist');
+const checker = require('license-checker');
+const path = require('path');
+const chalk = require('chalk');
+
+// The following modules reside in `@enact/cli` but end up in production builds of apps
+const enactCLIProdModules = [
+	'babel-core',
+	'babel-polyfill'
+].map(m => path.dirname(require.resolve(m + '/package.json')));
 
 function displayHelp() {
 	console.log('  Usage');
@@ -17,54 +23,37 @@ function displayHelp() {
 	process.exit(0);
 }
 
-// The following modules reside in `@enact/cli` but end up in production builds of apps
-const enactDevProdModules = [
-	'babel-core',
-	'string.fromcodepoint',
-	'string.prototype.codepointat',
-	'whatwg-fetch',
-	'object-assign',
-	'promise'
-];
+function api({modules = []} = {}) {
+	if(!modules.length) {
+		modules = modules.concat(enactCLIProdModules, '.');
+	}
 
-let output = {};
+	return Promise.all(modules.map(m => {
+		return new Promise((resolve, reject) => {
+			checker.init({start:m}, (err, json) => {
+				if(err) {
+					reject(new Error(`Unable to process licenses for ${m}.\n${err.message}`));
+				} else {
+					resolve(json || {});
+				}
+			});
+		});
+	})).then(values => values.reduce((a, b) => Object.assign(a, b)));
+}
 
-module.exports = function(args) {
+function cli(args) {
 	const opts = minimist(args, {
-		boolean: ['h', 'help'],
+		boolean: ['help'],
 		alias: {h:'help'}
 	});
-
 	opts.help && displayHelp();
 
-	let modules = [];
-
-	if (opts._.length) {
-		modules = modules.concat(opts._);
-	} else {
-		modules = [...resolveModulePath(enactDevProdModules), '.'];
-	}
-
-	modules.forEach(package => {
-		checker.init({
-			start: package
-		}, (err, json) => {
-			if (err) {
-				console.warn(`Unable to process licenses for ${path}: `, err);
-			} else {
-				output = Object.assign(output, json);
-			}
-		});
+	api({modules:opts._}).then((licenses) => {
+		console.log(JSON.stringify(licenses, null, 2));
+	}).catch(err => {
+		console.error(chalk.red('ERROR: ') + err.message);
+		process.exit(1);
 	});
-};
-
-process.on('exit', () => {
-	if (Object.keys(output).length) {
-		console.log(JSON.stringify(output, null, 2));
-	}
-});
-
-// Resolve module directories relative to `@enact/cli`
-function resolveModulePath(modules) {
-	return modules.map(mod => path.dirname(require.resolve(mod)));
 }
+
+module.exports = {api, cli};

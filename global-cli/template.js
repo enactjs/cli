@@ -10,6 +10,40 @@ const tar = require('tar');
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 const DEFAULT_LINK = path.join(TEMPLATE_DIR, 'default');
 
+function displayHelp() {
+	console.log('  Usage');
+	console.log('    enact template <action> ...');
+	console.log();
+	console.log('  Actions');
+	console.log('    enact template install <name> [source]');
+	console.log(chalk.dim('    Install a template from a local or remote source'));
+	console.log('    name              Name for the template to install as');
+	console.log('    source            Git, NPM or local directory path');
+	console.log('                          (default: cwd)');
+	console.log();
+	console.log('    enact template link <name> [directory]');
+	console.log(chalk.dim('    Symlink a directory into template management'));
+	console.log('    name              Name for the template');
+	console.log('    directory         Local directory path to link');
+	console.log('                          (default: cwd)');
+	console.log();
+	console.log('    enact template remove <name>');
+	console.log(chalk.dim('    Remove a template by name'));
+	console.log('    name              Name of template to remove');
+	console.log();
+	console.log('    enact template default');
+	console.log(chalk.dim('    Choose a default template for "enact create"'));
+	console.log();
+	console.log('    enact template list');
+	console.log(chalk.dim('    List all templates installed/linked'));
+	console.log();
+	console.log('  Options');
+	console.log('    -v, --version     Display version information');
+	console.log('    -h, --help        Display help information');
+	console.log();
+	process.exit(0);
+}
+
 function validateArgs(action, name) {
 	return new Promise((resolve, reject) => {
 		if(!name && !['list', 'default'].includes(action)) {
@@ -89,15 +123,9 @@ function installFromGit(name, target) {
 
 // Copy directory files
 function installFromLocal(output, target) {
-	return new Promise((resolve, reject) => {
-		fs.ensureDirSync(output);
-		fs.copy(target, output, err => {
-			if(err) {
-				reject(new Error(`Failed to copy template files from ${target}.\n${err.message}`));
-			} else {
-				resolve();
-			}
-		});
+	fs.ensureDirSync(output)
+	return fs.copy(target, output).catch(err => {
+		throw new Error(`Failed to copy template files from ${target}.\n${err.message}`);
 	});
 }
 
@@ -140,41 +168,28 @@ function installFromNPM(output, target) {
 
 function doLink(name, target) {
 	return doRemove(name).then(() => {
-		return new Promise((resolve, reject) => {
-			const directory = path.resolve(target);
-			const prevCWD = process.cwd();
-			process.chdir(TEMPLATE_DIR);
-			fs.symlink(directory, name, 'junction', err => {
-				process.chdir(prevCWD);
-				if(err) {
-					reject(new Error(`Unable to create symlink to ${target}.\n${err.message}`))
-				} else {
-					resolve({name, target});
-				}
-			});
+		const directory = path.resolve(target);
+		const prevCWD = process.cwd();
+		process.chdir(TEMPLATE_DIR);
+		return fs.symlink(directory, name, 'junction').then(() => {
+			process.chdir(prevCWD);
+		}).catch(err => {
+			process.chdir(prevCWD);
+			throw new Error(`Unable to create symlink to ${target}.\n${err.message}`);
 		});
 	});
 }
 
 function doRemove(name) {
-	return new Promise((resolve, reject) => {
-		const output = path.join(TEMPLATE_DIR, name);
-		if(fs.existsSync(output)) {
-			const isDefault = fs.existsSync(DEFAULT_LINK)
-					&& fs.realpathSync(output) === fs.realpathSync(DEFAULT_LINK);
-			fs.remove(output, err => {
-				if(err) {
-					reject(new Error(`Failed to delete template ${name}.\n${err.message}`));
-				} else {
-					if(isDefault) {
-						fs.removeSync(DEFAULT_LINK);
-					}
-					resolve();
-				}
-			});
-		} else {
-			resolve();
+	const output = path.join(TEMPLATE_DIR, name);
+	const isDefault = fs.existsSync(DEFAULT_LINK)
+			&& fs.realpathSync(output) === fs.realpathSync(DEFAULT_LINK);
+	return fs.remove(output).then(() => {
+		if(isDefault) {
+			fs.removeSync(DEFAULT_LINK);
 		}
+	}).catch(err => {
+		throw new Error(`Failed to delete template ${name}.\n${err.message}`);
 	});
 }
 
@@ -208,53 +223,8 @@ function doList() {
 	});
 }
 
-function displayHelp() {
-	console.log('  Usage');
-	console.log('    enact template <action> ...');
-	console.log();
-	console.log('  Actions');
-	console.log('    enact template install <name> [source]');
-	console.log(chalk.dim('    Install a template from a local or remote source'));
-	console.log('    name              Name for the template to install as');
-	console.log('    source            Git, NPM or local directory path');
-	console.log('                          (default: cwd)');
-	console.log();
-	console.log('    enact template link <name> [directory]');
-	console.log(chalk.dim('    Symlink a directory into template management'));
-	console.log('    name              Name for the template');
-	console.log('    directory         Local directory path to link');
-	console.log('                          (default: cwd)');
-	console.log();
-	console.log('    enact template remove <name>');
-	console.log(chalk.dim('    Remove a template by name'));
-	console.log('    name              Name of template to remove');
-	console.log();
-	console.log('    enact template default');
-	console.log(chalk.dim('    Choose a default template for "enact create"'));
-	console.log();
-	console.log('    enact template list');
-	console.log(chalk.dim('    List all templates installed/linked'));
-	console.log();
-	console.log('  Options');
-	console.log('    -v, --version     Display version information');
-	console.log('    -h, --help        Display help information');
-	console.log();
-	process.exit(0);
-}
-
-module.exports = function(args) {
-	const opts = minimist(args, {
-		boolean: ['help'],
-		alias: {h:'help'}
-	});
-	opts.help && displayHelp();
-
-	const action = opts._[0];
-	const name = opts._[1];
-	const target = opts._[2] || process.cwd();
-	if(!action) displayHelp();
-
-	validateArgs(action, name).then(initTemplateArea).then(() => {
+function api({action, name, target} = {}) {
+	return validateArgs(action, name).then(initTemplateArea).then(() => {
 		let actionPromise;
 		switch (action) {
 			case 'install':
@@ -281,9 +251,31 @@ module.exports = function(args) {
 				doList();
 				break;
 			default:
-				actionPromise = Promise.reject(`Invalid template action: ${action}.`)
+				actionPromise = Promise.reject(new Error(`Invalid template action: ${action}.`))
 				break;
 		}
 		return actionPromise;
-	}).catch(err => console.log(chalk.red('ERROR: ') + err.message));
-};
+	});
+}
+
+function cli(args) {
+	const opts = minimist(args, {
+		boolean: ['help'],
+		alias: {h:'help'}
+	});
+	opts.help && displayHelp();
+
+	const action = opts._[0];
+	const name = opts._[1];
+	const target = opts._[2] || process.cwd();
+	if(!action) displayHelp();
+
+	api({action, name, target}).catch(err => {
+		console.error('Template action failed.');
+		console.error();
+		console.log(chalk.red('ERROR: ') + err.message);
+		process.exit(1);
+	});
+}
+
+module.exports = {api, cli};

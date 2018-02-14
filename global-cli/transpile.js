@@ -1,10 +1,10 @@
-const
-	path = require('path'),
-	glob = require('glob'),
-	babel = require('babel-core'),
-	fs = require('fs-extra'),
-	minimist = require('minimist'),
-	packageRoot = require('@enact/dev-utils/package-root');
+const path = require('path');
+const glob = require('glob');
+const babel = require('babel-core');
+const chalk = require('chalk');
+const fs = require('fs-extra');
+const minimist = require('minimist');
+const packageRoot = require('@enact/dev-utils/package-root');
 
 function displayHelp() {
 	console.log('  Usage');
@@ -18,45 +18,52 @@ function displayHelp() {
 	process.exit(0);
 }
 
-module.exports = function(args) {
+function api({source = '.', output = './build'} = {}) {
+	process.env.ES5 = 'true';
+	const filter = f => /^(?!.*(node_modules|build|dist|\\.git)).*$/.test(f);
+	return fs.copy(source, output, {filter, stopOnErr:true}).then(() => {
+		return new Promise((resolve, reject) => {
+			glob(output + '/**/*.js', {nodir:true}, (err, files) => {
+				if(err) {
+					reject(err);
+				} else {
+					resolve(files || []);
+				}
+			});
+		}).then(files => {
+			const babelrc = path.join(__dirname, '..', 'config', '.babelrc');
+			const plugins = [require.resolve('babel-plugin-transform-es2015-modules-commonjs')];
+			return Promise.all(files.map(js => {
+				return new Promise((resolve, reject) => {
+					babel.transformFile(js, {extends:babelrc, plugins}, (err, transpiled) => {
+						if(err) {
+							reject(err);
+						} else {
+							resolve(transpiled || {})
+						}
+					});
+				}).then(transpiled => fs.writeFile(js, transpiled.code, {encoding:'utf8'}));
+			}));
+		});
+	});
+}
+
+function cli(args) {
 	const opts = minimist(args, {
-		string: ['o', 'output'],
-		boolean: ['h', 'help'],
+		string: ['output'],
+		boolean: ['help'],
+		default: {output:'./build'},
 		alias: {o:'output', h:'help'}
 	});
 	opts.help && displayHelp();
 
 	process.chdir(packageRoot().path);
-	process.env.ES5 = 'true';
+	console.log('Transpiling via Babel to ' + path.resolve(opts.output));
 
-	const sourceRoot = '.';
-	const buildRoot = opts.output || './build';
-
-	console.log('Transpiling via Babel to ' + path.resolve(buildRoot));
-	fs.copy(sourceRoot, buildRoot, {filter:function(f) { return /^(?!.*(node_modules|build|dist|\\.git)).*$/.test(f); }, stopOnErr:true}, cpErr => {
-		if(cpErr) {
-			console.error(cpErr);
-		} else {
-			glob(buildRoot + '/**/*.js', {nodir:true}, (globErr, files) => {
-				if(globErr) {
-					console.error(globErr);
-				} else {
-					const babelrc = path.join(__dirname, '..', 'config', '.babelrc');
-					files.forEach(js => {
-						babel.transformFile(js, {extends:babelrc, plugins:[require.resolve('babel-plugin-transform-es2015-modules-commonjs')]}, (babelErr, result) => {
-							if(babelErr) {
-								console.error(babelErr);
-							} else {
-								fs.writeFile(js, result.code, {encoding:'utf8'}, fsErr => {
-									if(fsErr) {
-										console.error(fsErr);
-									}
-								});
-							}
-						});
-					});
-				}
-			});
-		}
+	api({source:'.', output:opts.output}).catch(err => {
+		console.error(chalk.red('ERROR: ') + err.message);
+		process.exit(1);
 	});
-};
+}
+
+module.exports = {api, cli};

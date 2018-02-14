@@ -24,18 +24,16 @@
  * SOFTWARE.
  */
 
-const
-	chalk = require('chalk'),
-	webpack = require('webpack'),
-	WebpackDevServer = require('webpack-dev-server'),
-	minimist = require('minimist'),
-	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
-	{choosePort, createCompiler, prepareProxy, prepareUrls} = require('react-dev-utils/WebpackDevServerUtils'),
-	errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware'),
-	clearConsole = require('react-dev-utils/clearConsole'),
-	openBrowser = require('react-dev-utils/openBrowser'),
-	app = require('@enact/dev-utils/option-parser'),
-	devConfig = require('../config/webpack.config.dev');
+const chalk = require('chalk');
+const webpack = require('webpack');
+const WebpackDevServer = require('webpack-dev-server');
+const minimist = require('minimist');
+const {choosePort, createCompiler, prepareProxy, prepareUrls} = require('react-dev-utils/WebpackDevServerUtils');
+const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
+const clearConsole = require('react-dev-utils/clearConsole');
+const openBrowser = require('react-dev-utils/openBrowser');
+const app = require('@enact/dev-utils/option-parser');
+const devConfig = require('../config/webpack.config.dev');
 
 // Any unhandled promise rejections should be treated like errors.
 process.on('unhandledRejection', err => {
@@ -151,10 +149,10 @@ function devServerConfig(host, protocol, proxy, allowedHost, publicPath) {
 function serve(config, host, port, open) {
 	// We attempt to use the default port but if it is busy, we offer the user to
 	// run on a different port. `detect()` Promise resolves to the next free port.
-	choosePort(host, port).then(resolvedPort => {
+	return choosePort(host, port).then(resolvedPort => {
 		if (resolvedPort == null) {
 			// We have not found a port.
-			return;
+			return Promise.reject(new Error('Could not find a free port for the dev-server.'));
 		}
 		const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
 		const urls = prepareUrls(protocol, host, resolvedPort);
@@ -183,40 +181,40 @@ function serve(config, host, port, open) {
 				process.exit();
 			});
 		});
-	}).catch(err => {
-		if(err && err.message) {
-			console.log(err.message);
-		}
-		process.exit(1);
 	});
 }
 
-module.exports = function(args) {
-	const opts = minimist(args, {
-		string: ['i', 'host', 'p', 'port'],
-		boolean: ['b', 'browser', 'h', 'help'],
-		alias: {b:'browser', i:'host', p:'port', h:'help'}
-	});
-	opts.help && displayHelp();
-
-	if(['node', 'async-node', 'webworker'].includes(app.environment)) {
-		console.log(chalk.red('Serving is not supported for non-browser apps.'))
-		process.exit(1);
-	}
-
-	process.chdir(app.context);
-	process.env.NODE_ENV = 'development';
-
+function api(opts) {
+	// Setup the development config with additional webpack-dev-erver customizations.
 	const config = hotDevServer(devConfig);
-
-	// Warn and crash if required files are missing
-	if (!checkRequiredFiles([config.entry.main[config.entry.main.length-1]])) {
-		process.exit(1);
-	}
 
 	// Tools like Cloud9 rely on this.
 	const host = process.env.HOST || opts.host || config.devServer.host || '0.0.0.0';
 	const port = parseInt(process.env.PORT || opts.port || config.devServer.port || 8080);
 
-	serve(config, host, port, opts.browser);
-};
+	// Start serving
+	if(['node', 'async-node', 'webworker'].includes(app.environment)) {
+		return Promise.reject(new Error('Serving is not supported for non-browser apps.'));
+	} else {
+		return serve(config, host, port, opts.browser);
+	}
+}
+
+function cli(args) {
+	const opts = minimist(args, {
+		string: ['host', 'port'],
+		boolean: ['browser', 'help'],
+		alias: {b:'browser', i:'host', p:'port', h:'help'}
+	});
+	opts.help && displayHelp();
+
+	process.chdir(app.context);
+	process.env.NODE_ENV = 'development';
+
+	api(opts).catch(err => {
+		console.error(chalk.red('ERROR: ') + (err.message || err));
+		process.exit(1);
+	})
+}
+
+module.exports = {api, cli};

@@ -145,6 +145,24 @@ const defaultGenerator = {
 	}
 };
 
+function displayHelp() {
+	console.log('  Usage');
+	console.log('    enact create [options] [<directory>]');
+	console.log();
+	console.log('  Arguments');
+	console.log('    directory         Optional destination directory');
+	console.log('                          (default: cwd)');
+	console.log();
+	console.log('  Options');
+	console.log('    -t, --template    Specific template to use');
+	console.log('    -local            Include @enact/cli locally');
+	console.log('    -verbose          Verbose output logging');
+	console.log('    -v, --version     Display version information');
+	console.log('    -h, --help        Display help information');
+	console.log();
+	process.exit(0);
+}
+
 function resolveTemplateGenerator(template) {
 	return new Promise((resolve, reject) => {
 		let templatePath = path.join(TEMPLATE_DIR, template);
@@ -231,25 +249,28 @@ function npmInstall(directory, verbose, ...rest) {
 	});
 }
 
-function displayHelp() {
-	console.log('  Usage');
-	console.log('    enact create [options] [<directory>]');
-	console.log();
-	console.log('  Arguments');
-	console.log('    directory         Optional destination directory');
-	console.log('                          (default: cwd)');
-	console.log();
-	console.log('  Options');
-	console.log('    -t, --template    Specific template to use');
-	console.log('    -local            Include @enact/cli locally');
-	console.log('    -verbose          Verbose output logging');
-	console.log('    -v, --version     Display version information');
-	console.log('    -h, --help        Display help information');
-	console.log();
-	process.exit(0);
+function api(opts = {}) {
+	return resolveTemplateGenerator(opts.template).then(({generator, templatePath}) => {
+		const params = Object.assign({opts, defaultGenerator}, opts);
+		const overwrite = generator.overwrite || (typeof generator.overwrite === 'undefined');
+
+		return new Promise(resolve => resolve(generator.validate && generator.validate(params)))
+				.then(() => fs.ensureDir(opts.directory))
+				.then(() => generator.prepare(params))
+				.then(() => copyTemplate(templatePath, opts.directory, overwrite))
+				.then(() => generator.setup(params))
+				.then(() => npmInstall(opts.directory, opts.verbose))
+				.then(() => {
+					if(opts.local) {
+						console.log('Installing @enact/cli locally. This might take a couple minutes.');
+						return npmInstall(opts.directory, opts.verbose, '--save-dev', ENACT_DEV_NPM);
+					}
+				})
+				.then(() => generator.complete(params));
+	});
 }
 
-module.exports = function(args) {
+function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['local', 'verbose', 'help'],
 		string: ['template'],
@@ -258,25 +279,13 @@ module.exports = function(args) {
 	});
 	opts.help && displayHelp();
 
-	const directory = path.resolve(typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
-	const name = path.basename(directory).replace(/ /g, '-').toLowerCase();
+	opts.directory = path.resolve(typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
+	opts.name = path.basename(opts.directory).replace(/ /g, '-').toLowerCase();
 
-	resolveTemplateGenerator(opts.template).then(({generator, templatePath}) => {
-		const params = {opts,  defaultGenerator, template:opts.template, directory, name};
-		const overwrite = generator.overwrite || (typeof generator.overwrite === 'undefined');
+	api(opts).catch(err => {
+		console.error(chalk.red('ERROR: ') + err.message);
+		process.exit(1);
+	});
+}
 
-		return new Promise(resolve => resolve(generator.validate && generator.validate(params)))
-				.then(() => fs.ensureDir(directory))
-				.then(() => generator.prepare(params))
-				.then(() => copyTemplate(templatePath, directory, overwrite))
-				.then(() => generator.setup(params))
-				.then(() => npmInstall(directory, opts.verbose))
-				.then(() => {
-					if(opts.local) {
-						console.log('Installing @enact/cli locally. This might take a couple minutes.');
-						return npmInstall(directory, opts.verbose, '--save-dev', ENACT_DEV_NPM);
-					}
-				})
-				.then(() => generator.complete(params))
-	}).catch(err => console.log(chalk.red('ERROR: ') + err.message));
-};
+module.exports = {api, cli};
