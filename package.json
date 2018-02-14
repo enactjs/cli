@@ -83,6 +83,7 @@
     "strip-ansi": "4.0.0",
     "style-loader": "0.19.1",
     "tar": "4.3.3",
+    "thread-loader": "1.1.2",
     "uglifyjs-webpack-plugin": "1.1.6",
     "validate-npm-package-name": "3.0.0",
     "webpack": "3.10.0",
