@@ -4,15 +4,7 @@ const globalDir = require('global-modules');
 const fs = require('fs');
 const chalk = require('chalk');
 const minimist = require('minimist');
-
-const enact = [
-	'core',
-	'ui',
-	'moonstone',
-	'spotlight',
-	'i18n',
-	'webos'
-];
+const packageRoot = require('@enact/dev-utils/package-root');
 
 function displayHelp() {
 	console.log('  Usage');
@@ -32,6 +24,9 @@ function api({verbose = false} = {}) {
 		(verbose ? 'verbose' : 'error'),
 		'link'
 	];
+	const pkg = packageRoot();
+	let enact = Object.keys(pkg.meta.dependencies || {}).concat(Object.keys(pkg.meta.devDependencies || {}));
+	enact = enact.filter(d => d.startsWith('@enact/')).map(d => d.replace('@enact/', ''));
 
 	return new Promise((resolve, reject) => {
 		const missing = [];
