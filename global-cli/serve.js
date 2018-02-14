@@ -158,6 +158,13 @@ function serve(config, host, port, open) {
 		const urls = prepareUrls(protocol, host, resolvedPort);
 		// Create a webpack compiler that is configured with custom messages.
 		const compiler = createCompiler(webpack, config, app.name, urls);
+		compiler.plugin('done', stats => {
+			if(!stats.compilation.errors.length && stats.compilation.warnings.length) {
+				// React-Dev-Utils does not output any hosting information on warnings.
+				// Enact-CLI is a bit more lenient in that respect.
+				printInstructions(app.name, urls);
+			}
+		});
 		// Load proxy config
 		const proxySetting = app.proxy;
 		const proxyConfig = prepareProxy(proxySetting, './');
@@ -182,6 +189,24 @@ function serve(config, host, port, open) {
 			});
 		});
 	});
+}
+
+function printInstructions(name, urls) {
+	console.log();
+	console.log(`You can now view ${chalk.bold(name)} in the browser.`);
+	console.log();
+
+	if(urls.lanUrlForTerminal) {
+		console.log(`  ${chalk.bold('Local:')}            ${urls.localUrlForTerminal}`);
+		console.log(`  ${chalk.bold('On Your Network:')}  ${urls.lanUrlForTerminal}`);
+	} else {
+		console.log(`  ${urls.localUrlForTerminal}`);
+	}
+
+	console.log();
+	console.log('Note that the development build is not optimized.');
+	console.log(`To create a production build, use ${chalk.cyan('npm run pack-p')}.`);
+	console.log();
 }
 
 function api(opts) {
