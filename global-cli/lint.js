@@ -34,7 +34,7 @@ function api({strict = false, local = false, eslintArgs = []} = {}) {
 		args.push('.');
 	}
 	return new Promise((resolve, reject) => {
-		const child = cp.fork(require.resolve('eslint/bin/eslint'), eslintArgs,
+		const child = cp.fork(require.resolve('eslint/bin/eslint'), args,
 				{env:process.env, cwd:process.cwd()});
 		child.on('close', code => {
 			if(code!==0) {
