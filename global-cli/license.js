@@ -1,7 +1,7 @@
-const minimist = require('minimist');
-const checker = require('license-checker');
 const path = require('path');
 const chalk = require('chalk');
+const checker = require('license-checker');
+const minimist = require('minimist');
 
 // The following modules reside in `@enact/cli` but end up in production builds of apps
 const enactCLIProdModules = [
@@ -24,14 +24,14 @@ function displayHelp() {
 }
 
 function api({modules = []} = {}) {
-	if(!modules.length) {
+	if (!modules.length) {
 		modules = modules.concat(enactCLIProdModules, '.');
 	}
 
 	return Promise.all(modules.map(m => {
 		return new Promise((resolve, reject) => {
 			checker.init({start:m}, (err, json) => {
-				if(err) {
+				if (err) {
 					reject(new Error(`Unable to process licenses for ${m}.\n${err.message}`));
 				} else {
 					resolve(json || {});

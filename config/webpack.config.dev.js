@@ -27,19 +27,19 @@
 // @remove-on-eject-end
 
 const path = require('path');
-const {DefinePlugin} = require('webpack');
 const autoprefixer = require('autoprefixer');
-const flexbugfixes = require('postcss-flexbugs-fixes');
-const LessPluginRi = require('resolution-independence');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const flexbugfixes = require('postcss-flexbugs-fixes');
+const eslintFormatter = require('react-dev-utils/eslintFormatter');
+const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
+const LessPluginRi = require('resolution-independence');
+const {DefinePlugin} = require('webpack');
+const app = require('@enact/dev-utils/option-parser');
 const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
 const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
 const WebOSMetaPlugin = require('@enact/dev-utils/plugins/WebOSMetaPlugin');
-const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
-const eslintFormatter = require('react-dev-utils/eslintFormatter');
-const app = require('@enact/dev-utils/option-parser');
 
 process.chdir(app.context);
 

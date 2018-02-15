@@ -24,12 +24,12 @@
  * SOFTWARE.
  */
 
-const chalk = require('chalk');
-const fs = require('fs-extra');
-const minimist = require('minimist');
 const os = require('os');
 const path = require('path');
+const chalk = require('chalk');
 const spawn = require('cross-spawn');
+const fs = require('fs-extra');
+const minimist = require('minimist');
 const validatePackageName = require('validate-npm-package-name');
 
 const ENACT_DEV_NPM = '@enact/cli';
@@ -40,16 +40,16 @@ const defaultGenerator = {
 	validate: ({template, name}) => {
 		const validation = validatePackageName(name);
 
-		if(!validation.validForNewPackages) {
+		if (!validation.validForNewPackages) {
 			throw new Error('Could not create a project called ' + chalk.bold(name)
 					+ 'because of NPM naming restrictions:\n'
 					+ validation.errors.concat(validation.warnings).map(r => '  * ' + r).join('/n'));
 		} else {
 			const meta = fs.readJsonSync(path.join(template, 'package.json'), {throws:false}) || {};
 			const deps = Object.keys(meta.dependencies || {}).concat(Object.keys(meta.devDependencies || {}));
-			deps.sort()
+			deps.sort();
 
-			if(deps.includes(name)) {
+			if (deps.includes(name)) {
 				throw new Error('Cannot create a project called ' + chalk.bold(name)
 						+ ' because a dependency with the same name exists.\n'
 						+ 'Due to the way npm works, the following names are not allowed:\n\n'
@@ -103,13 +103,13 @@ const defaultGenerator = {
 
 		// Update appinfo.json if it exists in the template
 		let appinfo = path.join(directory, 'appinfo.json');
-		if(!fs.existsSync(appinfo)) {
+		if (!fs.existsSync(appinfo)) {
 			appinfo = path.join(directory, 'webos-meta', 'appinfo.json');
-			if(!fs.existsSync(appinfo)) {
+			if (!fs.existsSync(appinfo)) {
 				appinfo = undefined;
 			}
 		}
-		if(appinfo) {
+		if (appinfo) {
 			const aiMeta = fs.readJsonSync(appinfo, {encoding:'UTF8', throws:false}) || {};
 			aiMeta.id = meta.name;
 			fs.writeJsonSync(appinfo, aiMeta, {encoding:'UTF8', spaces:'\t'});
@@ -136,7 +136,7 @@ const defaultGenerator = {
 		// console.log('		and scripts into the app directory. If you do this, you can’t go back!');
 		// console.log();
 		console.log('We suggest that you begin by typing:');
-		if(path.resolve(process.cwd())!==path.resolve(directory)) {
+		if (path.resolve(process.cwd())!==path.resolve(directory)) {
 			console.log(chalk.cyan('	cd ' + path.relative(process.cwd(), directory)));
 		}
 		console.log('	' + chalk.cyan('npm run serve'));
@@ -166,8 +166,8 @@ function displayHelp() {
 function resolveTemplateGenerator(template) {
 	return new Promise((resolve, reject) => {
 		let templatePath = path.join(TEMPLATE_DIR, template);
-		if(!fs.existsSync(templatePath)) {
-			if(['default', 'moonstone'].includes(template)) {
+		if (!fs.existsSync(templatePath)) {
+			if (['default', 'moonstone'].includes(template)) {
 				templatePath = path.join(__dirname, '..', 'template');
 			} else {
 				reject(new Error(`Template ${chalk.bold(template)} not found.`));
@@ -175,17 +175,17 @@ function resolveTemplateGenerator(template) {
 		}
 		templatePath = fs.realpathSync(templatePath);
 		const subDir = path.join(templatePath, 'template');
-		if(fs.existsSync(subDir)) {
+		if (fs.existsSync(subDir)) {
 			try {
 				const generator = require(templatePath) || {};
 				Object.keys(defaultGenerator).forEach(k => {
-					if(generator[k]===undefined || generator[k]===true) {
+					if (generator[k]===undefined || generator[k]===true) {
 						generator[k] = defaultGenerator[k];
 					}
 				});
 				resolve({generator, templatePath:subDir});
-			} catch(e) {
-				if(e.message === `Cannot find module '${templatePath}'`) {
+			} catch (e) {
+				if (e.message === `Cannot find module '${templatePath}'`) {
 					resolve({generator:defaultGenerator, templatePath:subDir});
 				} else {
 					reject(new Error(`Failed to load ${chalk.bold(template)} template generator.\n${e}`));
@@ -203,7 +203,7 @@ function copyTemplate(template, output, overwrite) {
 	let templateGitIgnore = fs.readdirSync(template).filter(f => ['.gitignore', 'gitignore'].includes(f))[0];
 	templateGitIgnore = templateGitIgnore && path.join(template, templateGitIgnore);
 
-	if(overwrite && fs.existsSync(outputReadme) && fs.existsSync(path.join(template, 'README.md'))) {
+	if (overwrite && fs.existsSync(outputReadme) && fs.existsSync(path.join(template, 'README.md'))) {
 		console.log(chalk.yellow('Found an existing README.md file. Renaming to README.old.md'
 				+ ' to avoid overwriting.'));
 		console.log();
@@ -215,8 +215,8 @@ function copyTemplate(template, output, overwrite) {
 	return fs.copy(template, output, {overwrite:overwrite, errorOnExist:!overwrite, filter:filter}).then(() => {
 		// Handle gitignore after the fact to prevent npm from renaming it to .npmignore
 		// See: https://github.com/npm/npm/issues/1862
-		if(templateGitIgnore) {
-			if(fs.existsSync(outputGitIgnore)) {
+		if (templateGitIgnore) {
+			if (fs.existsSync(outputGitIgnore)) {
 				// Append if there's already a `.gitignore` file there
 				const data = fs.readFileSync(templateGitIgnore, {encoding:'UTF8'});
 				fs.appendFileSync(outputGitIgnore, data, {encoding:'UTF8'});
@@ -240,7 +240,7 @@ function npmInstall(directory, verbose, ...rest) {
 	return new Promise((resolve, reject) => {
 		const proc = spawn('npm', args, {stdio:'inherit', cwd:directory});
 		proc.on('close', code => {
-			if(code!==0) {
+			if (code!==0) {
 				reject(new Error('NPM install failed.'));
 			} else {
 				resolve();
@@ -261,7 +261,7 @@ function api(opts = {}) {
 				.then(() => generator.setup(params))
 				.then(() => npmInstall(opts.directory, opts.verbose))
 				.then(() => {
-					if(opts.local) {
+					if (opts.local) {
 						console.log('Installing @enact/cli locally. This might take a couple minutes.');
 						return npmInstall(opts.directory, opts.verbose, '--save-dev', ENACT_DEV_NPM);
 					}

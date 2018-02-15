@@ -1,6 +1,6 @@
+const chalk = require('chalk');
 const fs = require('fs-extra');
 const minimist = require('minimist');
-const chalk = require('chalk');
 const packageRoot = require('@enact/dev-utils/package-root');
 
 function displayHelp() {

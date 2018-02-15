@@ -24,16 +24,16 @@
  * SOFTWARE.
  */
 
-const chalk = require('chalk');
-const fs = require('fs-extra');
 const path = require('path');
-const minimist = require('minimist');
+const chalk = require('chalk');
 const filesize = require('filesize');
+const fs = require('fs-extra');
+const minimist = require('minimist');
+const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
+const stripAnsi = require('strip-ansi');
 const webpack = require('webpack');
 const mixins = require('@enact/dev-utils/mixins');
 const packageRoot = require('@enact/dev-utils/package-root');
-const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
-const stripAnsi = require('strip-ansi');
 
 function displayHelp() {
 	console.log('  Usage');
@@ -68,22 +68,22 @@ function displayHelp() {
 }
 
 function details(err, stats, output) {
-	if(err) return err;
+	if (err) return err;
 	stats.compilation.warnings.forEach(w => {
 		w.message = w.message.replace(/\n.* potentially fixable with the `--fix` option./gm, '');
 	});
 	const statsJSON = stats.toJson({}, true);
 	const messages = formatWebpackMessages(statsJSON);
-	if(messages.errors.length) {
+	if (messages.errors.length) {
 		return new Error(messages.errors.join('\n\n'));
-	} else if(process.env.CI && messages.warnings.length) {
+	} else if (process.env.CI && messages.warnings.length) {
 		console.log(chalk.yellow('Treating warnings as errors because process.env.CI = true. '
 				+ 'Most CI servers set it automatically.\n'));
 		return new Error(messages.warnings.join('\n\n'));
 	} else {
 		printFileSizes(statsJSON, output);
 		console.log();
-		if(messages.warnings.length) {
+		if (messages.warnings.length) {
 			console.log(chalk.yellow('Compiled with warnings:\n'));
 			console.log(messages.warnings.join('\n\n') + '\n');
 		} else {
@@ -136,8 +136,8 @@ function build(config) {
 		const compiler = webpack(config);
 		compiler.run((err, stats) => {
 			err = details(err, stats, config.output.path);
-			if(err) {
-				reject(err)
+			if (err) {
+				reject(err);
 			} else {
 				resolve();
 			}
@@ -176,7 +176,7 @@ function api(opts = {}) {
 		config = require('../config/webpack.config.dev');
 	}
 
-	if(opts.output) config.output.path = path.resolve(opts.output);
+	if (opts.output) config.output.path = path.resolve(opts.output);
 
 	mixins.apply(config, opts);
 

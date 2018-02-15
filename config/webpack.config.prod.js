@@ -27,20 +27,20 @@
 // @remove-on-eject-end
 
 const path = require('path');
-const {DefinePlugin} = require('webpack');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const autoprefixer = require('autoprefixer');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
 const removeclass = require('postcss-remove-classes').default;
+const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const LessPluginRi = require('resolution-independence');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const {DefinePlugin} = require('webpack');
+const app = require('@enact/dev-utils/option-parser');
 const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
 const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
 const WebOSMetaPlugin = require('@enact/dev-utils/plugins/WebOSMetaPlugin');
-const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const eslintFormatter = require('react-dev-utils/eslintFormatter');
-const app = require('@enact/dev-utils/option-parser');
 
 process.chdir(app.context);
 

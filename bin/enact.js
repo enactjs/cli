@@ -7,7 +7,7 @@ const chalk = require('chalk');
 // Verify the correct version of Node is in use.
 const minimum = [6, 4, 0];
 const active = process.versions.node.split('.').map(val => parseInt(val));
-if(active[0] < minimum[0] || (active[0] === minimum[0] && active[1] < minimum[1])) {
+if (active[0] < minimum[0] || (active[0] === minimum[0] && active[1] < minimum[1])) {
 	console.log(chalk.red('You are running Node ' + active.join('.') + '.\n@enact/cli requires Node '
 			+ minimum.join('.') + ' or higher. \n' + chalk.bold('Please update your version of Node.')));
 	process.exit(1);

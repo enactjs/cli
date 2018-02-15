@@ -25,7 +25,7 @@ function displayHelp() {
 function transpile(src, dest) {
 	return new Promise((resolve, reject) => {
 		babel.transformFile(src, {extends:babelrc, plugins}, (err, result) => {
-			if(err) {
+			if (err) {
 				reject(err);
 			} else {
 				resolve(result);
@@ -38,9 +38,9 @@ function transpile(src, dest) {
 function api({source = '.', output = './build', ignore} = {}) {
 	process.env.ES5 = 'true';
 	const filter = (src, dest) => {
-		if(ignore && ignore.test && ignore.test(src)) {
+		if (ignore && ignore.test && ignore.test(src)) {
 			return false;
-		} else if(path.extname(src)==='.js') {
+		} else if (path.extname(src)==='.js') {
 			return fs.ensureDir(path.dirname(dest)).then(() => transpile(src, dest));
 		} else {
 			return true;

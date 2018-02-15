@@ -3,10 +3,11 @@ module.exports = {
 		'window': true
 	},
 	env: {
-		'es6': true, // sets the "ecmaVersion" parser option to 6
+		'es6': true, // sets the 'ecmaVersion' parser option to 6
 		'node': true
 	},
 	extends: ['eslint:recommended'],
+	plugins: ['import'],
 	rules: {
 		'comma-dangle': 2,
 		'no-console': 0,
@@ -19,6 +20,7 @@ module.exports = {
 		'block-scoped-var': 1,
 		'dot-location': [1, 'property'],
 		'eqeqeq': [1, 'smart'],
+		'keyword-spacing': 1,
 		'no-caller': 2,
 		'no-div-regex': 1,
 		'no-eval': 1,
@@ -55,7 +57,7 @@ module.exports = {
 		'comma-style': 1,
 		'computed-property-spacing': 1,
 		'eol-last': 1,
-		'indent': [1, 'tab', {'SwitchCase': 1, 'CallExpression': {'arguments': 2}, 'MemberExpression': 'off', "flatTernaryExpressions": true}],
+		'indent': [1, 'tab', {'SwitchCase': 1, 'CallExpression': {'arguments': 2}, 'MemberExpression': 'off', 'flatTernaryExpressions': true}],
 		'jsx-quotes': 1,
 		'linebreak-style': 1,
 		'new-cap': [2, {'newIsCap': true, 'capIsNew': false}],
@@ -69,6 +71,7 @@ module.exports = {
 		'no-unneeded-ternary': 1,
 		'operator-linebreak': [1, 'before'],
 		'quotes': [1, 'single', {'avoidEscape':true}],
+		'semi': 1,
 		'space-before-function-paren': [1, 'never'],
 		'space-infix-ops': 0,
 		'space-unary-ops': [1, {'words': true, 'nonwords': false}],
@@ -77,6 +80,14 @@ module.exports = {
 		'require-yield': 0,
 		'no-var': 1,
 		'prefer-const': 1,
-		'prefer-arrow-callback': [1, {'allowNamedFunctions': true}]
+		'prefer-arrow-callback': [1, {'allowNamedFunctions': true}],
+		'import/no-unresolved': [2, {'commonjs': true, 'caseSensitive': true}],
+		'import/named': 2,
+		'import/first': 1,
+		'import/exports-last': 1,
+		'import/no-duplicates': 2,
+		'import/extensions': [1, 'always', {'js': 'never', 'json': 'always'}],
+		'import/newline-after-import': 1,
+		'import/order': [1, {'newlines-between':'never'}]
 	}
 };

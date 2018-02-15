@@ -25,13 +25,13 @@
  */
 
 const chalk = require('chalk');
+const minimist = require('minimist');
+const clearConsole = require('react-dev-utils/clearConsole');
+const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
+const openBrowser = require('react-dev-utils/openBrowser');
+const {choosePort, createCompiler, prepareProxy, prepareUrls} = require('react-dev-utils/WebpackDevServerUtils');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const minimist = require('minimist');
-const {choosePort, createCompiler, prepareProxy, prepareUrls} = require('react-dev-utils/WebpackDevServerUtils');
-const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
-const clearConsole = require('react-dev-utils/clearConsole');
-const openBrowser = require('react-dev-utils/openBrowser');
 const app = require('@enact/dev-utils/option-parser');
 const devConfig = require('../config/webpack.config.dev');
 
@@ -160,7 +160,7 @@ function serve(config, host, port, open) {
 		const compiler = createCompiler(webpack, config, app.name, urls);
 		compiler.plugin('after-emit', (compilation, callback) => {
 			compilation.warnings.forEach(w => {
-				if(w.message) {
+				if (w.message) {
 					// Remove any --fix ESLintinfo messages since the eslint-loader config is
 					// internal and eslist is used in an embedded context.
 					w.message = w.message
@@ -178,10 +178,10 @@ function serve(config, host, port, open) {
 		const devServer = new WebpackDevServer(compiler, serverConfig);
 		// Launch WebpackDevServer.
 		devServer.listen(resolvedPort, host, err => {
-			if(err) return console.log(err);
-			if(process.stdout.isTTY) clearConsole();
+			if (err) return console.log(err);
+			if (process.stdout.isTTY) clearConsole();
 			console.log(chalk.cyan('Starting the development server...\n'));
-			if(open) {
+			if (open) {
 				openBrowser(urls.localUrlForBrowser);
 			}
 		});
@@ -204,7 +204,7 @@ function api(opts) {
 	const port = parseInt(process.env.PORT || opts.port || config.devServer.port || 8080);
 
 	// Start serving
-	if(['node', 'async-node', 'webworker'].includes(app.environment)) {
+	if (['node', 'async-node', 'webworker'].includes(app.environment)) {
 		return Promise.reject(new Error('Serving is not supported for non-browser apps.'));
 	} else {
 		return serve(config, host, port, opts.browser);
@@ -225,7 +225,7 @@ function cli(args) {
 	api(opts).catch(err => {
 		console.error(chalk.red('ERROR: ') + (err.message || err));
 		process.exit(1);
-	})
+	});
 }
 
 module.exports = {api, cli};

@@ -1,10 +1,10 @@
+const os = require('os');
+const path = require('path');
 const chalk = require('chalk');
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
-const inquirer = require('react-dev-utils/inquirer');
 const minimist = require('minimist');
-const os = require('os');
-const path = require('path');
+const inquirer = require('react-dev-utils/inquirer');
 const tar = require('tar');
 
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
@@ -46,9 +46,9 @@ function displayHelp() {
 
 function validateArgs(action, name) {
 	return new Promise((resolve, reject) => {
-		if(!name && !['list', 'default'].includes(action)) {
-			reject(new Error('Invalid or missing template name.'))
-		} else if(name === 'default') {
+		if (!name && !['list', 'default'].includes(action)) {
+			reject(new Error('Invalid or missing template name.'));
+		} else if (name === 'default') {
 			reject(new Error('Template "default" name is reserved. '
 					+ 'Use "enact template default <name>" to modify it.'));
 		} else {
@@ -58,9 +58,9 @@ function validateArgs(action, name) {
 }
 
 function initTemplateArea() {
-	if(!fs.existsSync(TEMPLATE_DIR)) {
+	if (!fs.existsSync(TEMPLATE_DIR)) {
 		fs.mkdirSync(TEMPLATE_DIR);
-		console.log(path.join(__dirname, '..', 'template'))
+		console.log(path.join(__dirname, '..', 'template'));
 	}
 	const init = doLink('moonstone', path.join(__dirname, '..', 'template'));
 	const moonstoneLink = path.join(TEMPLATE_DIR, 'moonstone');
@@ -71,14 +71,14 @@ function doInstall(name, target) {
 	const output = path.join(TEMPLATE_DIR, name);
 	return doRemove(name).then(() => {
 		const github = target.match(/(^\w+\/\w+)(#\w+)?$/);
-		if(github) {
+		if (github) {
 			// If target is GitHub shorthand, resolve to full HTTPS URI
 			target = 'https://github.com/' + github[1] + '.git' + (github[2] || '');
 		}
 
-		if(/(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|#[-\d\w._]+?)$/.test(target)) {
+		if (/(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|#[-\d\w._]+?)$/.test(target)) {
 			return installFromGit(name, target);
-		} else if(fs.existsSync(target)) {
+		} else if (fs.existsSync(target)) {
 			return installFromLocal(output, target);
 		} else {
 			return installFromNPM(output, target);
@@ -86,12 +86,12 @@ function doInstall(name, target) {
 	}).then(() => {
 		// npm install if needed
 		return new Promise((resolve, reject) => {
-			if(fs.existsSync(path.join(output, 'template'))
+			if (fs.existsSync(path.join(output, 'template'))
 					&& fs.existsSync(path.join(output, 'package.json'))) {
 				const child = spawn('npm', ['--loglevel', 'error', 'install', '--production'],
 						{stdio: 'inherit', cwd:output});
 				child.on('close', code => {
-					if(code !== 0) {
+					if (code !== 0) {
 						reject(new Error('Failed to NPM install dynamic template. Ensure package.json is valid.'));
 					} else {
 						resolve();
@@ -109,10 +109,10 @@ function installFromGit(name, target) {
 	return new Promise((resolve, reject) => {
 		const git = target.match(/^(?:(^.*)#(\w+)?|(^.*))$/);
 		const args = ['clone', (git[1] || git[3]), name];
-		if(git[2]) args.splice(2, 0, '-b', git[2]);
+		if (git[2]) args.splice(2, 0, '-b', git[2]);
 		const child = spawn('git', args, {stdio:'inherit', cwd:TEMPLATE_DIR});
 		child.on('close', code => {
-			if(code !== 0) {
+			if (code !== 0) {
 				reject(new Error(`Unable to clone git URI ${target}.`));
 			} else {
 				resolve();
@@ -123,7 +123,7 @@ function installFromGit(name, target) {
 
 // Copy directory files
 function installFromLocal(output, target) {
-	fs.ensureDirSync(output)
+	fs.ensureDirSync(output);
 	return fs.copy(target, output).catch(err => {
 		throw new Error(`Failed to copy template files from ${target}.\n${err.message}`);
 	});
@@ -133,23 +133,23 @@ function installFromLocal(output, target) {
 function installFromNPM(output, target) {
 	return new Promise((resolve, reject) => {
 		const tempDir = path.join(os.tmpdir(), 'enact');
-		if(fs.existsSync(tempDir)) fs.removeSync(tempDir);
+		if (fs.existsSync(tempDir)) fs.removeSync(tempDir);
 		fs.ensureDirSync(tempDir);
 
 		const child = spawn('npm', ['--loglevel', 'error', 'pack', target], {stdio:'ignore', cwd:tempDir});
 		child.on('close', code => {
-			if(code !== 0) {
+			if (code !== 0) {
 				reject(new Error('Invalid template target: ' + target));
 			} else {
 				const tarball = fs.readdirSync(tempDir).filter(f => f.endsWith('.tgz'))[0];
-				if(tarball) {
+				if (tarball) {
 					tar.x({file:path.join(tempDir, tarball), cwd:tempDir}, [], err => {
-						if(err) {
-							reject(new Error(`Tarball extraction failure.\n${err.message}`))
+						if (err) {
+							reject(new Error(`Tarball extraction failure.\n${err.message}`));
 						} else {
 							fs.ensureDirSync(output);
 							fs.copy(path.join(tempDir, 'package'), output, err2 => {
-								if(err2) {
+								if (err2) {
 									reject(new Error(`Failed to copy template files from ${tempDir}.\n${err2.message}`));
 								} else {
 									fs.removeSync(tempDir);
@@ -159,7 +159,7 @@ function installFromNPM(output, target) {
 						}
 					});
 				} else {
-					reject(new Error(`Failed to download NPM package ${target} from registry.`))
+					reject(new Error(`Failed to download NPM package ${target} from registry.`));
 				}
 			}
 		});
@@ -185,7 +185,7 @@ function doRemove(name) {
 	const isDefault = fs.existsSync(DEFAULT_LINK)
 			&& fs.realpathSync(output) === fs.realpathSync(DEFAULT_LINK);
 	return fs.remove(output).then(() => {
-		if(isDefault) {
+		if (isDefault) {
 			fs.removeSync(DEFAULT_LINK);
 		}
 	}).catch(err => {
@@ -208,15 +208,15 @@ function doDefault() {
 function doList() {
 	const realDefault = fs.realpathSync(DEFAULT_LINK);
 	const all = fs.readdirSync(TEMPLATE_DIR).filter(t => t !== 'default');
-	console.log(chalk.bold('Available Templates'))
+	console.log(chalk.bold('Available Templates'));
 	all.forEach(t => {
 		let item = '  ' + t;
 		const template = path.join(TEMPLATE_DIR, t);
 		const realTemplate = fs.realpathSync(template);
-		if(realTemplate === realDefault) {
+		if (realTemplate === realDefault) {
 			item += chalk.green(' (default)');
 		}
-		if(fs.lstatSync(template).isSymbolicLink()) {
+		if (fs.lstatSync(template).isSymbolicLink()) {
 			item += chalk.dim(' -> ' + realTemplate);
 		}
 		console.log(item);
@@ -235,7 +235,7 @@ function api({action, name, target} = {}) {
 			case 'link':
 				actionPromise = doLink(name, target).then(() => {
 					console.log(`Template "${name}" linked from ${target}.`);
-				})
+				});
 				break;
 			case 'remove':
 				actionPromise = doRemove(name).then(() => {
@@ -251,7 +251,7 @@ function api({action, name, target} = {}) {
 				doList();
 				break;
 			default:
-				actionPromise = Promise.reject(new Error(`Invalid template action: ${action}.`))
+				actionPromise = Promise.reject(new Error(`Invalid template action: ${action}.`));
 				break;
 		}
 		return actionPromise;
@@ -268,7 +268,7 @@ function cli(args) {
 	const action = opts._[0];
 	const name = opts._[1];
 	const target = opts._[2] || process.cwd();
-	if(!action) displayHelp();
+	if (!action) displayHelp();
 
 	api({action, name, target}).catch(err => {
 		console.error('Template action failed.');

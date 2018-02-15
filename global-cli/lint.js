@@ -20,15 +20,15 @@ function displayHelp() {
 
 function api({strict = false, local = false, eslintArgs = []} = {}) {
 	let args = [];
-	if(strict) {
+	if (strict) {
 		args.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact/strict'));
-	} else if(!local) {
+	} else if (!local) {
 		args.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact'));
 	}
 	args.push('--ignore-pattern', 'node_modules/*');
 	args.push('--ignore-pattern', 'build/*');
 	args.push('--ignore-pattern', 'dist/*');
-	if(eslintArgs.length) {
+	if (eslintArgs.length) {
 		args = args.concat(eslintArgs);
 	} else {
 		args.push('.');
@@ -37,8 +37,8 @@ function api({strict = false, local = false, eslintArgs = []} = {}) {
 		const child = cp.fork(require.resolve('eslint/bin/eslint'), args,
 				{env:process.env, cwd:process.cwd()});
 		child.on('close', code => {
-			if(code!==0) {
-				reject()
+			if (code!==0) {
+				reject();
 			} else {
 				resolve();
 			}

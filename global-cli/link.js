@@ -1,8 +1,8 @@
-const spawn = require('cross-spawn');
 const path = require('path');
-const globalDir = require('global-modules');
-const fs = require('fs');
 const chalk = require('chalk');
+const spawn = require('cross-spawn');
+const fs = require('fs-extra');
+const globalDir = require('global-modules');
 const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils/package-root');
 
@@ -30,20 +30,20 @@ function api({verbose = false} = {}) {
 
 	return new Promise((resolve, reject) => {
 		const missing = [];
-		for(let i=0; i<enact.length; i++) {
-			if(fs.existsSync(path.join(globalDir, '@enact', enact[i]))) {
+		for (let i=0; i<enact.length; i++) {
+			if (fs.existsSync(path.join(globalDir, '@enact', enact[i]))) {
 				linkArgs.push('@enact/' + enact[i]);
 			} else {
 				missing.push('@enact/' + enact[i]);
 			}
 		}
 
-		if(missing.length === enact.length) {
+		if (missing.length === enact.length) {
 			reject(new Error('Unable to detect any Enact global modules. Please ensure they\'ve been linked correctly.'));
 		} else {
 			const proc = spawn('npm', linkArgs, {stdio: 'inherit', cwd:process.cwd()});
 			proc.on('close', code => {
-				if(code!==0) {
+				if (code!==0) {
 					reject(new Error('"npm ' + linkArgs.join(' ') + '" failed'));
 				} else {
 					resolve();
