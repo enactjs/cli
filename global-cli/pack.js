@@ -69,6 +69,9 @@ function displayHelp() {
 
 function details(err, stats, output) {
 	if(err) return err;
+	stats.compilation.warnings.forEach(w => {
+		w.message = w.message.replace(/\n.* potentially fixable with the `--fix` option./gm, '');
+	});
 	const statsJSON = stats.toJson({}, true);
 	const messages = formatWebpackMessages(statsJSON);
 	if(messages.errors.length) {
