@@ -1,3 +1,11 @@
+## 0.9.8 (February 15, 2018)
+
+* Updated all links for enactjs github organization and fixed a broken docs link.
+
+### serve
+
+* Restored usage of extract-text-webpack-plugin with updated Webpack 3.6.0.
+
 ## 0.9.7 (January 11, 2018)
 
 Updated copyright and license information for 2018 year.
