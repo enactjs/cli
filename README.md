@@ -1,6 +1,6 @@
-# @enact/cli
+# @enact/cli [![Build Status](https://travis-ci.org/enactjs/cli.svg?branch=master)](https://travis-ci.org/enactjs/cli) [![NPM Version](https://img.shields.io/npm/v/@enact/cli.svg?style=flat)](https://www.npmjs.com/package/preact-cli)
 
-A standalone dev environment for Enact apps using Webpack, Babel, React, and a collection of other tools.
+> A standalone toolkit for rapid Enact app development.
 
 ## Installation
 
