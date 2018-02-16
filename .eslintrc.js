@@ -84,7 +84,6 @@ module.exports = {
 		'import/no-unresolved': [2, {'commonjs': true, 'caseSensitive': true}],
 		'import/named': 2,
 		'import/first': 1,
-		'import/exports-last': 1,
 		'import/no-duplicates': 2,
 		'import/extensions': [1, 'always', {'js': 'never', 'json': 'always'}],
 		'import/newline-after-import': 1,
