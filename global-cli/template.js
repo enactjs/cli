@@ -131,20 +131,15 @@ function installFromNPM(target, name = path.basename(target)) {
 }
 
 function doLink(target, name = path.basename(path.resolve(target))) {
-	return doRemove(name).then(() => {
-		return new Promise((resolve, reject) => {
-			const directory = path.resolve(target);
-			const prevCWD = process.cwd();
-			process.chdir(TEMPLATE_DIR);
-			fs.symlink(directory, name, 'junction', err => {
-				process.chdir(prevCWD);
-				if(err) {
-					reject(new Error(`Unable to create symlink to ${target}.\n${err.message}`))
-				} else {
-					resolve({target, name});
-				}
-			});
-		});
+	const directory = path.resolve(target);
+	const prevCWD = process.cwd();
+	process.chdir(TEMPLATE_DIR);
+	return fs.remove(name).then(() => fs.symlink(directory, name, 'junction')).then(() => {
+		process.chdir(prevCWD);
+		return {target, name};
+	}).catch(err => {
+		process.chdir(prevCWD);
+		throw new Error(`Unable to setup symlink to ${directory}.\n${err.message}`);
 	});
 }
 
@@ -165,7 +160,7 @@ function doRemove(name) {
 				}
 			});
 		} else {
-			resolve();
+			reject(new Error(`Unable to remove. Template "${name}" not found.`));
 		}
 	});
 }
