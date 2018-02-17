@@ -235,14 +235,14 @@ function api({action, target, name} = {}) {
 
 		switch (action) {
 			case 'install':
-				actionPromise = doInstall(target, name).then((resolved) => {
+				actionPromise = doInstall(target, name).then(resolved => {
 					console.log(`Template "${resolved}" installed.`);
 				});
 				break;
 			case 'link':
-				actionPromise = doLink(target, name).then(() => {
-					console.log(`Template "${name}" linked from ${target}.`);
-				});
+				actionPromise = doLink(target, name).then(linked => {
+					console.log(`Template "${linked.name}" linked from ${path.resolve(linked.target)}.`);
+				})
 				break;
 			case 'remove':
 				actionPromise = doRemove(name).then(() => {
