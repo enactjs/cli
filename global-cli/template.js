@@ -163,23 +163,23 @@ function installFromNPM(target, name = path.basename(target)) {
 }
 
 function doLink(target, name = path.basename(path.resolve(target))) {
-	return doRemove(name).then(() => {
-		const directory = path.resolve(target);
-		const prevCWD = process.cwd();
-		process.chdir(TEMPLATE_DIR);
-		return fs.symlink(directory, name, 'junction').then(() => {
-			process.chdir(prevCWD);
-		}).catch(err => {
-			process.chdir(prevCWD);
-			throw new Error(`Unable to create symlink to ${target}.\n${err.message}`);
-		});
+	const directory = path.resolve(target);
+	const prevCWD = process.cwd();
+	process.chdir(TEMPLATE_DIR);
+	return fs.remove(name).then(() => fs.symlink(directory, name, 'junction')).then(() => {
+		process.chdir(prevCWD);
+		return {target, name};
+	}).catch(err => {
+		process.chdir(prevCWD);
+		throw new Error(`Unable to setup symlink to ${directory}.\n${err.message}`);
 	});
 }
 
 function doRemove(name) {
 	const output = path.join(TEMPLATE_DIR, name);
-	const isDefault = fs.existsSync(DEFAULT_LINK)
-			&& fs.realpathSync(output) === fs.realpathSync(DEFAULT_LINK);
+	const isDefault = fs.existsSync(DEFAULT_LINK) && fs.realpathSync(output) === fs.realpathSync(DEFAULT_LINK);
+	if(!fs.existsSync(output)) return Promise.reject(new Error(`Unable to remove. Template "${name}" not found.`));
+
 	return fs.remove(output).then(() => {
 		if (isDefault) {
 			fs.removeSync(DEFAULT_LINK);
