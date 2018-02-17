@@ -178,7 +178,7 @@ function doLink(target, name = path.basename(path.resolve(target))) {
 function doRemove(name) {
 	const output = path.join(TEMPLATE_DIR, name);
 	const isDefault = fs.existsSync(DEFAULT_LINK) && fs.realpathSync(output) === fs.realpathSync(DEFAULT_LINK);
-	if(!fs.existsSync(output)) return Promise.reject(new Error(`Unable to remove. Template "${name}" not found.`));
+	if (!fs.existsSync(output)) return Promise.reject(new Error(`Unable to remove. Template "${name}" not found.`));
 
 	return fs.remove(output).then(() => {
 		if (isDefault) {
@@ -242,7 +242,7 @@ function api({action, target, name} = {}) {
 			case 'link':
 				actionPromise = doLink(target, name).then(linked => {
 					console.log(`Template "${linked.name}" linked from ${path.resolve(linked.target)}.`);
-				})
+				});
 				break;
 			case 'remove':
 				actionPromise = doRemove(name).then(() => {
