@@ -61,15 +61,15 @@ function initTemplateArea() {
 
 function doInstall(target, name) {
 	const github = target.match(/(^\w+\/\w+)(#\w+)?$/);
-	if(github) {
+	if (github) {
 		// If target is GitHub shorthand, resolve to full HTTPS URI
 		target = 'https://github.com/' + github[1] + '.git' + (github[2] || '');
 	}
 
 	let installation;
-	if(/(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|#[-\d\w._]+?)$/.test(target)) {
+	if (/(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|#[-\d\w._]+?)$/.test(target)) {
 		installation = installFromGit(target, name);
-	} else if(fs.existsSync(target)) {
+	} else if (fs.existsSync(target)) {
 		installation = installFromLocal(target, name);
 	} else {
 		installation = installFromNPM(target, name);
@@ -78,7 +78,7 @@ function doInstall(target, name) {
 		// npm install if needed
 		return new Promise((resolve, reject) => {
 			const output = path.join(TEMPLATE_DIR, resolved);
-			if(fs.existsSync(path.join(output, 'template'))
+			if (fs.existsSync(path.join(output, 'template'))
 					&& fs.existsSync(path.join(output, 'package.json'))) {
 				const child = spawn('npm', ['--loglevel', 'error', 'install', '--production'],
 						{stdio: 'inherit', cwd:output});
@@ -100,7 +100,7 @@ function doInstall(target, name) {
 function installFromGit(target, name = path.basename(url.parse(target).pathname, '.git')) {
 	const git = target.match(/^(?:(^.*)#([\w\d-_.]+)?|(^.*))$/);
 	const args = ['clone', (git[1] || git[3]), name, '-c', 'advice.detachedHead=false'];
-	if(git[2]) args.splice(2, 0, '-b', git[2]);
+	if (git[2]) args.splice(2, 0, '-b', git[2]);
 	fs.removeSync(path.join(TEMPLATE_DIR, name));
 	return new Promise((resolve, reject) => {
 		const child = spawn('git', args, {stdio:'inherit', cwd:TEMPLATE_DIR});
@@ -119,7 +119,6 @@ function installFromLocal(target, name = path.basename(target)) {
 	const output = path.join(TEMPLATE_DIR, name);
 	fs.removeSync(output);
 	fs.ensureDirSync(output);
-	return new Promise((resolve, reject) => {
 	return fs.copy(target, output).then(() => name).catch(err => {
 		throw new Error(`Failed to copy template files from ${target}.\n${err.message}`);
 	});
@@ -160,7 +159,7 @@ function installFromNPM(target, name = path.basename(target)) {
 				}
 			}
 		});
-	})
+	});
 }
 
 function doLink(target, name = path.basename(path.resolve(target))) {
@@ -193,7 +192,7 @@ function doRemove(name) {
 function doDefault(name) {
 	const all = fs.readdirSync(TEMPLATE_DIR).filter(t => t !== 'default');
 	let choice;
-	if(name && all.includes(name)) {
+	if (name && all.includes(name)) {
 		choice = Promise.resolve({template:name});
 	} else {
 		const i = all.find(t => fs.realpathSync(path.join(TEMPLATE_DIR, t)) === fs.realpathSync(DEFAULT_LINK));
@@ -230,7 +229,7 @@ function api({action, target, name} = {}) {
 	return initTemplateArea().then(() => {
 		let actionPromise;
 
-		if(['install', 'link'].includes(action) && name === 'default')
+		if (['install', 'link'].includes(action) && name === 'default')
 			throw new Error('Template "default" name is reserved. '
 					+ 'Use "enact template default <name>" to modify it.');
 
