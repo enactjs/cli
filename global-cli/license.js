@@ -18,6 +18,7 @@ function displayHelp() {
 	console.log('                          (default: <current directory>');
 	console.log();
 	console.log('  Options');
+	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
 	process.exit(0);
