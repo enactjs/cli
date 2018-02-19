@@ -13,6 +13,9 @@ if (!semver.satisfies(process.version, pkg.engines.node)) {
 	process.exit(1);
 }
 
+// Uncaught error handler
+process.on('uncaughtException', err => console.error(chalk.red('ERROR: ') + (err.message || err)));
+
 // Handle tasks/arguments
 if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 	// Enact-CLI ascii art title
