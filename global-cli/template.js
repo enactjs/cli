@@ -125,7 +125,7 @@ function installFromLocal(target, name = path.basename(target)) {
 }
 
 // Download and extract NPM package
-function installFromNPM(target, name = path.basename(target)) {
+function installFromNPM(target, name = path.basename(target).replace(/^template-/, '')) {
 	const output = path.join(TEMPLATE_DIR, name);
 	const tempDir = path.join(os.tmpdir(), 'enact');
 	fs.removeSync(tempDir);
