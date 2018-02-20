@@ -231,7 +231,7 @@ function api({action, target, name} = {}) {
 
 		if (['install', 'link', 'remove'].includes(action) && name === 'default')
 			throw new Error('Template "default" name is reserved. '
-					+ 'Use "enact template default <name>" to modify it.');
+					+ 'Use "enact template default" to modify it.');
 
 		switch (action) {
 			case 'install':
