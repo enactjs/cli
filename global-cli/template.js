@@ -22,10 +22,10 @@ function initTemplateArea() {
 }
 
 function doInstall(target, name) {
-	const github = target.match(/(^\w+\/\w+)(#\w+)?$/);
+	const github = target.match(/^([a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38})\/([-_.\w]+)((?:#|@)?[-_.\w]+)?$/);
 	if(github) {
 		// If target is GitHub shorthand, resolve to full HTTPS URI
-		target = 'https://github.com/' + github[1] + '.git' + (github[2] || '');
+		target = 'https://github.com/' + github[1] + '/' + github[2] + '.git' + (github[3] || '');
 	}
 
 	let installation;
