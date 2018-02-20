@@ -254,7 +254,7 @@ module.exports = function(args) {
 	initTemplateArea().then(() => {
 		let actionPromise;
 
-		if(['install', 'link'].includes(action) && name === 'default')
+		if(['install', 'link', 'remove'].includes(action) && name === 'default')
 			throw new Error('Template "default" name is reserved. '
 					+ 'Use "enact template default <name>" to modify it.');
 
