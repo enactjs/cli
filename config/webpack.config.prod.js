@@ -54,10 +54,7 @@ module.exports = {
 	devtool: false,
 	// In production, we only want to load the polyfills and the app code.
 	entry: {
-		main: [
-			require.resolve('./polyfills'),
-			app.context
-		]
+		main: [require.resolve('./polyfills'), app.context]
 	},
 	output: {
 		// The build output directory.
@@ -82,17 +79,14 @@ module.exports = {
 		].filter(Boolean),
 		alias: {
 			// Support ilib shorthand alias for ilib modules
-			'ilib':'@enact/i18n/ilib/lib'
+			ilib: '@enact/i18n/ilib/lib'
 		}
 	},
 	// @remove-on-eject-begin
 	// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
 	// directory of `@enact/cli` itself rather than the project directory.
 	resolveLoader: {
-		modules: [
-			path.resolve(__dirname, '../node_modules'),
-			path.resolve('./node_modules')
-		]
+		modules: [path.resolve(__dirname, '../node_modules'), path.resolve('./node_modules')]
 	},
 	// @remove-on-eject-end
 	module: {
@@ -190,7 +184,7 @@ module.exports = {
 							loader: require.resolve('less-loader'),
 							options: {
 								// If resolution independence options are specified, use the LESS plugin.
-								plugins: ((app.ri) ? [new LessPluginRi(app.ri)] : [])
+								plugins: app.ri ? [new LessPluginRi(app.ri)] : []
 							}
 						}
 					]
@@ -218,7 +212,7 @@ module.exports = {
 			xhtml: true,
 			minify: {
 				removeComments: true,
-				collapseWhitespace:false,
+				collapseWhitespace: false,
 				removeRedundantAttributes: true,
 				useShortDoctype: true,
 				removeEmptyAttributes: true,
@@ -235,7 +229,7 @@ module.exports = {
 		// Otherwise React will be compiled in the very slow development mode.
 		new DefinePlugin({
 			'process.env': {
-				'NODE_ENV': '"production"'
+				NODE_ENV: '"production"'
 			}
 		}),
 		// Minify the code.

@@ -24,23 +24,22 @@ function displayHelp() {
 
 function transpile(src, dest) {
 	return new Promise((resolve, reject) => {
-		babel.transformFile(src, {extends:babelrc, plugins}, (err, result) => {
+		babel.transformFile(src, {extends: babelrc, plugins}, (err, result) => {
 			if (err) {
 				reject(err);
 			} else {
 				resolve(result);
 			}
 		});
-	}).then(result => fs.writeFile(dest, result.code, {encoding:'utf8'}));
+	}).then(result => fs.writeFile(dest, result.code, {encoding: 'utf8'}));
 }
-
 
 function api({source = '.', output = './build', ignore} = {}) {
 	process.env.ES5 = 'true';
 	const filter = (src, dest) => {
 		if (ignore && ignore.test && ignore.test(src)) {
 			return false;
-		} else if (path.extname(src)==='.js') {
+		} else if (path.extname(src) === '.js') {
 			return fs.ensureDir(path.dirname(dest)).then(() => transpile(src, dest));
 		} else {
 			return true;
@@ -49,9 +48,11 @@ function api({source = '.', output = './build', ignore} = {}) {
 
 	return fs.readdir(source).then(paths => {
 		paths = paths.filter(p => !blacklist.includes(p));
-		return Promise.all(paths.map(item => {
-			return fs.copy(path.join(source, item), path.join(output, item), {filter, stopOnErr:true});
-		}));
+		return Promise.all(
+			paths.map(item => {
+				return fs.copy(path.join(source, item), path.join(output, item), {filter, stopOnErr: true});
+			})
+		);
 	});
 }
 
@@ -59,8 +60,8 @@ function cli(args) {
 	const opts = minimist(args, {
 		string: ['output', 'ignore'],
 		boolean: ['help'],
-		default: {output:'./build'},
-		alias: {i:'ignore', o:'output', h:'help'}
+		default: {output: './build'},
+		alias: {i: 'ignore', o: 'output', h: 'help'}
 	});
 	opts.help && displayHelp();
 
@@ -68,7 +69,7 @@ function cli(args) {
 	process.chdir(packageRoot().path);
 	console.log('Transpiling via Babel to ' + path.resolve(opts.output));
 
-	api({source:'.', output:opts.output, ignore}).catch(err => {
+	api({source: '.', output: opts.output, ignore}).catch(err => {
 		console.error(chalk.red('ERROR: ') + err.message);
 		process.exit(1);
 	});

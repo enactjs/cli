@@ -1,4 +1,3 @@
-
 module.exports = {
 	create: require('./global-cli/create').api,
 	link: require('./global-cli/link').api,
