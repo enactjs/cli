@@ -25,6 +25,11 @@
   "eslintConfig": {
     "extends": "enact"
   },
+  "eslintIgnore": [
+    "node_modules/*",
+    "build/*",
+    "dist/*"
+  ],
   "dependencies": {
     "@enact/core": "^2.0.0-alpha.2",
     "@enact/i18n": "^2.0.0-alpha.2",

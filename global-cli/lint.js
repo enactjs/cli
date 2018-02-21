@@ -1,6 +1,5 @@
-const
-	cp = require('child_process'),
-	minimist = require('minimist');
+const cp = require('child_process');
+const minimist = require('minimist');
 
 function displayHelp() {
 	console.log('  Usage');
@@ -19,27 +18,44 @@ function displayHelp() {
 	process.exit(0);
 }
 
-module.exports = function(args) {
+function api({strict = false, local = false, eslintArgs = []} = {}) {
+	let args = [];
+	if (strict) {
+		args.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact/strict'));
+	} else if (!local) {
+		args.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact'));
+	}
+	args.push('--ignore-pattern', 'node_modules/*');
+	args.push('--ignore-pattern', 'build/*');
+	args.push('--ignore-pattern', 'dist/*');
+	if (eslintArgs.length) {
+		args = args.concat(eslintArgs);
+	} else {
+		args.push('.');
+	}
+	return new Promise((resolve, reject) => {
+		const child = cp.fork(require.resolve('eslint/bin/eslint'), args,
+				{env:process.env, cwd:process.cwd()});
+		child.on('close', code => {
+			if (code!==0) {
+				reject();
+			} else {
+				resolve();
+			}
+		});
+	});
+}
+
+function cli(args) {
 	const opts = minimist(args, {
-		boolean: ['l', 'local', 's', 'strict', 'f', 'framework', 'h', 'help'],
-		alias: {l:'local', s:'strict', f:'framework', h:'help'}
+		boolean: ['local', 'strict', 'help'],
+		alias: {l:'local', s:'strict', h:'help'}
 	});
 	opts.help && displayHelp();
 
-	let eslintArgs = [];
-	if (opts.strict || opts.framework) {
-		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact/strict'));
-	} else if (!opts.local) {
-		eslintArgs.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact'));
-	}
-	eslintArgs.push('--ignore-pattern', 'node_modules/*');
-	eslintArgs.push('--ignore-pattern', 'build/*');
-	eslintArgs.push('--ignore-pattern', 'dist/*');
-	if (opts._.length) {
-		eslintArgs = eslintArgs.concat(opts._);
-	} else {
-		eslintArgs.push('.');
-	}
-	const child = cp.fork(require.resolve('eslint/bin/eslint'), eslintArgs, {env:process.env, cwd:process.cwd()});
-	child.on('close', code => process.exit(code));
-};
+	api({strict:opts.strict, local:opts.local, eslintArgs:opts._}).catch(() => {
+		process.exit(1);
+	});
+}
+
+module.exports = {api, cli};

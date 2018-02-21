@@ -1,19 +1,10 @@
-const
-	spawn = require('cross-spawn'),
-	path = require('path'),
-	dir = require('global-modules'),
-	fs = require('fs'),
-	chalk = require('chalk'),
-	minimist = require('minimist');
-
-const enact = [
-	'core',
-	'ui',
-	'moonstone',
-	'spotlight',
-	'i18n',
-	'webos'
-];
+const path = require('path');
+const chalk = require('chalk');
+const spawn = require('cross-spawn');
+const fs = require('fs-extra');
+const globalDir = require('global-modules');
+const minimist = require('minimist');
+const packageRoot = require('@enact/dev-utils/package-root');
 
 function displayHelp() {
 	console.log('  Usage');
@@ -27,42 +18,52 @@ function displayHelp() {
 	process.exit(0);
 }
 
-module.exports = function(args) {
+function api({verbose = false} = {}) {
+	const linkArgs = [
+		'--loglevel',
+		(verbose ? 'verbose' : 'error'),
+		'link'
+	];
+	const pkg = packageRoot();
+	let enact = Object.keys(pkg.meta.dependencies || {}).concat(Object.keys(pkg.meta.devDependencies || {}));
+	enact = enact.filter(d => d.startsWith('@enact/')).map(d => d.replace('@enact/', ''));
+
+	return new Promise((resolve, reject) => {
+		const missing = [];
+		for (let i=0; i<enact.length; i++) {
+			if (fs.existsSync(path.join(globalDir, '@enact', enact[i]))) {
+				linkArgs.push('@enact/' + enact[i]);
+			} else {
+				missing.push('@enact/' + enact[i]);
+			}
+		}
+
+		if (missing.length === enact.length) {
+			reject(new Error('Unable to detect any Enact global modules. Please ensure they\'ve been linked correctly.'));
+		} else {
+			const proc = spawn('npm', linkArgs, {stdio: 'inherit', cwd:process.cwd()});
+			proc.on('close', code => {
+				if (code!==0) {
+					reject(new Error('"npm ' + linkArgs.join(' ') + '" failed'));
+				} else {
+					resolve();
+				}
+			});
+		}
+	});
+}
+
+function cli(args) {
 	const opts = minimist(args, {
-		boolean: ['verbose', 'h', 'help'],
+		boolean: ['verbose', 'help'],
 		alias: {h:'help'}
 	});
 	opts.help && displayHelp();
 
-	const linkArgs = [
-		'--loglevel',
-		(opts.verbose ? 'verbose' : 'error'),
-		'link'
-	];
-
-	const missing = [];
-	for(let i=0; i<enact.length; i++) {
-		if(fs.existsSync(path.join(dir, '@enact', enact[i]))) {
-			linkArgs.push('@enact/' + enact[i]);
-		} else {
-			missing.push('@enact/' + enact[i]);
-		}
-	}
-
-	if(missing.length === enact.length) {
-		console.log(chalk.red('Unable to detect any Enact global modules. Please ensure they\'ve been correctly linked.'));
+	api(opts).catch(err => {
+		console.error(chalk.red('ERROR: ') + err.message);
 		process.exit(1);
-	} else {
-		for(let j=0; j<missing.length; j++) {
-			console.log(chalk.yellow('Unable to locate global module ' + missing[j] + '. Skipping...'));
-		}
+	});
+}
 
-		const proc = spawn('npm', linkArgs, {stdio: 'inherit', cwd:process.cwd()});
-		proc.on('close', code => {
-			if(code!==0) {
-				console.log(chalk.cyan('ERROR: ') + '"npm ' + linkArgs.join(' ') + '" failed');
-				process.exit(1);
-			}
-		});
-	}
-};
+module.exports = {api, cli};

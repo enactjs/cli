@@ -27,20 +27,20 @@
 // @remove-on-eject-end
 
 const path = require('path');
-const {DefinePlugin} = require('webpack');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const autoprefixer = require('autoprefixer');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
 const removeclass = require('postcss-remove-classes').default;
+const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const LessPluginRi = require('resolution-independence');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const {DefinePlugin} = require('webpack');
+const app = require('@enact/dev-utils/option-parser');
 const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
 const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
 const WebOSMetaPlugin = require('@enact/dev-utils/plugins/WebOSMetaPlugin');
-const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const eslintFormatter = require('react-dev-utils/eslintFormatter');
-const app = require('@enact/dev-utils/option-parser');
 
 process.chdir(app.context);
 
@@ -56,7 +56,7 @@ module.exports = {
 	entry: {
 		main: [
 			require.resolve('./polyfills'),
-			path.resolve(app.main || 'index.js')
+			app.context
 		]
 	},
 	output: {
@@ -74,6 +74,12 @@ module.exports = {
 		extensions: ['.js', '.jsx', '.json'],
 		// Allows us to specify paths to check for module resolving.
 		modules: [path.resolve('./node_modules'), 'node_modules'],
+		// Allow "browser" field in electron-renderer along with the default web/webworker types.
+		mainFields: [
+			['web', 'webworker', 'electron-renderer'].includes(app.environment) && 'browser',
+			'module',
+			'main'
+		].filter(Boolean),
 		alias: {
 			// Support ilib shorthand alias for ilib modules
 			'ilib':'@enact/i18n/ilib/lib'
@@ -124,13 +130,19 @@ module.exports = {
 			{
 				test: /\.(js|jsx)$/,
 				exclude: /node_modules.(?!@enact)/,
-				loader: require.resolve('babel-loader'),
-				// @remove-on-eject-begin
-				options: {
-					babelrc: false,
-					extends: path.join(__dirname, '.babelrc')
-				}
-				// @remove-on-eject-end
+				use: [
+					require.resolve('thread-loader'),
+					{
+						loader: require.resolve('babel-loader'),
+						options: {
+							// @remove-on-eject-begin
+							babelrc: false,
+							extends: path.join(__dirname, '.babelrc'),
+							// @remove-on-eject-end
+							highlightCode: true
+						}
+					}
+				]
 			},
 			// Multiple styling-support features are used together.
 			// "less" loader compiles any LESS-formatted syntax into standard CSS.

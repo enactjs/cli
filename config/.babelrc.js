@@ -6,6 +6,7 @@
  */
 
 const app = require('@enact/dev-utils/option-parser');
+
 const env = process.env.BABEL_ENV || process.env.NODE_ENV;
 const es5Standalone = process.env.ES5 && process.env.ES5 !== 'false';
 

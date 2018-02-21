@@ -24,26 +24,23 @@
  * SOFTWARE.
  */
 
-const
-	chalk = require('chalk'),
-	fs = require('fs-extra'),
-	path = require('path'),
-	minimist = require('minimist'),
-	filesize = require('filesize'),
-	webpack = require('webpack'),
-	devConfig = require('../config/webpack.config.dev'),
-	prodConfig = require('../config/webpack.config.prod'),
-	mixins = require('@enact/dev-utils/mixins'),
-	packageRoot = require('@enact/dev-utils/package-root'),
-	formatWebpackMessages = require('react-dev-utils/formatWebpackMessages'),
-	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
-	stripAnsi = require('strip-ansi');
+const path = require('path');
+const chalk = require('chalk');
+const filesize = require('filesize');
+const fs = require('fs-extra');
+const minimist = require('minimist');
+const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
+const stripAnsi = require('strip-ansi');
+const webpack = require('webpack');
+const mixins = require('@enact/dev-utils/mixins');
+const packageRoot = require('@enact/dev-utils/package-root');
 
 function displayHelp() {
 	console.log('  Usage');
 	console.log('    enact pack [options]');
 	console.log();
 	console.log('  Options');
+	console.log('    -o, --output      Specify an output directory');
 	console.log('    -w, --watch       Rebuild on file changes');
 	console.log('    -p, --production  Build in production mode');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
@@ -70,20 +67,23 @@ function displayHelp() {
 	process.exit(0);
 }
 
-function details(err, stats) {
-	if(err) return err;
+function details(err, stats, output) {
+	if (err) return err;
+	stats.compilation.warnings.forEach(w => {
+		w.message = w.message.replace(/\n.* potentially fixable with the `--fix` option./gm, '');
+	});
 	const statsJSON = stats.toJson({}, true);
 	const messages = formatWebpackMessages(statsJSON);
-	if(messages.errors.length) {
+	if (messages.errors.length) {
 		return new Error(messages.errors.join('\n\n'));
-	} else if(process.env.CI && messages.warnings.length) {
+	} else if (process.env.CI && messages.warnings.length) {
 		console.log(chalk.yellow('Treating warnings as errors because process.env.CI = true. '
 				+ 'Most CI servers set it automatically.\n'));
 		return new Error(messages.warnings.join('\n\n'));
 	} else {
-		printFileSizes(statsJSON);
+		printFileSizes(statsJSON, output);
 		console.log();
-		if(messages.warnings.length) {
+		if (messages.warnings.length) {
 			console.log(chalk.yellow('Compiled with warnings:\n'));
 			console.log(messages.warnings.join('\n\n') + '\n');
 		} else {
@@ -98,12 +98,12 @@ function details(err, stats) {
 }
 
 // Print a detailed summary of build files.
-function printFileSizes(stats) {
+function printFileSizes(stats, output) {
 	const assets = stats.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
 		.map(asset => {
-			const size = fs.statSync('./dist/' + asset.name).size;
+			const size = fs.statSync(path.join(output, asset.name)).size;
 			return {
-				folder: path.join('dist', path.dirname(asset.name)),
+				folder: path.relative(packageRoot().path, path.join(output, path.dirname(asset.name))),
 				name: path.basename(asset.name),
 				size: size,
 				sizeLabel: filesize(size)
@@ -132,15 +132,16 @@ function build(config) {
 		console.log('Creating an optimized production build...');
 	}
 
-	const compiler = webpack(config);
-	compiler.run((err, stats) => {
-		err = details(err, stats);
-		if(err) {
-			console.log();
-			console.log(chalk.red('Failed to compile.\n'));
-			console.log((err.message || err) + '\n');
-			process.exit(1);
-		}
+	return new Promise((resolve, reject) => {
+		const compiler = webpack(config);
+		compiler.run((err, stats) => {
+			err = details(err, stats, config.output.path);
+			if (err) {
+				reject(err);
+			} else {
+				resolve();
+			}
+		});
 	});
 }
 
@@ -163,41 +164,51 @@ function watch(config) {
 	});
 }
 
-module.exports = function(args) {
-	const opts = minimist(args, {
-		boolean: ['minify', 'framework', 'stats', 'p', 'production', 'i', 'isomorphic', 's', 'snapshot', 'w', 'watch', 'h', 'help'],
-		string: ['externals', 'externals-inject', 'l', 'locales'],
-		default: {minify:true},
-		alias: {p:'production', i:'isomorphic', l:'locales', s:'snapshot', w:'watch', h:'help'}
-	});
-	if (opts.help) displayHelp();
-
-	process.chdir(packageRoot().path);
-	process.env.NODE_ENV = 'development';
-	let config = devConfig;
+function api(opts = {}) {
+	let config;
 
 	// Do this as the first thing so that any code reading it knows the right env.
 	if (opts.production) {
 		process.env.NODE_ENV = 'production';
-		config = prodConfig;
+		config = require('../config/webpack.config.prod');
+	} else {
+		process.env.NODE_ENV = 'development';
+		config = require('../config/webpack.config.dev');
 	}
+
+	if (opts.output) config.output.path = path.resolve(opts.output);
 
 	mixins.apply(config, opts);
 
-	// Warn and crash if required files are missing
-	if (!opts.framework && !checkRequiredFiles([config.entry.main[config.entry.main.length - 1]])) {
-		process.exit(1);
-	}
-
 	// Remove all content but keep the directory so that
 	// if you're in it, you don't end up in Trash
-	fs.emptyDirSync('./dist');
+	return fs.emptyDir(config.output.path).then(() => {
+		// Start the webpack build
+		if (opts.watch) {
+			// This will run infinitely until killed, even through errors
+			watch(config);
+		} else {
+			return build(config);
+		}
+	});
+}
 
-	// Start the webpack build
-	if (opts.watch) {
-		config.bail = false;
-		watch(config);
-	} else {
-		build(config);
-	}
-};
+function cli(args) {
+	const opts = minimist(args, {
+		boolean: ['minify', 'framework', 'stats', 'production', 'isomorphic', 'snapshot', 'watch', 'help'],
+		string: ['externals', 'externals-inject', 'locales', 'output'],
+		default: {minify:true},
+		alias: {o:'output', p:'production', i:'isomorphic', l:'locales', s:'snapshot', w:'watch', h:'help'}
+	});
+	if (opts.help) displayHelp();
+
+	process.chdir(packageRoot().path);
+	api(opts).catch(err => {
+		console.log();
+		console.log(chalk.red('Failed to compile.\n'));
+		console.log((err.message || err) + '\n');
+		process.exit(1);
+	});
+}
+
+module.exports = {api, cli};
