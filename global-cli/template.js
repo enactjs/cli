@@ -192,11 +192,7 @@ function doRemove(name) {
 
 	return fs
 		.remove(output)
-		.then(() => {
-			if (isDefault) {
-				fs.removeSync(DEFAULT_LINK);
-			}
-		})
+		.then(() => isDefault && fs.removeSync(DEFAULT_LINK))
 		.catch(err => {
 			throw new Error(`Failed to delete template ${name}.\n${err.message}`);
 		});
@@ -245,7 +241,7 @@ function api({action, target, name} = {}) {
 		let actionPromise;
 
 		if (['install', 'link', 'remove'].includes(action) && name === 'default')
-			throw new Error('Template "default" name is reserved. ' + 'Use "enact template default" to modify it.');
+			throw new Error('Template "default" name is reserved. Use "enact template default" to modify it.');
 
 		switch (action) {
 			case 'install':
