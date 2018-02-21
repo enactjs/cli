@@ -58,7 +58,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 		case 'template':
 		case 'lint':
 		case 'license': {
-			const task = require('../global-cli/' + command).cli;
+			const task = require('../commands/' + command).cli;
 			task(process.argv.slice(3));
 			break;
 		}

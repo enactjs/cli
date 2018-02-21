@@ -1,12 +1,12 @@
 module.exports = {
-	create: require('./global-cli/create').api,
-	link: require('./global-cli/link').api,
-	pack: require('./global-cli/pack').api,
-	serve: require('./global-cli/serve').api,
-	clean: require('./global-cli/clean').ali,
-	lint: require('./global-cli/lint').api,
-	test: require('./global-cli/test').api,
-	template: require('./global-cli/template').api,
-	transpile: require('./global-cli/transpile').api,
-	license: require('./global-cli/license').api
+	create: require('./commands/create').api,
+	link: require('./commands/link').api,
+	pack: require('./commands/pack').api,
+	serve: require('./commands/serve').api,
+	clean: require('./commands/clean').ali,
+	lint: require('./commands/lint').api,
+	test: require('./commands/test').api,
+	template: require('./commands/template').api,
+	transpile: require('./commands/transpile').api,
+	license: require('./commands/license').api
 };
