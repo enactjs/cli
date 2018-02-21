@@ -47,20 +47,17 @@ module.exports = function(karma) {
 					// @remove-on-eject-end
 				],
 				alias: {
-					'ilib':'@enact/i18n/ilib/lib',
-					'react-addons-test-utils':'react-dom/test-utils'
+					ilib: '@enact/i18n/ilib/lib',
+					'react-addons-test-utils': 'react-dom/test-utils'
 				}
 			},
 			// @remove-on-eject-begin
 			resolveLoader: {
-				modules: [
-					path.resolve(__dirname, '../node_modules'),
-					path.resolve(app.context, './node_modules')
-				]
+				modules: [path.resolve(__dirname, '../node_modules'), path.resolve(app.context, './node_modules')]
 			},
 			// @remove-on-eject-end
 			externals: {
-				'cheerio': 'window',
+				cheerio: 'window',
 				'react/addons': true,
 				'react/lib/ExecutionEnvironment': true,
 				'react/lib/ReactContext': true
@@ -108,20 +105,29 @@ module.exports = function(karma) {
 							require.resolve('style-loader'),
 							{
 								loader: require.resolve('css-loader'),
-								options: {importLoaders: 2, modules: true, localIdentName: '[name]__[local]___[hash:base64:5]'}
+								options: {
+									importLoaders: 2,
+									modules: true,
+									localIdentName: '[name]__[local]___[hash:base64:5]'
+								}
 							},
 							{
 								loader: require.resolve('postcss-loader'),
 								options: {
 									ident: 'postcss',
-									plugins: () => [autoprefixer({
-										browsers: app.browsers, flexbox: 'no-2009', remove:false
-									}), flexbugfixes]
+									plugins: () => [
+										autoprefixer({
+											browsers: app.browsers,
+											flexbox: 'no-2009',
+											remove: false
+										}),
+										flexbugfixes
+									]
 								}
 							},
 							{
 								loader: require.resolve('less-loader'),
-								options: {plugins: ((app.ri) ? [new LessPluginRi(app.ri)] : [])}
+								options: {plugins: app.ri ? [new LessPluginRi(app.ri)] : []}
 							}
 						]
 					}
@@ -130,7 +136,7 @@ module.exports = function(karma) {
 			},
 			devServer: {host: '0.0.0.0', port: 8080},
 			plugins: [
-				new DefinePlugin({'process.env': {'NODE_ENV': '"development"'}}),
+				new DefinePlugin({'process.env': {NODE_ENV: '"development"'}}),
 				new CaseSensitivePathsPlugin(),
 				new GracefulFsPlugin(),
 				new ILibPlugin({create: false}),
@@ -174,7 +180,7 @@ module.exports = function(karma) {
 		port: 9876,
 		colors: true,
 		logLevel: karma.LOG_INFO,
-		browserNoActivityTimeout : 60000,
+		browserNoActivityTimeout: 60000,
 		autoWatch: true,
 		browsers: ['Chrome'],
 		singleRun: false

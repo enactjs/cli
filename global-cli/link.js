@@ -19,18 +19,14 @@ function displayHelp() {
 }
 
 function api({verbose = false} = {}) {
-	const linkArgs = [
-		'--loglevel',
-		(verbose ? 'verbose' : 'error'),
-		'link'
-	];
+	const linkArgs = ['--loglevel', verbose ? 'verbose' : 'error', 'link'];
 	const pkg = packageRoot();
 	let enact = Object.keys(pkg.meta.dependencies || {}).concat(Object.keys(pkg.meta.devDependencies || {}));
 	enact = enact.filter(d => d.startsWith('@enact/')).map(d => d.replace('@enact/', ''));
 
 	return new Promise((resolve, reject) => {
 		const missing = [];
-		for (let i=0; i<enact.length; i++) {
+		for (let i = 0; i < enact.length; i++) {
 			if (fs.existsSync(path.join(globalDir, '@enact', enact[i]))) {
 				linkArgs.push('@enact/' + enact[i]);
 			} else {
@@ -39,11 +35,13 @@ function api({verbose = false} = {}) {
 		}
 
 		if (missing.length === enact.length) {
-			reject(new Error('Unable to detect any Enact global modules. Please ensure they\'ve been linked correctly.'));
+			reject(
+				new Error('Unable to detect any Enact global modules. Please ensure they have been linked correctly.')
+			);
 		} else {
-			const proc = spawn('npm', linkArgs, {stdio: 'inherit', cwd:process.cwd()});
+			const proc = spawn('npm', linkArgs, {stdio: 'inherit', cwd: process.cwd()});
 			proc.on('close', code => {
-				if (code!==0) {
+				if (code !== 0) {
 					reject(new Error('"npm ' + linkArgs.join(' ') + '" failed'));
 				} else {
 					resolve();
@@ -56,7 +54,7 @@ function api({verbose = false} = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['verbose', 'help'],
-		alias: {h:'help'}
+		alias: {h: 'help'}
 	});
 	opts.help && displayHelp();
 

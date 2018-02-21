@@ -34,10 +34,9 @@ function api({strict = false, local = false, eslintArgs = []} = {}) {
 		args.push('.');
 	}
 	return new Promise((resolve, reject) => {
-		const child = cp.fork(require.resolve('eslint/bin/eslint'), args,
-				{env:process.env, cwd:process.cwd()});
+		const child = cp.fork(require.resolve('eslint/bin/eslint'), args, {env: process.env, cwd: process.cwd()});
 		child.on('close', code => {
-			if (code!==0) {
+			if (code !== 0) {
 				reject();
 			} else {
 				resolve();
@@ -49,11 +48,11 @@ function api({strict = false, local = false, eslintArgs = []} = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['local', 'strict', 'help'],
-		alias: {l:'local', s:'strict', h:'help'}
+		alias: {l: 'local', s: 'strict', h: 'help'}
 	});
 	opts.help && displayHelp();
 
-	api({strict:opts.strict, local:opts.local, eslintArgs:opts._}).catch(() => {
+	api({strict: opts.strict, local: opts.local, eslintArgs: opts._}).catch(() => {
 		process.exit(1);
 	});
 }
