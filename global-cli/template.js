@@ -185,11 +185,7 @@ function doRemove(name) {
 
 	return fs
 		.remove(output)
-		.then(() => {
-			if (isDefault) {
-				fs.removeSync(DEFAULT_LINK);
-			}
-		})
+		.then(() => isDefault && fs.removeSync(DEFAULT_LINK))
 		.catch(err => {
 			throw new Error(`Failed to delete template ${name}.\n${err.message}`);
 		});
