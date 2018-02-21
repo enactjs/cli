@@ -1,4 +1,4 @@
-# @enact/cli [![Build Status](https://travis-ci.org/enactjs/cli.svg?branch=master)](https://travis-ci.org/enactjs/cli) [![NPM Version](https://img.shields.io/npm/v/@enact/cli.svg?style=flat)](https://www.npmjs.com/package/preact-cli)
+# @enact/cli [![Build Status](https://travis-ci.org/enactjs/cli.svg?branch=master)](https://travis-ci.org/enactjs/cli) [![NPM Version](https://img.shields.io/npm/v/@enact/cli.svg?style=flat)](https://www.npmjs.com/package/@enact/cli)
 
 > A standalone toolkit for rapid Enact app development.
 
