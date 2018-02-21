@@ -1,3 +1,11 @@
+## 0.9.8 (February 15, 2018)
+
+* Updated all links for enactjs github organization and fixed a broken docs link.
+
+### serve
+
+* Restored usage of extract-text-webpack-plugin with updated Webpack 3.6.0.
+
 ## 0.9.7 (January 11, 2018)
 
 Updated copyright and license information for 2018 year.
@@ -138,7 +146,7 @@ Added support for a link command (`enact link`) as a shorthand to link in Enact 
 * Will now warn about performance when building in development mode.
 * HTML template will now be used in all situations and can be customized as desired.
 * Vastly rewritten isomorphic app prerendering support with improved reliability and mmemory management.
-* Depreciated prerendering of isomorphic apps within the HTML template has been removed. Please ensure all app entrypoints are able to self-render. See [this example](https://github.com/enyojs/enact-dev/blob/master/template/src/index.js).
+* Depreciated prerendering of isomorphic apps within the HTML template has been removed. Please ensure all app entrypoints are able to self-render. See [this example](https://github.com/enactjs/cli/blob/master/template/src/index.js).
 
 ### test
 
@@ -182,14 +190,14 @@ All enact-dev dependencies have been updated to latest applicable revisions. If 
 
 ### pack
 
-* Added a `node` Enact build option to support polyfilling NodeJS components. See [here](https://github.com/enyojs/enact-dev/blob/master/README.md#enact-build-options) for more info.
+* Added a `node` Enact build option to support polyfilling NodeJS components. See [here](https://github.com/enactjs/cli/blob/master/README.md#enact-build-options) for more info.
 * All localized appinfo.json resources and assets will now be correctly copied to the output directory.
 
 ### test
 
 * Added a polyfill for String.prototype.repeat, as phantomjs lacks the API.
 * Webpack build warnings will no longer spam the console in certain scenarios.
-* Test action will now automatically fail when no test suite is found. This was done to allows tests which build incorrect or have missing modules to correctly fail. See [#38](https://github.com/enyojs/enact-dev/pull/38) for more background information.
+* Test action will now automatically fail when no test suite is found. This was done to allows tests which build incorrect or have missing modules to correctly fail. See [#38](https://github.com/enactjs/cli/pull/38) for more background information.
 
 
 ## 0.5.0 (December 20, 2016)
@@ -199,7 +207,7 @@ Several additional documentation files have been added to the `docs` directory, 
 ### create
 
 * Template updated for Enact 1.0.0-beta.1
-* Template has been updated to use a single isomorphic-compatible entrypoint [index.js](https://github.com/enyojs/enact-dev/blob/master/template/src/index.js).
+* Template has been updated to use a single isomorphic-compatible entrypoint [index.js](https://github.com/enactjs/cli/blob/master/template/src/index.js).
 
 ## serve
 

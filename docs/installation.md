@@ -13,4 +13,4 @@ Standard global installation of `@enact/cli` via NPM. For Linux `sudo` may be re
 npm install -g @enact/cli
 ```
 
-All releases are published, with the default (and `latest` tag) being the current stable release. Unreleased and development builds can be installed by installing from the git repository directly (for example, `enyojs/enact-cli#develop`).
+All releases are published, with the default (and `latest` tag) being the current stable release. Unreleased and development builds can be installed by installing from the git repository directly (for example, `enactjs/cli#develop`).
