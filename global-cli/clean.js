@@ -24,12 +24,12 @@ function api({paths = []} = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['help'],
-		alias: {h:'help'}
+		alias: {h: 'help'}
 	});
 	opts.help && displayHelp();
 
 	process.chdir(packageRoot().path);
-	api({paths:opts._}).catch(err => {
+	api({paths: opts._}).catch(err => {
 		console.error(chalk.red('ERROR: ') + 'Failed to clean project.\n' + err.message);
 		process.exit(1);
 	});

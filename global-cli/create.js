@@ -41,20 +41,29 @@ const defaultGenerator = {
 		const validation = validatePackageName(name);
 
 		if (!validation.validForNewPackages) {
-			throw new Error('Could not create a project called ' + chalk.bold(name)
-					+ 'because of NPM naming restrictions:\n'
-					+ validation.errors.concat(validation.warnings).map(r => '  * ' + r).join('/n'));
+			throw new Error(
+				'Could not create a project called ' +
+					chalk.bold(name) +
+					'because of NPM naming restrictions:\n' +
+					validation.errors
+						.concat(validation.warnings)
+						.map(r => '  * ' + r)
+						.join('/n')
+			);
 		} else {
-			const meta = fs.readJsonSync(path.join(template, 'package.json'), {throws:false}) || {};
+			const meta = fs.readJsonSync(path.join(template, 'package.json'), {throws: false}) || {};
 			const deps = Object.keys(meta.dependencies || {}).concat(Object.keys(meta.devDependencies || {}));
 			deps.sort();
 
 			if (deps.includes(name)) {
-				throw new Error('Cannot create a project called ' + chalk.bold(name)
-						+ ' because a dependency with the same name exists.\n'
-						+ 'Due to the way npm works, the following names are not allowed:\n\n'
-						+ chalk.cyan(deps.map(d => '\t' + d).join('\n'))
-						+ '\n\nPlease choose a different project name.');
+				throw new Error(
+					'Cannot create a project called ' +
+						chalk.bold(name) +
+						' because a dependency with the same name exists.\n' +
+						'Due to the way npm works, the following names are not allowed:\n\n' +
+						chalk.cyan(deps.map(d => '\t' + d).join('\n')) +
+						'\n\nPlease choose a different project name.'
+				);
 			}
 		}
 	},
@@ -97,9 +106,9 @@ const defaultGenerator = {
 		// Do stuff to setup the directory workspace after template is copied
 		// Update package.json name
 		const pkgJSON = path.join(directory, 'package.json');
-		const meta = fs.readJsonSync(pkgJSON, {encoding:'UTF8', throws:false}) || {};
+		const meta = fs.readJsonSync(pkgJSON, {encoding: 'UTF8', throws: false}) || {};
 		meta.name = name;
-		fs.writeJsonSync(pkgJSON, meta, {encoding:'UTF8', spaces:'\t'});
+		fs.writeJsonSync(pkgJSON, meta, {encoding: 'UTF8', spaces: '\t'});
 
 		// Update appinfo.json if it exists in the template
 		let appinfo = path.join(directory, 'appinfo.json');
@@ -110,9 +119,9 @@ const defaultGenerator = {
 			}
 		}
 		if (appinfo) {
-			const aiMeta = fs.readJsonSync(appinfo, {encoding:'UTF8', throws:false}) || {};
+			const aiMeta = fs.readJsonSync(appinfo, {encoding: 'UTF8', throws: false}) || {};
 			aiMeta.id = meta.name;
-			fs.writeJsonSync(appinfo, aiMeta, {encoding:'UTF8', spaces:'\t'});
+			fs.writeJsonSync(appinfo, aiMeta, {encoding: 'UTF8', spaces: '\t'});
 		}
 	},
 	complete: ({directory, name}) => {
@@ -136,7 +145,7 @@ const defaultGenerator = {
 		// console.log('		and scripts into the app directory. If you do this, you can’t go back!');
 		// console.log();
 		console.log('We suggest that you begin by typing:');
-		if (path.resolve(process.cwd())!==path.resolve(directory)) {
+		if (path.resolve(process.cwd()) !== path.resolve(directory)) {
 			console.log(chalk.cyan('	cd ' + path.relative(process.cwd(), directory)));
 		}
 		console.log('	' + chalk.cyan('npm run serve'));
@@ -179,20 +188,20 @@ function resolveTemplateGenerator(template) {
 			try {
 				const generator = require(templatePath) || {};
 				Object.keys(defaultGenerator).forEach(k => {
-					if (generator[k]===undefined || generator[k]===true) {
+					if (generator[k] === undefined || generator[k] === true) {
 						generator[k] = defaultGenerator[k];
 					}
 				});
-				resolve({generator, templatePath:subDir});
+				resolve({generator, templatePath: subDir});
 			} catch (e) {
 				if (e.message === `Cannot find module '${templatePath}'`) {
-					resolve({generator:defaultGenerator, templatePath:subDir});
+					resolve({generator: defaultGenerator, templatePath: subDir});
 				} else {
 					reject(new Error(`Failed to load ${chalk.bold(template)} template generator.\n${e}`));
 				}
 			}
 		} else {
-			resolve({generator:defaultGenerator, templatePath});
+			resolve({generator: defaultGenerator, templatePath});
 		}
 	});
 }
@@ -204,43 +213,40 @@ function copyTemplate(template, output, overwrite) {
 	templateGitIgnore = templateGitIgnore && path.join(template, templateGitIgnore);
 
 	if (overwrite && fs.existsSync(outputReadme) && fs.existsSync(path.join(template, 'README.md'))) {
-		console.log(chalk.yellow('Found an existing README.md file. Renaming to README.old.md'
-				+ ' to avoid overwriting.'));
+		console.log(chalk.yellow('Found an existing README.md file. Renaming to README.old.md to avoid overwriting.'));
 		console.log();
 		fs.moveSync(outputReadme, path.join(output, 'README.old.md'));
 	}
 
 	// Copy the files for the user
-	const filter = (src) => src!==templateGitIgnore;
-	return fs.copy(template, output, {overwrite:overwrite, errorOnExist:!overwrite, filter:filter}).then(() => {
-		// Handle gitignore after the fact to prevent npm from renaming it to .npmignore
-		// See: https://github.com/npm/npm/issues/1862
-		if (templateGitIgnore) {
-			if (fs.existsSync(outputGitIgnore)) {
-				// Append if there's already a `.gitignore` file there
-				const data = fs.readFileSync(templateGitIgnore, {encoding:'UTF8'});
-				fs.appendFileSync(outputGitIgnore, data, {encoding:'UTF8'});
-			} else {
-				fs.copySync(templateGitIgnore, outputGitIgnore);
+	const filter = src => src !== templateGitIgnore;
+	return fs
+		.copy(template, output, {overwrite: overwrite, errorOnExist: !overwrite, filter: filter})
+		.then(() => {
+			// Handle gitignore after the fact to prevent npm from renaming it to .npmignore
+			// See: https://github.com/npm/npm/issues/1862
+			if (templateGitIgnore) {
+				if (fs.existsSync(outputGitIgnore)) {
+					// Append if there's already a `.gitignore` file there
+					const data = fs.readFileSync(templateGitIgnore, {encoding: 'UTF8'});
+					fs.appendFileSync(outputGitIgnore, data, {encoding: 'UTF8'});
+				} else {
+					fs.copySync(templateGitIgnore, outputGitIgnore);
+				}
 			}
-		}
-	}).catch(err => {
-		throw new Error(`Failed to copy template files to ${output}\n${err.stack}`);
-	});
+		})
+		.catch(err => {
+			throw new Error(`Failed to copy template files to ${output}\n${err.stack}`);
+		});
 }
 
 function npmInstall(directory, verbose, ...rest) {
-	const args = [
-		'--loglevel',
-		(verbose ? 'verbose' : 'error'),
-		'install',
-		...rest
-	];
+	const args = ['--loglevel', verbose ? 'verbose' : 'error', 'install', ...rest];
 
 	return new Promise((resolve, reject) => {
-		const proc = spawn('npm', args, {stdio:'inherit', cwd:directory});
+		const proc = spawn('npm', args, {stdio: 'inherit', cwd: directory});
 		proc.on('close', code => {
-			if (code!==0) {
+			if (code !== 0) {
 				reject(new Error('NPM install failed.'));
 			} else {
 				resolve();
@@ -252,21 +258,21 @@ function npmInstall(directory, verbose, ...rest) {
 function api(opts = {}) {
 	return resolveTemplateGenerator(opts.template).then(({generator, templatePath}) => {
 		const params = Object.assign({opts, defaultGenerator}, opts);
-		const overwrite = generator.overwrite || (typeof generator.overwrite === 'undefined');
+		const overwrite = generator.overwrite || typeof generator.overwrite === 'undefined';
 
 		return new Promise(resolve => resolve(generator.validate && generator.validate(params)))
-				.then(() => fs.ensureDir(opts.directory))
-				.then(() => generator.prepare(params))
-				.then(() => copyTemplate(templatePath, opts.directory, overwrite))
-				.then(() => generator.setup(params))
-				.then(() => npmInstall(opts.directory, opts.verbose))
-				.then(() => {
-					if (opts.local) {
-						console.log('Installing @enact/cli locally. This might take a couple minutes.');
-						return npmInstall(opts.directory, opts.verbose, '--save-dev', ENACT_DEV_NPM);
-					}
-				})
-				.then(() => generator.complete(params));
+			.then(() => fs.ensureDir(opts.directory))
+			.then(() => generator.prepare(params))
+			.then(() => copyTemplate(templatePath, opts.directory, overwrite))
+			.then(() => generator.setup(params))
+			.then(() => npmInstall(opts.directory, opts.verbose))
+			.then(() => {
+				if (opts.local) {
+					console.log('Installing @enact/cli locally. This might take a couple minutes.');
+					return npmInstall(opts.directory, opts.verbose, '--save-dev', ENACT_DEV_NPM);
+				}
+			})
+			.then(() => generator.complete(params));
 	});
 }
 
@@ -274,13 +280,16 @@ function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['local', 'verbose', 'help'],
 		string: ['template'],
-		default: {template:'default'},
-		alias: {t:'template', h:'help'}
+		default: {template: 'default'},
+		alias: {t: 'template', h: 'help'}
 	});
 	opts.help && displayHelp();
 
 	opts.directory = path.resolve(typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
-	opts.name = path.basename(opts.directory).replace(/ /g, '-').toLowerCase();
+	opts.name = path
+		.basename(opts.directory)
+		.replace(/ /g, '-')
+		.toLowerCase();
 
 	api(opts).catch(err => {
 		console.error(chalk.red('ERROR: ') + err.message);

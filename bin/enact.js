@@ -8,8 +8,16 @@ const pkg = require('../package.json');
 
 // Verify the correct version of Node is in use.
 if (!semver.satisfies(process.version, pkg.engines.node)) {
-	console.log(chalk.red('You are running Node ' + process.version + ', but @enact/cli requires Node '
-			+ pkg.engines.node + '. \n' + chalk.bold('Please update your version of Node.')));
+	console.log(
+		chalk.red(
+			'You are running Node ' +
+				process.version +
+				', but @enact/cli requires Node ' +
+				pkg.engines.node +
+				'. \n' +
+				chalk.bold('Please update your version of Node.')
+		)
+	);
 	process.exit(1);
 }
 
@@ -28,11 +36,16 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
     ────────────────────────      ▀▀██████▀▀   
                                       ▀▀       `;
 	// Add colour to the logo
-	const colourTitle = title.split(/[\n\r]+/g).map(l => {
-		const half = (l.length-31)/2;
-		return l.substring(0, 31) + chalk.bgBlueBright(chalk.whiteBright(l.substring(31, 31+half))
-				+ chalk.white(l.substring(31+half)));
-	}).join('\n');
+	const colourTitle = title
+		.split(/[\n\r]+/g)
+		.map(l => {
+			const half = (l.length - 31) / 2;
+			return (
+				l.substring(0, 31) +
+				chalk.bgBlueBright(chalk.whiteBright(l.substring(31, 31 + half)) + chalk.white(l.substring(31 + half)))
+			);
+		})
+		.join('\n');
 	console.log();
 	console.log(colourTitle);
 	console.log('    Version ' + pkg.version);
@@ -50,7 +63,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 		case 'test':
 		case 'template':
 		case 'lint':
-		case 'license':{
+		case 'license': {
 			const task = require('../global-cli/' + command).cli;
 			task(process.argv.slice(3));
 			break;
