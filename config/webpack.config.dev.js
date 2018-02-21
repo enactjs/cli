@@ -27,19 +27,19 @@
 // @remove-on-eject-end
 
 const path = require('path');
-const {DefinePlugin} = require('webpack');
 const autoprefixer = require('autoprefixer');
-const flexbugfixes = require('postcss-flexbugs-fixes');
-const LessPluginRi = require('resolution-independence');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const flexbugfixes = require('postcss-flexbugs-fixes');
+const eslintFormatter = require('react-dev-utils/eslintFormatter');
+const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
+const LessPluginRi = require('resolution-independence');
+const {DefinePlugin} = require('webpack');
+const app = require('@enact/dev-utils/option-parser');
 const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
 const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
 const WebOSMetaPlugin = require('@enact/dev-utils/plugins/WebOSMetaPlugin');
-const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
-const eslintFormatter = require('react-dev-utils/eslintFormatter');
-const app = require('@enact/dev-utils/option-parser');
 
 process.chdir(app.context);
 
@@ -135,24 +135,30 @@ module.exports = {
 			{
 				test: /\.(js|jsx)$/,
 				exclude: /node_modules.(?!@enact)/,
-				loader: require.resolve('babel-loader'),
-				options: {
-					// @remove-on-eject-begin
-					babelrc: false,
-					extends: path.join(__dirname, '.babelrc'),
-					// @remove-on-eject-end
-					// This is a feature of `babel-loader` for webpack (not Babel itself).
-					// It enables caching results in ./node_modules/.cache/babel-loader/
-					// directory for faster rebuilds.
-					cacheDirectory: true,
-					// Generate a unique identifier string based off versons of components and app config.
-					cacheIdentifier: JSON.stringify({
-						'babel-loader': require('babel-loader/package.json').version,
-						'babel-core': require('babel-core/package.json').version,
-						browsers: app.browsers,
-						node: app.node
-					})
-				}
+				use: [
+					require.resolve('thread-loader'),
+					{
+						loader: require.resolve('babel-loader'),
+						options: {
+							// @remove-on-eject-begin
+							babelrc: false,
+							extends: path.join(__dirname, '.babelrc'),
+							// @remove-on-eject-end
+							// This is a feature of `babel-loader` for webpack (not Babel itself).
+							// It enables caching results in ./node_modules/.cache/babel-loader/
+							// directory for faster rebuilds.
+							cacheDirectory: true,
+							// Generate a unique identifier string based off versons of components and app config.
+							cacheIdentifier: JSON.stringify({
+								'babel-loader': require('babel-loader/package.json').version,
+								'babel-core': require('babel-core/package.json').version,
+								browsers: app.browsers,
+								node: app.node
+							}),
+							highlightCode: true
+						}
+					}
+				]
 			},
 			// Multiple styling-support features are used together.
 			// "less" loader compiles any LESS-formatted syntax into standard CSS.

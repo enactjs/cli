@@ -1,13 +1,13 @@
 const path = require('path');
-const {DefinePlugin} = require('webpack');
 const autoprefixer = require('autoprefixer');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
 const LessPluginRi = require('resolution-independence');
+const {DefinePlugin} = require('webpack');
+const app = require('@enact/dev-utils/option-parser');
+const EnzymeAdapterPlugin = require('@enact/dev-utils/plugins/EnzymeAdapterPlugin');
 const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
 const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
-const EnzymeAdapterPlugin = require('@enact/dev-utils/plugins/EnzymeAdapterPlugin');
-const app = require('@enact/dev-utils/option-parser');
-const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 
 process.env.ES5 = 'true';
 
