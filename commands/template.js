@@ -78,10 +78,11 @@ function doInstall(target, name) {
 		// npm install if needed
 		return new Promise((resolve, reject) => {
 			const output = path.join(TEMPLATE_DIR, resolved);
-			if (fs.existsSync(path.join(output, 'template'))
-					&& fs.existsSync(path.join(output, 'package.json'))) {
-				const child = spawn('npm', ['--loglevel', 'error', 'install', '--production'],
-						{stdio: 'inherit', cwd:output});
+			if (fs.existsSync(path.join(output, 'template')) && fs.existsSync(path.join(output, 'package.json'))) {
+				const child = spawn('npm', ['--loglevel', 'error', 'install', '--production'], {
+					stdio: 'inherit',
+					cwd: output
+				});
 				child.on('close', code => {
 					if (code !== 0) {
 						reject(new Error('Failed to NPM install dynamic template. Ensure package.json is valid.'));
@@ -99,11 +100,11 @@ function doInstall(target, name) {
 // Clone Git repository using specific branch if desired
 function installFromGit(target, name = path.basename(url.parse(target).pathname, '.git')) {
 	const git = target.match(/^(?:(^.*)#([\w\d-_.]+)?|(^.*))$/);
-	const args = ['clone', (git[1] || git[3]), name, '-c', 'advice.detachedHead=false'];
+	const args = ['clone', git[1] || git[3], name, '-c', 'advice.detachedHead=false'];
 	if (git[2]) args.splice(2, 0, '-b', git[2]);
 	fs.removeSync(path.join(TEMPLATE_DIR, name));
 	return new Promise((resolve, reject) => {
-		const child = spawn('git', args, {stdio:'inherit', cwd:TEMPLATE_DIR});
+		const child = spawn('git', args, {stdio: 'inherit', cwd: TEMPLATE_DIR});
 		child.on('close', code => {
 			if (code !== 0) {
 				reject(new Error(`Unable to clone git URI ${target}.`));
@@ -119,39 +120,32 @@ function installFromLocal(target, name = path.basename(target)) {
 	const output = path.join(TEMPLATE_DIR, name);
 	fs.removeSync(output);
 	fs.ensureDirSync(output);
-	return fs.copy(target, output).then(() => name).catch(err => {
-		throw new Error(`Failed to copy template files from ${target}.\n${err.message}`);
-	});
+	return fs
+		.copy(target, output)
+		.then(() => name)
+		.catch(err => {
+			throw new Error(`Failed to copy template files from ${target}.\n${err.message}`);
+		});
 }
 
 // Download and extract NPM package
 function installFromNPM(target, name = path.basename(target).replace(/^template-/, '')) {
-	const output = path.join(TEMPLATE_DIR, name);
 	const tempDir = path.join(os.tmpdir(), 'enact');
 	fs.removeSync(tempDir);
 	fs.ensureDirSync(tempDir);
 	return new Promise((resolve, reject) => {
-		const child = spawn('npm', ['--loglevel', 'error', 'pack', target], {stdio:'ignore', cwd:tempDir});
+		const child = spawn('npm', ['--loglevel', 'error', 'pack', target], {stdio: 'ignore', cwd: tempDir});
 		child.on('close', code => {
 			if (code !== 0) {
 				reject(new Error('Invalid template target: ' + target));
 			} else {
 				const tarball = fs.readdirSync(tempDir).filter(f => f.endsWith('.tgz'))[0];
 				if (tarball) {
-					tar.x({file:path.join(tempDir, tarball), cwd:tempDir}, [], err => {
+					tar.x({file: path.join(tempDir, tarball), cwd: tempDir}, [], err => {
 						if (err) {
 							reject(new Error(`Tarball extraction failure.\n${err.message}`));
 						} else {
-							fs.removeSync(output);
-							fs.ensureDirSync(output);
-							fs.copy(path.join(tempDir, 'package'), output, err2 => {
-								if (err2) {
-									reject(new Error(`Failed to copy template files from ${tempDir}.\n${err2.message}`));
-								} else {
-									fs.removeSync(tempDir);
-									resolve(name);
-								}
-							});
+							resolve();
 						}
 					});
 				} else {
@@ -159,20 +153,29 @@ function installFromNPM(target, name = path.basename(target).replace(/^template-
 				}
 			}
 		});
-	});
+	})
+		.then(() => installFromLocal(path.join(tempDir, 'package'), name))
+		.then(() => {
+			fs.removeSync(tempDir);
+			return name;
+		});
 }
 
 function doLink(target, name = path.basename(path.resolve(target))) {
 	const directory = path.resolve(target);
 	const prevCWD = process.cwd();
 	process.chdir(TEMPLATE_DIR);
-	return fs.remove(name).then(() => fs.symlink(directory, name, 'junction')).then(() => {
-		process.chdir(prevCWD);
-		return {target, name};
-	}).catch(err => {
-		process.chdir(prevCWD);
-		throw new Error(`Unable to setup symlink to ${directory}.\n${err.message}`);
-	});
+	return fs
+		.remove(name)
+		.then(() => fs.symlink(directory, name, 'junction'))
+		.then(() => {
+			process.chdir(prevCWD);
+			return {target, name};
+		})
+		.catch(err => {
+			process.chdir(prevCWD);
+			throw new Error(`Unable to setup symlink to ${directory}.\n${err.message}`);
+		});
 }
 
 function doRemove(name) {
@@ -180,29 +183,30 @@ function doRemove(name) {
 	const isDefault = fs.existsSync(DEFAULT_LINK) && fs.realpathSync(output) === fs.realpathSync(DEFAULT_LINK);
 	if (!fs.existsSync(output)) return Promise.reject(new Error(`Unable to remove. Template "${name}" not found.`));
 
-	return fs.remove(output).then(() => {
-		if (isDefault) {
-			fs.removeSync(DEFAULT_LINK);
-		}
-	}).catch(err => {
-		throw new Error(`Failed to delete template ${name}.\n${err.message}`);
-	});
+	return fs
+		.remove(output)
+		.then(() => isDefault && fs.removeSync(DEFAULT_LINK))
+		.catch(err => {
+			throw new Error(`Failed to delete template ${name}.\n${err.message}`);
+		});
 }
 
 function doDefault(name) {
 	const all = fs.readdirSync(TEMPLATE_DIR).filter(t => t !== 'default');
 	let choice;
 	if (name && all.includes(name)) {
-		choice = Promise.resolve({template:name});
+		choice = Promise.resolve({template: name});
 	} else {
 		const i = all.find(t => fs.realpathSync(path.join(TEMPLATE_DIR, t)) === fs.realpathSync(DEFAULT_LINK));
-		choice = inquirer.prompt([{
-			name: 'template',
-			type: 'list',
-			choices: all,
-			default: i,
-			message: 'Which template would you like as the default?'
-		}]);
+		choice = inquirer.prompt([
+			{
+				name: 'template',
+				type: 'list',
+				choices: all,
+				default: i,
+				message: 'Which template would you like as the default?'
+			}
+		]);
 	}
 	return choice.then(response => doLink(path.join(TEMPLATE_DIR, response.template), 'default'));
 }
@@ -230,8 +234,7 @@ function api({action, target, name} = {}) {
 		let actionPromise;
 
 		if (['install', 'link', 'remove'].includes(action) && name === 'default')
-			throw new Error('Template "default" name is reserved. '
-					+ 'Use "enact template default" to modify it.');
+			throw new Error('Template "default" name is reserved. ' + 'Use "enact template default" to modify it.');
 
 		switch (action) {
 			case 'install':
@@ -268,7 +271,7 @@ function api({action, target, name} = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['help'],
-		alias: {h:'help'}
+		alias: {h: 'help'}
 	});
 	opts.help && displayHelp();
 

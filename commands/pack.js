@@ -77,8 +77,12 @@ function details(err, stats, output) {
 	if (messages.errors.length) {
 		return new Error(messages.errors.join('\n\n'));
 	} else if (process.env.CI && messages.warnings.length) {
-		console.log(chalk.yellow('Treating warnings as errors because process.env.CI = true. '
-				+ 'Most CI servers set it automatically.\n'));
+		console.log(
+			chalk.yellow(
+				'Treating warnings as errors because process.env.CI = true. ' +
+					'Most CI servers set it automatically.\n'
+			)
+		);
 		return new Error(messages.warnings.join('\n\n'));
 	} else {
 		printFileSizes(statsJSON, output);
@@ -90,8 +94,12 @@ function details(err, stats, output) {
 			console.log(chalk.green('Compiled successfully.'));
 		}
 		if (process.env.NODE_ENV === 'development') {
-			console.log(chalk.yellow('NOTICE: This build contains debugging functionality and may run'
-					+ ' slower than in production mode.'));
+			console.log(
+				chalk.yellow(
+					'NOTICE: This build contains debugging functionality and may run' +
+						' slower than in production mode.'
+				)
+			);
 		}
 		console.log();
 	}
@@ -99,16 +107,15 @@ function details(err, stats, output) {
 
 // Print a detailed summary of build files.
 function printFileSizes(stats, output) {
-	const assets = stats.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
-		.map(asset => {
-			const size = fs.statSync(path.join(output, asset.name)).size;
-			return {
-				folder: path.relative(packageRoot().path, path.join(output, path.dirname(asset.name))),
-				name: path.basename(asset.name),
-				size: size,
-				sizeLabel: filesize(size)
-			};
-		});
+	const assets = stats.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name)).map(asset => {
+		const size = fs.statSync(path.join(output, asset.name)).size;
+		return {
+			folder: path.relative(packageRoot().path, path.join(output, path.dirname(asset.name))),
+			name: path.basename(asset.name),
+			size: size,
+			sizeLabel: filesize(size)
+		};
+	});
 	assets.sort((a, b) => b.size - a.size);
 	const longestSizeLabelLength = Math.max.apply(null, assets.map(a => stripAnsi(a.sizeLabel).length));
 	assets.forEach(asset => {
@@ -118,11 +125,9 @@ function printFileSizes(stats, output) {
 			const rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
 			sizeLabel += rightPadding;
 		}
-		console.log('	' + sizeLabel +	'	' + chalk.dim(asset.folder + path.sep)
-				+ chalk.cyan(asset.name));
+		console.log('	' + sizeLabel + '	' + chalk.dim(asset.folder + path.sep) + chalk.cyan(asset.name));
 	});
 }
-
 
 // Create the production build and print the deployment instructions.
 function build(config) {
@@ -197,8 +202,8 @@ function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['minify', 'framework', 'stats', 'production', 'isomorphic', 'snapshot', 'watch', 'help'],
 		string: ['externals', 'externals-inject', 'locales', 'output'],
-		default: {minify:true},
-		alias: {o:'output', p:'production', i:'isomorphic', l:'locales', s:'snapshot', w:'watch', h:'help'}
+		default: {minify: true},
+		alias: {o: 'output', p: 'production', i: 'isomorphic', l: 'locales', s: 'snapshot', w: 'watch', h: 'help'}
 	});
 	if (opts.help) displayHelp();
 
