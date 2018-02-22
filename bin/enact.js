@@ -18,6 +18,9 @@ if (!semver.satisfies(process.version, pkg.engines.node)) {
 // Uncaught error handler
 process.on('uncaughtException', err => console.error(chalk.red('ERROR: ') + (err.message || err)));
 
+// Write UTF-8 BOM for Windows PowerShell ISE
+if (process.platform === 'win32' && process.title === 'Windows PowerShell ISE') console.log('\ufeff');
+
 // Handle tasks/arguments
 if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 	// Enact-CLI ascii art title
