@@ -15,10 +15,7 @@ module.exports = {
 		[
 			'@babel/preset-env',
 			{
-				targets: Object.assign(
-					app.browsers && {browsers: app.browsers},
-					app.node && {node: app.node}
-				),
+				targets: Object.assign({}, app.browsers && {browsers: app.browsers}, app.node && {node: app.node}),
 				exclude: ['transform-regenerator', 'web.dom.iterable', 'web.timers', 'web.immediate'],
 				forceAllTransforms: es5Standalone,
 				useBuiltIns: !es5Standalone && 'entry',
