@@ -11,7 +11,7 @@
 var origToLocaleString = Array.prototype.toLocaleString;
 Array.prototype.toLocaleString = Array.prototype.toString;
 
-require('babel-polyfill');
+require('@babel/polyfill');
 
 // Restore real [Array].toLocaleString for runtime usage.
 Array.prototype.toLocaleString = origToLocaleString;

@@ -131,7 +131,7 @@ module.exports = {
 						options: {
 							// @remove-on-eject-begin
 							babelrc: false,
-							extends: path.join(__dirname, '.babelrc'),
+							extends: path.join(__dirname, '.babelrc.js'),
 							// @remove-on-eject-end
 							highlightCode: true
 						}

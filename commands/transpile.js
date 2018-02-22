@@ -1,12 +1,12 @@
 const path = require('path');
-const babel = require('babel-core');
+const babel = require('@babel/core');
 const chalk = require('chalk');
 const fs = require('fs-extra');
 const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils/package-root');
 
-const babelrc = path.join(__dirname, '..', 'config', '.babelrc');
-const plugins = [require.resolve('babel-plugin-transform-es2015-modules-commonjs')];
+const babelrc = path.join(__dirname, '..', 'config', '.babelrc.js');
+const plugins = [require.resolve('@babel/plugin-transform-modules-commonjs')];
 const blacklist = ['node_modules', 'build', 'dist', '.git', '.gitignore'];
 
 function displayHelp() {

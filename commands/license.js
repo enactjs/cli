@@ -4,7 +4,7 @@ const checker = require('license-checker');
 const minimist = require('minimist');
 
 // The following modules reside in `@enact/cli` but end up in production builds of apps
-const enactCLIProdModules = ['babel-core', 'babel-polyfill'].map(m =>
+const enactCLIProdModules = ['@babel/core', '@babel/polyfill'].map(m =>
 	path.dirname(require.resolve(m + '/package.json'))
 );
 
