@@ -16,7 +16,7 @@ module.exports = function(karma) {
 		basePath: process.cwd(),
 		frameworks: ['mocha', 'chai', 'dirty-chai'],
 		files: [
-			require.resolve('babel-polyfill/dist/polyfill'),
+			require.resolve('@babel/polyfill/dist/polyfill'),
 			require.resolve('./proptype-checker'),
 			'./!(node_modules|dist|build)/**/*-specs.js'
 		],
@@ -87,13 +87,13 @@ module.exports = function(karma) {
 						options: {
 							// @remove-on-eject-begin
 							babelrc: false,
-							extends: path.join(__dirname, '.babelrc'),
+							extends: path.join(__dirname, '.babelrc.js'),
 							// @remove-on-eject-end
 							cacheDirectory: true,
 							// Generate a unique identifier string based off versons of components and app config.
 							cacheIdentifier: JSON.stringify({
 								'babel-loader': require('babel-loader/package.json').version,
-								'babel-core': require('babel-core/package.json').version,
+								'babel-core': require('@babel/core/package.json').version,
 								browsers: app.browsers,
 								node: app.node
 							})
