@@ -184,7 +184,7 @@ module.exports = function(karma) {
 		logLevel: karma.LOG_INFO,
 		browserNoActivityTimeout: 60000,
 		autoWatch: true,
-		browsers: ['Chrome'],
+		browsers: ['PhantomJS'],
 		singleRun: false
 	});
 };
