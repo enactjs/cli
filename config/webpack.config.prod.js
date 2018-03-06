@@ -124,19 +124,14 @@ module.exports = {
 			{
 				test: /\.(js|jsx)$/,
 				exclude: /node_modules.(?!@enact)/,
-				use: [
-					require.resolve('thread-loader'),
-					{
-						loader: require.resolve('babel-loader'),
-						options: {
-							// @remove-on-eject-begin
-							babelrc: false,
-							extends: path.join(__dirname, '.babelrc.js'),
-							// @remove-on-eject-end
-							highlightCode: true
-						}
-					}
-				]
+				loader: require.resolve('babel-loader'),
+				options: {
+					// @remove-on-eject-begin
+					babelrc: false,
+					extends: path.join(__dirname, '.babelrc.js'),
+					// @remove-on-eject-end
+					highlightCode: true
+				}
 			},
 			// Multiple styling-support features are used together.
 			// "less" loader compiles any LESS-formatted syntax into standard CSS.

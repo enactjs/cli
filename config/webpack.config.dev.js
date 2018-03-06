@@ -132,30 +132,25 @@ module.exports = {
 			{
 				test: /\.(js|jsx)$/,
 				exclude: /node_modules.(?!@enact)/,
-				use: [
-					require.resolve('thread-loader'),
-					{
-						loader: require.resolve('babel-loader'),
-						options: {
-							// @remove-on-eject-begin
-							babelrc: false,
-							extends: path.join(__dirname, '.babelrc.js'),
-							// @remove-on-eject-end
-							// This is a feature of `babel-loader` for webpack (not Babel itself).
-							// It enables caching results in ./node_modules/.cache/babel-loader/
-							// directory for faster rebuilds.
-							cacheDirectory: true,
-							// Generate a unique identifier string based off versons of components and app config.
-							cacheIdentifier: JSON.stringify({
-								'babel-loader': require('babel-loader/package.json').version,
-								'babel-core': require('@babel/core/package.json').version,
-								browsers: app.browsers,
-								node: app.node
-							}),
-							highlightCode: true
-						}
-					}
-				]
+				loader: require.resolve('babel-loader'),
+				options: {
+					// @remove-on-eject-begin
+					babelrc: false,
+					extends: path.join(__dirname, '.babelrc.js'),
+					// @remove-on-eject-end
+					// This is a feature of `babel-loader` for webpack (not Babel itself).
+					// It enables caching results in ./node_modules/.cache/babel-loader/
+					// directory for faster rebuilds.
+					cacheDirectory: true,
+					// Generate a unique identifier string based off versons of components and app config.
+					cacheIdentifier: JSON.stringify({
+						'babel-loader': require('babel-loader/package.json').version,
+						'babel-core': require('@babel/core/package.json').version,
+						browsers: app.browsers,
+						node: app.node
+					}),
+					highlightCode: true
+				}
 			},
 			// Multiple styling-support features are used together.
 			// "less" loader compiles any LESS-formatted syntax into standard CSS.
