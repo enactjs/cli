@@ -143,7 +143,6 @@ module.exports = function(karma) {
 				new EnzymeAdapterPlugin()
 			]
 		},
-
 		webpackServer: {
 			// please don't spam the console when running in karma!
 			noInfo: true,
@@ -163,7 +162,6 @@ module.exports = function(karma) {
 				moduleTrace: false
 			}
 		},
-
 		plugins: [
 			'karma-webpack',
 			'karma-mocha',
@@ -173,16 +171,20 @@ module.exports = function(karma) {
 			'karma-phantomjs-launcher',
 			'karma-json-reporter'
 		],
-
 		jsonReporter: {
 			stdout: true
+		},
+		client: {
+			mocha: {
+				timeout: 30000
+			}
 		},
 		port: 9876,
 		colors: true,
 		logLevel: karma.LOG_INFO,
 		browserNoActivityTimeout: 60000,
 		autoWatch: true,
-		browsers: ['Chrome'],
+		browsers: ['PhantomJS'],
 		singleRun: false
 	});
 };
