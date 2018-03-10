@@ -12,13 +12,14 @@ function displayHelp() {
 	console.log('  Options');
 	console.log('    -l, --local       Scan with local eslint config');
 	console.log('    -s, --strict      Scan with strict eslint config');
+	console.log('    -f, --fix         Attempt to fix viable problems');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
 	process.exit(0);
 }
 
-function api({strict = false, local = false, eslintArgs = []} = {}) {
+function api({strict = false, local = false, fix = false, eslintArgs = []} = {}) {
 	let args = [];
 	if (strict) {
 		args.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact/strict'));
@@ -28,6 +29,7 @@ function api({strict = false, local = false, eslintArgs = []} = {}) {
 	args.push('--ignore-pattern', 'node_modules/*');
 	args.push('--ignore-pattern', 'build/*');
 	args.push('--ignore-pattern', 'dist/*');
+	if (fix) args.push('--fix');
 	if (eslintArgs.length) {
 		args = args.concat(eslintArgs);
 	} else {
@@ -47,12 +49,12 @@ function api({strict = false, local = false, eslintArgs = []} = {}) {
 
 function cli(args) {
 	const opts = minimist(args, {
-		boolean: ['local', 'strict', 'help'],
-		alias: {l: 'local', s: 'strict', h: 'help'}
+		boolean: ['local', 'strict', 'fix', 'help'],
+		alias: {l: 'local', s: 'strict', f: 'fix', h: 'help'}
 	});
 	opts.help && displayHelp();
 
-	api({strict: opts.strict, local: opts.local, eslintArgs: opts._}).catch(() => {
+	api({strict: opts.strict, local: opts.local, fix: opts.fix, eslintArgs: opts._}).catch(() => {
 		process.exit(1);
 	});
 }
