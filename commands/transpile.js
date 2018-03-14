@@ -3,7 +3,7 @@ const babel = require('@babel/core');
 const chalk = require('chalk');
 const fs = require('fs-extra');
 const minimist = require('minimist');
-const packageRoot = require('@enact/dev-utils/package-root');
+const packageRoot = require('@enact/dev-utils').packageRoot;
 
 const babelrc = path.join(__dirname, '..', 'config', '.babelrc.js');
 const plugins = [require.resolve('@babel/plugin-transform-modules-commonjs')];

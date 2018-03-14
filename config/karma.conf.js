@@ -4,10 +4,7 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
 const LessPluginRi = require('resolution-independence');
 const {DefinePlugin} = require('webpack');
-const app = require('@enact/dev-utils/option-parser');
-const EnzymeAdapterPlugin = require('@enact/dev-utils/plugins/EnzymeAdapterPlugin');
-const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
-const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
+const {optionParser: app, EnzymeAdapterPlugin, GracefulFsPlugin, ILibPlugin} = require('@enact/dev-utils');
 
 process.env.ES5 = 'true';
 

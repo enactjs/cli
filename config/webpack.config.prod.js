@@ -37,10 +37,7 @@ const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const LessPluginRi = require('resolution-independence');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const {DefinePlugin} = require('webpack');
-const app = require('@enact/dev-utils/option-parser');
-const GracefulFsPlugin = require('@enact/dev-utils/plugins/GracefulFsPlugin');
-const ILibPlugin = require('@enact/dev-utils/plugins/ILibPlugin');
-const WebOSMetaPlugin = require('@enact/dev-utils/plugins/WebOSMetaPlugin');
+const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
 
 process.chdir(app.context);
 

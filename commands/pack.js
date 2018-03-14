@@ -32,8 +32,7 @@ const minimist = require('minimist');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const stripAnsi = require('strip-ansi');
 const webpack = require('webpack');
-const mixins = require('@enact/dev-utils/mixins');
-const packageRoot = require('@enact/dev-utils/package-root');
+const {mixins, packageRoot} = require('@enact/dev-utils');
 
 function displayHelp() {
 	console.log('  Usage');
@@ -45,24 +44,26 @@ function displayHelp() {
 	console.log('    -p, --production  Build in production mode');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
 	console.log('                      (includes prerendering)');
+	console.log('    -l, --locales     Locales for isomorphic mode; one of:');
+	console.log('            <commana-separated-values> Locale list');
+	console.log('            <JSON-filepath> - Read locales from JSON file');
+	console.log('            "none" - Disable locale-specific handling');
+	console.log('            "used" - Detect locales used within ./resources/');
+	console.log('            "tv" - Locales supported on webOS TV');
+	console.log('            "signage" - Locales supported on webOS signage');
+	console.log('            "all" - All locales that iLib supports');
+	console.log('    -s, --snapshot    Generate V8 snapshot blob');
+	console.log('                      (requires V8_MKSNAPSHOT set)');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
 	/*
 		Private Options:
-			-v8, --snapshot       Extension of isomorphic code layout which builds for V8 snapshot support
 			--no-minify           Will skip minification during production build
 			--framework           Builds the @enact/*, react, and react-dom into an external framework
 			--externals           Specify a local directory path to the standalone external framework
-			--externals-inject    Remote public path to the external framework for use injecting into HTML
-			-l, --locales         Extension of isomorphic code layout to prerender locales. Can be:
-			                          "used" - Prerender locales used within ./resources/
-			                          "tv" - Prerender locales supported on the TV platform
-			                          "signage" - Prerender locales supported on the signage platform
-			                          "all" - Prerender all locales that iLib supports
-			                          <JSON-filepath> - Prerender the locales listed within the JSON file
-			                          <commana-separated-values> - Prerender the specifically listed locales
+			--externals-public    Remote public path to the external framework for use injecting into HTML
 	*/
 	process.exit(0);
 }
@@ -201,7 +202,7 @@ function api(opts = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['minify', 'framework', 'stats', 'production', 'isomorphic', 'snapshot', 'watch', 'help'],
-		string: ['externals', 'externals-inject', 'locales', 'output'],
+		string: ['externals', 'externals-public', 'locales', 'output'],
 		default: {minify: true},
 		alias: {o: 'output', p: 'production', i: 'isomorphic', l: 'locales', s: 'snapshot', w: 'watch', h: 'help'}
 	});

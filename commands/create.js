@@ -92,8 +92,13 @@ const defaultGenerator = {
 			'yarn-error.log',
 			'yarn-debug.log'
 		];
+		const rel = path.relative(process.cwd(), directory);
+		if (!rel || rel === '.') {
+			console.log('Creating a new Enact app...');
+		} else {
+			console.log(`Creating a new Enact app in ${rel}...`);
+		}
 
-		console.log('Creating a new Enact app in ' + path.relative(process.cwd(), directory) + '...');
 		console.log();
 
 		if (!fs.readdirSync(directory).every(f => validFiles.includes(f))) {
