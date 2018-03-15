@@ -63,9 +63,9 @@ Deletes previous build fragments from ./dist.
 
 Runs the Enact configuration of Eslint on the project for syntax analysis.
 
-### `npm run test`, `npm run test-json`, and `npm run test-watch`
+### `npm run test` and `npm run test-watch`
 
-These tasks will execute all valid tests (files that end in `-specs.js`) that are within the project directory. The `test` is a standard execution pass, `test-json` uses a json reporter for output, and `test-watch` will set up a watcher to re-execute tests when files change.
+These tasks will execute all valid tests (files that end in `-specs.js`) that are within the project directory. The `test` is a standard single execution pass, while `test-watch` will set up a watcher to re-execute tests when files change.
 
 ## Enact Build Options
 
