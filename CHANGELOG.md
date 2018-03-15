@@ -1,3 +1,61 @@
+## 1.0.0 (March 15, 2018)
+
+Dependency updates for most components.
+Moved all plugins, mixins, and utility functions into [@enact/dev-utils](https://www.npmjs.com/package/@enact/dev-utils) package.
+Refactored all commands to support Promise-based API access for potential integration with 3rd party build systems.
+Enact CLI source code now updated for [`eslint-plugin-import`](https://github.com/benmosher/eslint-plugin-import) and [`prettier`](https://github.com/prettier/prettier) formatting.
+
+## create
+
+* Default moonstone template updated for latest Enact 1.x/React 15.x dependencies.
+* Updated to support customized templates via `-t`/`--templates` option.
+* Refactored creation handling to be general purpose and support dynamic templates modifying the execution.
+
+## link
+
+* Only link `@enact`-scoped dependencies found within the project `package.json` rather than all globally linked `@enact`-scoped packages.
+
+## transpile
+
+* Added support for `-i`/`--ignore` regex string to ignore filepathes when transpiling/copying.
+
+## pack
+
+* Added support for targeted builds. Can be set via a `target` enact `package.json` property or via [Browserslist](https://github.com/ai/browserslist) format.
+* Added support for Electron build target.
+* Switched to use `@babel/preset-env` and `@babel/polyfill` for on-demand transpiling/polyfilling to targetted build platforms.
+* Production mode build uses `uglifyjs-webpack-plugin` to support ES6-based minification (until the upgrade to webpack 4)
+* Dynamic handling of the `enact` options with `package.json`, with support for `theme` preset values that simplify setup of for given Enact GUI theme libraries.
+* Allow `electron-renderer` webpack target to support `browser` as a main field.
+* Isomorphic builds now build `en-US` locale by default. Switched `-l`/`--locales` as a public option, allowing specifying of locale-lists for prerendering.
+* Switched `-s`/`--snapshot` as a public option. Creates a v8 snapshot blob from the app bundle (provided mksnapshot binary is provided as `V8_MKSNAPSHOT` environment variable).
+* Updated to Webpack 3.x support.
+* Updated to Babel 7.x beta support.
+
+## serve
+
+* Allows attempted serving on all webpack targets other that `node`, `async-node` and `webworker`.
+
+## test
+
+* Fixed testing support for Windows when using modules that accessed `@enact/i18n`.
+
+## template
+
+* Full template management support. See the [docs](./docs/template-management.md) for more details.
+* Templates can be sourced from git URIs, npm packages, or local directories.
+* Able to install, link, remove, list templates.
+* Able to set templates as default when using `enact create`.
+* Templates can be static or dynamic generators, optionally hooking into the `enact create` execution.
+
+## lint
+
+* Added a `--fix` option to automatically attempt to have eslint fix linting errors.
+
+## license
+
+* Updated to include `@babel/polyfill` and `@babel/core` licenses in project scanning.
+
 ## 0.9.8 (February 15, 2018)
 
 * Updated all links for enactjs github organization and fixed a broken docs link.
