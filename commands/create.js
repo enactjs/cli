@@ -37,6 +37,7 @@ const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 
 const defaultGenerator = {
 	overwrite: false,
+	install: true,
 	validate: ({template, name}) => {
 		const validation = validatePackageName(name);
 
@@ -191,7 +192,7 @@ function resolveTemplateGenerator(template) {
 			try {
 				const generator = require(templatePath) || {};
 				Object.keys(defaultGenerator).forEach(k => {
-					if (generator[k] === undefined || generator[k] === true) {
+					if (generator[k] === undefined) {
 						generator[k] = defaultGenerator[k];
 					}
 				});
@@ -215,7 +216,7 @@ function copyTemplate(template, output, overwrite) {
 	let templateGitIgnore = fs.readdirSync(template).filter(f => ['.gitignore', 'gitignore'].includes(f))[0];
 	templateGitIgnore = templateGitIgnore && path.join(template, templateGitIgnore);
 
-	if (overwrite && fs.existsSync(outputReadme) && fs.existsSync(path.join(template, 'README.md'))) {
+	if (fs.existsSync(outputReadme) && fs.existsSync(path.join(template, 'README.md'))) {
 		console.log(chalk.yellow('Found an existing README.md file. Renaming to README.old.md to avoid overwriting.'));
 		console.log();
 		fs.moveSync(outputReadme, path.join(output, 'README.old.md'));
@@ -261,21 +262,20 @@ function npmInstall(directory, verbose, ...rest) {
 function api(opts = {}) {
 	return resolveTemplateGenerator(opts.template).then(({generator, templatePath}) => {
 		const params = Object.assign({opts, defaultGenerator}, opts);
-		const overwrite = generator.overwrite || typeof generator.overwrite === 'undefined';
 
 		return new Promise(resolve => resolve(generator.validate && generator.validate(params)))
 			.then(() => fs.ensureDir(opts.directory))
-			.then(() => generator.prepare(params))
-			.then(() => copyTemplate(templatePath, opts.directory, overwrite))
-			.then(() => generator.setup(params))
-			.then(() => npmInstall(opts.directory, opts.verbose))
+			.then(() => generator.prepare && generator.prepare(params))
+			.then(() => copyTemplate(templatePath, opts.directory, generator.overwrite))
+			.then(() => generator.setup && generator.setup(params))
+			.then(() => generator.install && npmInstall(opts.directory, opts.verbose))
 			.then(() => {
 				if (opts.local) {
 					console.log('Installing @enact/cli locally. This might take a couple minutes.');
 					return npmInstall(opts.directory, opts.verbose, '--save-dev', ENACT_DEV_NPM);
 				}
 			})
-			.then(() => generator.complete(params));
+			.then(() => generator.complete && generator.complete(params));
 	});
 }
 
