@@ -27,24 +27,18 @@
 // @remove-on-eject-end
 
 const path = require('path');
-const {DefinePlugin} = require('webpack');
 const autoprefixer = require('autoprefixer');
-const flexbugfixes = require('postcss-flexbugs-fixes');
-const LessPluginRi = require('resolution-independence');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const GracefulFsPlugin = require('graceful-fs-webpack-plugin');
-const ILibPlugin = require('ilib-webpack-plugin');
-const WebOSMetaPlugin = require('webos-meta-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const flexbugfixes = require('postcss-flexbugs-fixes');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
-const findProjectRoot = require('../global-cli/modifiers/util/find-project-root');
+const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
+const LessPluginRi = require('resolution-independence');
+const {DefinePlugin} = require('webpack');
+const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
 
-process.chdir(findProjectRoot().path);
-const pkg = require(path.resolve('./package.json'));
-const enact = pkg.enact || {};
-const reactPerf = path.resolve(path.join('node_modules', 'react-dom', 'lib', 'ReactPerf.js'));
+process.chdir(app.context);
 
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
@@ -61,10 +55,8 @@ module.exports = {
 		main: [
 			// Include a few polyfills by default (Promise, Object.assign, and fetch)
 			require.resolve('./polyfills'),
-			// Include React performance tools for debugging/optimization testing
-			reactPerf,
 			// Finally, this is your app's code
-			path.resolve(pkg.main || 'index.js')
+			app.context
 		]
 	},
 	output: {
@@ -84,27 +76,22 @@ module.exports = {
 		extensions: ['.js', '.jsx', '.json'],
 		// Allows us to specify paths to check for module resolving.
 		modules: [path.resolve('./node_modules'), 'node_modules'],
+		// Allow "browser" field in electron-renderer along with the default web/webworker types.
+		mainFields: [
+			['web', 'webworker', 'electron-renderer'].includes(app.environment) && 'browser',
+			'module',
+			'main'
+		].filter(Boolean),
 		alias: {
-			// @remove-on-eject-begin
-			'promise/lib/rejection-tracking': require.resolve('promise/lib/rejection-tracking'),
-			'promise/lib/es6-extensions': require.resolve('promise/lib/es6-extensions'),
-			'whatwg-fetch': require.resolve('whatwg-fetch'),
-			'object-assign': require.resolve('object-assign'),
-			'string.fromcodepoint': require.resolve('string.fromcodepoint'),
-			'string.prototype.codepointat': require.resolve('string.prototype.codepointat'),
-			// @remove-on-eject-end
 			// Support ilib shorthand alias for ilib modules
-			'ilib':'@enact/i18n/ilib/lib'
+			ilib: '@enact/i18n/ilib/lib'
 		}
 	},
 	// @remove-on-eject-begin
 	// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
 	// directory of `@enact/cli` itself rather than the project directory.
 	resolveLoader: {
-		modules: [
-			path.resolve(__dirname, '../node_modules'),
-			path.resolve('./node_modules')
-		]
+		modules: [path.resolve(__dirname, '../node_modules'), path.resolve('./node_modules')]
 	},
 	// @remove-on-eject-end
 	module: {
@@ -142,17 +129,30 @@ module.exports = {
 			{
 				test: /\.(js|jsx)$/,
 				exclude: /node_modules.(?!@enact)/,
-				loader: require.resolve('babel-loader'),
-				options: {
-					// @remove-on-eject-begin
-					babelrc: false,
-					extends: path.join(__dirname, '.babelrc'),
-					// @remove-on-eject-end
-					// This is a feature of `babel-loader` for webpack (not Babel itself).
-					// It enables caching results in ./node_modules/.cache/babel-loader/
-					// directory for faster rebuilds.
-					cacheDirectory: true
-				}
+				use: [
+					require.resolve('thread-loader'),
+					{
+						loader: require.resolve('babel-loader'),
+						options: {
+							// @remove-on-eject-begin
+							babelrc: false,
+							extends: path.join(__dirname, '.babelrc.js'),
+							// @remove-on-eject-end
+							// This is a feature of `babel-loader` for webpack (not Babel itself).
+							// It enables caching results in ./node_modules/.cache/babel-loader/
+							// directory for faster rebuilds.
+							cacheDirectory: true,
+							// Generate a unique identifier string based off versons of components and app config.
+							cacheIdentifier: JSON.stringify({
+								'babel-loader': require('babel-loader/package.json').version,
+								'babel-core': require('@babel/core/package.json').version,
+								browsers: app.browsers,
+								node: app.node
+							}),
+							highlightCode: true
+						}
+					}
+				]
 			},
 			// Multiple styling-support features are used together.
 			// "less" loader compiles any LESS-formatted syntax into standard CSS.
@@ -186,12 +186,7 @@ module.exports = {
 								plugins: () => [
 									// We use PostCSS for autoprefixing only, but others could be added.
 									autoprefixer({
-										browsers: [
-											'>1%',
-											'last 4 versions',
-											'Firefox ESR',
-											'not ie < 9' // React doesn't support IE8 anyway.
-										],
+										browsers: app.browsers,
 										flexbox: 'no-2009',
 										remove: false
 									}),
@@ -206,18 +201,11 @@ module.exports = {
 							options: {
 								sourceMap: true,
 								// If resolution independence options are specified, use the LESS plugin.
-								plugins: ((enact.ri) ? [new LessPluginRi(enact.ri)] : [])
+								plugins: app.ri ? [new LessPluginRi(app.ri)] : []
 							}
 						}
 					]
 				})
-			},
-			// Expose the 'react-addons-perf' on a global context for debugging.
-			// Currently maps the toolset to window.ReactPerf.
-			{
-				test: reactPerf,
-				loader: require.resolve('expose-loader'),
-				options: 'ReactPerf'
 			}
 			// ** STOP ** Are you adding a new loader?
 			// Remember to add the new extension(s) to the "file" loader exclusion regex list.
@@ -229,8 +217,10 @@ module.exports = {
 		host: '0.0.0.0',
 		port: 8080
 	},
+	// Target app to build for a specific environment (default 'web')
+	target: app.environment,
 	// Optional configuration for polyfilling NodeJS built-ins.
-	node: enact.node,
+	node: app.nodeBuiltins,
 	performance: {
 		hints: false
 	},
@@ -239,16 +229,16 @@ module.exports = {
 		new HtmlWebpackPlugin({
 			// Title can be specified in the package.json enact options or will
 			// be determined automatically from any appinfo.json files discovered.
-			title: enact.title || '',
+			title: app.title || '',
 			inject: 'body',
-			template: enact.template || path.join(__dirname, 'html-template.ejs'),
+			template: app.template || path.join(__dirname, 'html-template.ejs'),
 			xhtml: true
 		}),
 		// Make NODE_ENV environment variable available to the JS code, for example:
 		// if (process.env.NODE_ENV === 'development') { ... }.
 		new DefinePlugin({
 			'process.env': {
-				'NODE_ENV': '"development"'
+				NODE_ENV: '"development"'
 			}
 		}),
 		// Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.

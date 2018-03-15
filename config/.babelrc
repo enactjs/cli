@@ -1,9 +1,0 @@
-{
-	"presets": [["es2015", {"modules": false}], "stage-0", "react"],
-	"plugins": ["dev-expression", "syntax-dynamic-import"],
-	"env": {
-		"production": {
-			"plugins": ["transform-react-inline-elements","transform-react-constant-elements"]
-		}
-	}
-}

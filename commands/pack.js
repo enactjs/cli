@@ -24,91 +24,99 @@
  * SOFTWARE.
  */
 
-const
-	chalk = require('chalk'),
-	fs = require('fs-extra'),
-	path = require('path'),
-	minimist = require('minimist'),
-	filesize = require('filesize'),
-	webpack = require('webpack'),
-	modifiers = require('./modifiers'),
-	devConfig = require('../config/webpack.config.dev'),
-	prodConfig = require('../config/webpack.config.prod'),
-	findProjectRoot = require('./modifiers/util/find-project-root'),
-	formatWebpackMessages = require('react-dev-utils/formatWebpackMessages'),
-	checkRequiredFiles = require('react-dev-utils/checkRequiredFiles'),
-	stripAnsi = require('strip-ansi');
+const path = require('path');
+const chalk = require('chalk');
+const filesize = require('filesize');
+const fs = require('fs-extra');
+const minimist = require('minimist');
+const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
+const stripAnsi = require('strip-ansi');
+const webpack = require('webpack');
+const {mixins, packageRoot} = require('@enact/dev-utils');
 
 function displayHelp() {
 	console.log('  Usage');
 	console.log('    enact pack [options]');
 	console.log();
 	console.log('  Options');
+	console.log('    -o, --output      Specify an output directory');
 	console.log('    -w, --watch       Rebuild on file changes');
 	console.log('    -p, --production  Build in production mode');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
 	console.log('                      (includes prerendering)');
+	console.log('    -l, --locales     Locales for isomorphic mode; one of:');
+	console.log('            <commana-separated-values> Locale list');
+	console.log('            <JSON-filepath> - Read locales from JSON file');
+	console.log('            "none" - Disable locale-specific handling');
+	console.log('            "used" - Detect locales used within ./resources/');
+	console.log('            "tv" - Locales supported on webOS TV');
+	console.log('            "signage" - Locales supported on webOS signage');
+	console.log('            "all" - All locales that iLib supports');
+	console.log('    -s, --snapshot    Generate V8 snapshot blob');
+	console.log('                      (requires V8_MKSNAPSHOT set)');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
 	/*
 		Private Options:
-			-v8, --snapshot       Extension of isomorphic code layout which builds for V8 snapshot support
 			--no-minify           Will skip minification during production build
 			--framework           Builds the @enact/*, react, and react-dom into an external framework
 			--externals           Specify a local directory path to the standalone external framework
-			--externals-inject    Remote public path to the external framework for use injecting into HTML
-			-l, --locales         Extension of isomorphic code layout to prerender locales. Can be:
-			                          "used" - Prerender locales used within ./resources/
-			                          "tv" - Prerender locales supported on the TV platform
-			                          "signage" - Prerender locales supported on the signage platform
-			                          "all" - Prerender all locales that iLib supports
-			                          <JSON-filepath> - Prerender the locales listed within the JSON file
-			                          <commana-separated-values> - Prerender the specifically listed locales
+			--externals-public    Remote public path to the external framework for use injecting into HTML
 	*/
 	process.exit(0);
 }
 
-function details(err, stats) {
-	if(err) return err;
+function details(err, stats, output) {
+	if (err) return err;
+	stats.compilation.warnings.forEach(w => {
+		w.message = w.message.replace(/\n.* potentially fixable with the `--fix` option./gm, '');
+	});
 	const statsJSON = stats.toJson({}, true);
 	const messages = formatWebpackMessages(statsJSON);
-	if(messages.errors.length) {
+	if (messages.errors.length) {
 		return new Error(messages.errors.join('\n\n'));
-	} else if(process.env.CI && messages.warnings.length) {
-		console.log(chalk.yellow('Treating warnings as errors because process.env.CI = true. '
-				+ 'Most CI servers set it automatically.\n'));
+	} else if (process.env.CI && messages.warnings.length) {
+		console.log(
+			chalk.yellow(
+				'Treating warnings as errors because process.env.CI = true. ' +
+					'Most CI servers set it automatically.\n'
+			)
+		);
 		return new Error(messages.warnings.join('\n\n'));
 	} else {
-		printFileSizes(statsJSON);
+		printFileSizes(statsJSON, output);
 		console.log();
-		if(messages.warnings.length) {
+		if (messages.warnings.length) {
 			console.log(chalk.yellow('Compiled with warnings:\n'));
 			console.log(messages.warnings.join('\n\n') + '\n');
 		} else {
 			console.log(chalk.green('Compiled successfully.'));
 		}
 		if (process.env.NODE_ENV === 'development') {
-			console.log(chalk.yellow('NOTICE: This build contains debugging functionality and may run'
-					+ ' slower than in production mode.'));
+			console.log(
+				chalk.yellow(
+					'NOTICE: This build contains debugging functionality and may run' +
+						' slower than in production mode.'
+				)
+			);
 		}
 		console.log();
 	}
 }
 
 // Print a detailed summary of build files.
-function printFileSizes(stats) {
-	const assets = stats.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
-		.map(asset => {
-			const size = fs.statSync('./dist/' + asset.name).size;
-			return {
-				folder: path.join('dist', path.dirname(asset.name)),
-				name: path.basename(asset.name),
-				size: size,
-				sizeLabel: filesize(size)
-			};
-		});
+function printFileSizes(stats, output) {
+	const assets = stats.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name)).map(asset => {
+		const size = fs.statSync(path.join(output, asset.name)).size;
+		return {
+			folder: path.relative(packageRoot().path, path.join(output, path.dirname(asset.name))),
+			name: path.basename(asset.name),
+			size: size,
+			sizeLabel: filesize(size)
+		};
+	});
 	assets.sort((a, b) => b.size - a.size);
 	const longestSizeLabelLength = Math.max.apply(null, assets.map(a => stripAnsi(a.sizeLabel).length));
 	assets.forEach(asset => {
@@ -118,11 +126,9 @@ function printFileSizes(stats) {
 			const rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
 			sizeLabel += rightPadding;
 		}
-		console.log('	' + sizeLabel +	'	' + chalk.dim(asset.folder + path.sep)
-				+ chalk.cyan(asset.name));
+		console.log('	' + sizeLabel + '	' + chalk.dim(asset.folder + path.sep) + chalk.cyan(asset.name));
 	});
 }
-
 
 // Create the production build and print the deployment instructions.
 function build(config) {
@@ -132,15 +138,16 @@ function build(config) {
 		console.log('Creating an optimized production build...');
 	}
 
-	const compiler = webpack(config);
-	compiler.run((err, stats) => {
-		err = details(err, stats);
-		if(err) {
-			console.log();
-			console.log(chalk.red('Failed to compile.\n'));
-			console.log((err.message || err) + '\n');
-			process.exit(1);
-		}
+	return new Promise((resolve, reject) => {
+		const compiler = webpack(config);
+		compiler.run((err, stats) => {
+			err = details(err, stats, config.output.path);
+			if (err) {
+				reject(err);
+			} else {
+				resolve();
+			}
+		});
 	});
 }
 
@@ -163,41 +170,51 @@ function watch(config) {
 	});
 }
 
-module.exports = function(args) {
-	const opts = minimist(args, {
-		boolean: ['minify', 'framework', 'stats', 'p', 'production', 'i', 'isomorphic', 's', 'snapshot', 'w', 'watch', 'h', 'help'],
-		string: ['externals', 'externals-inject', 'l', 'locales'],
-		default: {minify:true},
-		alias: {p:'production', i:'isomorphic', l:'locales', s:'snapshot', w:'watch', h:'help'}
-	});
-	if (opts.help) displayHelp();
-
-	process.chdir(findProjectRoot().path);
-	process.env.NODE_ENV = 'development';
-	let config = devConfig;
+function api(opts = {}) {
+	let config;
 
 	// Do this as the first thing so that any code reading it knows the right env.
 	if (opts.production) {
 		process.env.NODE_ENV = 'production';
-		config = prodConfig;
+		config = require('../config/webpack.config.prod');
+	} else {
+		process.env.NODE_ENV = 'development';
+		config = require('../config/webpack.config.dev');
 	}
 
-	modifiers.apply(config, opts);
+	if (opts.output) config.output.path = path.resolve(opts.output);
 
-	// Warn and crash if required files are missing
-	if (!opts.framework && !checkRequiredFiles([config.entry.main[config.entry.main.length - 1]])) {
-		process.exit(1);
-	}
+	mixins.apply(config, opts);
 
 	// Remove all content but keep the directory so that
 	// if you're in it, you don't end up in Trash
-	fs.emptyDirSync('./dist');
+	return fs.emptyDir(config.output.path).then(() => {
+		// Start the webpack build
+		if (opts.watch) {
+			// This will run infinitely until killed, even through errors
+			watch(config);
+		} else {
+			return build(config);
+		}
+	});
+}
 
-	// Start the webpack build
-	if (opts.watch) {
-		config.bail = false;
-		watch(config);
-	} else {
-		build(config);
-	}
-};
+function cli(args) {
+	const opts = minimist(args, {
+		boolean: ['minify', 'framework', 'stats', 'production', 'isomorphic', 'snapshot', 'watch', 'help'],
+		string: ['externals', 'externals-public', 'locales', 'output'],
+		default: {minify: true},
+		alias: {o: 'output', p: 'production', i: 'isomorphic', l: 'locales', s: 'snapshot', w: 'watch', h: 'help'}
+	});
+	if (opts.help) displayHelp();
+
+	process.chdir(packageRoot().path);
+	api(opts).catch(err => {
+		console.log();
+		console.log(chalk.red('Failed to compile.\n'));
+		console.log((err.message || err) + '\n');
+		process.exit(1);
+	});
+}
+
+module.exports = {api, cli};

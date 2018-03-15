@@ -12,31 +12,32 @@
     "clean": "enact clean",
     "lint": "enact lint .",
     "license": "enact license",
-    "test": "enact test start --single-run --browsers PhantomJS",
-    "test-json": "enact test start --single-run --browsers PhantomJS --reporters json",
-    "test-watch": "enact test start --browsers PhantomJS"
+    "test": "enact test start --single-run",
+    "test-watch": "enact test start"
   },
   "license": "UNLICENSED",
   "private": true,
   "repository": "",
   "enact": {
-    "isomorphic": true,
-    "ri": {
-      "baseSize": 24
-    }
+    "theme": "moonstone"
   },
   "eslintConfig": {
     "extends": "enact"
   },
+  "eslintIgnore": [
+    "node_modules/*",
+    "build/*",
+    "dist/*"
+  ],
   "dependencies": {
-    "@enact/core": "^1.8.0",
-    "@enact/ui": "^1.8.0",
-    "@enact/moonstone": "^1.8.0",
-    "@enact/spotlight": "^1.8.0",
-    "@enact/i18n": "^1.8.0",
-    "@enact/webos": "^1.8.0",
-    "prop-types": "^15.5.10",
-    "react": "^15.6.1",
-    "react-dom": "^15.6.1"
+    "@enact/core": "^1.15.0",
+    "@enact/i18n": "^1.15.0",
+    "@enact/moonstone": "^1.15.0",
+    "@enact/spotlight": "^1.15.0",
+    "@enact/ui": "^1.15.0",
+    "@enact/webos": "^1.15.0",
+    "prop-types": "^15.6.0",
+    "react": "^15.6.2",
+    "react-dom": "^15.6.2"
   }
 }
