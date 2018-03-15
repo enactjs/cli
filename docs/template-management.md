@@ -42,4 +42,4 @@ Included within the Enact CLI is a default Enact moonstone template, however the
 Due to the similar nature in these actions, it's worth some clarification. The `install` action pulls from a local or remote source, copying the template files to a user-storage location (`%APPDATA%\.enact` on Windows, `$HOME/.enact` on all other systems).  The `link` action, on the other hand, will create a symlink from a local source directory into the user-storage location.  No files are physically copied, only linked. As such, the local linked source directory should not be deleted and any changes made within will reflected when using the Enact CLI. It is generally only advisable to use the `link` action when actively developing templates.
 
 ## Developing Templates
-If you're intested in creating your own template for use with the Enact CLI, information can be found [here](./developing-a-template).
+If you're intested in creating your own template for use with the Enact CLI, information can be found [here](./developing-a-template.md).
