@@ -11,6 +11,7 @@ title: Starting a New App
                           (default: current working directory)
 
   Options
+    -t, --template    Specific template to use
     -local            Include @enact/cli locally in the project
     -verbose          Verbose output logging
 ```
