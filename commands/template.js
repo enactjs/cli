@@ -25,6 +25,7 @@ function displayHelp() {
 	console.log();
 	console.log('    enact template link [directory] [name]');
 	console.log(chalk.dim('    Symlink a directory into template management'));
+	console.log();
 	console.log('        directory         Local directory path to link');
 	console.log('                          (default: cwd)');
 	console.log('        name              Specific name for the template');

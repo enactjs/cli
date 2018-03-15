@@ -4,7 +4,7 @@ const spawn = require('cross-spawn');
 const fs = require('fs-extra');
 const globalDir = require('global-modules');
 const minimist = require('minimist');
-const packageRoot = require('@enact/dev-utils/package-root');
+const packageRoot = require('@enact/dev-utils').packageRoot;
 
 function displayHelp() {
 	console.log('  Usage');
