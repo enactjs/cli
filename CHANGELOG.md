@@ -1,3 +1,17 @@
+## 1.0.1 (March 26, 2018)
+
+## pack
+
+* Updated `@enact/dev-utils` fixing React 16 issues with v8 snapshot support.
+
+## template
+
+* Fixed automatic name detection for NPM packages when using version/tag specifiers.
+
+## lint
+
+* Added `--framework` temporary alias for `--strict` to fix build systems while they update to current syntax.
+
 ## 1.0.0 (March 15, 2018)
 
 Dependency updates for most components.
