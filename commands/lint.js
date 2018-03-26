@@ -50,7 +50,7 @@ function api({strict = false, local = false, fix = false, eslintArgs = []} = {})
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['local', 'strict', 'fix', 'help'],
-		alias: {l: 'local', s: 'strict', f: 'fix', h: 'help'}
+		alias: {l: 'local', s: 'strict', framework: 'strict', f: 'fix', h: 'help'}
 	});
 	opts.help && displayHelp();
 
