@@ -1,6 +1,6 @@
 {
   "name": "@enact/cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Full-featured build environment tool for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
@@ -11,6 +11,9 @@
   },
   "engines": {
     "node": ">=6.4.0"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "lint": "eslint .",
@@ -33,7 +36,7 @@
     "@babel/preset-env": "7.0.0-beta.41",
     "@babel/preset-react": "7.0.0-beta.41",
     "@babel/preset-stage-0": "7.0.0-beta.41",
-    "@enact/dev-utils": "1.0.1",
+    "@enact/dev-utils": "1.0.2",
     "autoprefixer": "8.1.0",
     "babel-eslint": "8.2.2",
     "babel-loader": "8.0.0-beta.2",
@@ -85,7 +88,7 @@
     "react-dev-utils": "5.0.0",
     "react-dom": "16.2.0",
     "react-test-renderer": "16.2.0",
-    "resolution-independence": "0.0.3",
+    "resolution-independence": "1.0.0",
     "semver": "5.5.0",
     "sinon": "4.4.6",
     "strip-ansi": "4.0.0",
