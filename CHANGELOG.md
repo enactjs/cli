@@ -1,3 +1,8 @@
+## 1.0.2 (March 30m 2018)
+
+Updated [`resolution-independence`](https://github.com/enactjs/less-plugin-resolution-independence) plugin dependency with fixed support Less 3.x.
+Updated [`@enact/dev-utils`](https://github.com/enactjs/dev-utils) dependency with fixes for resolution-independence configuration autodetection and React16-based framework builds.
+
 ## 1.0.1 (March 26, 2018)
 
 ## pack
