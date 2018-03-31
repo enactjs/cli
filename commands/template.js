@@ -98,8 +98,12 @@ function doInstall(target, name) {
 	});
 }
 
+function normalizeName(name) {
+	return name.replace(/(?:^enact-template-|^template-)/g, '');
+}
+
 // Clone Git repository using specific branch if desired
-function installFromGit(target, name = path.basename(url.parse(target).pathname, '.git')) {
+function installFromGit(target, name = normalizeName(path.basename(url.parse(target).pathname, '.git'))) {
 	const git = target.match(/^(?:(^.*)#([\w\d-_.]+)?|(^.*))$/);
 	const args = ['clone', git[1] || git[3], name, '-c', 'advice.detachedHead=false'];
 	if (git[2]) args.splice(2, 0, '-b', git[2]);
@@ -117,7 +121,7 @@ function installFromGit(target, name = path.basename(url.parse(target).pathname,
 }
 
 // Copy directory files
-function installFromLocal(target, name = path.basename(target)) {
+function installFromLocal(target, name = normalizeName(path.basename(target))) {
 	const output = path.join(TEMPLATE_DIR, name);
 	fs.removeSync(output);
 	fs.ensureDirSync(output);
@@ -130,7 +134,7 @@ function installFromLocal(target, name = path.basename(target)) {
 }
 
 // Download and extract NPM package
-function installFromNPM(target, name = path.basename(target).replace(/(?:^template-|@.*$)/g, '')) {
+function installFromNPM(target, name = normalizeName(path.basename(target).replace(/@.*$/g, ''))) {
 	const tempDir = path.join(os.tmpdir(), 'enact');
 	fs.removeSync(tempDir);
 	fs.ensureDirSync(tempDir);
@@ -162,7 +166,7 @@ function installFromNPM(target, name = path.basename(target).replace(/(?:^templa
 		});
 }
 
-function doLink(target, name = path.basename(path.resolve(target))) {
+function doLink(target, name = normalizeName(path.basename(path.resolve(target)))) {
 	const directory = path.resolve(target);
 	const prevCWD = process.cwd();
 	process.chdir(TEMPLATE_DIR);
