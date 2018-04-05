@@ -96,6 +96,7 @@
     "tar": "4.4.0",
     "thread-loader": "1.1.5",
     "uglifyjs-webpack-plugin": "1.2.3",
+    "v8-compile-cache": "1.1.2",
     "validate-npm-package-name": "3.0.0",
     "webpack": "3.11.0",
     "webpack-dev-server": "2.11.1"
