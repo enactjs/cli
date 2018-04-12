@@ -1,19 +1,33 @@
-## 1.0.2 (March 30m 2018)
+## 1.0.3 (April 12, 2018)
+
+### pack
+
+* Fixed memory leak during prerendering in isomorphic builds, where babel-polyfill would be loaded and disrupt the global Node scope.
+
+### template
+
+* Default autodetection naming scheme will now filter out `enact-template-` and `template-` prefix.
+
+### transpile
+
+* Ensure development helper transpile plugins are not applied to standalone ES5 transpile operations.
+
+## 1.0.2 (March 30, 2018)
 
 Updated [`resolution-independence`](https://github.com/enactjs/less-plugin-resolution-independence) plugin dependency with fixed support Less 3.x.
 Updated [`@enact/dev-utils`](https://github.com/enactjs/dev-utils) dependency with fixes for resolution-independence configuration autodetection and React16-based framework builds.
 
 ## 1.0.1 (March 26, 2018)
 
-## pack
+### pack
 
 * Updated `@enact/dev-utils` fixing React 16 issues with v8 snapshot support.
 
-## template
+### template
 
 * Fixed automatic name detection for NPM packages when using version/tag specifiers.
 
-## lint
+### lint
 
 * Added `--framework` temporary alias for `--strict` to fix build systems while they update to current syntax.
 
@@ -24,21 +38,21 @@ Moved all plugins, mixins, and utility functions into [@enact/dev-utils](https:/
 Refactored all commands to support Promise-based API access for potential integration with 3rd party build systems.
 Enact CLI source code now updated for [`eslint-plugin-import`](https://github.com/benmosher/eslint-plugin-import) and [`prettier`](https://github.com/prettier/prettier) formatting.
 
-## create
+### create
 
 * Default moonstone template updated for latest Enact 1.x/React 15.x dependencies.
 * Updated to support customized templates via `-t`/`--templates` option.
 * Refactored creation handling to be general purpose and support dynamic templates modifying the execution.
 
-## link
+### link
 
 * Only link `@enact`-scoped dependencies found within the project `package.json` rather than all globally linked `@enact`-scoped packages.
 
-## transpile
+### transpile
 
 * Added support for `-i`/`--ignore` regex string to ignore filepathes when transpiling/copying.
 
-## pack
+### pack
 
 * Added support for targeted builds. Can be set via a `target` enact `package.json` property or via [Browserslist](https://github.com/ai/browserslist) format.
 * Added support for Electron build target.
@@ -51,15 +65,15 @@ Enact CLI source code now updated for [`eslint-plugin-import`](https://github.co
 * Updated to Webpack 3.x support.
 * Updated to Babel 7.x beta support.
 
-## serve
+### serve
 
 * Allows attempted serving on all webpack targets other that `node`, `async-node` and `webworker`.
 
-## test
+### test
 
 * Fixed testing support for Windows when using modules that accessed `@enact/i18n`.
 
-## template
+### template
 
 * Full template management support. See the [docs](./docs/template-management.md) for more details.
 * Templates can be sourced from git URIs, npm packages, or local directories.
@@ -67,11 +81,11 @@ Enact CLI source code now updated for [`eslint-plugin-import`](https://github.co
 * Able to set templates as default when using `enact create`.
 * Templates can be static or dynamic generators, optionally hooking into the `enact create` execution.
 
-## lint
+### lint
 
 * Added a `--fix` option to automatically attempt to have eslint fix linting errors.
 
-## license
+### license
 
 * Updated to include `@babel/polyfill` and `@babel/core` licenses in project scanning.
 
