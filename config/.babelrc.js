@@ -27,8 +27,8 @@ module.exports = {
 	],
 	plugins: [
 		'dev-expression',
-		env !== 'production' && '@babel/plugin-transform-react-jsx-self',
-		env !== 'production' && '@babel/plugin-transform-react-jsx-source',
-		env === 'production' && '@babel/plugin-transform-react-inline-elements'
+		env !== 'production' && !es5Standalone && '@babel/plugin-transform-react-jsx-self',
+		env !== 'production' && !es5Standalone && '@babel/plugin-transform-react-jsx-source',
+		env === 'production' && !es5Standalone && '@babel/plugin-transform-react-inline-elements'
 	].filter(Boolean)
 };
