@@ -1,3 +1,13 @@
+## 1.0.4 (April 26, 2018)
+
+Updated dependencies to support React/ReactDOM 16.3.2.
+Improved CLI runtime executing via `v8-compile-cache` optimizations.
+
+### pack
+
+* Support `@enact/core/snapshot` window handling APIs when using v8 snapshot.
+* Preserve HTML comment nodes in prerendered app HTML content (to support empty nodes in React 15).
+
 ## 1.0.3 (April 12, 2018)
 
 ### pack
