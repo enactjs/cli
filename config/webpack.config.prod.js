@@ -40,6 +40,7 @@ const {DefinePlugin} = require('webpack');
 const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
 
 process.chdir(app.context);
+process.env.NODE_ENV = 'production';
 
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
@@ -93,7 +94,6 @@ module.exports = {
 			{
 				test: /\.(js|jsx)$/,
 				enforce: 'pre',
-				// @remove-on-eject-begin
 				// Point ESLint to our predefined config.
 				options: {
 					formatter: eslintFormatter,
@@ -103,7 +103,6 @@ module.exports = {
 					cache: true,
 					useEslintrc: false
 				},
-				// @remove-on-eject-end
 				loader: require.resolve('eslint-loader'),
 				include: process.cwd(),
 				exclude: /node_modules/
@@ -126,10 +125,8 @@ module.exports = {
 					{
 						loader: require.resolve('babel-loader'),
 						options: {
-							// @remove-on-eject-begin
 							babelrc: false,
 							extends: path.join(__dirname, '.babelrc.js'),
-							// @remove-on-eject-end
 							highlightCode: true
 						}
 					}

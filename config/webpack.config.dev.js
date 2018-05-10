@@ -39,6 +39,7 @@ const {DefinePlugin} = require('webpack');
 const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
 
 process.chdir(app.context);
+process.env.NODE_ENV = 'development';
 
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
@@ -101,7 +102,6 @@ module.exports = {
 			{
 				test: /\.(js|jsx)$/,
 				enforce: 'pre',
-				// @remove-on-eject-begin
 				// Point ESLint to our predefined config.
 				options: {
 					formatter: eslintFormatter,
@@ -111,10 +111,9 @@ module.exports = {
 					cache: true,
 					useEslintrc: false
 				},
-				// @remove-on-eject-end
 				loader: require.resolve('eslint-loader'),
 				include: process.cwd(),
-				exclude: /node_modules/
+				exclude: [/node_modules/, path.resolve(__dirname, '../config')]
 			},
 			// "file" loader makes sure those assets get copied during build
 			// When you `import` an asset, you get its output filename.
@@ -134,10 +133,8 @@ module.exports = {
 					{
 						loader: require.resolve('babel-loader'),
 						options: {
-							// @remove-on-eject-begin
 							babelrc: false,
 							extends: path.join(__dirname, '.babelrc.js'),
-							// @remove-on-eject-end
 							// This is a feature of `babel-loader` for webpack (not Babel itself).
 							// It enables caching results in ./node_modules/.cache/babel-loader/
 							// directory for faster rebuilds.
