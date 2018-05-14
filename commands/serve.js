@@ -235,3 +235,4 @@ function cli(args) {
 }
 
 module.exports = {api, cli};
+if (require.main === module) cli(process.argv.slice(3));

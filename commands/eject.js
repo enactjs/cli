@@ -24,6 +24,8 @@
  * SOFTWARE.
  */
 
+// @remove-file-on-eject
+
 const cp = require('child_process');
 const os = require('os');
 const path = require('path');
@@ -35,25 +37,30 @@ const {packageRoot} = require('@enact/dev-utils');
 const spawn = require('cross-spawn');
 
 const ownPath = path.join(__dirname, '..');
-const assets = ['config'];
+const assets = [
+	'config',
+	'scripts',
+];
 const internalDeps = [
 	'@babel/plugin-transform-modules-commonjs',
-	'chalk',
-	'cross-spawn',
-	'filesize',
-	'fs-extra',
 	'glob',
 	'global-modules',
-	'minimist',
 	'semver',
-	'strip-ansi',
 	'tar',
 	'v8-compile-cache',
 	'validate-npm-package-name'
 ];
+const enhancedDeps = [
+	'chalk',
+	'cross-spawn',
+	'filesize',
+	'fs-extra',
+	'minimist',
+	'strip-ansi'
+];
 const contentDeps = ['@babel/polyfill'];
-const extraDeps = {rimraf: '^2.6.2'};
-const taskMap = {
+const bareDeps = {rimraf: '^2.6.2'};
+const bareTasks = {
 	serve: 'webpack-dev-server --hot --inline --config config/webpack.config.dev.js',
 	pack: 'webpack --config config/webpack.config.dev.js',
 	'pack-p': 'webpack --config config/webpack.config.prod.js',
@@ -71,6 +78,7 @@ function displayHelp() {
 	console.log('    enact eject [options]');
 	console.log();
 	console.log('  Options');
+	console.log('    -b, --bare        Display version information');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -162,7 +170,7 @@ function copySanitizedFile(file) {
 	fs.writeFileSync(file, content, {encoding: 'utf8'});
 }
 
-function configurePackage() {
+function configurePackage(bare) {
 	const ownMeta = require('../package.json');
 	const appMeta = require(path.resolve('package.json'));
 
@@ -183,9 +191,9 @@ function configurePackage() {
 	});
 
 	// Add any additional dependencies
-	Object.keys(extraDeps).forEach(key => {
+	Object.keys(bareDeps).forEach(key => {
 		console.log(`	Adding ${chalk.cyan(key)} to devDependencies`);
-		appMeta.devDependencies[key] = extraDeps[key];
+		appMeta.devDependencies[key] = bareDeps[key];
 	});
 
 	// Sort the dependencies
@@ -224,7 +232,10 @@ function npmInstall() {
 	});
 }
 
-function api() {
+function api({bare = false} = {}) {
+	if (bare) {
+		assets.pop();
+	}
 	return validateEject().then(({abort = false, files = []}) => {
 		if (!abort) {
 			console.log('Ejecting...');
@@ -234,7 +245,7 @@ function api() {
 			files.forEach(copySanitizedFile);
 			console.log();
 			console.log(chalk.cyan('Configuring package.json'));
-			configurePackage();
+			configurePackage(bare);
 			console.log();
 			console.log(chalk.cyan('Running npm install...'));
 			return npmInstall().then(() => {
@@ -248,14 +259,14 @@ function api() {
 
 function cli(args) {
 	const opts = minimist(args, {
-		boolean: ['help'],
-		alias: {h: 'help'}
+		boolean: ['bare', 'help'],
+		alias: {b:'bare', h: 'help'}
 	});
 	opts.help && displayHelp();
 
 	process.chdir(packageRoot().path);
 
-	api().catch(err => {
+	api({bare:opts.bare}).catch(err => {
 		console.error(chalk.red('ERROR: ') + err.message);
 		process.exit(1);
 	});

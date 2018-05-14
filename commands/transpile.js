@@ -1,3 +1,4 @@
+// @remove-file-on-eject
 const path = require('path');
 const babel = require('@babel/core');
 const chalk = require('chalk');

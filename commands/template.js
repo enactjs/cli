@@ -1,3 +1,4 @@
+// @remove-file-on-eject
 const os = require('os');
 const path = require('path');
 const url = require('url');
