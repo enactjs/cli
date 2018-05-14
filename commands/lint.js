@@ -1,3 +1,4 @@
+/* eslint-env node, es6 */
 const cp = require('child_process');
 const minimist = require('minimist');
 
@@ -52,7 +53,7 @@ function cli(args) {
 		boolean: ['local', 'strict', 'fix', 'help'],
 		alias: {l: 'local', s: 'strict', framework: 'strict', f: 'fix', h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	api({strict: opts.strict, local: opts.local, fix: opts.fix, eslintArgs: opts._}).catch(() => {
 		process.exit(1);

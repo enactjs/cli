@@ -1,3 +1,4 @@
+/* eslint-env node, es6 */
 const cp = require('child_process');
 
 function api(args = []) {

@@ -279,7 +279,7 @@ function cli(args) {
 		boolean: ['help'],
 		alias: {h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	const action = opts._[0];
 	const target = opts._[1] || process.cwd();

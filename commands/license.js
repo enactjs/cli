@@ -1,3 +1,4 @@
+/* eslint-env node, es6 */
 const path = require('path');
 const chalk = require('chalk');
 const checker = require('license-checker');
@@ -48,7 +49,7 @@ function cli(args) {
 		boolean: ['help'],
 		alias: {h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	api({modules: opts._})
 		.then(licenses => console.log(JSON.stringify(licenses, null, 2)))

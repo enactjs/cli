@@ -55,7 +55,7 @@ function cli(args) {
 		boolean: ['verbose', 'help'],
 		alias: {h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	api(opts).catch(err => {
 		console.error(chalk.red('ERROR: ') + err.message);

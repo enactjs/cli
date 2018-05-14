@@ -1,3 +1,4 @@
+/* eslint-env node, es6 */
 const chalk = require('chalk');
 const fs = require('fs-extra');
 const minimist = require('minimist');
@@ -26,7 +27,7 @@ function cli(args) {
 		boolean: ['help'],
 		alias: {h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	process.chdir(packageRoot().path);
 	api({paths: opts._}).catch(err => {

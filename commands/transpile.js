@@ -64,7 +64,7 @@ function cli(args) {
 		default: {output: './build'},
 		alias: {i: 'ignore', o: 'output', h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	const ignore = opts.ignore ? new RegExp(opts.ignore) : false;
 	process.chdir(packageRoot().path);

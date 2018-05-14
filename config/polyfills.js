@@ -1,4 +1,4 @@
-/* eslint no-var: off */
+/* eslint no-var: off, no-extend-native: off */
 /*
  *  polyfills.js
  *
