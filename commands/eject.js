@@ -1,30 +1,14 @@
+// @remove-file-on-eject
 /**
  * Portions of this source code file are from create-react-app, used under the
  * following MIT license:
  *
  * Copyright (c) 2013-present, Facebook, Inc.
- * https://github.com/facebookincubator/create-react-app
+ * https://github.com/facebook/create-react-app
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
-
-// @remove-file-on-eject
 
 const cp = require('child_process');
 const os = require('os');
@@ -36,12 +20,11 @@ const minimist = require('minimist');
 const {packageRoot} = require('@enact/dev-utils');
 const spawn = require('cross-spawn');
 
-const ownPath = path.join(__dirname, '..');
 const assets = [
-	'config',
-	'scripts',
+	{src: path.join(__dirname, '..', 'config'), dest: 'config'},
+	{src: path.join(__dirname, '..', 'commands'), dest: 'scripts'}
 ];
-const internalDeps = [
+const internal = [
 	'@babel/plugin-transform-modules-commonjs',
 	'glob',
 	'global-modules',
@@ -50,15 +33,8 @@ const internalDeps = [
 	'v8-compile-cache',
 	'validate-npm-package-name'
 ];
-const enhancedDeps = [
-	'chalk',
-	'cross-spawn',
-	'filesize',
-	'fs-extra',
-	'minimist',
-	'strip-ansi'
-];
-const contentDeps = ['@babel/polyfill'];
+const enhanced = ['chalk', 'cross-spawn', 'filesize', 'fs-extra', 'minimist', 'strip-ansi'];
+const content = ['@babel/polyfill'];
 const bareDeps = {rimraf: '^2.6.2'};
 const bareTasks = {
 	serve: 'webpack-dev-server --hot --inline --config config/webpack.config.dev.js',
@@ -71,14 +47,15 @@ const bareTasks = {
 	test: 'karma test start config/karma.conf.js --single-run',
 	'test-watch': 'karma test start config/karma.conf.js'
 };
-const taskBin = /^(?:node\s+)*(\S*)/;
 
 function displayHelp() {
 	console.log('  Usage');
 	console.log('    enact eject [options]');
 	console.log();
 	console.log('  Options');
-	console.log('    -b, --bare        Display version information');
+	console.log('    -b, --bare        Abandon Enact CLI command enhancements');
+	console.log('                      and eject into a a barebones setup (using');
+	console.log('                      webpack, eslint, karma, etc. directly)');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -104,11 +81,14 @@ function validateEject() {
 				const files = assets.reduce((list, dir) => {
 					return list.concat(
 						fs
-							.readdirSync(path.join(ownPath, dir))
+							.readdirSync(dir.src)
 							// set full relative path
-							.map(file => path.join(dir, file))
+							.map(file => ({
+								src: path.join(dir.src, file),
+								dest: path.join(dir.dest, file)
+							}))
 							// omit dirs from file list
-							.filter(file => fs.lstatSync(path.join(ownPath, file)).isFile())
+							.filter(file => fs.lstatSync(file.src).isFile())
 					);
 				}, []);
 				files.forEach(verifyAbsent);
@@ -139,10 +119,10 @@ function checkGitStatus() {
 	}
 }
 
-function verifyAbsent(file) {
-	if (fs.existsSync(file)) {
+function verifyAbsent({dest}) {
+	if (fs.existsSync(dest)) {
 		throw new Error(
-			`"${file}" already exists in your app folder. We cannot ` +
+			`"${dest}" already exists in your app folder. We cannot ` +
 				'continue as you would lose all the changes in that file or directory. ' +
 				'Please move or delete it (maybe make a copy for backup) and run this ' +
 				'command again.'
@@ -150,24 +130,24 @@ function verifyAbsent(file) {
 	}
 }
 
-function copySanitizedFile(file) {
-	let content = fs.readFileSync(path.join(ownPath, file), {encoding: 'utf8'});
+function copySanitizedFile({src, dest}) {
+	let data = fs.readFileSync(src, {encoding: 'utf8'});
 
 	// Skip flagged files
-	if (content.match(/\/\/ @remove-file-on-eject/)) {
+	if (data.match(/\/\/ @remove-file-on-eject/)) {
 		return false;
 	}
 
-	content =
-		content
+	data =
+		data
 			// Remove dead code from .js files on eject
-			.replace(/\/\/ @remove-on-eject-begin([\s\S]*?)\/\/ @remove-on-eject-end/gm, '')
+			.replace(/[\t ]*\/\/ @remove-on-eject-begin([\s\S]*?)\/\/ @remove-on-eject-end/gm, '')
 			// Remove dead code from .applescript files on eject
-			.replace(/-- @remove-on-eject-begin([\s\S]*?)-- @remove-on-eject-end/gm, '')
+			.replace(/[\t ]*-- @remove-on-eject-begin([\s\S]*?)-- @remove-on-eject-end/gm, '')
 			.trim() + '\n';
 
-	console.log(`	Adding ${chalk.cyan(file)} to the project`);
-	fs.writeFileSync(file, content, {encoding: 'utf8'});
+	console.log(`	Adding ${chalk.cyan(dest)} to the project`);
+	fs.writeFileSync(dest, data, {encoding: 'utf8'});
 }
 
 function configurePackage(bare) {
@@ -179,11 +159,11 @@ function configurePackage(bare) {
 
 	// Merge the applicable dependencies
 	Object.keys(ownMeta.dependencies).forEach(key => {
-		if (!internalDeps.includes(key)) {
-			if (contentDeps.includes(key)) {
+		if (!internal.includes(key)) {
+			if (content.includes(key)) {
 				console.log(`	Adding ${chalk.cyan(key)} to dependencies`);
 				appMeta.dependencies[key] = ownMeta.dependencies[key];
-			} else {
+			} else if (!enhanced.includes(key) || !bare) {
 				console.log(`	Adding ${chalk.cyan(key)} to devDependencies`);
 				appMeta.devDependencies[key] = ownMeta.dependencies[key];
 			}
@@ -191,10 +171,12 @@ function configurePackage(bare) {
 	});
 
 	// Add any additional dependencies
-	Object.keys(bareDeps).forEach(key => {
-		console.log(`	Adding ${chalk.cyan(key)} to devDependencies`);
-		appMeta.devDependencies[key] = bareDeps[key];
-	});
+	if (bare) {
+		Object.keys(bareDeps).forEach(key => {
+			console.log(`	Adding ${chalk.cyan(key)} to devDependencies`);
+			appMeta.devDependencies[key] = bareDeps[key];
+		});
+	}
 
 	// Sort the dependencies
 	['dependencies', 'devDependencies'].forEach(obj => {
@@ -209,11 +191,13 @@ function configurePackage(bare) {
 
 	console.log();
 
-	Object.keys(taskMap).forEach(key => {
-		const bin = taskMap[key].match(taskBin);
-		const updated = (bin && bin[1]) || taskMap[key];
+	// Update NPM task scripts
+	Object.keys(bareTasks).forEach(key => {
+		const task = bare ? bareTasks[key] : `node ./scripts/${key}.js`.replace(/-(.*)\.js/, '.js -$1');
+		const bin = task.match(/^(?:node\s+)*(\S*)/);
+		const updated = (bin && bin[1]) || task;
 		console.log(`	Updated NPM task ${chalk.cyan(key)} to use ${chalk.cyan(updated)}`);
-		appMeta.scripts[key] = taskMap[key];
+		appMeta.scripts[key] = task;
 	});
 
 	fs.writeFileSync('package.json', JSON.stringify(appMeta, null, 2) + os.EOL, {encoding: 'utf8'});
@@ -241,7 +225,7 @@ function api({bare = false} = {}) {
 			console.log('Ejecting...');
 			console.log();
 			console.log(chalk.cyan(`Copying files into ${process.cwd()}`));
-			assets.forEach(dir => !fs.existsSync(dir) && fs.mkdirSync(dir));
+			assets.forEach(dir => !fs.existsSync(dir.dest) && fs.mkdirSync(dir.dest));
 			files.forEach(copySanitizedFile);
 			console.log();
 			console.log(chalk.cyan('Configuring package.json'));
@@ -260,13 +244,13 @@ function api({bare = false} = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['bare', 'help'],
-		alias: {b:'bare', h: 'help'}
+		alias: {b: 'bare', h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	process.chdir(packageRoot().path);
 
-	api({bare:opts.bare}).catch(err => {
+	api({bare: opts.bare}).catch(err => {
 		console.error(chalk.red('ERROR: ') + err.message);
 		process.exit(1);
 	});
