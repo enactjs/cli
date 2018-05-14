@@ -64,6 +64,7 @@ const taskMap = {
 	test: 'karma test start config/karma.conf.js --single-run',
 	'test-watch': 'karma test start config/karma.conf.js'
 };
+const taskBin = /^(?:node\s+)*(\S*)/;
 
 function displayHelp() {
 	console.log('  Usage');
@@ -201,7 +202,9 @@ function configurePackage() {
 	console.log();
 
 	Object.keys(taskMap).forEach(key => {
-		console.log(`	Updated NPM task ${chalk.cyan(key)} to ${chalk.cyan(`"${taskMap[key]}"`)}`);
+		const bin = taskMap[key].match(taskBin);
+		const updated = (bin && bin[1]) || taskMap[key];
+		console.log(`	Updated NPM task ${chalk.cyan(key)} to use ${chalk.cyan(updated)}`);
 		appMeta.scripts[key] = taskMap[key];
 	});
 
