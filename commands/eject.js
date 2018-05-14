@@ -141,9 +141,9 @@ function copySanitizedFile({src, dest}) {
 	data =
 		data
 			// Remove dead code from .js files on eject
-			.replace(/[\t ]*\/\/ @remove-on-eject-begin([\s\S]*?)\/\/ @remove-on-eject-end/gm, '')
+			.replace(/[\t ]*\/\/ @remove-on-eject-begin([\s\S]*?)\/\/ @remove-on-eject-end\n?/gm, '')
 			// Remove dead code from .applescript files on eject
-			.replace(/[\t ]*-- @remove-on-eject-begin([\s\S]*?)-- @remove-on-eject-end/gm, '')
+			.replace(/[\t ]*-- @remove-on-eject-begin([\s\S]*?)-- @remove-on-eject-end\n?/gm, '')
 			.trim() + '\n';
 
 	console.log(`	Adding ${chalk.cyan(dest)} to the project`);
