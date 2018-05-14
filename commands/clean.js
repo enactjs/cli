@@ -1,4 +1,5 @@
 /* eslint-env node, es6 */
+const path = require('path');
 const chalk = require('chalk');
 const fs = require('fs-extra');
 const minimist = require('minimist');
@@ -6,7 +7,8 @@ const packageRoot = require('@enact/dev-utils').packageRoot;
 
 function displayHelp() {
 	console.log('  Usage');
-	console.log('    enact clean [options] [paths...]');
+	if (require.main !== module) console.log('    enact clean [options] [paths...]');
+	else console.log(`    node ${path.relative(process.cwd(), __filename)} [options] [paths...]`);
 	console.log();
 	console.log('  Arguments');
 	console.log('    paths             Additional path(s) to delete');

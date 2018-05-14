@@ -11,7 +11,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 // @remove-on-eject-end
-
+const path = require('path');
 const chalk = require('chalk');
 const minimist = require('minimist');
 const clearConsole = require('react-dev-utils/clearConsole');
@@ -40,7 +40,8 @@ console.log = (log => (data, ...rest) =>
 
 function displayHelp() {
 	console.log('  Usage');
-	console.log('    enact serve [options]');
+	if (require.main !== module) console.log('    enact serve [options]');
+	else console.log(`    node ${path.relative(process.cwd(), __filename)} [options]`);
 	console.log();
 	console.log('  Options');
 	console.log('    -b, --browser     Automatically open browser');

@@ -1,10 +1,12 @@
 /* eslint-env node, es6 */
 const cp = require('child_process');
+const path = require('path');
 const minimist = require('minimist');
 
 function displayHelp() {
 	console.log('  Usage');
-	console.log('    enact lint [options] [<target>]');
+	if (require.main !== module) console.log('    enact lint [options] [<target>]');
+	else console.log(`    node ${path.relative(process.cwd(), __filename)} [options] [<target>]`);
 	console.log();
 	console.log('  Arguments');
 	console.log('    target            Optional target file or directory');

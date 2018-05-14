@@ -11,7 +11,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 // @remove-on-eject-end
-
 const path = require('path');
 const chalk = require('chalk');
 const filesize = require('filesize');
@@ -24,7 +23,8 @@ const {mixins, packageRoot} = require('@enact/dev-utils');
 
 function displayHelp() {
 	console.log('  Usage');
-	console.log('    enact pack [options]');
+	if (require.main !== module) console.log('    enact pack [options]');
+	else console.log(`    node ${path.relative(process.cwd(), __filename)} [options]`);
 	console.log();
 	console.log('  Options');
 	console.log('    -o, --output      Specify an output directory');
