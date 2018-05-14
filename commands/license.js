@@ -10,9 +10,11 @@ const enactCLIProdModules = ['@babel/core', '@babel/polyfill'].map(m =>
 );
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact license';
+
 	console.log('  Usage');
-	if (require.main !== module) console.log('    enact license [options] [<module>]');
-	else console.log(`    node ${path.relative(process.cwd(), __filename)} [options] [<module>]`);
+	console.log(`    ${e} [options] [<module>]`);
 	console.log();
 	console.log('  Arguments');
 	console.log('    module            Optional module path');

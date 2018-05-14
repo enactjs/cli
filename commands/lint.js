@@ -4,9 +4,11 @@ const path = require('path');
 const minimist = require('minimist');
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact lint';
+
 	console.log('  Usage');
-	if (require.main !== module) console.log('    enact lint [options] [<target>]');
-	else console.log(`    node ${path.relative(process.cwd(), __filename)} [options] [<target>]`);
+	console.log(`    ${e} [options] [<target>]`);
 	console.log();
 	console.log('  Arguments');
 	console.log('    target            Optional target file or directory');

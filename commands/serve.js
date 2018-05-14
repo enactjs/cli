@@ -39,9 +39,11 @@ console.log = (log => (data, ...rest) =>
 			: log.call(this, data, ...rest))(console.log);
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact serve';
+
 	console.log('  Usage');
-	if (require.main !== module) console.log('    enact serve [options]');
-	else console.log(`    node ${path.relative(process.cwd(), __filename)} [options]`);
+	console.log(`    ${e} [options]`);
 	console.log();
 	console.log('  Options');
 	console.log('    -b, --browser     Automatically open browser');

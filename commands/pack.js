@@ -22,9 +22,11 @@ const webpack = require('webpack');
 const {mixins, packageRoot} = require('@enact/dev-utils');
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact pack';
+
 	console.log('  Usage');
-	if (require.main !== module) console.log('    enact pack [options]');
-	else console.log(`    node ${path.relative(process.cwd(), __filename)} [options]`);
+	console.log(`    ${e} [options]`);
 	console.log();
 	console.log('  Options');
 	console.log('    -o, --output      Specify an output directory');
