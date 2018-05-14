@@ -1,3 +1,4 @@
+/* eslint-env node, es6 */
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
