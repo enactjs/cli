@@ -44,7 +44,7 @@
     "case-sensitive-paths-webpack-plugin": "2.1.2",
     "chai": "3.5.0",
     "chalk": "2.3.2",
-    "console-snoop": "0.0.4",
+    "console-snoop": "0.1.0",
     "cross-spawn": "6.0.5",
     "css-loader": "0.28.10",
     "dirty-chai": "2.0.1",
