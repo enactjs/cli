@@ -153,6 +153,17 @@ function configurePackage(bare) {
 	const ownMeta = require('../package.json');
 	const appMeta = require(path.resolve('package.json'));
 
+	// Update ESLint settings
+	console.log(`	Adding ${chalk.cyan('ESlint')} config to package.json`);
+	appMeta.eslintConfig = {extends: 'enact'};
+	appMeta.eslintIgnore = ['config/*', 'scripts/*', 'node_modules/*', 'build/*', 'dist/*'];
+
+	// Update Babel settings
+	console.log(`	Adding ${chalk.cyan('Babel')} config to package.json`);
+	appMeta.babel = {extends: './config/.babelrc.js'};
+
+	console.log();
+
 	appMeta.dependencies = appMeta.dependencies || [];
 	appMeta.devDependencies = appMeta.devDependencies || [];
 
@@ -180,6 +191,7 @@ function configurePackage(bare) {
 	// Sort the dependencies
 	['dependencies', 'devDependencies'].forEach(obj => {
 		const unsortedDependencies = appMeta[obj];
+		delete appMeta[obj];
 		appMeta[obj] = {};
 		Object.keys(unsortedDependencies)
 			.sort()
