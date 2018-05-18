@@ -33,7 +33,7 @@ const internal = [
 	'validate-npm-package-name'
 ];
 const enhanced = ['chalk', 'cross-spawn', 'filesize', 'fs-extra', 'minimist', 'strip-ansi'];
-const content = ['@babel/polyfill'];
+const content = ['@babel/polyfill', 'react', 'react-dom'];
 const bareDeps = {rimraf: '^2.6.2'};
 const bareTasks = {
 	serve: 'webpack-dev-server --hot --inline --config config/webpack.config.dev.js',
@@ -150,32 +150,28 @@ function copySanitizedFile({src, dest}) {
 }
 
 function configurePackage(bare) {
-	const ownMeta = require('../package.json');
-	const appMeta = require(path.resolve('package.json'));
+	const own = require('../package.json');
+	const app = require(path.resolve('package.json'));
+	const backup = JSON.stringify(app, null, 2) + os.EOL;
+	const availScripts = fs.readdirSync('./scripts').map(f => f.replace(/\.js$/, ''));
+	const enactCLI = new RegExp('enact (' + availScripts.join('|') + ')', 'g');
+	const eslintConfig = {extends: 'enact'};
+	const eslintIgnore = ['build/*', 'config/*', 'dist/*', 'node_modules/*', 'scripts/*'];
+	const babel = {extends: './config/.babelrc.js'};
+	const conflicts = [];
 
-	// Update ESLint settings
-	console.log(`	Adding ${chalk.cyan('ESlint')} config to package.json`);
-	appMeta.eslintConfig = {extends: 'enact'};
-	appMeta.eslintIgnore = ['config/*', 'scripts/*', 'node_modules/*', 'build/*', 'dist/*'];
-
-	// Update Babel settings
-	console.log(`	Adding ${chalk.cyan('Babel')} config to package.json`);
-	appMeta.babel = {extends: './config/.babelrc.js'};
-
-	console.log();
-
-	appMeta.dependencies = appMeta.dependencies || [];
-	appMeta.devDependencies = appMeta.devDependencies || [];
+	app.dependencies = app.dependencies || [];
+	app.devDependencies = app.devDependencies || [];
 
 	// Merge the applicable dependencies
-	Object.keys(ownMeta.dependencies).forEach(key => {
+	Object.keys(own.dependencies).forEach(key => {
 		if (!internal.includes(key)) {
 			if (content.includes(key)) {
 				console.log(`	Adding ${chalk.cyan(key)} to dependencies`);
-				appMeta.dependencies[key] = ownMeta.dependencies[key];
+				app.dependencies[key] = app.dependencies[key] || own.dependencies[key];
 			} else if (!enhanced.includes(key) || !bare) {
 				console.log(`	Adding ${chalk.cyan(key)} to devDependencies`);
-				appMeta.devDependencies[key] = ownMeta.dependencies[key];
+				app.devDependencies[key] = own.dependencies[key];
 			}
 		}
 	});
@@ -184,34 +180,74 @@ function configurePackage(bare) {
 	if (bare) {
 		Object.keys(bareDeps).forEach(key => {
 			console.log(`	Adding ${chalk.cyan(key)} to devDependencies`);
-			appMeta.devDependencies[key] = bareDeps[key];
+			app.devDependencies[key] = bareDeps[key];
 		});
 	}
-
-	// Sort the dependencies
-	['dependencies', 'devDependencies'].forEach(obj => {
-		const unsortedDependencies = appMeta[obj];
-		delete appMeta[obj];
-		appMeta[obj] = {};
-		Object.keys(unsortedDependencies)
-			.sort()
-			.forEach(key => {
-				appMeta[obj][key] = unsortedDependencies[key];
-			});
-	});
 
 	console.log();
 
 	// Update NPM task scripts
-	Object.keys(bareTasks).forEach(key => {
-		const task = bare ? bareTasks[key] : `node ./scripts/${key}.js`.replace(/-(.*)\.js/, '.js -$1');
-		const bin = task.match(/^(?:node\s+)*(\S*)/);
-		const updated = (bin && bin[1]) || task;
-		console.log(`	Updated NPM task ${chalk.cyan(key)} to use ${chalk.cyan(updated)}`);
-		appMeta.scripts[key] = task;
+	const type = chalk.cyan('NPM script');
+	Object.keys(app.scripts).forEach(key => {
+		if (bare && bareTasks[key]) {
+			if (!conflicts.includes(type)) conflicts.push(type);
+			const bin = bareTasks[key].match(/^(?:node\s+)*(\S*)/);
+			const updated = (bin && bin[1]) || bareTasks[key];
+			console.log(`	Updating NPM task ${chalk.cyan(key)} to use ${chalk.cyan(updated)}`);
+			app.scripts[key] = bareTasks[key];
+		} else if (!bare) {
+			app.scripts[key] = app.scripts[key].replace(enactCLI, (match, name) => {
+				console.log(`	Updating NPM task ${chalk.cyan(key)} to use ` + chalk.cyan(`scripts/${name}.js`));
+				return `node ./scripts/${name}.js`;
+			});
+		}
 	});
 
-	fs.writeFileSync('package.json', JSON.stringify(appMeta, null, 2) + os.EOL, {encoding: 'utf8'});
+	console.log();
+
+	// Update ESLint settings
+	console.log(`	Setting up ${chalk.cyan('ESlint')} config in package.json`);
+	if (app.eslintConfig && JSON.stringify(app.eslintConfig) !== JSON.stringify(eslintConfig)) {
+		conflicts.push(chalk.cyan('ESLint'));
+	}
+	app.eslintConfig = eslintConfig;
+	app.eslintIgnore = app.eslintIgnore || [];
+	app.eslintIgnore = app.eslintIgnore.concat(eslintIgnore.filter(l => !app.eslintIgnore.includes(l)));
+	backupOld(['.eslintignore', '.eslintrc.js', '.eslintrc.yaml', '.eslintrc.yml', '.eslintrc.json', '.eslintrc']);
+
+	// Update Babel settings
+	console.log(`	Setting up ${chalk.cyan('Babel')} config in package.json`);
+	if (app.babel && JSON.stringify(app.babel) !== JSON.stringify(babel)) {
+		conflicts.push(chalk.cyan('Babel'));
+	}
+	app.babel = babel;
+	backupOld(['.babelrc', '.babelrc.js']);
+
+	// Sort the package.json output
+	['dependencies', 'devDependencies'].forEach(obj => {
+		const unsortedDependencies = app[obj];
+		delete app[obj];
+		app[obj] = {};
+		Object.keys(unsortedDependencies)
+			.sort()
+			.forEach(key => {
+				app[obj][key] = unsortedDependencies[key];
+			});
+	});
+
+	fs.writeFileSync('package.json', JSON.stringify(app, null, 2) + os.EOL, {encoding: 'utf8'});
+
+	if (conflicts.length > 0) fs.writeFileSync('package.old.json', backup, {encoding: 'utf8'});
+
+	return conflicts;
+}
+
+function backupOld(files) {
+	files.filter(fs.existsSync).forEach(f => {
+		const backup = path.basename(f, path.extname(f)) + '.old' + path.extname(f);
+		console.log(`	Found existing ${chalk.cyan(f)}; backing up to ${chalk.cyan(backup)}`);
+		fs.renameSync(f, backup);
+	});
 }
 
 function npmInstall() {
@@ -240,10 +276,22 @@ function api({bare = false} = {}) {
 			files.forEach(copySanitizedFile);
 			console.log();
 			console.log(chalk.cyan('Configuring package.json'));
-			configurePackage(bare);
+			const con = configurePackage(bare);
 			console.log();
 			console.log(chalk.cyan('Running npm install...'));
 			return npmInstall().then(() => {
+				if (con.length > 0) {
+					let list = con[0];
+					if (con.length > 1) list = con.splice(1).join(', ') + ' and ' + list;
+					console.log();
+					console.log(
+						chalk.yellow(
+							`NOTICE: Existing ${list} settings within the package.json ` +
+								'were overwritten. A backup of the original content has been ' +
+								'preserved to package.old.json.'
+						)
+					);
+				}
 				console.log();
 				console.log(chalk.green('Ejected successfully!'));
 				console.log();
