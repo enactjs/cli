@@ -15,14 +15,14 @@ module.exports = function(karma) {
 		frameworks: ['mocha', 'chai', 'dirty-chai'],
 		files: [
 			require.resolve('@babel/polyfill/dist/polyfill'),
-			require.resolve('./proptype-checker'),
+			require.resolve('mocha-react-proptype-checker'),
 			'./!(node_modules|dist|build)/**/*-specs.js'
 		],
 
 		preprocessors: {
 			// add webpack as preprocessor
 			'./!(node_modules|dist|build)/**/*.js': ['webpack'],
-			[require.resolve('./proptype-checker')]: ['webpack']
+			[require.resolve('mocha-react-proptype-checker')]: ['webpack']
 		},
 
 		failOnEmptyTestSuite: true,
