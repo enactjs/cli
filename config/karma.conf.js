@@ -83,8 +83,10 @@ module.exports = function(karma) {
 						exclude: /node_modules.(?!@enact)/,
 						loader: require.resolve('babel-loader'),
 						options: {
-							babelrc: false,
+							// @remove-on-eject-begin
 							extends: path.join(__dirname, '.babelrc.js'),
+							babelrc: false,
+							// @remove-on-eject-end
 							cacheDirectory: true,
 							// Generate a unique identifier string based off versons of components and app config.
 							cacheIdentifier: JSON.stringify({

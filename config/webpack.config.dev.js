@@ -91,11 +91,13 @@ module.exports = {
 				// Point ESLint to our predefined config.
 				options: {
 					formatter: eslintFormatter,
+					// @remove-on-eject-begin
 					baseConfig: {
 						extends: [require.resolve('eslint-config-enact')]
 					},
-					cache: true,
-					useEslintrc: false
+					useEslintrc: false,
+					// @remove-on-eject-end
+					cache: true
 				},
 				loader: require.resolve('eslint-loader'),
 				include: process.cwd(),
@@ -119,8 +121,10 @@ module.exports = {
 					{
 						loader: require.resolve('babel-loader'),
 						options: {
-							babelrc: false,
+							// @remove-on-eject-begin
 							extends: path.join(__dirname, '.babelrc.js'),
+							babelrc: false,
+							// @remove-on-eject-end
 							// This is a feature of `babel-loader` for webpack (not Babel itself).
 							// It enables caching results in ./node_modules/.cache/babel-loader/
 							// directory for faster rebuilds.
