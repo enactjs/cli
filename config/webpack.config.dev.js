@@ -125,6 +125,15 @@ module.exports = {
 					name: '[path][name].[ext]'
 				}
 			},
+			// Handle json files in project-root 'assets' directory as file assets.
+			{
+				include: path.resolve('./assets'),
+				test: /\.json$/,
+				loader: require.resolve('file-loader'),
+				options: {
+					name: '[path][name].[ext]'
+				}
+			},
 			// Process JS with Babel.
 			{
 				test: /\.(js|jsx)$/,

@@ -74,6 +74,12 @@ module.exports = function(karma) {
 						options: {name: '[path][name].[ext]'}
 					},
 					{
+						include: path.resolve(app.context, './assets'),
+						test: /\.json$/,
+						loader: require.resolve('file-loader'),
+						options: {name: '[path][name].[ext]'}
+					},
+					{
 						test: /\.(html|txt)$/,
 						loader: require.resolve('raw-loader')
 					},
