@@ -3,6 +3,7 @@ const path = require('path');
 const autoprefixer = require('autoprefixer');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
+const getLocalIdent = require('css-loader/lib/getLocalIdent');
 const LessPluginRi = require('resolution-independence');
 const {DefinePlugin} = require('webpack');
 const {optionParser: app, EnzymeAdapterPlugin, GracefulFsPlugin, ILibPlugin} = require('@enact/dev-utils');
@@ -106,7 +107,12 @@ module.exports = function(karma) {
 								options: {
 									importLoaders: 2,
 									modules: true,
-									localIdentName: '[name]__[local]___[hash:base64:5]'
+									localIdentName: '[name]__[local]___[hash:base64:5]',
+									getLocalIdent: function(context, localIdentName, localName) {
+										return /global/.test(context.resourceQuery)
+											? localName
+											: getLocalIdent.apply(null, arguments);
+									}
 								}
 							},
 							{

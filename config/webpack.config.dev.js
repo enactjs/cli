@@ -18,6 +18,7 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
+const getLocalIdent = require('css-loader/lib/getLocalIdent');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const LessPluginRi = require('resolution-independence');
@@ -162,7 +163,12 @@ module.exports = {
 								importLoaders: 2,
 								modules: true,
 								sourceMap: true,
-								localIdentName: '[name]__[local]___[hash:base64:5]'
+								localIdentName: '[name]__[local]___[hash:base64:5]',
+								getLocalIdent: function(context, localIdentName, localName) {
+									return /global/.test(context.resourceQuery)
+										? localName
+										: getLocalIdent.apply(null, arguments);
+								}
 							}
 						},
 						{
