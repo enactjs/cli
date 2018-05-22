@@ -161,7 +161,7 @@ module.exports = {
 									// See https://github.com/philipwalton/flexbugs
 									flexbugfixes,
 									// Remove the development-only CSS class `.__DEV__`.
-									removeclass(['__DEV__'])
+									removeclass(['__DEV__']),
 									// Support @global-import syntax to import css in a global context.
 									globalImport
 								]
