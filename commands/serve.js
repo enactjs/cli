@@ -1,29 +1,17 @@
+/* eslint-env node, es6 */
+// @remove-on-eject-begin
 /**
  * Portions of this source code file are from create-react-app, used under the
  * following MIT license:
  *
  * Copyright (c) 2013-present, Facebook, Inc.
- * https://github.com/facebookincubator/create-react-app
+ * https://github.com/facebook/create-react-app
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
-
+// @remove-on-eject-end
+const path = require('path');
 const chalk = require('chalk');
 const minimist = require('minimist');
 const clearConsole = require('react-dev-utils/clearConsole');
@@ -51,8 +39,11 @@ console.log = (log => (data, ...rest) =>
 			: log.call(this, data, ...rest))(console.log);
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact serve';
+
 	console.log('  Usage');
-	console.log('    enact serve [options]');
+	console.log(`    ${e} [options]`);
 	console.log();
 	console.log('  Options');
 	console.log('    -b, --browser     Automatically open browser');
@@ -223,7 +214,7 @@ function cli(args) {
 		boolean: ['browser', 'help'],
 		alias: {b: 'browser', i: 'host', p: 'port', h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	process.chdir(app.context);
 	process.env.NODE_ENV = 'development';
@@ -235,3 +226,4 @@ function cli(args) {
 }
 
 module.exports = {api, cli};
+if (require.main === module) cli(process.argv.slice(2));

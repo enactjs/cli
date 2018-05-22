@@ -1,3 +1,4 @@
+/* eslint-env node, es6 */
 const path = require('path');
 const chalk = require('chalk');
 const checker = require('license-checker');
@@ -9,8 +10,11 @@ const enactCLIProdModules = ['@babel/core', '@babel/polyfill'].map(m =>
 );
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact license';
+
 	console.log('  Usage');
-	console.log('    enact license [options] [<module>]');
+	console.log(`    ${e} [options] [<module>]`);
 	console.log();
 	console.log('  Arguments');
 	console.log('    module            Optional module path');
@@ -48,7 +52,7 @@ function cli(args) {
 		boolean: ['help'],
 		alias: {h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	api({modules: opts._})
 		.then(licenses => console.log(JSON.stringify(licenses, null, 2)))
@@ -59,3 +63,4 @@ function cli(args) {
 }
 
 module.exports = {api, cli};
+if (require.main === module) cli(process.argv.slice(2));

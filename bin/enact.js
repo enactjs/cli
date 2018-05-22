@@ -60,6 +60,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 		case 'pack':
 		case 'clean':
 		case 'test':
+		case 'eject':
 		case 'template':
 		case 'lint':
 		case 'license': {
@@ -82,6 +83,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 			console.log('    license           Detect all used licenses');
 			console.log('    lint              Lint source code');
 			console.log('    clean             Clean build directory');
+			console.log('    eject             Eject to standalone app');
 			console.log();
 			console.log(`  Refer to each command's ${chalk.cyan('--help')} for more details.`);
 			console.log();
