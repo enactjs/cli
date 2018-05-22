@@ -98,6 +98,11 @@ module.exports = function(karma) {
 						}
 					},
 					{
+						test: /\.worker\.js$/,
+						exclude: /node_modules/,
+						loader: require.resolve('worker-loader')
+					},
+					{
 						test: /\.(c|le)ss$/,
 						use: [
 							require.resolve('style-loader'),

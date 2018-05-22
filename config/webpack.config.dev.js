@@ -62,7 +62,13 @@ module.exports = {
 		// These are the reasonable defaults supported by the React/ES6 ecosystem.
 		extensions: ['.js', '.jsx', '.json'],
 		// Allows us to specify paths to check for module resolving.
-		modules: [path.resolve('./node_modules'), 'node_modules'],
+		modules: [
+			path.resolve('./node_modules'),
+			'node_modules',
+			// @remove-on-eject-begin
+			path.resolve(__dirname, '../node_modules')
+			// @remove-on-eject-end
+		],
 		// Allow "browser" field in electron-renderer along with the default web/webworker types.
 		mainFields: [
 			['web', 'webworker', 'electron-renderer'].includes(app.environment) && 'browser',
@@ -140,6 +146,13 @@ module.exports = {
 						}
 					}
 				]
+			},
+			// Process webworkers as external chunks for bundling independently.
+			{
+				test: /\.worker\.js$/,
+				enforce: 'post',
+				exclude: /node_modules/,
+				loader: require.resolve('worker-loader')
 			},
 			// Multiple styling-support features are used together.
 			// "less" loader compiles any LESS-formatted syntax into standard CSS.
