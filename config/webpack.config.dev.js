@@ -18,6 +18,7 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
+const globalImport = require('postcss-global-import');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const LessPluginRi = require('resolution-independence');
@@ -179,7 +180,9 @@ module.exports = {
 									}),
 									// Fix and adjust for known flexbox issues
 									// See https://github.com/philipwalton/flexbugs
-									flexbugfixes
+									flexbugfixes,
+									// Support @global-import syntax to import css in a global context.
+									globalImport
 								]
 							}
 						},

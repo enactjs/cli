@@ -18,6 +18,7 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
+const globalImport = require('postcss-global-import');
 const removeclass = require('postcss-remove-classes').default;
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const LessPluginRi = require('resolution-independence');
@@ -160,7 +161,9 @@ module.exports = {
 									// See https://github.com/philipwalton/flexbugs
 									flexbugfixes,
 									// Remove the development-only CSS class `.__DEV__`.
-									removeclass(['__DEV__'])
+									removeclass(['__DEV__']),
+									// Support @global-import syntax to import css in a global context.
+									globalImport
 								]
 							}
 						},
