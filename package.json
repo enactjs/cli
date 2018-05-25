@@ -37,6 +37,7 @@
     "@babel/preset-react": "7.0.0-beta.41",
     "@babel/preset-stage-0": "7.0.0-beta.41",
     "@enact/dev-utils": "1.0.4",
+    "@enact/template-moonstone": "1.0.0",
     "autoprefixer": "8.1.0",
     "babel-eslint": "8.2.2",
     "babel-loader": "8.0.0-beta.2",
