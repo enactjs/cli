@@ -143,7 +143,12 @@ module.exports = {
 							options: {
 								importLoaders: 2,
 								modules: true,
-								minimize: true
+								minimize: {
+									// Disable postcss-calc support within the css minifier due to
+									// an open bug where "calc" in a css variable name can break.
+									// See https://github.com/postcss/postcss-calc/issues/50
+									calc: false
+								}
 							}
 						},
 						{
