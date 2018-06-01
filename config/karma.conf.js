@@ -127,7 +127,10 @@ module.exports = function(karma) {
 							},
 							{
 								loader: require.resolve('less-loader'),
-								options: {plugins: app.ri ? [new LessPluginRi(app.ri)] : []}
+								options: {
+									modifyVars: Object.assign({}, app.accent),
+									plugins: app.ri ? [new LessPluginRi(app.ri)] : []
+								}
 							}
 						]
 					}

@@ -189,6 +189,7 @@ module.exports = {
 						{
 							loader: require.resolve('less-loader'),
 							options: {
+								modifyVars: Object.assign({}, app.accent),
 								sourceMap: true,
 								// If resolution independence options are specified, use the LESS plugin.
 								plugins: app.ri ? [new LessPluginRi(app.ri)] : []
