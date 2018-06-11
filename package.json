@@ -45,6 +45,7 @@
     "case-sensitive-paths-webpack-plugin": "2.1.2",
     "chai": "3.5.0",
     "chalk": "2.3.2",
+    "closure-webpack-plugin": "0.0.24",
     "cross-spawn": "6.0.5",
     "css-loader": "0.28.10",
     "dirty-chai": "2.0.1",
