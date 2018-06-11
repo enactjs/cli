@@ -227,7 +227,7 @@ module.exports = {
 		}),
 		// Minify the code.
 		new ClosurePlugin({
-			mode: 'STANDARD'
+			mode: 'AGGRESSIVE_BUNDLE'
 		}),
 		// Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
 		new ExtractTextPlugin('[name].css'),
