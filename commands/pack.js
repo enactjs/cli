@@ -45,6 +45,7 @@ function displayHelp() {
 	console.log('    -s, --snapshot    Generate V8 snapshot blob');
 	console.log('                      (requires V8_MKSNAPSHOT set)');
 	console.log('    --stats           Output bundle analysis file');
+	console.log('    --verbose         Verbose log build details');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -191,7 +192,7 @@ function api(opts = {}) {
 
 function cli(args) {
 	const opts = minimist(args, {
-		boolean: ['minify', 'framework', 'stats', 'production', 'isomorphic', 'snapshot', 'watch', 'help'],
+		boolean: ['minify', 'framework', 'stats', 'production', 'isomorphic', 'snapshot', 'verbose', 'watch', 'help'],
 		string: ['externals', 'externals-public', 'locales', 'output'],
 		default: {minify: true},
 		alias: {o: 'output', p: 'production', i: 'isomorphic', l: 'locales', s: 'snapshot', w: 'watch', h: 'help'}
