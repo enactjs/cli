@@ -22,7 +22,7 @@ const globalImport = require('postcss-global-import');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const LessPluginRi = require('resolution-independence');
-const {DefinePlugin} = require('webpack');
+const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
 
 process.chdir(app.context);
@@ -227,11 +227,9 @@ module.exports = {
 		}),
 		// Make NODE_ENV environment variable available to the JS code, for example:
 		// if (process.env.NODE_ENV === 'development') { ... }.
-		new DefinePlugin({
-			'process.env': {
-				NODE_ENV: '"development"'
-			}
-		}),
+		new DefinePlugin({'process.env.NODE_ENV': JSON.stringify('development')}),
+		// Inject prefixed environment variables within code, when used
+		new EnvironmentPlugin(Object.keys(process.env).filter(/^REACT_APP_/.test)),
 		// Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
 		new ExtractTextPlugin('[name].css'),
 		// Watcher doesn't work well if you mistype casing in a path so this is

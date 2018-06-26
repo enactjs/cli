@@ -23,7 +23,7 @@ const removeclass = require('postcss-remove-classes').default;
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const LessPluginRi = require('resolution-independence');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const {DefinePlugin} = require('webpack');
+const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
 
 process.chdir(app.context);
@@ -220,11 +220,9 @@ module.exports = {
 		// if (process.env.NODE_ENV === 'production') { ... }.
 		// It is absolutely essential that NODE_ENV was set to production here.
 		// Otherwise React will be compiled in the very slow development mode.
-		new DefinePlugin({
-			'process.env': {
-				NODE_ENV: '"production"'
-			}
-		}),
+		new DefinePlugin({'process.env.NODE_ENV': JSON.stringify('development')}),
+		// Inject prefixed environment variables within code, when used
+		new EnvironmentPlugin(Object.keys(process.env).filter(/^REACT_APP_/.test)),
 		// Minify the code.
 		new UglifyJsPlugin({
 			uglifyOptions: {
