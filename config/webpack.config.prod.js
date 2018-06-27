@@ -220,9 +220,9 @@ module.exports = {
 		// if (process.env.NODE_ENV === 'production') { ... }.
 		// It is absolutely essential that NODE_ENV was set to production here.
 		// Otherwise React will be compiled in the very slow development mode.
-		new DefinePlugin({'process.env.NODE_ENV': JSON.stringify('development')}),
+		new DefinePlugin({'process.env.NODE_ENV': JSON.stringify('production')}),
 		// Inject prefixed environment variables within code, when used
-		new EnvironmentPlugin(Object.keys(process.env).filter(/^REACT_APP_/.test)),
+		new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
 		// Minify the code.
 		new UglifyJsPlugin({
 			uglifyOptions: {

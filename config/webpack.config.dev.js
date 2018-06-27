@@ -229,7 +229,7 @@ module.exports = {
 		// if (process.env.NODE_ENV === 'development') { ... }.
 		new DefinePlugin({'process.env.NODE_ENV': JSON.stringify('development')}),
 		// Inject prefixed environment variables within code, when used
-		new EnvironmentPlugin(Object.keys(process.env).filter(/^REACT_APP_/.test)),
+		new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
 		// Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
 		new ExtractTextPlugin('[name].css'),
 		// Watcher doesn't work well if you mistype casing in a path so this is
