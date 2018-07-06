@@ -5,7 +5,7 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
 const globalImport = require('postcss-global-import');
 const LessPluginRi = require('resolution-independence');
-const {DefinePlugin} = require('webpack');
+const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {optionParser: app, EnzymeAdapterPlugin, GracefulFsPlugin, ILibPlugin} = require('@enact/dev-utils');
 
 process.env.ES5 = 'true';
@@ -139,7 +139,8 @@ module.exports = function(karma) {
 			},
 			devServer: {host: '0.0.0.0', port: 8080},
 			plugins: [
-				new DefinePlugin({'process.env': {NODE_ENV: '"development"'}}),
+				new DefinePlugin({'process.env.NODE_ENV': JSON.stringify('development')}),
+				new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
 				new CaseSensitivePathsPlugin(),
 				new GracefulFsPlugin(),
 				new ILibPlugin({create: false}),
