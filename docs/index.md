@@ -13,5 +13,6 @@ The following sections describe its installation and usage:
   * [Isomorphic Support](./isomorphic-support.md)
 * [Serving Apps](./serving-apps.md)
 * [Testing Apps](./testing-apps.md)
+* [Ejecting Apps](./ejecting-apps.md)
 * [Template Management](./template-management.md)
   * [Developing a Custom Template](./developing-a-template.md)

@@ -47,9 +47,18 @@ Generally, when a prerender fails, it's due to `window` or `document` being used
 >    } 
 >```
 
+## Prerendering in Specific Locales
+While the app content built with Enact is designed to run for all locales, the prerendered **index.html** content is based on `en-US` locale. While the page should load correctly on other locales, the `en-US`-based content will be visible to the user until the app is fulled locaded/executed. Enact CLI provides commandline options to alter and customize the locales that should be prerendered.  The `-l`/`--locales` accepts a comma-separated list is locales, path to a json array of locales desired, or a preset name (eg. `tv`, `signage`, `none`, etc.). For example:
+```
+enact pack -i --locales=en-US,ko-KR
+enact pack -i --locales=my-locales.json
+enact pack -i --locales=tv
+```
+When multiple locales are specified for prerendering, each local is evaluated into its own HTML file (**index.en-US.html**, **index.ko-KR.html**, etc.) with a non-prerendered **index.html** file as a fallback. Deduping is applied to simplify and minify the number of HTML files outputted, simplifying by root language and across languages themselves. Additionally, with full webOS support, locale-specific **appinfo.json** files will be generated to correctly target locale-specific app entrypoints.
+
 ## How It Works
 With an isomorphic build, the app is built in a special pseudo-library layout, in a universal module definition ([UMD](https://github.com/umdjs/umd)) format. In a Node environment, the top-level export is the `ReactElement` export of the 'isomorphic' file. In a browser environment, the app executes normally.
 
-During the build process, a custom webpack plugin, `PrerenderPlugin`, will access the build within its Node environment and use React's own [`ReactDOMServer`](https://facebook.github.io/react/docs/top-level-api.html#reactdomserver.rendertostring) to render the initial state of the app into an HTML string and inject that into the **index.html** file.  This is the same API used in server-side rendering.
+During the build process, a custom webpack plugin, `PrerenderPlugin`, will access the build within its Node environment and use React's own [`ReactDOMServer`](https://facebook.github.io/react/docs/top-level-api.html#reactdomserver.rendertostring) to render the initial state of the app into an HTML string and inject that into the **index.html** file, within the `root` ID div element.  This is the same API used in server-side rendering.
 
 When the webpage loads up in a browser environment, the built JavaScript is loaded normally (and is expected to render itself into the HTML), except React will detect the DOM tree and will simply attach event listeners and go through the React lifecycle methods.
