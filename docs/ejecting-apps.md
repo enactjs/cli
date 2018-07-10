@@ -28,7 +28,20 @@ my-app/
   package.json
   node_modules/
   config/
+    polyfills.js
+    babel-proxy.js
+    .babelrc.js
+    html-template.ejs
+    webpack.config.dev.js
+    webpack.config.prod.js
+    karma.conf.js
   scripts/
+    serve.js
+    pack.js
+    test.js
+    lint.js
+    license.js
+    clean.js
   src/
   resources/
   webos-meta/
