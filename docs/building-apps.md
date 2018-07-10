@@ -30,7 +30,7 @@ Run within an Enact project's source code, the `enact pack` command (aliased as 
 By default, projects will build in development mode. When you're code is ready for deployment you can build in production mode. Production mode will minify the source code and remove dead code, along with numerous other minor code optimization strategies.
 
 ## \_\_DEV\_\_ Keyword
-In order to make development and debugging simpler, the enact cli supports a special `__DEV__` keyboard in both javascript and CSS.
+In order to make development and debugging simpler, the enact cli supports a special `__DEV__` keyboard in both javascript and LESS.
 
 In javascript, for example:
 
@@ -41,15 +41,14 @@ In javascript, for example:
 ```
 In development mode, the code will execute correctly, whereas in production mode it will get caught and removed as unused dead code. This allows for custom development-only debug code.
 
-Similarly, in css/less:
+Similarly, in LESS:
 
 ```css
-	div .__DEV__ {
+	div when (@__DEV__ = true) {
 		background: blue;
 	}
-}
 ```
-In development mode, the css/less remains intact and usable, but in production mode, the `.__DEV__` css class stylings are removed. This allows for custom development-only styling.
+In development mode, the LESS remains intact and used, but in production mode, the `@__DEV__` variable is false and the CSS isn't output. This allows for custom development-only styling. See LESS's [CSS Guards](http://lesscss.org/features/#css-guards-feature) for more details on usage.
 
 ## Isomorphic Support & Prerendering
 By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The enact cli takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wade variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
