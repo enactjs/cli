@@ -1,15 +1,16 @@
 ---
 title: Developing a Template
+order: 10
 ---
 ## Static Templates
 
-The simplest form of template supported by the Enact CLI is a flat static directory of fileas to be copied. Static templates should include a root-level **package.json**, which will get `npm install` executed upon creation via `enact create`.
+The simplest form of template supported by the Enact CLI is a flat static directory of files to be copied. Static templates should include a root-level **package.json**, which will get `npm install` executed upon creation via `enact create`.
 
-A simple example would be the [default moonstone template](https://github.com/enactjs/cli/tree/master/template) embedded with the Enact CLI itself.
+A simple example would be the [default moonstone template](https://github.com/enactjs/templates/tree/master/packages/moonstone).
 
 ## Dynamic Template Generators
 
-An enhanced form of template generators are also supported. In this form, the static template files are within a `./template` subdirectory and a root-level **index.js** is available. The **index.js** can export hooks which `enact create` can tie into.
+An enhanced form of template generators are also supported. In this form, the static template files are within a **./template** subdirectory and a root-level **index.js** is available. The **index.js** can export hooks which `enact create` can tie into.
 
 Available optional properties that can be exported:
 

@@ -1,5 +1,6 @@
 ---
 title: Isomorphic Support
+order: 5
 ---
 Isomorphic code layout is a special feature which builds projects in a JavaScript layout that can be potentially processed by any environment, such as [NodeJS](https://nodejs.org) or the browser. One main benefit is that this code can be evaluated at build-time and prerendered into the HTML document ahead of time. When the isomorphic option is used, prerendering will be attempted.
 

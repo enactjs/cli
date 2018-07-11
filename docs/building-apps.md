@@ -1,5 +1,6 @@
 ---
 title: Building Apps
+order: 4
 ---
 ## Packaging Source Code
 ```
