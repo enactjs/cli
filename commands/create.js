@@ -29,7 +29,7 @@ const defaultGenerator = {
 
 		if (!validation.validForNewPackages) {
 			throw new Error(
-				`Cannot create a project called ${chalk.bold(name)} because of NPM naming restrictions:\n` +
+				`Cannot create a project called ${chalk.bold(name)} because of npm naming restrictions:\n` +
 					validation.errors
 						.concat(validation.warnings)
 						.map(r => '  * ' + r)
@@ -119,7 +119,7 @@ const defaultGenerator = {
 		console.log();
 		console.log('Success! Created ' + name + ' at ' + directory);
 		console.log();
-		console.log('Inside that directory, you can run several NPM commands, including:');
+		console.log('Inside that directory, you can run several npm commands, including:');
 		console.log(chalk.cyan('	npm run serve'));
 		console.log('		Starts the development server.');
 		console.log(chalk.cyan('	npm run pack'));
@@ -237,7 +237,7 @@ function npmInstall(directory, verbose, ...rest) {
 		const proc = spawn('npm', args, {stdio: 'inherit', cwd: directory});
 		proc.on('close', code => {
 			if (code !== 0) {
-				reject(new Error('NPM install failed.'));
+				reject(new Error('npm install failed.'));
 			} else {
 				resolve();
 			}

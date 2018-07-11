@@ -21,7 +21,7 @@ function displayHelp() {
 	console.log('    enact template install [source] [name]');
 	console.log(chalk.dim('    Install a template from a local or remote source'));
 	console.log();
-	console.log('        source            Git URI, NPM package or local directory');
+	console.log('        source            Git URI, npm package or local directory');
 	console.log('                          (default: cwd)');
 	console.log('        name              Specific name for the template');
 	console.log();
@@ -87,7 +87,7 @@ function doInstall(target, name) {
 				});
 				child.on('close', code => {
 					if (code !== 0) {
-						reject(new Error('Failed to NPM install dynamic template. Ensure package.json is valid.'));
+						reject(new Error('Failed to npm install dynamic template. Ensure package.json is valid.'));
 					} else {
 						resolve(resolved);
 					}
@@ -155,7 +155,7 @@ function installFromNPM(target, name = normalizeName(path.basename(target).repla
 						}
 					});
 				} else {
-					reject(new Error(`Failed to download NPM package ${target} from registry.`));
+					reject(new Error(`Failed to download npm package ${target} from registry.`));
 				}
 			}
 		});

@@ -5,9 +5,9 @@ title: Installation
 
 Node 6.4 or later.
 
-## Installation via NPM
+## Installation via npm
 
-Standard global installation of `@enact/cli` via NPM. For Linux `sudo` may be required.
+Standard global installation of `@enact/cli` via npm. For Linux `sudo` may be required.
 
 ```sh
 npm install -g @enact/cli
