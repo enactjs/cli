@@ -1,5 +1,6 @@
 ---
 title: Building Apps
+order: 4
 ---
 ## Packaging Source Code
 ```
@@ -30,7 +31,7 @@ Run within an Enact project's source code, the `enact pack` command (aliased as 
 By default, projects will build in development mode. When you're code is ready for deployment you can build in production mode. Production mode will minify the source code and remove dead code, along with numerous other minor code optimization strategies.
 
 ## \_\_DEV\_\_ Keyword
-In order to make development and debugging simpler, the enact cli supports a special `__DEV__` keyboard in both javascript and CSS.
+In order to make development and debugging simpler, the Enact CLI supports a special `__DEV__` keyboard in both javascript and CSS.
 
 In javascript, for example:
 
@@ -51,8 +52,12 @@ Similarly, in css/less:
 ```
 In development mode, the css/less remains intact and usable, but in production mode, the `.__DEV__` css class stylings are removed. This allows for custom development-only styling.
 
+## Environment Variable Injection
+
+Some scenarios may require sensitive or dynamic data to be kept outside a project itself.  All environment variables that are prefixed with `REACT_APP_` will be supported for injection into the app output. For example, with `REACT_APP_MYVAR="Hello World"` environment variable, usage of `process.env.REACT_APP_MYVAR` will be replaced with `"Hello World"`.
+
 ## Isomorphic Support & Prerendering
-By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The enact cli takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wade variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
+By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wade variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
 
 ## V8 Snapshot Generation
 The v8 snapshot blob creation feature is highly experimental and tempermental depending on your code. It is considered an extension of the isomorphic code layout, bringing along all the same requirements. Given the highly-specific nature of a v8 snapshot blob being tied to particular versions of Chrome/Chromium/Electron/etc., developers must provide their own copy of the `mksnapshot` binary and have its filepath set to the `V8_MKSNAPSHOT` environment variable.
