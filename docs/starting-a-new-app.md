@@ -50,7 +50,7 @@ For example:
 ```
 
 ## Available npm Tasks
-Included within the project template are a number of npm tasks available, with each mapped to enact cli commands:
+Included within the project template are a number of npm tasks available, with each mapped to Enact CLI commands:
 
 * `npm run serve` - Packages and hosts the app on a local http server using [webpack-dev-server](https://github.com/webpack/webpack-dev-server). Supports hot module replacement and inline updates as the source code changes.
 * `npm run pack` - Packages the app into **./dist** in development mode (unminified code, with any applicable development code).

@@ -31,7 +31,7 @@ npm pack-p -- --isomorphic
 ```
 
 ### When to Build Isomorphically
-By default, enact cli will use not use isomorphic code layout, and it should not be considered part of the regular development workflow. It is advisable to only build in isomorphic format when you want to test isomorphic features or in production mode builds.
+By default, the Enact CLI will not use isomorphic code layout, and it should not be considered part of the regular development workflow. It is advisable to only build in isomorphic format when you want to test isomorphic features or in production mode builds.
 
 ### How to Debug When Prerendering Fails
 If prerendering fails, there will be a stack trace printed to the console and the build will continue without prerendering.  It's useful to build in development mode so that you can use the stack trace to determine where in the code the issue lies without any minification getting in the way.
