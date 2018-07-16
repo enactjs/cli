@@ -1,9 +1,11 @@
+/* eslint-env node, es6 */
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
+const globalImport = require('postcss-global-import');
 const LessPluginRi = require('resolution-independence');
-const {DefinePlugin} = require('webpack');
+const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {optionParser: app, EnzymeAdapterPlugin, GracefulFsPlugin, ILibPlugin} = require('@enact/dev-utils');
 
 process.env.ES5 = 'true';
@@ -14,14 +16,14 @@ module.exports = function(karma) {
 		frameworks: ['mocha', 'chai', 'dirty-chai'],
 		files: [
 			require.resolve('@babel/polyfill/dist/polyfill'),
-			require.resolve('./proptype-checker'),
+			require.resolve('mocha-react-proptype-checker'),
 			'./!(node_modules|dist|build)/**/*-specs.js'
 		],
 
 		preprocessors: {
 			// add webpack as preprocessor
 			'./!(node_modules|dist|build)/**/*.js': ['webpack'],
-			[require.resolve('./proptype-checker')]: ['webpack']
+			[require.resolve('mocha-react-proptype-checker')]: ['webpack']
 		},
 
 		failOnEmptyTestSuite: true,
@@ -83,8 +85,8 @@ module.exports = function(karma) {
 						loader: require.resolve('babel-loader'),
 						options: {
 							// @remove-on-eject-begin
-							babelrc: false,
 							extends: path.join(__dirname, '.babelrc.js'),
+							babelrc: false,
 							// @remove-on-eject-end
 							cacheDirectory: true,
 							// Generate a unique identifier string based off versons of components and app config.
@@ -118,13 +120,17 @@ module.exports = function(karma) {
 											flexbox: 'no-2009',
 											remove: false
 										}),
-										flexbugfixes
+										flexbugfixes,
+										globalImport
 									]
 								}
 							},
 							{
 								loader: require.resolve('less-loader'),
-								options: {plugins: app.ri ? [new LessPluginRi(app.ri)] : []}
+								options: {
+									modifyVars: Object.assign({}, app.accent),
+									plugins: app.ri ? [new LessPluginRi(app.ri)] : []
+								}
 							}
 						]
 					}
@@ -133,7 +139,8 @@ module.exports = function(karma) {
 			},
 			devServer: {host: '0.0.0.0', port: 8080},
 			plugins: [
-				new DefinePlugin({'process.env': {NODE_ENV: '"development"'}}),
+				new DefinePlugin({'process.env.NODE_ENV': JSON.stringify('development')}),
+				new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
 				new CaseSensitivePathsPlugin(),
 				new GracefulFsPlugin(),
 				new ILibPlugin({create: false}),

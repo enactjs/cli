@@ -1,29 +1,14 @@
+// @remove-file-on-eject
 /**
  * Portions of this source code file are from create-react-app, used under the
  * following MIT license:
  *
  * Copyright (c) 2013-present, Facebook, Inc.
- * https://github.com/facebookincubator/create-react-app
+ * https://github.com/facebook/create-react-app
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
-
 const os = require('os');
 const path = require('path');
 const chalk = require('chalk');
@@ -33,6 +18,7 @@ const minimist = require('minimist');
 const validatePackageName = require('validate-npm-package-name');
 
 const ENACT_DEV_NPM = '@enact/cli';
+const INCLUDED = path.dirname(require.resolve('@enact/template-moonstone'));
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 
 const defaultGenerator = {
@@ -43,7 +29,7 @@ const defaultGenerator = {
 
 		if (!validation.validForNewPackages) {
 			throw new Error(
-				`Cannot create a project called ${chalk.bold(name)} because of NPM naming restrictions:\n` +
+				`Cannot create a project called ${chalk.bold(name)} because of npm naming restrictions:\n` +
 					validation.errors
 						.concat(validation.warnings)
 						.map(r => '  * ' + r)
@@ -133,7 +119,7 @@ const defaultGenerator = {
 		console.log();
 		console.log('Success! Created ' + name + ' at ' + directory);
 		console.log();
-		console.log('Inside that directory, you can run several NPM commands, including:');
+		console.log('Inside that directory, you can run several npm commands, including:');
 		console.log(chalk.cyan('	npm run serve'));
 		console.log('		Starts the development server.');
 		console.log(chalk.cyan('	npm run pack'));
@@ -181,7 +167,7 @@ function resolveTemplateGenerator(template) {
 		let templatePath = path.join(TEMPLATE_DIR, template);
 		if (!fs.existsSync(templatePath)) {
 			if (['default', 'moonstone'].includes(template)) {
-				templatePath = path.join(__dirname, '..', 'template');
+				templatePath = path.join(INCLUDED, 'template');
 			} else {
 				reject(new Error(`Template ${chalk.bold(template)} not found.`));
 			}
@@ -251,7 +237,7 @@ function npmInstall(directory, verbose, ...rest) {
 		const proc = spawn('npm', args, {stdio: 'inherit', cwd: directory});
 		proc.on('close', code => {
 			if (code !== 0) {
-				reject(new Error('NPM install failed.'));
+				reject(new Error('npm install failed.'));
 			} else {
 				resolve();
 			}
@@ -286,7 +272,7 @@ function cli(args) {
 		default: {template: 'default'},
 		alias: {t: 'template', h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	opts.directory = path.resolve(typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
 	opts.name = path

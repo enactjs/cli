@@ -1,9 +1,14 @@
+/* eslint-env node, es6 */
 const cp = require('child_process');
+const path = require('path');
 const minimist = require('minimist');
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact lint';
+
 	console.log('  Usage');
-	console.log('    enact lint [options] [<target>]');
+	console.log(`    ${e} [options] [<target>]`);
 	console.log();
 	console.log('  Arguments');
 	console.log('    target            Optional target file or directory');
@@ -52,7 +57,7 @@ function cli(args) {
 		boolean: ['local', 'strict', 'fix', 'help'],
 		alias: {l: 'local', s: 'strict', framework: 'strict', f: 'fix', h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	api({strict: opts.strict, local: opts.local, fix: opts.fix, eslintArgs: opts._}).catch(() => {
 		process.exit(1);
@@ -60,3 +65,4 @@ function cli(args) {
 }
 
 module.exports = {api, cli};
+if (require.main === module) cli(process.argv.slice(2));

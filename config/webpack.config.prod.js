@@ -1,28 +1,14 @@
+/* eslint-env node, es6 */
 // @remove-on-eject-begin
 /**
  * Portions of this source code file are from create-react-app, used under the
  * following MIT license:
  *
  * Copyright (c) 2013-present, Facebook, Inc.
- * https://github.com/facebookincubator/create-react-app
+ * https://github.com/facebook/create-react-app
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
 // @remove-on-eject-end
 
@@ -32,14 +18,16 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
+const globalImport = require('postcss-global-import');
 const removeclass = require('postcss-remove-classes').default;
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const LessPluginRi = require('resolution-independence');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const {DefinePlugin} = require('webpack');
+const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
 
 process.chdir(app.context);
+process.env.NODE_ENV = 'production';
 
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
@@ -93,17 +81,17 @@ module.exports = {
 			{
 				test: /\.(js|jsx)$/,
 				enforce: 'pre',
-				// @remove-on-eject-begin
 				// Point ESLint to our predefined config.
 				options: {
 					formatter: eslintFormatter,
+					// @remove-on-eject-begin
 					baseConfig: {
 						extends: [require.resolve('eslint-config-enact')]
 					},
-					cache: true,
-					useEslintrc: false
+					useEslintrc: false,
+					// @remove-on-eject-end
+					cache: true
 				},
-				// @remove-on-eject-end
 				loader: require.resolve('eslint-loader'),
 				include: process.cwd(),
 				exclude: /node_modules/
@@ -127,8 +115,8 @@ module.exports = {
 						loader: require.resolve('babel-loader'),
 						options: {
 							// @remove-on-eject-begin
-							babelrc: false,
 							extends: path.join(__dirname, '.babelrc.js'),
+							babelrc: false,
 							// @remove-on-eject-end
 							highlightCode: true
 						}
@@ -155,7 +143,12 @@ module.exports = {
 							options: {
 								importLoaders: 2,
 								modules: true,
-								minimize: true
+								minimize: {
+									// Disable postcss-calc support within the css minifier due to
+									// an open bug where "calc" in a css variable name can break.
+									// See https://github.com/postcss/postcss-calc/issues/50
+									calc: false
+								}
 							}
 						},
 						{
@@ -173,13 +166,16 @@ module.exports = {
 									// See https://github.com/philipwalton/flexbugs
 									flexbugfixes,
 									// Remove the development-only CSS class `.__DEV__`.
-									removeclass(['__DEV__'])
+									removeclass(['__DEV__']),
+									// Support @global-import syntax to import css in a global context.
+									globalImport
 								]
 							}
 						},
 						{
 							loader: require.resolve('less-loader'),
 							options: {
+								modifyVars: Object.assign({}, app.accent),
 								// If resolution independence options are specified, use the LESS plugin.
 								plugins: app.ri ? [new LessPluginRi(app.ri)] : []
 							}
@@ -224,29 +220,42 @@ module.exports = {
 		// if (process.env.NODE_ENV === 'production') { ... }.
 		// It is absolutely essential that NODE_ENV was set to production here.
 		// Otherwise React will be compiled in the very slow development mode.
-		new DefinePlugin({
-			'process.env': {
-				NODE_ENV: '"production"'
-			}
-		}),
+		new DefinePlugin({'process.env.NODE_ENV': JSON.stringify('production')}),
+		// Inject prefixed environment variables within code, when used
+		new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
 		// Minify the code.
 		new UglifyJsPlugin({
 			uglifyOptions: {
+				parse: {
+					// we want uglify-js to parse ecma 8 code. However, we don't want it
+					// to apply any minfication steps that turns valid ecma 5 code
+					// into invalid ecma 5 code. This is why the 'compress' and 'output'
+					// sections only apply transformations that are ecma 5 safe
+					// https://github.com/facebook/create-react-app/pull/4234
+					ecma: 8
+				},
 				compress: {
+					ecma: 5,
 					warnings: false,
 					// Disabled because of an issue with Uglify breaking seemingly valid code:
-					// https://github.com/facebookincubator/create-react-app/issues/2376
+					// https://github.com/facebook/create-react-app/issues/2376
 					// Pending further investigation:
 					// https://github.com/mishoo/UglifyJS2/issues/2011
 					comparisons: false
 				},
 				output: {
+					ecma: 5,
 					comments: false,
 					// Turned on because emoji and regex is not minified properly using default
-					// https://github.com/facebookincubator/create-react-app/issues/2488
+					// https://github.com/facebook/create-react-app/issues/2488
 					ascii_only: true
 				}
-			}
+			},
+			// Use multi-process parallel running to improve the build speed
+			// Default number of concurrent runs: os.cpus().length - 1
+			parallel: true,
+			// Enable file caching
+			cache: true
 		}),
 		// Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
 		new ExtractTextPlugin('[name].css'),

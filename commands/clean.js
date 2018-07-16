@@ -1,11 +1,16 @@
+/* eslint-env node, es6 */
+const path = require('path');
 const chalk = require('chalk');
 const fs = require('fs-extra');
 const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils').packageRoot;
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact clean';
+
 	console.log('  Usage');
-	console.log('    enact clean [options] [paths...]');
+	console.log(`    ${e} [options] [paths...]`);
 	console.log();
 	console.log('  Arguments');
 	console.log('    paths             Additional path(s) to delete');
@@ -26,7 +31,7 @@ function cli(args) {
 		boolean: ['help'],
 		alias: {h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	process.chdir(packageRoot().path);
 	api({paths: opts._}).catch(err => {
@@ -36,3 +41,4 @@ function cli(args) {
 }
 
 module.exports = {api, cli};
+if (require.main === module) cli(process.argv.slice(2));

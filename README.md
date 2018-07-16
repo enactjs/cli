@@ -19,13 +19,13 @@ The only time you're ever want to directly use the Enact CLI is when you want to
 enact create [directory]
 ```
 
-This will generate a basic App template, complete with npm scripts and dependencies setup. If no directory path is specified, it will be generated within the working directory.
+This will generate a basic App template, complete with npm scripts and dependencies. If no directory path is specified, it will be generated within the working directory.
 
->Advanced: If you've used `npm link` on separate installations of the Enact repo, you can run `enact link` afterwards to link in any available enact libraries.
+>Advanced: If you've used `npm link` on separate installations of the Enact repo, you can run `enact link` afterwards to link in any available Enact libraries.
 
 ## Available Commands
 
-Enact supports several commands, each accessible through the `enact` command and through npm aliases in `package.json`. For help on individual commands, add `--help` following the command name. The commands are:
+Enact supports several commands, each accessible through the `enact` command and through npm aliases in **package.json**. For help on individual commands, add `--help` following the command name. The commands are:
 
 ### `enact serve` (aliased as `npm run serve`)
 
@@ -57,17 +57,18 @@ Outputs a JSON representation of the licenses for modules referenced by the curr
 
 ## Enact Build Options
 
-The @enact/cli tool will check the project's `package.json` looking for an optional `enact` object for a few customization options:
+The @enact/cli tool will check the project's **package.json** looking for an optional `enact` object for a few customization options:
 
 * `template` _[string]_ - Filepath to an alternate HTML template to use with the [Webpack html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin).
-* `isomorphic` _[string]_ - Alternate filepath to a custom isomorphic-compatible entrypoint. Not needed if main entrypoint is already isomorphic-compatible.
-* `title` _[string]_ - Title text that should be put within the HTML's `<title></title>` tags. Note: if this is a webOS-project, the title by default will be auto-detected from the appinfo.json content.
+* `isomorphic` _[string]_ - Alternate filepath to a custom isomorphic-compatible entry point. Not needed if main entry point is already isomorphic-compatible.
+* `title` _[string]_ - Title text that should be put within the HTML's `<title></title>` tags. Note: if this is a webOS-project, the title will, by default, be auto-detected from the **appinfo.json** content.
 * `theme` _[object]_ - A simplified string name to extrapolate `fontGenerator`, `ri`, and `screenTypes` preset values from. For example, `"moonstone"`
-* `fontGenerator` _[string]_ - Filepath to a commonjs fontGenerator module which will build locale-specific font CSS to inject into the HTML. By default will use any preset for a specified theme or fallback to moonstone.
-* `ri` _[object]_ - Resolution independence options to be forwarded to the [LESS plugin](https://github.com/enyojs/less-plugin-resolution-independence). By default will use any preset for a specified theme or fallback to moonstone
-* `screenTypes` _[array|string]_ - Array of 1 or more screentype definitions to be used with prerender HTML initialization. Can alternatively reference a json filepath to read for screentype definitons.  By default will use any preset for a specified theme or fallback to moonstone.
+* `fontGenerator` _[string]_ - Filepath to a CommonJS fontGenerator module which will build locale-specific font CSS to inject into the HTML. By default, will use any preset for a specified theme or fallback to moonstone.
+* `ri` _[object]_ - Resolution independence options to be forwarded to the [LESS plugin](https://github.com/enyojs/less-plugin-resolution-independence). By default, will use any preset for a specified theme or fallback to moonstone
+* `screenTypes` _[array|string]_ - Array of 1 or more screentype definitions to be used with prerender HTML initialization. Can alternatively reference a json filepath to read for screentype definitons.  By default, will use any preset for a specified theme or fallback to moonstone.
 * `nodeBuiltins` _[object]_ - Configuration settings for polyfilling NodeJS built-ins. See `node` [webpack option](https://webpack.js.org/configuration/node/).
-* `deep` _[string|array]_ - 1 or more javascript conditions that, when met, indicate deeplinking and any prerender should be discarded.
+* `externalStartup` _[boolean]_ - Flag whether to externalize the startup/update js that is normally inlined within prerendered app HTML output.
+* `deep` _[string|array]_ - 1 or more JavaScript conditions that, when met, indicate deeplinking and any prerender should be discarded.
 * `target` _[string|array]_ - A build-type generic preset string (see `target` [webpack option](https://webpack.js.org/configuration/target/)) or alternatively a specific [browserlist array](https://github.com/ai/browserslist) of desired targets.
 * `proxy` _[string]_ - Proxy target during project `serve` to be used within the [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware).
 

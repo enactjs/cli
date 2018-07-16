@@ -1,5 +1,6 @@
 ---
 title: Template Management
+order: 9
 ---
 ## Enact CLI Template Support 
 ```
@@ -12,7 +13,7 @@ title: Template Management
     enact template install [source] [name]
     Install a template from a local or remote source
 
-        source            Git URI, NPM package or local directory
+        source            Git URI, npm package or local directory
                           (default: cwd)
         name              Specific name for the template
 

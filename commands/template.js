@@ -1,3 +1,4 @@
+// @remove-file-on-eject
 const os = require('os');
 const path = require('path');
 const url = require('url');
@@ -9,6 +10,7 @@ const inquirer = require('react-dev-utils/inquirer');
 const tar = require('tar');
 
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
+const INCLUDED = path.dirname(require.resolve('@enact/template-moonstone'));
 const DEFAULT_LINK = path.join(TEMPLATE_DIR, 'default');
 
 function displayHelp() {
@@ -19,7 +21,7 @@ function displayHelp() {
 	console.log('    enact template install [source] [name]');
 	console.log(chalk.dim('    Install a template from a local or remote source'));
 	console.log();
-	console.log('        source            Git URI, NPM package or local directory');
+	console.log('        source            Git URI, npm package or local directory');
 	console.log('                          (default: cwd)');
 	console.log('        name              Specific name for the template');
 	console.log();
@@ -53,9 +55,8 @@ function displayHelp() {
 function initTemplateArea() {
 	if (!fs.existsSync(TEMPLATE_DIR)) {
 		fs.mkdirSync(TEMPLATE_DIR);
-		console.log(path.join(__dirname, '..', 'template'));
 	}
-	const init = doLink(path.join(__dirname, '..', 'template'), 'moonstone');
+	const init = doLink(path.join(INCLUDED, 'template'), 'moonstone');
 	const moonstoneLink = path.join(TEMPLATE_DIR, 'moonstone');
 	return init.then(() => !fs.existsSync(DEFAULT_LINK) && doLink(moonstoneLink, 'default'));
 }
@@ -86,7 +87,7 @@ function doInstall(target, name) {
 				});
 				child.on('close', code => {
 					if (code !== 0) {
-						reject(new Error('Failed to NPM install dynamic template. Ensure package.json is valid.'));
+						reject(new Error('Failed to npm install dynamic template. Ensure package.json is valid.'));
 					} else {
 						resolve(resolved);
 					}
@@ -154,7 +155,7 @@ function installFromNPM(target, name = normalizeName(path.basename(target).repla
 						}
 					});
 				} else {
-					reject(new Error(`Failed to download NPM package ${target} from registry.`));
+					reject(new Error(`Failed to download npm package ${target} from registry.`));
 				}
 			}
 		});
@@ -278,7 +279,7 @@ function cli(args) {
 		boolean: ['help'],
 		alias: {h: 'help'}
 	});
-	opts.help && displayHelp();
+	if (opts.help) displayHelp();
 
 	const action = opts._[0];
 	const target = opts._[1] || process.cwd();

@@ -1,6 +1,7 @@
+/* eslint-env node, es6 */
 const cp = require('child_process');
 
-function api(args) {
+function api(args = []) {
 	if (args[0] === 'start' || args[0] === 'init') {
 		args.splice(1, 0, require.resolve('../config/karma.conf.js'));
 	}
@@ -23,3 +24,4 @@ function cli(args) {
 }
 
 module.exports = {api, cli};
+if (require.main === module) cli(process.argv.slice(2));
