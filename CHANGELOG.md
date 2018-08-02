@@ -1,3 +1,8 @@
+## [Unreleased]
+
+### template
+* Updated to default to 2.0.0 template.
+
 ## 1.1.0 (July 16, 2018)
 
 ### pack
