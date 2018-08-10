@@ -1,8 +1,13 @@
-## [unreleased]
+## 1.1.1 (August 10, 2018)
 
-### template
+### create
 
-* Updated to default to 2.0.0 template.
+* Updated default included moonstone template for Enact 2.x.
+
+### pack
+
+* Fixed locale classes failing to be applied on a multi-locale prerender when deep-linking is used.
+* Fixed font style prerendering, with added support for font overrides.
 
 ## 1.1.0 (July 16, 2018)
 
