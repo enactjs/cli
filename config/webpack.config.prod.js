@@ -15,8 +15,9 @@
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
 const globalImport = require('postcss-global-import');
 const removeclass = require('postcss-remove-classes').default;
@@ -33,6 +34,7 @@ process.env.NODE_ENV = 'production';
 // It compiles slowly and is focused on producing a fast and minimal bundle.
 // The development configuration is different and lives in a separate file.
 module.exports = {
+	mode: 'production',
 	// Don't attempt to continue if there are any errors.
 	bail: true,
 	// Skip source map support
@@ -135,53 +137,45 @@ module.exports = {
 			{
 				test: /\.(c|le)ss$/,
 				// Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
-				loader: ExtractTextPlugin.extract({
-					fallback: require.resolve('style-loader'),
-					use: [
-						{
-							loader: require.resolve('css-loader'),
-							options: {
-								importLoaders: 2,
-								modules: true,
-								minimize: {
-									// Disable postcss-calc support within the css minifier due to
-									// an open bug where "calc" in a css variable name can break.
-									// See https://github.com/postcss/postcss-calc/issues/50
-									calc: false
-								}
-							}
-						},
-						{
-							loader: require.resolve('postcss-loader'),
-							options: {
-								ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
-								plugins: () => [
-									// Automatically add vendor CSS prefixes.
-									autoprefixer({
-										browsers: app.browsers,
-										flexbox: 'no-2009',
-										remove: false
-									}),
-									// Fix and adjust for known flexbox issues
-									// See https://github.com/philipwalton/flexbugs
-									flexbugfixes,
-									// Remove the development-only CSS class `.__DEV__`.
-									removeclass(['__DEV__']),
-									// Support @global-import syntax to import css in a global context.
-									globalImport
-								]
-							}
-						},
-						{
-							loader: require.resolve('less-loader'),
-							options: {
-								modifyVars: Object.assign({}, app.accent),
-								// If resolution independence options are specified, use the LESS plugin.
-								plugins: app.ri ? [new LessPluginRi(app.ri)] : []
-							}
+				use: [
+					MiniCssExtractPlugin.loader,
+					{
+						loader: require.resolve('css-loader'),
+						options: {
+							importLoaders: 2,
+							modules: true
 						}
-					]
-				})
+					},
+					{
+						loader: require.resolve('postcss-loader'),
+						options: {
+							ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
+							plugins: () => [
+								// Automatically add vendor CSS prefixes.
+								autoprefixer({
+									browsers: app.browsers,
+									flexbox: 'no-2009',
+									remove: false
+								}),
+								// Fix and adjust for known flexbox issues
+								// See https://github.com/philipwalton/flexbugs
+								flexbugfixes,
+								// Remove the development-only CSS class `.__DEV__`.
+								removeclass(['__DEV__']),
+								// Support @global-import syntax to import css in a global context.
+								globalImport
+							]
+						}
+					},
+					{
+						loader: require.resolve('less-loader'),
+						options: {
+							modifyVars: Object.assign({}, app.accent),
+							// If resolution independence options are specified, use the LESS plugin.
+							plugins: app.ri ? [new LessPluginRi(app.ri)] : []
+						}
+					}
+				]
 			}
 			// ** STOP ** Are you adding a new loader?
 			// Remember to add the new extension(s) to the "file" loader exclusion regex list.
@@ -193,6 +187,48 @@ module.exports = {
 	node: app.nodeBuiltins,
 	performance: {
 		hints: false
+	},
+	optimization: {
+		minimizer: [
+			new UglifyJsPlugin({
+				uglifyOptions: {
+					parse: {
+						// we want uglify-js to parse ecma 8 code. However, we don't want it
+						// to apply any minfication steps that turns valid ecma 5 code
+						// into invalid ecma 5 code. This is why the 'compress' and 'output'
+						// sections only apply transformations that are ecma 5 safe
+						// https://github.com/facebook/create-react-app/pull/4234
+						ecma: 8
+					},
+					compress: {
+						ecma: 5,
+						warnings: false,
+						// Disabled because of an issue with Uglify breaking seemingly valid code:
+						// https://github.com/facebook/create-react-app/issues/2376
+						// Pending further investigation:
+						// https://github.com/mishoo/UglifyJS2/issues/2011
+						comparisons: false
+					},
+					output: {
+						ecma: 5,
+						comments: false,
+						// Turned on because emoji and regex is not minified properly using default
+						// https://github.com/facebook/create-react-app/issues/2488
+						ascii_only: true
+					}
+				},
+				// Use multi-process parallel running to improve the build speed
+				// Default number of concurrent runs: os.cpus().length - 1
+				parallel: true,
+				// Enable file caching
+				cache: true
+			}),
+			new OptimizeCSSAssetsPlugin({
+				cssProcessorOptions: {
+					calc: false
+				}
+			})
+		]
 	},
 	plugins: [
 		// Generates an `index.html` file with the js and css tags injected.
@@ -223,42 +259,11 @@ module.exports = {
 		new DefinePlugin({'process.env.NODE_ENV': JSON.stringify('production')}),
 		// Inject prefixed environment variables within code, when used
 		new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
-		// Minify the code.
-		new UglifyJsPlugin({
-			uglifyOptions: {
-				parse: {
-					// we want uglify-js to parse ecma 8 code. However, we don't want it
-					// to apply any minfication steps that turns valid ecma 5 code
-					// into invalid ecma 5 code. This is why the 'compress' and 'output'
-					// sections only apply transformations that are ecma 5 safe
-					// https://github.com/facebook/create-react-app/pull/4234
-					ecma: 8
-				},
-				compress: {
-					ecma: 5,
-					warnings: false,
-					// Disabled because of an issue with Uglify breaking seemingly valid code:
-					// https://github.com/facebook/create-react-app/issues/2376
-					// Pending further investigation:
-					// https://github.com/mishoo/UglifyJS2/issues/2011
-					comparisons: false
-				},
-				output: {
-					ecma: 5,
-					comments: false,
-					// Turned on because emoji and regex is not minified properly using default
-					// https://github.com/facebook/create-react-app/issues/2488
-					ascii_only: true
-				}
-			},
-			// Use multi-process parallel running to improve the build speed
-			// Default number of concurrent runs: os.cpus().length - 1
-			parallel: true,
-			// Enable file caching
-			cache: true
+		// Note: this won't work without MiniCssExtractPlugin.loader in `loaders`.
+		new MiniCssExtractPlugin({
+			filename: '[name].css',
+			chunkFilename: 'chunk.[name].js'
 		}),
-		// Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
-		new ExtractTextPlugin('[name].css'),
 		// Ensure correct casing in module filepathes
 		new CaseSensitivePathsPlugin(),
 		// Switch the internal NodeOutputFilesystem to use graceful-fs to avoid

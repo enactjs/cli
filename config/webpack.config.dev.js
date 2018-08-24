@@ -15,7 +15,7 @@
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const flexbugfixes = require('postcss-flexbugs-fixes');
 const globalImport = require('postcss-global-import');
@@ -32,6 +32,7 @@ process.env.NODE_ENV = 'development';
 // It is focused on developer experience and fast rebuilds.
 // The production configuration is different and lives in a separate file.
 module.exports = {
+	mode: 'development',
 	// Don't attempt to continue if there are any errors.
 	bail: true,
 	// We use sourcemaps to allow devtools to view the original module code data
@@ -154,49 +155,47 @@ module.exports = {
 			{
 				test: /\.(c|le)ss$/,
 				// Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
-				loader: ExtractTextPlugin.extract({
-					fallback: require.resolve('style-loader'),
-					use: [
-						{
-							loader: require.resolve('css-loader'),
-							options: {
-								importLoaders: 2,
-								modules: true,
-								sourceMap: true,
-								localIdentName: '[name]__[local]___[hash:base64:5]'
-							}
-						},
-						{
-							loader: require.resolve('postcss-loader'),
-							options: {
-								ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
-								sourceMap: true,
-								plugins: () => [
-									// We use PostCSS for autoprefixing only, but others could be added.
-									autoprefixer({
-										browsers: app.browsers,
-										flexbox: 'no-2009',
-										remove: false
-									}),
-									// Fix and adjust for known flexbox issues
-									// See https://github.com/philipwalton/flexbugs
-									flexbugfixes,
-									// Support @global-import syntax to import css in a global context.
-									globalImport
-								]
-							}
-						},
-						{
-							loader: require.resolve('less-loader'),
-							options: {
-								modifyVars: Object.assign({}, app.accent),
-								sourceMap: true,
-								// If resolution independence options are specified, use the LESS plugin.
-								plugins: app.ri ? [new LessPluginRi(app.ri)] : []
-							}
+				use: [
+					MiniCssExtractPlugin.loader,
+					{
+						loader: require.resolve('css-loader'),
+						options: {
+							importLoaders: 2,
+							modules: true,
+							sourceMap: true,
+							localIdentName: '[name]__[local]___[hash:base64:5]'
 						}
-					]
-				})
+					},
+					{
+						loader: require.resolve('postcss-loader'),
+						options: {
+							ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
+							sourceMap: true,
+							plugins: () => [
+								// We use PostCSS for autoprefixing only, but others could be added.
+								autoprefixer({
+									browsers: app.browsers,
+									flexbox: 'no-2009',
+									remove: false
+								}),
+								// Fix and adjust for known flexbox issues
+								// See https://github.com/philipwalton/flexbugs
+								flexbugfixes,
+								// Support @global-import syntax to import css in a global context.
+								globalImport
+							]
+						}
+					},
+					{
+						loader: require.resolve('less-loader'),
+						options: {
+							modifyVars: Object.assign({}, app.accent),
+							sourceMap: true,
+							// If resolution independence options are specified, use the LESS plugin.
+							plugins: app.ri ? [new LessPluginRi(app.ri)] : []
+						}
+					}
+				]
 			}
 			// ** STOP ** Are you adding a new loader?
 			// Remember to add the new extension(s) to the "file" loader exclusion regex list.
@@ -230,8 +229,11 @@ module.exports = {
 		new DefinePlugin({'process.env.NODE_ENV': JSON.stringify('development')}),
 		// Inject prefixed environment variables within code, when used
 		new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
-		// Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
-		new ExtractTextPlugin('[name].css'),
+		// Note: this won't work without MiniCssExtractPlugin.loader in `loaders`.
+		new MiniCssExtractPlugin({
+			filename: '[name].css',
+			chunkFilename: 'chunk.[name].js'
+		}),
 		// Watcher doesn't work well if you mistype casing in a path so this is
 		// a plugin that prints an error when you attempt to do this.
 		// See https://github.com/facebookincubator/create-react-app/issues/240
