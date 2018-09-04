@@ -44,12 +44,12 @@ module.exports = {
 	    //'@babel/plugin-proposal-throw-expressions',
 
 	    // Stage 3
-	    //'@babel/plugin-syntax-dynamic-import',
+	    '@babel/plugin-syntax-dynamic-import',
 	    //'@babel/plugin-syntax-import-meta',
 	    '@babel/plugin-proposal-class-properties',
 	    //'@babel/plugin-proposal-json-strings'
 
-		'dev-expression',
+		'dev-expression'
 		env !== 'production' && !es5Standalone && '@babel/plugin-transform-react-jsx-self',
 		env !== 'production' && !es5Standalone && '@babel/plugin-transform-react-jsx-source',
 		env === 'production' && !es5Standalone && '@babel/plugin-transform-react-inline-elements'
