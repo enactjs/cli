@@ -9,6 +9,7 @@ const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {optionParser: app, EnzymeAdapterPlugin, GracefulFsPlugin, ILibPlugin} = require('@enact/dev-utils');
 
 process.env.ES5 = 'true';
+app.setEnactTargetsAsDefault();
 
 module.exports = function(karma) {
 	karma.set({
@@ -91,14 +92,7 @@ module.exports = function(karma) {
 							extends: path.join(__dirname, '.babelrc.js'),
 							babelrc: false,
 							// @remove-on-eject-end
-							cacheDirectory: true,
-							// Generate a unique identifier string based off versons of components and app config.
-							cacheIdentifier: JSON.stringify({
-								'babel-loader': require('babel-loader/package.json').version,
-								'babel-core': require('@babel/core/package.json').version,
-								browsers: app.browsers,
-								node: app.node
-							})
+							cacheDirectory: true
 						}
 					},
 					{
@@ -119,7 +113,6 @@ module.exports = function(karma) {
 									ident: 'postcss',
 									plugins: () => [
 										autoprefixer({
-											browsers: app.browsers,
 											flexbox: 'no-2009',
 											remove: false
 										}),

@@ -15,7 +15,6 @@ module.exports = {
 		[
 			'@babel/preset-env',
 			{
-				targets: Object.assign({}, app.browsers && {browsers: app.browsers}, app.node && {node: app.node}),
 				exclude: ['transform-regenerator', 'web.dom.iterable', 'web.timers', 'web.immediate'],
 				forceAllTransforms: es5Standalone,
 				useBuiltIns: 'entry',
@@ -59,7 +58,7 @@ module.exports = {
 		['@babel/plugin-proposal-class-properties', { 'loose': true }],
 		//'@babel/plugin-proposal-json-strings'
 
-		'dev-expression'
+		'dev-expression',
 		env === 'production' && !es5Standalone && '@babel/plugin-transform-react-inline-elements'
 	].filter(Boolean)
 };

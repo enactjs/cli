@@ -28,6 +28,9 @@ const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = requi
 process.chdir(app.context);
 process.env.NODE_ENV = 'development';
 
+// Sets the browserslist default fallback set of browsers to the Enact default browser support list
+app.setEnactTargetsAsDefault();
+
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
 // The production configuration is different and lives in a separate file.
@@ -131,13 +134,6 @@ module.exports = {
 							// It enables caching results in ./node_modules/.cache/babel-loader/
 							// directory for faster rebuilds.
 							cacheDirectory: true,
-							// Generate a unique identifier string based off versons of components and app config.
-							cacheIdentifier: JSON.stringify({
-								'babel-loader': require('babel-loader/package.json').version,
-								'babel-core': require('@babel/core/package.json').version,
-								browsers: app.browsers,
-								node: app.node
-							}),
 							highlightCode: true
 						}
 					}
@@ -174,7 +170,6 @@ module.exports = {
 							plugins: () => [
 								// We use PostCSS for autoprefixing only, but others could be added.
 								autoprefixer({
-									browsers: app.browsers,
 									flexbox: 'no-2009',
 									remove: false
 								}),

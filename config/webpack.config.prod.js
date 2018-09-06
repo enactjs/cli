@@ -30,6 +30,9 @@ const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = requi
 process.chdir(app.context);
 process.env.NODE_ENV = 'production';
 
+// Sets the browserslist default fallback set of browsers to the Enact default browser support list
+app.setEnactTargetsAsDefault();
+
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
 // The development configuration is different and lives in a separate file.
@@ -153,7 +156,6 @@ module.exports = {
 							plugins: () => [
 								// Automatically add vendor CSS prefixes.
 								autoprefixer({
-									browsers: app.browsers,
 									flexbox: 'no-2009',
 									remove: false
 								}),
