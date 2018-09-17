@@ -42,7 +42,7 @@ function displayHelp() {
 	console.log('            "tv" - Locales supported on webOS TV');
 	console.log('            "signage" - Locales supported on webOS signage');
 	console.log('            "all" - All locales that iLib supports');
-	console.log('    --meta            JSON-formatted string to override package.json metadata');
+	console.log('    --meta            JSON-formatted string to override package.json enact metadata');
 	console.log('    -s, --snapshot    Generate V8 snapshot blob');
 	console.log('                      (requires V8_MKSNAPSHOT set)');
 	console.log('    --stats           Output bundle analysis file');
