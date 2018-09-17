@@ -103,10 +103,11 @@ function meta(opts = {}) {
 		let metadata;
 		try {
 			metadata = JSON.parse(opts.meta);
-		} catch (ex) {
-			console.error('Failed to parse custom package meta data.');
-			console.error(ex);
-			return;
+		} catch (err) {
+			console.error(chalk.red('Failed to parse custom enact metadata:'));
+			console.error(chalk.red('\n  ', opts.meta, '\n'));
+
+			throw err;
 		}
 
 		packageRoot.overrideEnactMetadata(metadata);
