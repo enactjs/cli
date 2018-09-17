@@ -19,7 +19,7 @@ const minimist = require('minimist');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const stripAnsi = require('strip-ansi');
 const webpack = require('webpack');
-const {meta, mixins, packageRoot} = require('@enact/dev-utils');
+const {mixins, packageRoot} = require('@enact/dev-utils');
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -95,6 +95,21 @@ function details(err, stats, output) {
 			);
 		}
 		console.log();
+	}
+}
+
+function meta(opts = {}) {
+	if (opts.meta) {
+		let metadata;
+		try {
+			metadata = JSON.parse(opts.meta);
+		} catch (ex) {
+			console.error('Failed to parse custom package meta data.');
+			console.error(ex);
+			return;
+		}
+
+		packageRoot.overrideMeta(metadata);
 	}
 }
 
