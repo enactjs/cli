@@ -109,7 +109,7 @@ function meta(opts = {}) {
 			return;
 		}
 
-		packageRoot.overrideMeta(metadata);
+		packageRoot.overrideEnactMetadata(metadata);
 	}
 }
 
