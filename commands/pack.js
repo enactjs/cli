@@ -19,7 +19,7 @@ const minimist = require('minimist');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const stripAnsi = require('strip-ansi');
 const webpack = require('webpack');
-const {mixins, packageRoot} = require('@enact/dev-utils');
+const {meta, mixins, packageRoot} = require('@enact/dev-utils');
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -42,6 +42,7 @@ function displayHelp() {
 	console.log('            "tv" - Locales supported on webOS TV');
 	console.log('            "signage" - Locales supported on webOS signage');
 	console.log('            "all" - All locales that iLib supports');
+	console.log('    --meta            JSON-formatted string to override package.json metadata');
 	console.log('    -s, --snapshot    Generate V8 snapshot blob');
 	console.log('                      (requires V8_MKSNAPSHOT set)');
 	console.log('    --stats           Output bundle analysis file');
@@ -164,6 +165,10 @@ function watch(config) {
 function api(opts = {}) {
 	let config;
 
+	// overriding package metadata has to happen before the webpack configs while may rely on those
+	// attributes
+	meta(opts);
+
 	// Do this as the first thing so that any code reading it knows the right env.
 	if (opts.production) {
 		process.env.NODE_ENV = 'production';
@@ -193,7 +198,7 @@ function api(opts = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['minify', 'framework', 'stats', 'production', 'isomorphic', 'snapshot', 'verbose', 'watch', 'help'],
-		string: ['externals', 'externals-public', 'locales', 'output'],
+		string: ['externals', 'externals-public', 'locales', 'meta', 'output'],
 		default: {minify: true},
 		alias: {o: 'output', p: 'production', i: 'isomorphic', l: 'locales', s: 'snapshot', w: 'watch', h: 'help'}
 	});
