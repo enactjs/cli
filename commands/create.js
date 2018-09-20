@@ -259,7 +259,7 @@ function api(opts = {}) {
 			.then(() => {
 				if (opts.local) {
 					console.log('Installing @enact/cli locally. This might take a couple minutes.');
-					return npmInstall(opts.directory, opts.verbose, '--save-dev', CORE_JS_NPM).then(() =>
+					return npmInstall(opts.directory, opts.verbose, '--save', CORE_JS_NPM).then(() =>
 						npmInstall(opts.directory, opts.verbose, '--save-dev', ENACT_DEV_NPM)
 					);
 				}
