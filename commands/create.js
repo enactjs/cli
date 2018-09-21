@@ -18,6 +18,7 @@ const minimist = require('minimist');
 const validatePackageName = require('validate-npm-package-name');
 
 const ENACT_DEV_NPM = '@enact/cli';
+const CORE_JS_NPM = 'core-js@2';
 const INCLUDED = path.dirname(require.resolve('@enact/template-moonstone'));
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 
@@ -258,7 +259,9 @@ function api(opts = {}) {
 			.then(() => {
 				if (opts.local) {
 					console.log('Installing @enact/cli locally. This might take a couple minutes.');
-					return npmInstall(opts.directory, opts.verbose, '--save-dev', ENACT_DEV_NPM);
+					return npmInstall(opts.directory, opts.verbose, '--save', CORE_JS_NPM).then(() =>
+						npmInstall(opts.directory, opts.verbose, '--save-dev', ENACT_DEV_NPM)
+					);
 				}
 			})
 			.then(() => generator.complete && generator.complete(params));
