@@ -42,6 +42,7 @@ function displayHelp() {
 	console.log('            "tv" - Locales supported on webOS TV');
 	console.log('            "signage" - Locales supported on webOS signage');
 	console.log('            "all" - All locales that iLib supports');
+	console.log('    --meta            JSON-formatted string to override package.json enact metadata');
 	console.log('    -s, --snapshot    Generate V8 snapshot blob');
 	console.log('                      (requires V8_MKSNAPSHOT set)');
 	console.log('    --stats           Output bundle analysis file');
@@ -94,6 +95,22 @@ function details(err, stats, output) {
 			);
 		}
 		console.log();
+	}
+}
+
+function meta(opts = {}) {
+	if (opts.meta) {
+		let metadata;
+		try {
+			metadata = JSON.parse(opts.meta);
+		} catch (err) {
+			console.error(chalk.red('Failed to parse custom enact metadata:'));
+			console.error(chalk.red('\n  ', opts.meta, '\n'));
+
+			throw err;
+		}
+
+		packageRoot.overrideEnactMetadata(metadata);
 	}
 }
 
@@ -164,6 +181,10 @@ function watch(config) {
 function api(opts = {}) {
 	let config;
 
+	// overriding package metadata has to happen before the webpack configs while may rely on those
+	// attributes
+	meta(opts);
+
 	// Do this as the first thing so that any code reading it knows the right env.
 	if (opts.production) {
 		process.env.NODE_ENV = 'production';
@@ -193,7 +214,7 @@ function api(opts = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['minify', 'framework', 'stats', 'production', 'isomorphic', 'snapshot', 'verbose', 'watch', 'help'],
-		string: ['externals', 'externals-public', 'locales', 'output'],
+		string: ['externals', 'externals-public', 'locales', 'meta', 'output'],
 		default: {minify: true},
 		alias: {o: 'output', p: 'production', i: 'isomorphic', l: 'locales', s: 'snapshot', w: 'watch', h: 'help'}
 	});
