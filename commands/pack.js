@@ -19,7 +19,7 @@ const minimist = require('minimist');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const stripAnsi = require('strip-ansi');
 const webpack = require('webpack');
-const {mixins, packageRoot} = require('@enact/dev-utils');
+const {optionParser: app, mixins} = require('@enact/dev-utils');
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -44,6 +44,7 @@ function displayHelp() {
 	console.log('            "all" - All locales that iLib supports');
 	console.log('    -s, --snapshot    Generate V8 snapshot blob');
 	console.log('                      (requires V8_MKSNAPSHOT set)');
+	console.log('    -m, --meta        JSON override package.json enact metadata');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    --verbose         Verbose log build details');
 	console.log('    -v, --version     Display version information');
@@ -102,7 +103,7 @@ function printFileSizes(stats, output) {
 	const assets = stats.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name)).map(asset => {
 		const size = fs.statSync(path.join(output, asset.name)).size;
 		return {
-			folder: path.relative(packageRoot().path, path.join(output, path.dirname(asset.name))),
+			folder: path.relative(app.context, path.join(output, path.dirname(asset.name))),
 			name: path.basename(asset.name),
 			size: size,
 			sizeLabel: filesize(size)
@@ -164,6 +165,18 @@ function watch(config) {
 function api(opts = {}) {
 	let config;
 
+	// Apply any package.json enact metadata overrides.
+	// Until webpak 4 is used, must occur before requiring webpack config.
+	if (opts.meta) {
+		let meta;
+		try {
+			meta = JSON.parse(opts.meta);
+		} catch (e) {
+			throw new Error('Invalid metadata; must be valid JSON string\n' + e.message);
+		}
+		app.applyEnactMeta(meta);
+	}
+
 	// Do this as the first thing so that any code reading it knows the right env.
 	if (opts.production) {
 		process.env.NODE_ENV = 'production';
@@ -173,6 +186,7 @@ function api(opts = {}) {
 		config = require('../config/webpack.config.dev');
 	}
 
+	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);
 
 	mixins.apply(config, opts);
@@ -193,13 +207,22 @@ function api(opts = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['minify', 'framework', 'stats', 'production', 'isomorphic', 'snapshot', 'verbose', 'watch', 'help'],
-		string: ['externals', 'externals-public', 'locales', 'output'],
+		string: ['externals', 'externals-public', 'locales', 'output', 'meta'],
 		default: {minify: true},
-		alias: {o: 'output', p: 'production', i: 'isomorphic', l: 'locales', s: 'snapshot', w: 'watch', h: 'help'}
+		alias: {
+			o: 'output',
+			p: 'production',
+			i: 'isomorphic',
+			l: 'locales',
+			s: 'snapshot',
+			m: 'meta',
+			w: 'watch',
+			h: 'help'
+		}
 	});
 	if (opts.help) displayHelp();
 
-	process.chdir(packageRoot().path);
+	process.chdir(app.context);
 	api(opts).catch(err => {
 		console.log();
 		console.log(chalk.red('Failed to compile.\n'));
