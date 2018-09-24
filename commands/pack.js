@@ -44,7 +44,7 @@ function displayHelp() {
 	console.log('            "all" - All locales that iLib supports');
 	console.log('    -s, --snapshot    Generate V8 snapshot blob');
 	console.log('                      (requires V8_MKSNAPSHOT set)');
-	console.log('    -m, --meta        JSON override package.json enact metadata');
+	console.log('    -m, --meta        JSON to override package.json enact metadata');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    --verbose         Verbose log build details');
 	console.log('    -v, --version     Display version information');
@@ -172,7 +172,7 @@ function api(opts = {}) {
 		try {
 			meta = JSON.parse(opts.meta);
 		} catch (e) {
-			throw new Error('Invalid metadata; must be valid JSON string\n' + e.message);
+			throw new Error('Invalid metadata; must be a valid JSON string.\n' + e.message);
 		}
 		app.applyEnactMeta(meta);
 	}

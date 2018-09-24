@@ -48,7 +48,7 @@ function displayHelp() {
 	console.log('    -b, --browser     Automatically open browser');
 	console.log('    -i, --host        Server host IP address');
 	console.log('    -p, --port        Server port number');
-	console.log('    -m, --meta        JSON override package.json enact metadata');
+	console.log('    -m, --meta        JSON to override package.json enact metadata');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -200,7 +200,7 @@ function api(opts) {
 		try {
 			meta = JSON.parse(opts.meta);
 		} catch (e) {
-			throw new Error('Invalid metadata; must be valid JSON string\n' + e.message);
+			throw new Error('Invalid metadata; must be a valid JSON string.\n' + e.message);
 		}
 		app.applyEnactMeta(meta);
 	}
