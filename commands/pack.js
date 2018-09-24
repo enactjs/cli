@@ -65,7 +65,6 @@ function details(err, stats, output) {
 		w.message = w.message.replace(/\n.* potentially fixable with the `--fix` option./gm, '');
 	});
 	const statsJSON = stats.toJson({}, true);
-	fixFormatting(statsJSON);
 	const messages = formatWebpackMessages(statsJSON);
 	if (messages.errors.length) {
 		return new Error(messages.errors.join('\n\n'));
@@ -96,27 +95,6 @@ function details(err, stats, output) {
 		}
 		console.log();
 	}
-}
-
-// Temporary fix until https://github.com/facebook/create-react-app/pull/4656 is merged
-function fixFormatting(stats) {
-	const format = message => {
-		const lines = message.split('\n');
-		if (
-			lines.length > 2 &&
-			(lines[1].indexOf('Module Warning') !== -1 ||
-				lines[1].indexOf('Module Error') !== -1 ||
-				/thread.loader/i.test(lines[1]))
-		) {
-			lines.splice(1, 1);
-		}
-		if (lines.length > 2 && /thread.loader/i.test(lines[1])) {
-			lines.splice(1, 1);
-		}
-		return lines.join('\n');
-	};
-	stats.errors = stats.errors.map(format);
-	stats.warnings = stats.warnings.map(format);
 }
 
 // Print a detailed summary of build files.

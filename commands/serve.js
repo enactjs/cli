@@ -192,31 +192,6 @@ function serve(config, host, port, open) {
 	});
 }
 
-// Temporary fix until https://github.com/facebook/create-react-app/pull/4656 is merged
-// Hotwire the Stats object to re-format JSON output for correct display
-const statsToJson = webpack.Stats.prototype.toJson;
-webpack.Stats.prototype.toJson = function() {
-	const stats = statsToJson.apply(this, arguments);
-	const format = message => {
-		const lines = message.split('\n');
-		if (
-			lines.length > 2 &&
-			(lines[1].indexOf('Module Warning') !== -1 ||
-				lines[1].indexOf('Module Error') !== -1 ||
-				/thread.loader/i.test(lines[1]))
-		) {
-			lines.splice(1, 1);
-		}
-		if (lines.length > 2 && /thread.loader/i.test(lines[1])) {
-			lines.splice(1, 1);
-		}
-		return lines.join('\n');
-	};
-	stats.errors = stats.errors.map(format);
-	stats.warnings = stats.warnings.map(format);
-	return stats;
-};
-
 function api(opts) {
 	// Setup the development config with additional webpack-dev-erver customizations.
 	const config = hotDevServer(devConfig);
