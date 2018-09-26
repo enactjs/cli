@@ -22,7 +22,7 @@ module.exports = {
 				modules: false
 			}
 		],
-		'@babel/preset-stage-0',
+		['@babel/preset-stage-0', {loose: true}],
 		'@babel/preset-react'
 	],
 	plugins: [
