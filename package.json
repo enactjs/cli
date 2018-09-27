@@ -1,6 +1,6 @@
 {
   "name": "@enact/cli",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Full-featured build environment tool for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
@@ -38,7 +38,7 @@
     "@babel/polyfill": "7.0.0",
     "@babel/preset-env": "7.0.0",
     "@babel/preset-react": "7.0.0",
-    "@enact/dev-utils": "1.1.2",
+    "@enact/dev-utils": "1.2.0",
     "@enact/template-moonstone": "2.0.0",
     "autoprefixer": "9.1.5",
     "babel-eslint": "9.0.0",
