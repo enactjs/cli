@@ -68,12 +68,6 @@ module.exports = {
 		extensions: ['.js', '.jsx', '.json'],
 		// Allows us to specify paths to check for module resolving.
 		modules: [path.resolve('./node_modules'), 'node_modules'],
-		// Allow "browser" field in electron-renderer along with the default web/webworker types.
-		mainFields: [
-			['web', 'webworker', 'electron-renderer'].includes(app.environment) && 'browser',
-			'module',
-			'main'
-		].filter(Boolean),
 		alias: {
 			// Support ilib shorthand alias for ilib modules
 			ilib: '@enact/i18n/ilib/lib'
