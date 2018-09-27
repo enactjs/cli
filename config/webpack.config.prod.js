@@ -23,7 +23,7 @@ const globalImport = require('postcss-global-import');
 const removeclass = require('postcss-remove-classes').default;
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const LessPluginRi = require('resolution-independence');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
 
@@ -186,8 +186,8 @@ module.exports = {
 	},
 	optimization: {
 		minimizer: [
-			new UglifyJsPlugin({
-				uglifyOptions: {
+			new TerserPlugin({
+				terserOptions: {
 					parse: {
 						// we want uglify-js to parse ecma 8 code. However, we don't want it
 						// to apply any minfication steps that turns valid ecma 5 code
