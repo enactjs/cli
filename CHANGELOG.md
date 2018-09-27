@@ -1,3 +1,15 @@
+## 1.2.0 (September 27, 2018)
+
+* Updated to latest `@enact/dev-utils` and `mocha-react-proptype-checker` dependency releases.
+
+### create
+
+* Added `core-js` as a direct dependency when creating a new project with `--local` to prevent conflicting polyfill versions.
+
+### pack
+
+* Added support for `-m`/`--meta` option to override the `enact` object metadata from the `package.json`.
+
 ## 1.1.1 (August 10, 2018)
 
 ### create
