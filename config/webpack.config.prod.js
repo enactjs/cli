@@ -258,7 +258,7 @@ module.exports = {
 		// Note: this won't work without MiniCssExtractPlugin.loader in `loaders`.
 		new MiniCssExtractPlugin({
 			filename: '[name].css',
-			chunkFilename: 'chunk.[name].js'
+			chunkFilename: 'chunk.[name].css'
 		}),
 		// Ensure correct casing in module filepathes
 		new CaseSensitivePathsPlugin(),

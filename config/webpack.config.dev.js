@@ -221,7 +221,7 @@ module.exports = {
 		// Note: this won't work without MiniCssExtractPlugin.loader in `loaders`.
 		new MiniCssExtractPlugin({
 			filename: '[name].css',
-			chunkFilename: 'chunk.[name].js'
+			chunkFilename: 'chunk.[name].css'
 		}),
 		// Watcher doesn't work well if you mistype casing in a path so this is
 		// a plugin that prints an error when you attempt to do this.
