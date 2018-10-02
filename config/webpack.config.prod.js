@@ -13,14 +13,10 @@
 // @remove-on-eject-end
 
 const path = require('path');
-const autoprefixer = require('autoprefixer');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const flexbugfixes = require('postcss-flexbugs-fixes');
-const globalImport = require('postcss-global-import');
-const removeclass = require('postcss-remove-classes').default;
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const LessPluginRi = require('resolution-independence');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -148,18 +144,23 @@ module.exports = {
 						options: {
 							ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
 							plugins: () => [
-								// Automatically add vendor CSS prefixes.
-								autoprefixer({
-									flexbox: 'no-2009',
-									remove: false
+								// Transpile stage-3 CSS standards based on browserslist targets.
+								// See https://preset-env.cssdb.org/features for supported features.
+								// Includes support for targetted auto-prefixing.
+								require('postcss-preset-env')({
+									autoprefixer: {
+										flexbox: 'no-2009',
+										remove: false
+									},
+									stage: 3
 								}),
 								// Fix and adjust for known flexbox issues
 								// See https://github.com/philipwalton/flexbugs
-								flexbugfixes,
-								// Remove the development-only CSS class `.__DEV__`.
-								removeclass(['__DEV__']),
+								require('postcss-flexbugs-fixes'),
 								// Support @global-import syntax to import css in a global context.
-								globalImport
+								require('postcss-global-import'),
+								// Remove the development-only CSS class `.__DEV__`.
+								require('postcss-remove-classes').default(['__DEV__'])
 							]
 						}
 					},
