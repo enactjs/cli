@@ -151,7 +151,7 @@ function serve(config, host, port, open) {
 		const urls = prepareUrls(protocol, host, resolvedPort);
 		// Create a webpack compiler that is configured with custom messages.
 		const compiler = createCompiler(webpack, config, app.name, urls);
-		compiler.plugin('after-emit', (compilation, callback) => {
+		compiler.hooks.afterEmit.tapAsync('EnactCLI', (compilation, callback) => {
 			compilation.warnings.forEach(w => {
 				if (w.message) {
 					// Remove any --fix ESLintinfo messages since the eslint-loader config is
