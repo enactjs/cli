@@ -2,7 +2,7 @@
 title: Enact CLI Development Tool
 ---
 
-The enact cli package provides a command-line tool for creating and building Enact applications. It leverages powerful open source tools and technologies such as [Webpack](https://webpack.js.org), [Babel](https://babeljs.io), [LESS](http://lesscss.org), and [Karma](https://karma-runner.github.io) to provide a development environment for apps that requires zero configuration to get started.
+The Enact CLI package provides a command-line tool for creating and building Enact applications. It leverages powerful open source tools and technologies such as [webpack](https://webpack.js.org), [Babel](https://babeljs.io), [LESS](http://lesscss.org), and [Karma](https://karma-runner.github.io) to provide a development environment for apps that requires zero configuration to get started.
 
 The following sections describe its installation and usage:
 
@@ -13,5 +13,6 @@ The following sections describe its installation and usage:
   * [Isomorphic Support](./isomorphic-support.md)
 * [Serving Apps](./serving-apps.md)
 * [Testing Apps](./testing-apps.md)
+* [Ejecting Apps](./ejecting-apps.md)
 * [Template Management](./template-management.md)
   * [Developing a Custom Template](./developing-a-template.md)

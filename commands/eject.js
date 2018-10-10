@@ -187,17 +187,17 @@ function configurePackage(bare) {
 	console.log();
 
 	// Update NPM task scripts
-	const type = chalk.cyan('NPM script');
+	const type = chalk.cyan('npm script');
 	Object.keys(app.scripts).forEach(key => {
 		if (bare && bareTasks[key]) {
 			if (!conflicts.includes(type)) conflicts.push(type);
 			const bin = bareTasks[key].match(/^(?:node\s+)*(\S*)/);
 			const updated = (bin && bin[1]) || bareTasks[key];
-			console.log(`	Updating NPM task ${chalk.cyan(key)} to use ${chalk.cyan(updated)}`);
+			console.log(`	Updating npm task ${chalk.cyan(key)} to use ${chalk.cyan(updated)}`);
 			app.scripts[key] = bareTasks[key];
 		} else if (!bare) {
 			app.scripts[key] = app.scripts[key].replace(enactCLI, (match, name) => {
-				console.log(`	Updating NPM task ${chalk.cyan(key)} to use ` + chalk.cyan(`scripts/${name}.js`));
+				console.log(`	Updating npm task ${chalk.cyan(key)} to use ` + chalk.cyan(`scripts/${name}.js`));
 				return `node ./scripts/${name}.js`;
 			});
 		}
@@ -255,7 +255,7 @@ function npmInstall() {
 		const proc = spawn('npm', ['--loglevel', 'error', 'install'], {stdio: 'inherit', cwd: process.cwd()});
 		proc.on('close', code => {
 			if (code !== 0) {
-				reject(new Error('NPM install failed.'));
+				reject(new Error('npm install failed.'));
 			} else {
 				resolve();
 			}

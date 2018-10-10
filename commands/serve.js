@@ -21,7 +21,6 @@ const {choosePort, createCompiler, prepareProxy, prepareUrls} = require('react-d
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const app = require('@enact/dev-utils').optionParser;
-const devConfig = require('../config/webpack.config.dev');
 
 // Any unhandled promise rejections should be treated like errors.
 process.on('unhandledRejection', err => {
@@ -49,6 +48,7 @@ function displayHelp() {
 	console.log('    -b, --browser     Automatically open browser');
 	console.log('    -i, --host        Server host IP address');
 	console.log('    -p, --port        Server port number');
+	console.log('    -m, --meta        JSON to override package.json enact metadata');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -151,7 +151,7 @@ function serve(config, host, port, open) {
 		const urls = prepareUrls(protocol, host, resolvedPort);
 		// Create a webpack compiler that is configured with custom messages.
 		const compiler = createCompiler(webpack, config, app.name, urls);
-		compiler.plugin('after-emit', (compilation, callback) => {
+		compiler.hooks.afterEmit.tapAsync('EnactCLI', (compilation, callback) => {
 			compilation.warnings.forEach(w => {
 				if (w.message) {
 					// Remove any --fix ESLintinfo messages since the eslint-loader config is
@@ -193,8 +193,20 @@ function serve(config, host, port, open) {
 }
 
 function api(opts) {
+	// Apply any package.json enact metadata overrides.
+	// Until webpak 4 is used, must occur before requiring webpack config.
+	if (opts.meta) {
+		let meta;
+		try {
+			meta = JSON.parse(opts.meta);
+		} catch (e) {
+			throw new Error('Invalid metadata; must be a valid JSON string.\n' + e.message);
+		}
+		app.applyEnactMeta(meta);
+	}
+
 	// Setup the development config with additional webpack-dev-erver customizations.
-	const config = hotDevServer(devConfig);
+	const config = hotDevServer(require('../config/webpack.config.dev'));
 
 	// Tools like Cloud9 rely on this.
 	const host = process.env.HOST || opts.host || config.devServer.host || '0.0.0.0';
@@ -210,9 +222,9 @@ function api(opts) {
 
 function cli(args) {
 	const opts = minimist(args, {
-		string: ['host', 'port'],
+		string: ['host', 'port', 'meta'],
 		boolean: ['browser', 'help'],
-		alias: {b: 'browser', i: 'host', p: 'port', h: 'help'}
+		alias: {b: 'browser', i: 'host', p: 'port', m: 'meta', h: 'help'}
 	});
 	if (opts.help) displayHelp();
 

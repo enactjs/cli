@@ -18,6 +18,7 @@ const minimist = require('minimist');
 const validatePackageName = require('validate-npm-package-name');
 
 const ENACT_DEV_NPM = '@enact/cli';
+const CORE_JS_NPM = 'core-js@2';
 const INCLUDED = path.dirname(require.resolve('@enact/template-moonstone'));
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 
@@ -29,7 +30,7 @@ const defaultGenerator = {
 
 		if (!validation.validForNewPackages) {
 			throw new Error(
-				`Cannot create a project called ${chalk.bold(name)} because of NPM naming restrictions:\n` +
+				`Cannot create a project called ${chalk.bold(name)} because of npm naming restrictions:\n` +
 					validation.errors
 						.concat(validation.warnings)
 						.map(r => '  * ' + r)
@@ -119,7 +120,7 @@ const defaultGenerator = {
 		console.log();
 		console.log('Success! Created ' + name + ' at ' + directory);
 		console.log();
-		console.log('Inside that directory, you can run several NPM commands, including:');
+		console.log('Inside that directory, you can run several npm commands, including:');
 		console.log(chalk.cyan('	npm run serve'));
 		console.log('		Starts the development server.');
 		console.log(chalk.cyan('	npm run pack'));
@@ -154,8 +155,8 @@ function displayHelp() {
 	console.log();
 	console.log('  Options');
 	console.log('    -t, --template    Specific template to use');
-	console.log('    -local            Include @enact/cli locally');
-	console.log('    -verbose          Verbose output logging');
+	console.log('    --local           Include @enact/cli locally');
+	console.log('    --verbose         Verbose output logging');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -237,7 +238,7 @@ function npmInstall(directory, verbose, ...rest) {
 		const proc = spawn('npm', args, {stdio: 'inherit', cwd: directory});
 		proc.on('close', code => {
 			if (code !== 0) {
-				reject(new Error('NPM install failed.'));
+				reject(new Error('npm install failed.'));
 			} else {
 				resolve();
 			}
@@ -258,7 +259,9 @@ function api(opts = {}) {
 			.then(() => {
 				if (opts.local) {
 					console.log('Installing @enact/cli locally. This might take a couple minutes.');
-					return npmInstall(opts.directory, opts.verbose, '--save-dev', ENACT_DEV_NPM);
+					return npmInstall(opts.directory, opts.verbose, '--save', CORE_JS_NPM).then(() =>
+						npmInstall(opts.directory, opts.verbose, '--save-dev', ENACT_DEV_NPM)
+					);
 				}
 			})
 			.then(() => generator.complete && generator.complete(params));

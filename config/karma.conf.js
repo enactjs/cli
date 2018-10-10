@@ -9,13 +9,15 @@ const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {optionParser: app, EnzymeAdapterPlugin, GracefulFsPlugin, ILibPlugin} = require('@enact/dev-utils');
 
 process.env.ES5 = 'true';
+app.setEnactTargetsAsDefault();
 
 module.exports = function(karma) {
 	karma.set({
 		basePath: process.cwd(),
-		frameworks: ['mocha', 'chai', 'dirty-chai'],
+		frameworks: ['mocha', 'chai'],
 		files: [
 			require.resolve('@babel/polyfill/dist/polyfill'),
+			require.resolve('dirty-chai'),
 			require.resolve('mocha-react-proptype-checker'),
 			'./!(node_modules|dist|build)/**/*-specs.js'
 		],
@@ -31,6 +33,7 @@ module.exports = function(karma) {
 		webpack: {
 			// Use essentially the same webpack config as from the development build setup.
 			// We do not include an entry value as Karma will control that.
+			mode: 'development',
 			devtool: false,
 			output: {
 				path: './dist',
@@ -47,7 +50,8 @@ module.exports = function(karma) {
 				],
 				alias: {
 					ilib: '@enact/i18n/ilib/lib',
-					'react-addons-test-utils': 'react-dom/test-utils'
+					'react-addons-test-utils': 'react-dom/test-utils',
+					sinon: require.resolve('sinon/pkg/sinon-no-sourcemaps.js')
 				}
 			},
 			// @remove-on-eject-begin
@@ -88,14 +92,7 @@ module.exports = function(karma) {
 							extends: path.join(__dirname, '.babelrc.js'),
 							babelrc: false,
 							// @remove-on-eject-end
-							cacheDirectory: true,
-							// Generate a unique identifier string based off versons of components and app config.
-							cacheIdentifier: JSON.stringify({
-								'babel-loader': require('babel-loader/package.json').version,
-								'babel-core': require('@babel/core/package.json').version,
-								browsers: app.browsers,
-								node: app.node
-							})
+							cacheDirectory: true
 						}
 					},
 					{
@@ -116,7 +113,6 @@ module.exports = function(karma) {
 									ident: 'postcss',
 									plugins: () => [
 										autoprefixer({
-											browsers: app.browsers,
 											flexbox: 'no-2009',
 											remove: false
 										}),
@@ -138,6 +134,7 @@ module.exports = function(karma) {
 				noParse: /node_modules\/json-schema\/lib\/validate\.js/
 			},
 			devServer: {host: '0.0.0.0', port: 8080},
+			performance: {hints: false},
 			plugins: [
 				new DefinePlugin({'process.env.NODE_ENV': JSON.stringify('development')}),
 				new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
@@ -151,26 +148,12 @@ module.exports = function(karma) {
 			// please don't spam the console when running in karma!
 			noInfo: true,
 			progress: false,
-			stats: {
-				assets: false,
-				chunkModules: false,
-				chunks: false,
-				colors: true,
-				errorDetails: false,
-				hash: false,
-				reasons: false,
-				timings: false,
-				version: false,
-				children: false,
-				warnings: false,
-				moduleTrace: false
-			}
+			stats: 'errors-only'
 		},
 		plugins: [
 			'karma-webpack',
 			'karma-mocha',
 			'karma-chai',
-			'karma-dirty-chai',
 			'karma-chrome-launcher',
 			'karma-phantomjs-launcher',
 			'karma-json-reporter'

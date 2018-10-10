@@ -1,3 +1,53 @@
+## 1.2.0 (September 27, 2018)
+
+* Updated to latest `@enact/dev-utils` and `mocha-react-proptype-checker` dependency releases.
+
+### create
+
+* Added `core-js` as a direct dependency when creating a new project with `--local` to prevent conflicting polyfill versions.
+
+### pack
+
+* Added support for `-m`/`--meta` option to override the `enact` object metadata from the `package.json`.
+
+## 1.1.1 (August 10, 2018)
+
+### create
+
+* Updated default included moonstone template for Enact 2.x.
+
+### pack
+
+* Fixed locale classes failing to be applied on a multi-locale prerender when deep-linking is used.
+* Fixed font style prerendering, with added support for font overrides.
+
+## 1.1.0 (July 16, 2018)
+
+### pack
+
+* Added new option `--verbose` which outputs detailed build information as the process ocurrs, for specific information on what modules are being process and when.
+* Added support for dynamically injecting `REACT_APP_` prefixed environment variables into app code, when used under `process.env`.
+* Added support for `@global-import "<file>";` syntax to import CSS files in a global context.
+* Added support for boolean flag option `externalStartup` in the enact options in a project's `package.json`. When true, any prerender startup scripts will be external file assets, rather than embedded inline javascript.
+* Fixed `@babel/polyfill` failing to be transpiled into targetted `core-js` components. Additionally now ensures polyfills aren't loaded more than once.
+* Fixed v8 snapshot support for React 16.4.1.
+* Relocated the old `./config/proptype-checker.js` into its own standalone [`mocha-react-proptype-checker`](https://www.npmjs.com/package/mocha-react-proptype-checker) package.
+* Production mode limits the UglifyJS options to ECMA 5 optimizations only.
+* Disabled CSS minifier support for calc simplification due to bugs with CSS variables that contain 'calc' string of letters. See https://github.com/postcss/postcss-calc/issues/50.
+
+### lint
+
+* Updated React ESLint plugin to `7.9.1` and Enact ESLint plugin to `1.2.0`.
+
+### template
+
+* Relocated default moonstone app template into a separate standalone [@enact/template-moonstone](https://www.npmjs.com/package/@enact/template-moonstone) package depdendency.
+
+### eject
+
+* Initial implementation of a `create-react-app`-style project ejection feature. A permanent process which extracts an app from the Enact CLI environment and converts it standalone, with exposed development tool config files.
+* Supports the `--bare` eject operation flag which removed the Enact CLI sugar from devtool commands and uses the barebones underlying 3rd party tools.
+
 ## 1.0.4 (April 26, 2018)
 
 Updated dependencies to support React/ReactDOM 16.3.2.
