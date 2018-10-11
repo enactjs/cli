@@ -35,7 +35,9 @@ function api({verbose = false} = {}) {
 			}
 		}
 
-		if (missing.length === enact.length) {
+		if (enact.length === 0) {
+			resolve();
+		} else if (missing.length === enact.length) {
 			reject(new Error('Unable to detect any Enact global modules. Please ensure they are linked correctly.'));
 		} else {
 			const proc = spawn('npm', linkArgs, {stdio: 'inherit', cwd: process.cwd()});
