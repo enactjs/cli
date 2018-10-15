@@ -36,7 +36,7 @@ function api({verbose = false} = {}) {
 		}
 
 		if (enact.length === 0) {
-			resolve();
+			reject(new Error('No Enact dependencies found within the package. Nothing to link.'));
 		} else if (missing.length === enact.length) {
 			reject(new Error('Unable to detect any Enact global modules. Please ensure they are linked correctly.'));
 		} else {
