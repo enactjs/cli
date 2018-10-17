@@ -1,9 +1,6 @@
 /* eslint-env node, es6 */
 const path = require('path');
-const autoprefixer = require('autoprefixer');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const flexbugfixes = require('postcss-flexbugs-fixes');
-const globalImport = require('postcss-global-import');
 const LessPluginRi = require('resolution-independence');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {optionParser: app, EnzymeAdapterPlugin, GracefulFsPlugin, ILibPlugin} = require('@enact/dev-utils');
@@ -112,12 +109,15 @@ module.exports = function(karma) {
 								options: {
 									ident: 'postcss',
 									plugins: () => [
-										autoprefixer({
-											flexbox: 'no-2009',
-											remove: false
+										require('postcss-preset-env')({
+											autoprefixer: {
+												flexbox: 'no-2009',
+												remove: false
+											},
+											stage: 3
 										}),
-										flexbugfixes,
-										globalImport
+										require('postcss-flexbugs-fixes'),
+										require('postcss-global-import')
 									]
 								}
 							},
