@@ -31,7 +31,7 @@ Run within an Enact project's source code, the `enact pack` command (aliased as 
 By default, projects will build in development mode. When you're code is ready for deployment you can build in production mode. Production mode will minify the source code and remove dead code, along with numerous other minor code optimization strategies.
 
 ## \_\_DEV\_\_ Keyword
-In order to make development and debugging simpler, the enact cli supports a special `__DEV__` keyboard in both javascript and LESS.
+In order to make development and debugging simpler, the enact cli supports a special `__DEV__` keyword in both javascript and LESS.
 
 In javascript, for example:
 
