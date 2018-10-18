@@ -6,6 +6,8 @@ const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {optionParser: app, EnzymeAdapterPlugin, GracefulFsPlugin, ILibPlugin} = require('@enact/dev-utils');
 
 process.env.ES5 = 'true';
+process.env.NODE_ENV = 'test';
+require('./dotenv').load(app.context);
 app.setEnactTargetsAsDefault();
 
 module.exports = function(karma) {

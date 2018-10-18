@@ -25,6 +25,9 @@ const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = requi
 process.chdir(app.context);
 process.env.NODE_ENV = 'development';
 
+// Load applicable .env files into environment variables.
+require('./dotenv').load(app.context);
+
 // Sets the browserslist default fallback set of browsers to the Enact default browser support list
 app.setEnactTargetsAsDefault();
 
