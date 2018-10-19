@@ -22,6 +22,12 @@ module.exports = {
 			}
 		],
 		[
+			'@babel/preset-typescript',
+			{
+				// No options today, come back tomorrow
+			}
+		],
+		[
 			'@babel/preset-react',
 			{
 				// Adds component stack to warning messages

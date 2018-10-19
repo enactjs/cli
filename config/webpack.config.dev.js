@@ -62,7 +62,7 @@ module.exports = {
 	},
 	resolve: {
 		// These are the reasonable defaults supported by the React/ES6 ecosystem.
-		extensions: ['.js', '.jsx', '.json'],
+		extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
 		// Allows us to specify paths to check for module resolving.
 		modules: [path.resolve('./node_modules'), 'node_modules'],
 		alias: {
@@ -79,6 +79,21 @@ module.exports = {
 	// @remove-on-eject-end
 	module: {
 		rules: [
+			{
+				test: /\.tsx?$/,
+				loader: 'babel-loader',
+				options: {
+					// @remove-on-eject-begin
+					extends: path.join(__dirname, '.babelrc.js'),
+					babelrc: false,
+					// @remove-on-eject-end
+					// This is a feature of `babel-loader` for webpack (not Babel itself).
+					// It enables caching results in ./node_modules/.cache/babel-loader/
+					// directory for faster rebuilds.
+					cacheDirectory: true,
+					highlightCode: true
+				}
+			},
 			// First, run the linter.
 			// It's important to do this before Babel processes the JS.
 			{
