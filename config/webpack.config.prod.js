@@ -71,20 +71,6 @@ module.exports = {
 	// @remove-on-eject-end
 	module: {
 		rules: [
-			{
-				test: /\.tsx?$/,
-				loader: require.resolve('babel-loader'),
-				options: {
-					// @remove-on-eject-begin
-					extends: path.join(__dirname, '.babelrc.js'),
-					babelrc: false,
-					// @remove-on-eject-end
-					// This is a feature of `babel-loader` for webpack (not Babel itself).
-					// It enables caching results in ./node_modules/.cache/babel-loader/
-					// directory for faster rebuilds.
-					highlightCode: true
-				}
-			},
 			// First, run the linter.
 			// It's important to do this before Babel processes the JS.
 			{
@@ -108,7 +94,7 @@ module.exports = {
 			// "file" loader makes sure those assets get copied during build
 			// When you `import` an asset, you get its output filename.
 			{
-				exclude: /\.(html|js|jsx|css|less|ejs|json)$/,
+				exclude: /\.(html|js|jsx|ts|tsx|css|less|ejs|json)$/,
 				loader: require.resolve('file-loader'),
 				options: {
 					name: '[path][name].[ext]'
@@ -116,7 +102,7 @@ module.exports = {
 			},
 			// Process JS with Babel.
 			{
-				test: /\.(js|jsx)$/,
+				test: /\.(js|jsx|ts|tsx)$/,
 				exclude: /node_modules.(?!@enact)/,
 				use: [
 					require.resolve('thread-loader'),
