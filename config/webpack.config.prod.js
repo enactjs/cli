@@ -73,7 +73,7 @@ module.exports = {
 		rules: [
 			{
 				test: /\.tsx?$/,
-				loader: 'babel-loader',
+				loader: require.resolve('babel-loader'),
 				options: {
 					// @remove-on-eject-begin
 					extends: path.join(__dirname, '.babelrc.js'),
