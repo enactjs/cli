@@ -22,6 +22,7 @@ module.exports = function(karma) {
 		preprocessors: {
 			// add webpack as preprocessor
 			'./!(node_modules|dist|build)/**/*.js': ['webpack'],
+			'./!(node_modules|dist|build)/**/*.tsx': ['webpack'],
 			[require.resolve('mocha-react-proptype-checker')]: ['webpack']
 		},
 
@@ -37,7 +38,7 @@ module.exports = function(karma) {
 				filename: '[name].js'
 			},
 			resolve: {
-				extensions: ['.js', '.jsx', '.json'],
+				extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
 				modules: [
 					path.resolve(app.context, './node_modules'),
 					'node_modules',
@@ -72,7 +73,7 @@ module.exports = function(karma) {
 			module: {
 				rules: [
 					{
-						exclude: /\.(html|js|jsx|css|less|ejs|json|txt)$/,
+						exclude: /\.(html|js|jsx|ts|tsx|css|less|ejs|json|txt)$/,
 						loader: require.resolve('file-loader'),
 						options: {name: '[path][name].[ext]'}
 					},
@@ -81,7 +82,7 @@ module.exports = function(karma) {
 						loader: require.resolve('raw-loader')
 					},
 					{
-						test: /\.(js|jsx)$/,
+						test: /\.(js|jsx|ts|tsx)$/,
 						exclude: /node_modules.(?!@enact)/,
 						loader: require.resolve('babel-loader'),
 						options: {
