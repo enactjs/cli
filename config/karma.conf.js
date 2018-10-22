@@ -21,8 +21,7 @@ module.exports = function(karma) {
 
 		preprocessors: {
 			// add webpack as preprocessor
-			'./!(node_modules|dist|build)/**/*.js': ['webpack'],
-			'./!(node_modules|dist|build)/**/*.tsx': ['webpack'],
+			'./!(node_modules|dist|build)/**/*.(js|jsx|ts|tsx)': ['webpack'],
 			[require.resolve('mocha-react-proptype-checker')]: ['webpack']
 		},
 

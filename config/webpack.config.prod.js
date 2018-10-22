@@ -12,6 +12,7 @@
  */
 // @remove-on-eject-end
 
+const fs = require('fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -273,6 +274,29 @@ module.exports = {
 		new ILibPlugin(),
 		// Automatically detect ./appinfo.json and ./webos-meta/appinfo.json files,
 		// and parses any to copy over any webOS meta assets at build time.
-		new WebOSMetaPlugin()
+		new WebOSMetaPlugin(),
+		// TypeScript type checking
+		fs.existsSync('tsconfig.json') &&
+			(() => {
+				let ForkTsCheckerWebpackPlugin;
+				try {
+					ForkTsCheckerWebpackPlugin = require(path.resolve(
+						'node-modules',
+						'fork-ts-checker-webpack-plugin'
+					));
+				} catch (e) {
+					// Fail silently.
+					// Type checking using this plugin is optional.
+					// The user may decide to install `fork-ts-checker-webpack-plugin` or use `tsc -w`.
+					return null;
+				}
+
+				return new ForkTsCheckerWebpackPlugin({
+					async: false,
+					checkSyntacticErrors: true,
+					tsconfig: path.resolve(app.context, 'tsconfig.json'),
+					watch: app.context
+				});
+			})()
 	]
 };
