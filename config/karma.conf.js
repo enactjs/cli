@@ -16,7 +16,7 @@ module.exports = function(karma) {
 			require.resolve('@babel/polyfill/dist/polyfill'),
 			require.resolve('dirty-chai'),
 			require.resolve('mocha-react-proptype-checker'),
-			'./!(node_modules|dist|build)/**/*-specs.js'
+			'./!(node_modules|dist|build)/**/*-specs.(js|jsx|ts|tsx)'
 		],
 
 		preprocessors: {
