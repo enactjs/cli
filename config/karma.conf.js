@@ -109,15 +109,16 @@ module.exports = function(karma) {
 								options: {
 									ident: 'postcss',
 									plugins: () => [
+										require('postcss-flexbugs-fixes'),
+										require('postcss-global-import'),
 										require('postcss-preset-env')({
 											autoprefixer: {
 												flexbox: 'no-2009',
 												remove: false
 											},
-											stage: 3
-										}),
-										require('postcss-flexbugs-fixes'),
-										require('postcss-global-import')
+											stage: 3,
+											features: {'custom-properties': false}
+										})
 									]
 								}
 							},
