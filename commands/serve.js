@@ -20,7 +20,7 @@ const openBrowser = require('react-dev-utils/openBrowser');
 const {choosePort, createCompiler, prepareProxy, prepareUrls} = require('react-dev-utils/WebpackDevServerUtils');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const app = require('@enact/dev-utils').optionParser;
+const {optionParser: app} = require('@enact/dev-utils');
 
 // Any unhandled promise rejections should be treated like errors.
 process.on('unhandledRejection', err => {
