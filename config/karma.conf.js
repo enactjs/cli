@@ -16,12 +16,12 @@ module.exports = function(karma) {
 			require.resolve('@babel/polyfill/dist/polyfill'),
 			require.resolve('dirty-chai'),
 			require.resolve('mocha-react-proptype-checker'),
-			'./!(node_modules|dist|build)/**/*-specs.(js|jsx|ts|tsx)'
+			'./!(node_modules|dist|build)/**/*-specs.+(js|jsx|ts|tsx)'
 		],
 
 		preprocessors: {
 			// add webpack as preprocessor
-			'./!(node_modules|dist|build)/**/*.(js|jsx|ts|tsx)': ['webpack'],
+			'./!(node_modules|dist|build)/**/*.+(js|jsx|ts|tsx)': ['webpack'],
 			[require.resolve('mocha-react-proptype-checker')]: ['webpack']
 		},
 
