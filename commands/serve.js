@@ -193,8 +193,6 @@ function serve(config, host, port, open) {
 }
 
 function api(opts) {
-	// Apply any package.json enact metadata overrides.
-	// Until webpak 4 is used, must occur before requiring webpack config.
 	if (opts.meta) {
 		let meta;
 		try {
@@ -229,7 +227,6 @@ function cli(args) {
 	if (opts.help) displayHelp();
 
 	process.chdir(app.context);
-	process.env.NODE_ENV = 'development';
 
 	api(opts).catch(err => {
 		console.error(chalk.red('ERROR: ') + (err.message || err));

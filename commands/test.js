@@ -49,10 +49,10 @@ function resolveJestDefaultEnvironment(name) {
 }
 
 function testEnvironment(args) {
-	const env = args
-		.reverse()
-		.find((curr, i, a) => curr.startsWith('--env=') || a[i + 1] === '--env')
-		.replace(/^--env=/, '');
+	const env = (
+		args.reverse().find((curr, i, a) => curr.startsWith('--env=') || a[i + 1] === '--env') || 'jsdom'
+	).replace(/^--env=/, '');
+	args.reverse();
 	let resolvedEnv;
 	try {
 		resolvedEnv = resolveJestDefaultEnvironment(`jest-environment-${env}`);
@@ -132,18 +132,14 @@ function assignOverrides(config) {
 function api(args = []) {
 	const config = require('../config/jest/jest.config');
 
-	// Do this as the first thing so that any code reading it knows the right env.
-	process.env.BABEL_ENV = 'test';
-	process.env.NODE_ENV = 'test';
-	process.env.PUBLIC_URL = '';
-
 	// @TODO: readd dotenv parse support
 
 	// Watch unless on CI, in coverage mode, or explicitly running all tests
-	if (!process.env.CI && !args.includes('--coverage') && !args.includes('--watchAll')) {
+	const wIndex = args.indexOf('--watch');
+	if (wIndex > -1 && !process.env.CI && !args.includes('--coverage') && !args.includes('--watchAll')) {
 		// https://github.com/facebook/create-react-app/issues/5210
 		const hasSourceControl = isInGitRepository() || isInMercurialRepository();
-		args.push(hasSourceControl ? '--watch' : '--watchAll');
+		args[wIndex] = hasSourceControl ? '--watch' : '--watchAll';
 	}
 
 	// Apply safe override options from package.json
@@ -152,7 +148,7 @@ function api(args = []) {
 	args.push('--config', JSON.stringify(config));
 	args.push('--env', testEnvironment(args));
 
-	jest.run(args);
+	return jest.run(args);
 }
 
 function cli(args) {

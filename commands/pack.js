@@ -165,8 +165,6 @@ function watch(config) {
 function api(opts = {}) {
 	let config;
 
-	// Apply any package.json enact metadata overrides.
-	// Until webpak 4 is used, must occur before requiring webpack config.
 	if (opts.meta) {
 		let meta;
 		try {
@@ -179,10 +177,8 @@ function api(opts = {}) {
 
 	// Do this as the first thing so that any code reading it knows the right env.
 	if (opts.production) {
-		process.env.NODE_ENV = 'production';
 		config = require('../config/webpack.config.prod');
 	} else {
-		process.env.NODE_ENV = 'development';
 		config = require('../config/webpack.config.dev');
 	}
 

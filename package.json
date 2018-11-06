@@ -16,7 +16,6 @@
     "access": "public"
   },
   "scripts": {
-    "postinstall": "patch-package",
     "lint": "eslint .",
     "fix": "eslint . --fix"
   },
@@ -40,10 +39,12 @@
     "@babel/preset-react": "7.0.0",
     "@enact/dev-utils": "2.0.0",
     "@enact/template-moonstone": "2.0.0",
+    "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "10.0.1",
     "babel-jest": "^23.6.0",
     "babel-loader": "8.0.4",
     "babel-plugin-dev-expression": "0.2.1",
+    "babel-plugin-dynamic-import-node": "2.2.0",
     "case-sensitive-paths-webpack-plugin": "2.1.2",
     "chai": "4.2.0",
     "chalk": "2.4.1",
@@ -76,7 +77,6 @@
     "mocha": "5.2.0",
     "mocha-react-proptype-checker": "0.2.1",
     "optimize-css-assets-webpack-plugin": "5.0.1",
-    "patch-package": "5.1.1",
     "postcss-flexbugs-fixes": "4.1.0",
     "postcss-global-import": "1.0.6",
     "postcss-loader": "3.0.0",
