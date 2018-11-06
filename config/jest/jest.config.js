@@ -16,18 +16,23 @@ module.exports = {
 	collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}', '!src/**/*.d.ts'],
 	setupFiles: [require.resolve('../polyfills'), require.resolve('dirty-chai')],
 	setupTestFrameworkScriptFile: require.resolve('./setupTests'),
-	testMatch: ['<rootDir>/!(node_modules|dist|build)/**/*-specs.{js,jsx,ts,tsx}'],
+	testMatch: [
+		'<rootDir>/!(node_modules|dist|build)/**/__tests__/**/*.{js,jsx,ts,tsx}',
+		'<rootDir>/!(node_modules|dist|build)/**/?(*.)(spec|test).{js,jsx,ts,tsx}',
+		'<rootDir>/!(node_modules|dist|build)/**/*-specs.{js,jsx,ts,tsx}'
+	],
 	testEnvironment: 'jsdom',
 	testURL: 'http://localhost',
 	transform: {
 		'^.+\\.(js|jsx|ts|tsx)$': require.resolve('./babelTransform'),
 		'^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': require.resolve('./fileTransform')
 	},
-	transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.(js|jsx|ts|tsx)$'],
+	transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\](?!@enact).+\\.(js|jsx|ts|tsx)$'],
 	moduleNameMapper: {
-		'^.+\\.(css|less)$': 'identity-obj-proxy',
+		'^.+\\.(css|less)$': require.resolve('identity-obj-proxy'),
 		'^enzyme$': require.resolve('enzyme'),
 		'^sinon$': require.resolve('sinon')
 	},
-	moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx']
+	moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx'],
+	globals: {__DEV__: true}
 };
