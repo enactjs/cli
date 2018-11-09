@@ -1,7 +1,10 @@
 /* global console, beforeEach, afterEach, expect */
+const fs = require('fs');
+const path = require('path');
 const enzyme = require('enzyme');
 const Adapter = require('enzyme-adapter-react-16');
 const {watchErrorAndWarnings, filterErrorAndWarnings, restoreErrorAndWarnings} = require('console-snoop');
+const {packageRoot} = require('@enact/dev-utils');
 
 const filters = [
 	'Invalid prop',
@@ -38,3 +41,40 @@ afterEach(function() {
 	}
 	expect(actual).toHaveLength(expected);
 });
+
+// Support local file sync XHR to support iLib loading.
+
+const ilibPaths = Object.keys(global).filter(k => /ILIB_[^_]+_PATH/.test(k));
+const pkg = packageRoot();
+const XHR = global.XMLHttpRequest;
+class ILibXHR extends XHR {
+	open(method, uri) {
+		if (ilibPaths.some(p => uri.startsWith(global[p]))) {
+			this.send = () => {
+				try {
+					const file = path.join(pkg.path, uri.replace(/\//g, path.sep));
+					this.fileText = fs.readFileSync(file, {encoding: 'utf8'});
+					this.fileStatus = 200;
+				} catch (e) {
+					this.fileText = '';
+					this.fileStatus = 404;
+				}
+				this.dispatchEvent(new global.Event('readystatechange'));
+				this.dispatchEvent(new global.ProgressEvent('load'));
+				this.dispatchEvent(new global.ProgressEvent('loadend'));
+			};
+		} else {
+			return super.open(...arguments);
+		}
+	}
+	get readyState() {
+		return typeof this.fileStatus !== 'undefined' ? XHR.DONE : super.readyState;
+	}
+	get status() {
+		return typeof this.fileStatus !== 'undefined' ? this.fileStatus : super.status;
+	}
+	get responseText() {
+		return typeof this.fileText !== 'undefined' ? this.fileText : super.responseText;
+	}
+}
+global.XMLHttpRequest = ILibXHR;
