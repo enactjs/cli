@@ -42,6 +42,12 @@ afterEach(function() {
 	expect(actual).toHaveLength(expected);
 });
 
+// Set initial resolution to VGA, similar to PhantomJS.
+// Will ideally want to use a more modern resolution later.
+
+global.innerHeight = 640;
+global.innerWidth = 480;
+
 // Support local file sync XHR to support iLib loading.
 
 const ilibPaths = Object.keys(global).filter(k => /ILIB_[^_]+_PATH/.test(k));
