@@ -48,7 +48,8 @@ module.exports = {
 	moduleNameMapper: {
 		'^.+\\.(css|less)$': require.resolve('identity-obj-proxy'),
 		'^enzyme$': require.resolve('enzyme'),
-		'^sinon$': require.resolve('sinon')
+		'^sinon$': require.resolve('sinon'),
+		'^console-snoop$': require.resolve('console-snoop')
 	},
 	moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx'],
 	globals
