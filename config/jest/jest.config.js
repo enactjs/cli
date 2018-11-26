@@ -39,6 +39,7 @@ module.exports = {
 		'<rootDir>/!(node_modules|dist|build)/**/*-specs.{js,jsx,ts,tsx}'
 	],
 	testEnvironment: 'jsdom',
+	testEnvironmentOptions: {pretendToBeVisual: true},
 	testURL: 'http://localhost',
 	transform: {
 		'^.+\\.(js|jsx|ts|tsx)$': require.resolve('./babelTransform'),
