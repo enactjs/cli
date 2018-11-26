@@ -54,11 +54,11 @@ const ilibPaths = Object.keys(global).filter(k => /ILIB_[^_]+_PATH/.test(k));
 const pkg = packageRoot();
 const XHR = global.XMLHttpRequest;
 class ILibXHR extends XHR {
-	open(method, uri) {
-		if (ilibPaths.some(p => uri.startsWith(global[p]))) {
+	open(method, url) {
+		if (ilibPaths.some(p => url.startsWith(global[p]))) {
 			this.send = () => {
 				try {
-					const file = path.join(pkg.path, uri.replace(/\//g, path.sep));
+					const file = path.join(pkg.path, url.replace(/\//g, path.sep));
 					this.fileText = fs.readFileSync(file, {encoding: 'utf8'});
 					this.fileStatus = 200;
 				} catch (e) {
