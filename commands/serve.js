@@ -34,8 +34,8 @@ console.log = (log => (data, ...rest) =>
 	typeof data === 'undefined'
 		? log()
 		: typeof data === 'string'
-			? log(data.replace(/npm run build/, 'npm run pack-p'), ...rest)
-			: log.call(this, data, ...rest))(console.log);
+		? log(data.replace(/npm run build/, 'npm run pack-p'), ...rest)
+		: log.call(this, data, ...rest))(console.log);
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);

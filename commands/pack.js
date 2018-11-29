@@ -100,15 +100,17 @@ function details(err, stats, output) {
 
 // Print a detailed summary of build files.
 function printFileSizes(stats, output) {
-	const assets = stats.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name)).map(asset => {
-		const size = fs.statSync(path.join(output, asset.name)).size;
-		return {
-			folder: path.relative(app.context, path.join(output, path.dirname(asset.name))),
-			name: path.basename(asset.name),
-			size: size,
-			sizeLabel: filesize(size)
-		};
-	});
+	const assets = stats.assets
+		.filter(asset => /\.(js|css|bin)$/.test(asset.name))
+		.map(asset => {
+			const size = fs.statSync(path.join(output, asset.name)).size;
+			return {
+				folder: path.relative(app.context, path.join(output, path.dirname(asset.name))),
+				name: path.basename(asset.name),
+				size: size,
+				sizeLabel: filesize(size)
+			};
+		});
 	assets.sort((a, b) => b.size - a.size);
 	const longestSizeLabelLength = Math.max.apply(null, assets.map(a => stripAnsi(a.sizeLabel).length));
 	assets.forEach(asset => {
