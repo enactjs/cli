@@ -1,4 +1,4 @@
-/* global console, beforeEach, afterEach, expect */
+/* eslint-env jest */
 const enzyme = require('enzyme');
 const Adapter = require('enzyme-adapter-react-16');
 const {watchErrorAndWarnings, filterErrorAndWarnings, restoreErrorAndWarnings} = require('console-snoop');
@@ -29,7 +29,7 @@ enzyme.configure({adapter: new Adapter()});
 
 beforeEach(watchErrorAndWarnings);
 
-afterEach(function() {
+afterEach(() => {
 	const actual = filterErrorAndWarnings(filterExp);
 	const expected = 0;
 	restoreErrorAndWarnings();
