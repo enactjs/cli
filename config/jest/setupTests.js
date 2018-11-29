@@ -1,4 +1,4 @@
-/* global console, beforeEach, afterEach, expect */
+/* eslint-env jest */
 const fs = require('fs');
 const path = require('path');
 const enzyme = require('enzyme');
@@ -32,7 +32,7 @@ enzyme.configure({adapter: new Adapter()});
 
 beforeEach(watchErrorAndWarnings);
 
-afterEach(function() {
+afterEach(() => {
 	const actual = filterErrorAndWarnings(filterExp);
 	const expected = 0;
 	restoreErrorAndWarnings();
