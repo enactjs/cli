@@ -68,10 +68,10 @@
     "html-webpack-plugin": "4.0.0-alpha",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^23.6.0",
-    "less": "3.8.1",
+    "less": "3.9.0",
     "less-loader": "4.1.0",
     "license-checker": "24.0.1",
-    "mini-css-extract-plugin": "0.4.4",
+    "mini-css-extract-plugin": "0.4.5",
     "minimist": "1.2.0",
     "optimize-css-assets-webpack-plugin": "5.0.1",
     "postcss-flexbugs-fixes": "4.1.0",
@@ -95,7 +95,7 @@
     "thread-loader": "1.2.0",
     "v8-compile-cache": "2.0.2",
     "validate-npm-package-name": "3.0.0",
-    "webpack": "4.26.0",
+    "webpack": "4.26.1",
     "webpack-dev-server": "3.1.10"
   },
   "devDependencies": {
