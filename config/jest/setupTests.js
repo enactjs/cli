@@ -33,9 +33,6 @@ afterEach(function() {
 	const actual = filterErrorAndWarnings(filterExp);
 	const expected = 0;
 	restoreErrorAndWarnings();
-	if (actual.length > expected) {
-		console.error("Errors/Warnings in '" + this.currentTest.parent.title + "' at '" + this.currentTest.title + "'");
-	}
 	expect(actual).toHaveLength(expected);
 });
 
