@@ -26,10 +26,10 @@ const globals = {
 	ILIB_MOONSTONE_PATH: 'node_modules/@enact/moonstone/resources'
 };
 
-if (pkg.name === '@enact/moonstone') {
+if (pkg.meta.name === '@enact/moonstone') {
 	globals.ILIB_MOONSTONE_PATH = 'resources';
 	globals.ILIB_RESOURCES_PATH = '_resources_';
-} else if (pkg.name === '@enact/i18n') {
+} else if (pkg.meta.name === '@enact/i18n') {
 	globals.ILIB_BASE_PATH = 'ilib';
 }
 
@@ -43,6 +43,7 @@ module.exports = {
 		'<rootDir>/!(node_modules|dist|build)/**/*-specs.{js,jsx,ts,tsx}'
 	],
 	testEnvironment: 'jsdom',
+	testEnvironmentOptions: {pretendToBeVisual: true},
 	testURL: 'http://localhost',
 	transform: {
 		'^.+\\.(js|jsx|ts|tsx)$': require.resolve('./babelTransform'),
