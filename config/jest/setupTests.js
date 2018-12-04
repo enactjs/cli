@@ -3,7 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const enzyme = require('enzyme');
 const Adapter = require('enzyme-adapter-react-16');
-const {watchErrorAndWarnings, filterErrorAndWarnings, restoreErrorAndWarnings} = require('console-snoop');
 const {packageRoot} = require('@enact/dev-utils');
 
 const filters = [
@@ -24,20 +23,24 @@ const filters = [
 ];
 const filterExp = new RegExp('(' + filters.join('|') + ')');
 
+// Configure proptype & react error checking on the console.
+
+beforeEach(() => {
+	jest.spyOn(console, 'warn');
+	jest.spyOn(console, 'error');
+});
+
+afterEach(() => {
+	const actual = console.warn.mock.calls.concat(console.error.mock.calls).filter(([m]) => filterExp.test(m));
+	const expected = 0;
+	console.warn.mockRestore();
+	console.error.mockRestore();
+	expect(actual).toHaveLength(expected);
+});
+
 // Configure Enzyme to use React16 adapter.
 
 enzyme.configure({adapter: new Adapter()});
-
-// Configure proptype & react error checking on the console.
-
-beforeEach(watchErrorAndWarnings);
-
-afterEach(() => {
-	const actual = filterErrorAndWarnings(filterExp);
-	const expected = 0;
-	restoreErrorAndWarnings();
-	expect(actual).toHaveLength(expected);
-});
 
 // Set initial resolution to VGA, similar to PhantomJS.
 // Will ideally want to use a more modern resolution later.

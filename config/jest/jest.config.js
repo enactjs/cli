@@ -52,9 +52,7 @@ module.exports = {
 	transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\](?!@enact).+\\.(js|jsx|ts|tsx)$'],
 	moduleNameMapper: {
 		'^.+\\.(css|less)$': require.resolve('identity-obj-proxy'),
-		'^enzyme$': require.resolve('enzyme'),
-		'^sinon$': require.resolve('sinon'),
-		'^console-snoop$': require.resolve('console-snoop')
+		'^enzyme$': require.resolve('enzyme')
 	},
 	moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx'],
 	globals
