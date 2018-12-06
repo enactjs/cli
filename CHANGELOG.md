@@ -1,3 +1,7 @@
+## 1.2.1 (December 2, 2018)
+
+* Fixed test execution failures where an old copy of Enzyme was erroring out on the latest React 1.6 releases.
+
 ## 1.2.0 (September 27, 2018)
 
 * Updated to latest `@enact/dev-utils` and `mocha-react-proptype-checker` dependency releases.
