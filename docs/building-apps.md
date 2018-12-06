@@ -69,9 +69,8 @@ Ideally `.env` files **should be** checked into source control (with the exclusi
 
 Each `.env` file supports internal variable expansion to allow for composing complex dynamic variables. For example:
 ```
-DOMAIN=www.example.com
-REACT_APP_FOO=$DOMAIN/foo
-REACT_APP_BAR=$DOMAIN/bar
+REACT_APP_NAME=foobar
+REACT_APP_PATH=example/$REACT_APP_NAME
 ```
 
 Note: Changing any environment variables will require you to restart the development server if it is running.
