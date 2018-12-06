@@ -100,15 +100,17 @@ function details(err, stats, output) {
 
 // Print a detailed summary of build files.
 function printFileSizes(stats, output) {
-	const assets = stats.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name)).map(asset => {
-		const size = fs.statSync(path.join(output, asset.name)).size;
-		return {
-			folder: path.relative(app.context, path.join(output, path.dirname(asset.name))),
-			name: path.basename(asset.name),
-			size: size,
-			sizeLabel: filesize(size)
-		};
-	});
+	const assets = stats.assets
+		.filter(asset => /\.(js|css|bin)$/.test(asset.name))
+		.map(asset => {
+			const size = fs.statSync(path.join(output, asset.name)).size;
+			return {
+				folder: path.relative(app.context, path.join(output, path.dirname(asset.name))),
+				name: path.basename(asset.name),
+				size: size,
+				sizeLabel: filesize(size)
+			};
+		});
 	assets.sort((a, b) => b.size - a.size);
 	const longestSizeLabelLength = Math.max.apply(null, assets.map(a => stripAnsi(a.sizeLabel).length));
 	assets.forEach(asset => {
@@ -165,8 +167,6 @@ function watch(config) {
 function api(opts = {}) {
 	let config;
 
-	// Apply any package.json enact metadata overrides.
-	// Until webpak 4 is used, must occur before requiring webpack config.
 	if (opts.meta) {
 		let meta;
 		try {
@@ -179,10 +179,8 @@ function api(opts = {}) {
 
 	// Do this as the first thing so that any code reading it knows the right env.
 	if (opts.production) {
-		process.env.NODE_ENV = 'production';
 		config = require('../config/webpack.config.prod');
 	} else {
-		process.env.NODE_ENV = 'development';
 		config = require('../config/webpack.config.dev');
 	}
 

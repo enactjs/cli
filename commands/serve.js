@@ -20,7 +20,7 @@ const openBrowser = require('react-dev-utils/openBrowser');
 const {choosePort, createCompiler, prepareProxy, prepareUrls} = require('react-dev-utils/WebpackDevServerUtils');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const app = require('@enact/dev-utils').optionParser;
+const {optionParser: app} = require('@enact/dev-utils');
 
 // Any unhandled promise rejections should be treated like errors.
 process.on('unhandledRejection', err => {
@@ -34,8 +34,8 @@ console.log = (log => (data, ...rest) =>
 	typeof data === 'undefined'
 		? log()
 		: typeof data === 'string'
-			? log(data.replace(/npm run build/, 'npm run pack-p'), ...rest)
-			: log.call(this, data, ...rest))(console.log);
+		? log(data.replace(/npm run build/, 'npm run pack-p'), ...rest)
+		: log.call(this, data, ...rest))(console.log);
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -193,8 +193,6 @@ function serve(config, host, port, open) {
 }
 
 function api(opts) {
-	// Apply any package.json enact metadata overrides.
-	// Until webpak 4 is used, must occur before requiring webpack config.
 	if (opts.meta) {
 		let meta;
 		try {
@@ -229,7 +227,6 @@ function cli(args) {
 	if (opts.help) displayHelp();
 
 	process.chdir(app.context);
-	process.env.NODE_ENV = 'development';
 
 	api(opts).catch(err => {
 		console.error(chalk.red('ERROR: ') + (err.message || err));
