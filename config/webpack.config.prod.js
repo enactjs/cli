@@ -147,6 +147,13 @@ module.exports = {
 						options: {
 							ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
 							plugins: () => [
+								// Fix and adjust for known flexbox issues
+								// See https://github.com/philipwalton/flexbugs
+								require('postcss-flexbugs-fixes'),
+								// Support @global-import syntax to import css in a global context.
+								require('postcss-global-import'),
+								// Remove the development-only CSS class `.__DEV__`.
+								require('postcss-remove-classes').default(['__DEV__']),
 								// Transpile stage-3 CSS standards based on browserslist targets.
 								// See https://preset-env.cssdb.org/features for supported features.
 								// Includes support for targetted auto-prefixing.
@@ -155,15 +162,9 @@ module.exports = {
 										flexbox: 'no-2009',
 										remove: false
 									},
-									stage: 3
-								}),
-								// Fix and adjust for known flexbox issues
-								// See https://github.com/philipwalton/flexbugs
-								require('postcss-flexbugs-fixes'),
-								// Support @global-import syntax to import css in a global context.
-								require('postcss-global-import'),
-								// Remove the development-only CSS class `.__DEV__`.
-								require('postcss-remove-classes').default(['__DEV__'])
+									stage: 3,
+									features: {'custom-properties': false}
+								})
 							]
 						}
 					},
