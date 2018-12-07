@@ -1,4 +1,4 @@
-## 1.2.1 (December 2, 2018)
+## 1.2.1 (December 7, 2018)
 
 * Fixed test execution failures where an old copy of Enzyme was erroring out on the latest React 1.6 releases.
 
