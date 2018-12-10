@@ -15,6 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin-alt');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
@@ -280,25 +281,14 @@ module.exports = {
 		new WebOSMetaPlugin(),
 		// TypeScript type checking
 		fs.existsSync('tsconfig.json') &&
-			(() => {
-				let ForkTsCheckerWebpackPlugin;
-				try {
-					ForkTsCheckerWebpackPlugin = require(resolve.sync('fork-ts-checker-webpack-plugin', {
-						basedir: path.resolve('node_modules')
-					}));
-				} catch (e) {
-					// Fail silently.
-					// Type checking using this plugin is optional.
-					// The user may decide to install `fork-ts-checker-webpack-plugin` or use `tsc -w`.
-					return null;
-				}
-
-				return new ForkTsCheckerWebpackPlugin({
-					async: false,
-					checkSyntacticErrors: true,
-					tsconfig: path.resolve(app.context, 'tsconfig.json'),
-					watch: app.context
-				});
-			})()
-	]
+			new ForkTsCheckerWebpackPlugin({
+				typescript: resolve.sync('typescript', {
+					basedir: 'node_modules'
+				}),
+				async: false,
+				checkSyntacticErrors: true,
+				tsconfig: 'tsconfig.json',
+				watch: app.context
+			})
+	].filter(Boolean)
 };
