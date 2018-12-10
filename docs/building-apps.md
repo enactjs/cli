@@ -31,7 +31,7 @@ Run within an Enact project's source code, the `enact pack` command (aliased as 
 By default, projects will build in development mode. When you're code is ready for deployment you can build in production mode. Production mode will minify the source code and remove dead code, along with numerous other minor code optimization strategies.
 
 ## \_\_DEV\_\_ Keyword
-In order to make development and debugging simpler, the Enact CLI supports a special `__DEV__` keyboard in both javascript and CSS.
+In order to make development and debugging simpler, the enact cli supports a special `__DEV__` keyword in both javascript and LESS.
 
 In javascript, for example:
 
@@ -42,19 +42,37 @@ In javascript, for example:
 ```
 In development mode, the code will execute correctly, whereas in production mode it will get caught and removed as unused dead code. This allows for custom development-only debug code.
 
-Similarly, in css/less:
+Similarly, in LESS:
 
 ```css
-	div .__DEV__ {
+	div when (@__DEV__ = true) {
 		background: blue;
 	}
-}
 ```
-In development mode, the css/less remains intact and usable, but in production mode, the `.__DEV__` css class stylings are removed. This allows for custom development-only styling.
+In development mode, the LESS remains intact and used, but in production mode, the `@__DEV__` variable is false and the CSS isn't output. This allows for custom development-only styling. See LESS's [CSS Guards](http://lesscss.org/features/#css-guards-feature) for more details on usage.
 
 ## Environment Variable Injection
 
 Some scenarios may require sensitive or dynamic data to be kept outside a project itself.  All environment variables that are prefixed with `REACT_APP_` will be supported for injection into the app output. For example, with `REACT_APP_MYVAR="Hello World"` environment variable, usage of `process.env.REACT_APP_MYVAR` will be replaced with `"Hello World"`.
+
+Furthermore, Enact CLI supports a heirarchical `.env` format for declaring environment variables within a file.
+
+The following `.env` files will be processed, in overriding order:
+
+* `.env`: Default.
+* `.env.local`: Local overrides. **This file is loaded for all environments except test.**
+* `.env.development`, `.env.test`, `.env.production`: Environment-specific settings.
+* `.env.development.local`, `.env.test.local`, `.env.production.local`: Local overrides of environment-specific settings.
+
+Ideally `.env` files **should be** checked into source control (with the exclusion of `.env*.local`).
+
+Each `.env` file supports internal variable expansion to allow for composing complex dynamic variables. For example:
+```
+REACT_APP_NAME=foobar
+REACT_APP_PATH=example/$REACT_APP_NAME
+```
+
+Note: Changing any environment variables will require you to restart the development server if it is running.
 
 ## TypeScript Support
 

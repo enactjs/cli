@@ -27,7 +27,10 @@ const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = requi
 process.chdir(app.context);
 process.env.NODE_ENV = 'production';
 
-// Sets the browserslist default fallback set of browsers to the Enact default browser support list
+// Load applicable .env files into environment variables.
+require('./dotenv').load(app.context);
+
+// Sets the browserslist default fallback set of browsers to the Enact default browser support list.
 app.setEnactTargetsAsDefault();
 
 // This is the production configuration.
@@ -150,8 +153,6 @@ module.exports = {
 								require('postcss-flexbugs-fixes'),
 								// Support @global-import syntax to import css in a global context.
 								require('postcss-global-import'),
-								// Remove the development-only CSS class `.__DEV__`.
-								require('postcss-remove-classes').default(['__DEV__']),
 								// Transpile stage-3 CSS standards based on browserslist targets.
 								// See https://preset-env.cssdb.org/features for supported features.
 								// Includes support for targetted auto-prefixing.
@@ -169,7 +170,7 @@ module.exports = {
 					{
 						loader: require.resolve('less-loader'),
 						options: {
-							modifyVars: Object.assign({}, app.accent),
+							modifyVars: Object.assign({__DEV__: false}, app.accent),
 							// If resolution independence options are specified, use the LESS plugin.
 							plugins: app.ri ? [new LessPluginRi(app.ri)] : []
 						}
