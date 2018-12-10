@@ -20,6 +20,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const LessPluginRi = require('resolution-independence');
+const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
@@ -282,10 +283,9 @@ module.exports = {
 			(() => {
 				let ForkTsCheckerWebpackPlugin;
 				try {
-					ForkTsCheckerWebpackPlugin = require(path.resolve(
-						'node-modules',
-						'fork-ts-checker-webpack-plugin'
-					));
+					ForkTsCheckerWebpackPlugin = require(resolve.sync('fork-ts-checker-webpack-plugin', {
+						basedir: path.resolve('node_modules')
+					}));
 				} catch (e) {
 					// Fail silently.
 					// Type checking using this plugin is optional.
