@@ -19,6 +19,7 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin-alt')
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
+const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const LessPluginRi = require('resolution-independence');
 const resolve = require('resolve');
@@ -261,7 +262,26 @@ module.exports = {
 				async: false,
 				checkSyntacticErrors: true,
 				tsconfig: 'tsconfig.json',
-				watch: app.context
+				compilerOptions: {
+					module: 'esnext',
+					moduleResolution: 'node',
+					resolveJsonModule: true,
+					isolatedModules: true,
+					noEmit: true,
+					jsx: 'preserve'
+				},
+				reportFiles: [
+					'**',
+					'!**/*.json',
+					'!**/__tests__/**',
+					'!**/?(*.)(spec|test).*',
+					'!**/*-specs.*',
+					'!**/src/setupProxy.*',
+					'!**/src/setupTests.*'
+				],
+				watch: app.context,
+				silent: true,
+				formatter: typescriptFormatter
 			})
 	].filter(Boolean)
 };
