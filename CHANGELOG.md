@@ -1,3 +1,31 @@
+## 2.0.0-alpha.1 (December 12, 2018)
+
+Updated all dependencies to latest releases.
+
+### link
+
+* Improved handling and errors when linking into a non-Enact project.
+
+### pack
+
+* Refactored build procedure for Webpack 4 and Babel 7.
+* Added support for stage-3 CSS via `postcss-preset-env`, with `custom-properties` temporarily disabled while a bug is being resolved.
+* Added support for `.env` fileformat to declare environment variables for parsing/app-embedding.
+* Additional CSS optimization applied via `optimize-css-assets-webpack-plugin`.
+* Modified Babel configuration to use built-in APIs rather than transpiling mini re-implementations.
+* Switched from `uglifyjs-webpack-plugin` to `terser-webpack-plugin` as Uglify is no longer actively developed.
+* Switched from `extract-text-webpack-plugin` to `mini-css-extract-plugin` for CSS content output.
+* Removed direct autoprefixer usage as `postcss-preset-env` contains embedded support.
+* Removed support for `.__DEV__` CSS class and replaced it with `@__DEV__` LESS variable for usage as a CSS guard.
+* Removed legacy custom browser targetting format and now following `browserslist` standard for desclaring supporting browsers.
+
+### test
+
+* Replaced Karma/PhantomJS/Mocha/DirtyChai testing stack with a Jest-based alternative implementation.
+  * Supports Jest options like `--watch` and `--coverage` as a result.
+* Removed custom Enzyme webpack plugin since we can pre-setup Enyme directly for Jest usage.
+* Removed Sinon in favour of Jest built-in mocking/spy functionality.
+
 ## 1.2.0 (September 27, 2018)
 
 * Updated to latest `@enact/dev-utils` and `mocha-react-proptype-checker` dependency releases.
