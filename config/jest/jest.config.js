@@ -9,6 +9,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+const resolve = require('resolve');
 const {packageRoot} = require('@enact/dev-utils');
 
 // Do this as the first thing so that any code reading it knows the right env.
@@ -52,7 +53,9 @@ module.exports = {
 	transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\](?!@enact).+\\.(js|jsx|ts|tsx)$'],
 	moduleNameMapper: {
 		'^.+\\.(css|less)$': require.resolve('identity-obj-proxy'),
-		'^enzyme$': require.resolve('enzyme')
+		'^enzyme$': require.resolve('enzyme'),
+		'^react$': resolve.sync('react', {basedir: pkg.path}),
+		'^react-dom$': resolve.sync('react-dom', {basedir: pkg.path})
 	},
 	moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx'],
 	globals
