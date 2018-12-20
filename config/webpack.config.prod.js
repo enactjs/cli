@@ -12,13 +12,17 @@
  */
 // @remove-on-eject-end
 
+const fs = require('fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin-alt');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
+const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const LessPluginRi = require('resolution-independence');
+const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
@@ -57,7 +61,7 @@ module.exports = {
 	},
 	resolve: {
 		// These are the reasonable defaults supported by the React/ES6 ecosystem.
-		extensions: ['.js', '.jsx', '.json'],
+		extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
 		// Allows us to specify paths to check for module resolving.
 		modules: [path.resolve('./node_modules'), 'node_modules'],
 		alias: {
@@ -97,7 +101,7 @@ module.exports = {
 			// "file" loader makes sure those assets get copied during build
 			// When you `import` an asset, you get its output filename.
 			{
-				exclude: /\.(html|js|jsx|css|less|ejs|json)$/,
+				exclude: /\.(html|js|jsx|ts|tsx|css|less|ejs|json)$/,
 				loader: require.resolve('file-loader'),
 				options: {
 					name: '[path][name].[ext]'
@@ -105,7 +109,7 @@ module.exports = {
 			},
 			// Process JS with Babel.
 			{
-				test: /\.(js|jsx)$/,
+				test: /\.(js|jsx|ts|tsx)$/,
 				exclude: /node_modules.(?!@enact)/,
 				use: [
 					require.resolve('thread-loader'),
@@ -275,6 +279,36 @@ module.exports = {
 		new ILibPlugin(),
 		// Automatically detect ./appinfo.json and ./webos-meta/appinfo.json files,
 		// and parses any to copy over any webOS meta assets at build time.
-		new WebOSMetaPlugin()
-	]
+		new WebOSMetaPlugin(),
+		// TypeScript type checking
+		fs.existsSync('tsconfig.json') &&
+			new ForkTsCheckerWebpackPlugin({
+				typescript: resolve.sync('typescript', {
+					basedir: 'node_modules'
+				}),
+				async: false,
+				checkSyntacticErrors: true,
+				tsconfig: 'tsconfig.json',
+				compilerOptions: {
+					module: 'esnext',
+					moduleResolution: 'node',
+					resolveJsonModule: true,
+					isolatedModules: true,
+					noEmit: true,
+					jsx: 'preserve'
+				},
+				reportFiles: [
+					'**',
+					'!**/*.json',
+					'!**/__tests__/**',
+					'!**/?(*.)(spec|test).*',
+					'!**/*-specs.*',
+					'!**/src/setupProxy.*',
+					'!**/src/setupTests.*'
+				],
+				watch: app.context,
+				silent: true,
+				formatter: typescriptFormatter
+			})
+	].filter(Boolean)
 };

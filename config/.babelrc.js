@@ -31,6 +31,9 @@ module.exports = {
 				// behavior for any plugins that require one.
 				useBuiltIns: true
 			}
+		],
+		[
+			'@babel/preset-typescript'
 		]
 	],
 	plugins: [

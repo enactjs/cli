@@ -74,6 +74,14 @@ REACT_APP_PATH=example/$REACT_APP_NAME
 
 Note: Changing any environment variables will require you to restart the development server if it is running.
 
+## TypeScript Support
+
+[TypeScript](https://www.typescriptlang.org) syntax support is an optional feature.  All TypeScript-based code will be automatically transpiled like normal JavaScript and packaged by Enact CLI with no additional user setup needed. However, this does not inlude enforced type-checking, solely the syntax transpiling.  Type-checking will occur automatically at buildtime, however the `typescript` dependency must be on the project itself.  You'llalso want to install type definition packages for React, ReactDOM, and Jest.
+
+```
+npm install --save typescript @types/react @types/react-dom @types/jest
+```
+
 ## Isomorphic Support & Prerendering
 By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wade variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
 
