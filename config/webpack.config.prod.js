@@ -143,7 +143,8 @@ module.exports = {
 						loader: require.resolve('css-loader'),
 						options: {
 							importLoaders: 2,
-							modules: true
+							modules: true,
+							localIdentName: '[path][name]__[local]'
 						}
 					},
 					{
