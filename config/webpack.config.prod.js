@@ -112,7 +112,6 @@ module.exports = {
 				test: /\.(js|jsx|ts|tsx)$/,
 				exclude: /node_modules.(?!@enact)/,
 				use: [
-					require.resolve('thread-loader'),
 					{
 						loader: require.resolve('babel-loader'),
 						options: {
