@@ -76,11 +76,15 @@ Note: Changing any environment variables will require you to restart the develop
 
 ## TypeScript Support
 
-[TypeScript](https://www.typescriptlang.org) syntax support is an optional feature.  All TypeScript-based code will be automatically transpiled like normal JavaScript and packaged by Enact CLI with no additional user setup needed. However, this does not inlude enforced type-checking, solely the syntax transpiling.  Type-checking will occur automatically at buildtime, however the `typescript` dependency must be on the project itself.  You'llalso want to install type definition packages for React, ReactDOM, and Jest.
+[TypeScript](https://www.typescriptlang.org) syntax support is an optional feature.  All TypeScript-based code will be automatically transpiled like normal JavaScript and packaged by Enact CLI with no additional user setup needed. However, this does not inlude enforced type-checking, solely the syntax transpiling.  Type-checking will occur automatically at buildtime, however the `typescript` dependency must be on the project itself.  You'll also want to install type definition packages for React, ReactDOM, and Jest.
+
+It's easiest to begin from the start with TypeScript by using the `typescript` template (`@enact/template-typescript` on NPM). To add TypeScript support to an existing project:
 
 ```
 npm install --save typescript @types/react @types/react-dom @types/jest
 ```
+
+Optionally, [TSLint](https://palantir.github.io/tslint/) can be installed globally or locally and configured within a project to enable linting support within the `enact lint` command.
 
 ## Isomorphic Support & Prerendering
 By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wade variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).

@@ -58,7 +58,7 @@ Included within the project template are a number of npm tasks available, with e
 * `npm run pack-p` - Packages the app into **./dist** in production mode (minified code, with development code dropped).
 * `npm run watch` - Packages in development mode and sets up a watcher that will rebuild the app whenever the source code changes.
 * `npm run test` - Builds and executes any test spec files within the project.
-* `npm run lint `- Lints the project's JavaScript files according to the Enact ESLint configuration settings.
+* `npm run lint `- Lints the project's JavaScript files according to the Enact ESLint configuration settings and optionally TSLint.
 * `npm run clean` - Deletes the **./dist** directory
 
 That's it! Now you have a fully functioning app environment.
