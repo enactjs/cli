@@ -3,12 +3,25 @@ const path = require('path');
 const babel = require('@babel/core');
 const chalk = require('chalk');
 const fs = require('fs-extra');
+const less = require('less');
+const LessPluginResolve = require('less-plugin-npm-import');
 const minimist = require('minimist');
-const packageRoot = require('@enact/dev-utils').packageRoot;
+const LessPluginRi = require('resolution-independence');
+const {optionParser: app} = require('@enact/dev-utils');
 
-const babelrc = path.join(__dirname, '..', 'config', '.babelrc.js');
-const plugins = [require.resolve('@babel/plugin-transform-modules-commonjs')];
 const blacklist = ['node_modules', 'build', 'dist', '.git', '.gitignore'];
+const babelrc = path.join(__dirname, '..', 'config', '.babelrc.js');
+const babelRename = {original: '^(.+?)\\.less$', replacement: '$1.css'};
+const babelPlugins = [
+	require.resolve('@babel/plugin-transform-modules-commonjs'),
+	[require.resolve('babel-plugin-transform-rename-import'), babelRename]
+];
+// Temporary until PLAT-72711, hardcode expected libraries to 24px base size
+const ri24 = ['@enact/ui', '@enact/moonstone', '@enact/spotlight', '@enact/agate'];
+const lessPlugins = [
+	new LessPluginResolve({prefix: '~'}),
+	new LessPluginRi(ri24.includes(app.name) ? {baseSize: 24} : app.ri)
+];
 
 function displayHelp() {
 	console.log('  Usage');
@@ -25,7 +38,7 @@ function displayHelp() {
 
 function transpile(src, dest) {
 	return new Promise((resolve, reject) => {
-		babel.transformFile(src, {extends: babelrc, plugins}, (err, result) => {
+		babel.transformFile(src, {extends: babelrc, plugins: babelPlugins}, (err, result) => {
 			if (err) {
 				reject(err);
 			} else {
@@ -35,13 +48,25 @@ function transpile(src, dest) {
 	}).then(result => fs.writeFile(dest, result.code, {encoding: 'utf8'}));
 }
 
+function lessc(src, dest) {
+	return less
+		.render(fs.readFileSync(src, {encoding: 'utf8'}), {
+			rewriteUrls: 'off',
+			paths: [path.dirname(src)],
+			plugins: lessPlugins
+		})
+		.then(result => fs.writeFileSync(dest.replace(/\.less$/, '.css'), result.css, {encoding: 'utf8'}));
+}
+
 function api({source = '.', output = './build', ignore} = {}) {
 	process.env.ES5 = 'true';
 	const filter = (src, dest) => {
 		if (ignore && ignore.test && ignore.test(src)) {
 			return false;
-		} else if (path.extname(src) === '.js') {
+		} else if (/\.(js|js|ts|tsx)$/i.test(src)) {
 			return fs.ensureDir(path.dirname(dest)).then(() => transpile(src, dest));
+		} else if (/\.(less|css)$/i.test(src) && !/^[.\\/]*styles[\\/]+/i.test(src)) {
+			return fs.ensureDir(path.dirname(dest)).then(() => lessc(src, dest));
 		} else {
 			return true;
 		}
@@ -67,12 +92,11 @@ function cli(args) {
 	if (opts.help) displayHelp();
 
 	const ignore = opts.ignore ? new RegExp(opts.ignore) : false;
-	process.chdir(packageRoot().path);
+	process.chdir(app.context);
 	console.log('Transpiling via Babel to ' + path.resolve(opts.output));
 
 	api({source: '.', output: opts.output, ignore}).catch(err => {
 		console.error(chalk.red('ERROR: ') + err.message);
-		process.exit(1);
 	});
 }
 
