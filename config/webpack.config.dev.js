@@ -18,14 +18,13 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin-alt');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const LessPluginRi = require('resolution-independence');
 const resolve = require('resolve');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
-const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
+const {optionParser: app, cssModuleIdent, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
 
 process.chdir(app.context);
 process.env.NODE_ENV = 'development';
@@ -157,7 +156,7 @@ module.exports = {
 							importLoaders: 2,
 							modules: true,
 							sourceMap: true,
-							getLocalIdent: getCSSModuleLocalIdent
+							getLocalIdent: cssModuleIdent
 						}
 					},
 					{

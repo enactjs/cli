@@ -19,14 +19,13 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin-alt')
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const LessPluginRi = require('resolution-independence');
 const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
-const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
+const {optionParser: app, cssModuleIdent, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
 
 process.chdir(app.context);
 process.env.NODE_ENV = 'production';
@@ -144,7 +143,7 @@ module.exports = {
 						options: {
 							importLoaders: 2,
 							modules: true,
-							getLocalIdent: getCSSModuleLocalIdent
+							getLocalIdent: cssModuleIdent
 						}
 					},
 					{
