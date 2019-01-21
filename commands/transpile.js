@@ -11,7 +11,7 @@ const {optionParser: app} = require('@enact/dev-utils');
 
 const blacklist = ['node_modules', 'build', 'dist', '.git', '.gitignore'];
 const babelrc = path.join(__dirname, '..', 'config', '.babelrc.js');
-const babelRename = {original: '^(.+?)\\.less$', replacement: '$1.css'};
+const babelRename = {original: '^(\\.(?!.*\\bstyles\\b.*).*)\\.less$', replacement: '$1.css'};
 const babelPlugins = [
 	require.resolve('@babel/plugin-transform-modules-commonjs'),
 	[require.resolve('babel-plugin-transform-rename-import'), babelRename]
@@ -65,8 +65,14 @@ function api({source = '.', output = './build', ignore} = {}) {
 			return false;
 		} else if (/\.(js|js|ts|tsx)$/i.test(src)) {
 			return fs.ensureDir(path.dirname(dest)).then(() => transpile(src, dest));
-		} else if (/\.(less|css)$/i.test(src) && !/^[.\\/]*styles[\\/]+/i.test(src)) {
-			return fs.ensureDir(path.dirname(dest)).then(() => lessc(src, dest));
+		} else if (/\.(less|css)$/i.test(src)) {
+			// LESS/CSS within a 'styles' directory will not be run through LESS compiler
+			if (/[\\/]+styles[\\/]+/i.test('./' + src)) {
+				// Any LESS/CSS within an 'internal' directory will not be copied
+				return !/[\\/]+styles[\\/]+(.*[\\/]+)*internal[\\/]+/i.test('./' + src);
+			} else {
+				return fs.ensureDir(path.dirname(dest)).then(() => lessc(src, dest));
+			}
 		} else {
 			return true;
 		}
