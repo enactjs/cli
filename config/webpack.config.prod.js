@@ -135,7 +135,7 @@ module.exports = {
 			// in the main CSS file.
 			{
 				test: /\.(c|le)ss$/,
-				exclude: /node_modules.*@enact.*\.css/,
+				exclude: /node_modules(\\|\/).*\1?@enact\1.*\.css/,
 				// Note: this won't work without `new MiniCssExtractPlugin()` in `plugins`.
 				use: [
 					MiniCssExtractPlugin.loader,
@@ -183,7 +183,7 @@ module.exports = {
 			// CSS within @enact-scoped packages have already been precompiled from LESS to CSS with
 			// desirec resolution independence applied.
 			{
-				test: /node_modules.*@enact.*\.css/,
+				test: /node_modules(\\|\/).*\1?@enact\1.*\.css/,
 				use: [
 					MiniCssExtractPlugin.loader,
 					{
