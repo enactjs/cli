@@ -140,14 +140,15 @@ module.exports = {
 			// "less" loader compiles any LESS-formatted syntax into standard CSS.
 			// "postcss" loader applies autoprefixer to our CSS.
 			// "css" loader resolves paths in CSS and adds assets as dependencies.
-			// `ExtractTextPlugin` applies the "less", "postcss" and "css" loaders,
+			// `MiniCssExtractPlugin` applies the "less", "postcss" and "css" loaders,
 			// then grabs the result CSS and puts it into a separate file in our
 			// build process. If you use code splitting, any async bundles will still
 			// use the "style" loader inside the async code so CSS from them won't be
 			// in the main CSS file.
 			{
 				test: /\.(c|le)ss$/,
-				// Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
+				exclude: /node_modules.*@enact.*\.css/,
+				// Note: this won't work without `new MiniCssExtractPlugin()` in `plugins`.
 				use: [
 					MiniCssExtractPlugin.loader,
 					{
@@ -191,6 +192,42 @@ module.exports = {
 							sourceMap: true,
 							// If resolution independence options are specified, use the LESS plugin.
 							plugins: app.ri ? [new LessPluginRi(app.ri)] : []
+						}
+					}
+				]
+			},
+			// CSS within @enact-scoped packages have already been precompiled from LESS to CSS with
+			// desirec resolution independence applied.
+			{
+				test: /node_modules.*@enact.*\.css/,
+				use: [
+					MiniCssExtractPlugin.loader,
+					{
+						loader: require.resolve('css-loader'),
+						options: {
+							importLoaders: 1,
+							modules: true,
+							sourceMap: true,
+							localIdentName: '[name]__[local]___[hash:base64:5]'
+						}
+					},
+					{
+						loader: require.resolve('postcss-loader'),
+						options: {
+							ident: 'postcss',
+							sourceMap: true,
+							plugins: () => [
+								require('postcss-flexbugs-fixes'),
+								require('postcss-global-import'),
+								require('postcss-preset-env')({
+									autoprefixer: {
+										flexbox: 'no-2009',
+										remove: false
+									},
+									stage: 3,
+									features: {'custom-properties': false}
+								})
+							]
 						}
 					}
 				]
