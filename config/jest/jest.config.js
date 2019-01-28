@@ -47,11 +47,15 @@ module.exports = {
 	testURL: 'http://localhost',
 	transform: {
 		'^.+\\.(js|jsx|ts|tsx)$': require.resolve('./babelTransform'),
+		'^.+\\.css$': require.resolve('./cssTransform.js'),
 		'^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': require.resolve('./fileTransform')
 	},
-	transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\](?!@enact).+\\.(js|jsx|ts|tsx)$'],
+	transformIgnorePatterns: [
+		'[/\\\\]node_modules[/\\\\](?!@enact).+\\.(js|jsx|ts|tsx)$',
+		'^.+\\.module\\.(css|less)$'
+	],
 	moduleNameMapper: {
-		'^.+\\.(css|less)$': require.resolve('identity-obj-proxy'),
+		'^.+\\.module\\.(css|less)$': require.resolve('identity-obj-proxy'),
 		'^enzyme$': require.resolve('enzyme')
 	},
 	moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx'],
