@@ -11,7 +11,7 @@ order: 8
   Options
     -b, --bare        Abandon Enact CLI command enhancements
                       and eject into a a barebones setup (using
-                      webpack, eslint, karma, etc. directly)
+                      webpack, eslint, jest, etc. directly)
     -v, --version     Display version information
     -h, --help        Display help information
 ```
@@ -23,7 +23,7 @@ A question that may come up during the course of development is whether to eject
 
 ## Post-Eject Development Environment
 
-Once an app is ejected, its structure will be changed fairly noticeable. All the polyfills and development tools (babel, webpack, less, karma, eslint, etc.) will be added to the **package.json** and the run-scripts will be updated to use them.  Afterwards, your project should look like this:
+Once an app is ejected, its structure will be changed fairly noticeable. All the polyfills and development tools (babel, webpack, less, jest, eslint, etc.) will be added to the **package.json** and the run-scripts will be updated to use them.  Afterwards, your project should look like this:
 ```
 my-app/
   README.md
@@ -34,10 +34,14 @@ my-app/
     polyfills.js
     babel-proxy.js
     .babelrc.js
+    dotenv.js
     html-template.ejs
-    webpack.config.dev.js
-    webpack.config.prod.js
-    karma.conf.js
+    webpack.config.js
+    jest/
+      babelTransform.js
+      fileTransform.js
+      jest.config.js
+      setupTests.js
   scripts/
     serve.js
     pack.js
@@ -50,4 +54,4 @@ my-app/
   webos-meta/
 ```
 
-The **config** directory will contain all the main development configuration files: babel, webpack, and karma, along with polyfill setup files. Additionally, a **scripts** directory will be generated, containing shorthand wrapper scripts that replicate the Enact CLI output styling/usage. These scripts will keep a consistent developer experience between ejected and non-ejected apps. However, if `-b`/`--bare` flag is used during ejection, no scripts will be generated and the npm run-scripts will harness the raw tools (webpack/karma/eslint/etc) directly.
+The **config** directory will contain all the main development configuration files: babel, webpack, and jest, along with polyfill setup files. Additionally, a **scripts** directory will be generated, containing shorthand wrapper scripts that replicate the Enact CLI output styling/usage. These scripts will keep a consistent developer experience between ejected and non-ejected apps. However, if `-b`/`--bare` flag is used during ejection, no scripts will be generated and the npm run-scripts will harness the raw tools (webpack/jest/eslint/etc) directly.

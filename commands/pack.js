@@ -165,8 +165,6 @@ function watch(config) {
 }
 
 function api(opts = {}) {
-	let config;
-
 	if (opts.meta) {
 		let meta;
 		try {
@@ -178,11 +176,8 @@ function api(opts = {}) {
 	}
 
 	// Do this as the first thing so that any code reading it knows the right env.
-	if (opts.production) {
-		config = require('../config/webpack.config.prod');
-	} else {
-		config = require('../config/webpack.config.dev');
-	}
+	const configFactory = require('../config/webpack.config');
+	const config = configFactory(opts.production ? 'production' : 'development');
 
 	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);
