@@ -259,7 +259,9 @@ module.exports = function(env) {
 							// its runtime that would otherwise be processed through "file" loader.
 							// Also exclude `html` and `json` extensions so they get processed
 							// by webpacks internal loaders.
-							exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
+							// Exclude `ejs` HTML templating language as that's handled by
+							// the HtmlWebpackPlugin.
+							exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.ejs$/, /\.json$/],
 							options: {
 								name: '[path][name].[ext]'
 							}
@@ -269,6 +271,12 @@ module.exports = function(env) {
 					]
 				}
 			]
+		},
+		// Specific webpack-dev-server options
+		devServer: {
+			// Broadcast http server on the localhost, port 8080
+			host: '0.0.0.0',
+			port: 8080
 		},
 		// Target app to build for a specific environment (default 'web')
 		target: app.environment,
