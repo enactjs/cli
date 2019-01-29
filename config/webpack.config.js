@@ -23,7 +23,6 @@ const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
-const LessPluginRi = require('resolution-independence');
 const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
@@ -81,24 +80,27 @@ module.exports = function(env) {
 					// https://webpack.js.org/guides/migrating/#complex-options
 					ident: 'postcss',
 					sourceMap: shouldUseSourceMap,
-					plugins: () => [
-						// Fix and adjust for known flexbox issues
-						// See https://github.com/philipwalton/flexbugs
-						require('postcss-flexbugs-fixes'),
-						// Support @global-import syntax to import css in a global context.
-						require('postcss-global-import'),
-						// Transpile stage-3 CSS standards based on browserslist targets.
-						// See https://preset-env.cssdb.org/features for supported features.
-						// Includes support for targetted auto-prefixing.
-						require('postcss-preset-env')({
-							autoprefixer: {
-								flexbox: 'no-2009',
-								remove: false
-							},
-							stage: 3,
-							features: {'custom-properties': false}
-						})
-					]
+					plugins: () =>
+						[
+							// Fix and adjust for known flexbox issues
+							// See https://github.com/philipwalton/flexbugs
+							require('postcss-flexbugs-fixes'),
+							// Support @global-import syntax to import css in a global context.
+							require('postcss-global-import'),
+							// Transpile stage-3 CSS standards based on browserslist targets.
+							// See https://preset-env.cssdb.org/features for supported features.
+							// Includes support for targetted auto-prefixing.
+							require('postcss-preset-env')({
+								autoprefixer: {
+									flexbox: 'no-2009',
+									remove: false
+								},
+								stage: 3,
+								features: {'custom-properties': false}
+							}),
+							// Resolution indepedence support
+							app.ri && require('postcss-resolution-independence')(app.ri)
+						].filter(Boolean)
 				}
 			}
 		];
@@ -113,9 +115,7 @@ module.exports = function(env) {
 			loader: require.resolve('less-loader'),
 			options: {
 				modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent),
-				sourceMap: shouldUseSourceMap,
-				// If resolution independence options are specified, use the LESS plugin.
-				plugins: app.ri ? [new LessPluginRi(app.ri)] : []
+				sourceMap: shouldUseSourceMap
 			}
 		});
 
@@ -214,27 +214,19 @@ module.exports = function(env) {
 								}
 							]
 						},
-						// CSS within @enact-scoped packages have already been precompiled from LESS to CSS with
-						// desired resolution independence applied.
-						{
-							test: /node_modules(\\|\/).*\1?@enact\1.*\.css/,
-							use: getStyleLoaders({modules: true})
-						},
 						// Style-based rules support both LESS and CSS format, with *.module.* extension format
 						// to designate CSS modular support.
 						// See comments within `getStyleLoaders` for details on the stylesheet loader chains and
 						// options used at each level of processing.
 						{
 							test: /\.module\.css$/,
-							// Temporarily use LESS loader for CSS to apply resolution independence.
-							use: getLessStyleLoaders({modules: true})
+							use: getStyleLoaders({modules: true})
 						},
 						{
 							test: /\.css$/,
 							// The `forceCSSModules` Enact build option can be set true to universally apply
 							// modular CSS support.
-							// Temporarily use LESS loader for CSS to apply resolution independence.
-							use: getLessStyleLoaders({modules: app.forceCSSModules}),
+							use: getStyleLoaders({modules: app.forceCSSModules}),
 							// Don't consider CSS imports dead code even if the
 							// containing package claims to have no side effects.
 							// Remove this when webpack adds a warning or an error for this.
