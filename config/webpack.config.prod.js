@@ -19,6 +19,7 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin-alt')
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const LessPluginRi = require('resolution-independence');
@@ -142,7 +143,8 @@ module.exports = {
 						loader: require.resolve('css-loader'),
 						options: {
 							importLoaders: 2,
-							modules: true
+							modules: true,
+							getLocalIdent: getCSSModuleLocalIdent
 						}
 					},
 					{
