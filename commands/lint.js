@@ -77,12 +77,16 @@ function tslintBin(context) {
 }
 
 function shouldTSLint(context) {
-	if (fs.existsSync(path.join(context, 'tslint.json'))) {
-		if (glob.sync('**/*.+(ts|tsx)', globOpts).length > 0) {
-			try {
-				return !spawn.sync(tslintBin(context), ['-v'], {stdio: 'ignore'}).error;
-			} catch (e) {
-				// ignore
+	if (glob.sync('**/*.+(ts|tsx)', globOpts).length > 0) {
+		try {
+			return !spawn.sync(tslintBin(context), ['-v'], {stdio: 'ignore'}).error;
+		} catch (e) {
+			if (fs.existsSync(path.join(context, 'tslint.json'))) {
+				console.warn(
+					'TSLint config file found, however TSLint could not be resolved.\n' +
+						'Install TSLint globally or locally on this project to ' +
+						'enable TypeScript linting.'
+				);
 			}
 		}
 	}
