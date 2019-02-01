@@ -25,8 +25,10 @@ const assets = [
 ];
 const internal = [
 	'@babel/plugin-transform-modules-commonjs',
+	'babel-plugin-transform-rename-import',
 	'glob',
 	'global-modules',
+	'less-plugin-npm-import',
 	'semver',
 	'tar',
 	'v8-compile-cache',
@@ -36,15 +38,15 @@ const enhanced = ['chalk', 'cross-spawn', 'filesize', 'fs-extra', 'minimist', 's
 const content = ['@babel/polyfill', 'react', 'react-dom'];
 const bareDeps = {rimraf: '^2.6.2'};
 const bareTasks = {
-	serve: 'webpack-dev-server --hot --inline --config config/webpack.config.dev.js',
-	pack: 'webpack --config config/webpack.config.dev.js',
-	'pack-p': 'webpack --config config/webpack.config.prod.js',
-	watch: 'webpack --config config/webpack.config.dev.js --watch',
+	serve: 'webpack-dev-server --hot --inline --env development --config config/webpack.config.js',
+	pack: 'webpack --env development --config config/webpack.config.js',
+	'pack-p': 'webpack --env production --config config/webpack.config.js',
+	watch: 'webpack --env development --config config/webpack.config.js --watch',
 	clean: 'rimraf build dist',
 	lint: 'eslint --no-eslintrc --config enact --ignore-pattern config/* .',
 	license: 'license-checker ',
-	test: 'karma test start config/karma.conf.js --single-run',
-	'test-watch': 'karma test start config/karma.conf.js'
+	test: 'jest --config config/jest/jest.config.js',
+	'test-watch': 'jest --config config/jest/jest.config.js --watch'
 };
 
 function displayHelp() {

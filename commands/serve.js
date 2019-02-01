@@ -204,7 +204,8 @@ function api(opts) {
 	}
 
 	// Setup the development config with additional webpack-dev-erver customizations.
-	const config = hotDevServer(require('../config/webpack.config.dev'));
+	const configFactory = require('../config/webpack.config');
+	const config = hotDevServer(configFactory('development'));
 
 	// Tools like Cloud9 rely on this.
 	const host = process.env.HOST || opts.host || config.devServer.host || '0.0.0.0';
