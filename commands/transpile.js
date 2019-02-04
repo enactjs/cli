@@ -12,10 +12,7 @@ const {optionParser: app} = require('@enact/dev-utils');
 const blacklist = ['node_modules', 'build', 'dist', '.git', '.gitignore'];
 const babelrc = path.join(__dirname, '..', 'config', '.babelrc.js');
 const babelRename = {original: '^(\\.(?!.*\\bstyles\\b.*).*)\\.less$', replacement: '$1.css'};
-const babelPlugins = [
-	require.resolve('@babel/plugin-transform-modules-commonjs'),
-	[require.resolve('babel-plugin-transform-rename-import'), babelRename]
-];
+
 // Temporary until PLAT-72711, hardcode expected libraries to 24px base size
 const ri24 = ['@enact/ui', '@enact/moonstone', '@enact/spotlight', '@enact/agate'];
 const lessPlugins = [
@@ -36,9 +33,9 @@ function displayHelp() {
 	process.exit(0);
 }
 
-function transpile(src, dest) {
+function transpile(src, dest, plugins) {
 	return new Promise((resolve, reject) => {
-		babel.transformFile(src, {extends: babelrc, plugins: babelPlugins}, (err, result) => {
+		babel.transformFile(src, {extends: babelrc, plugins}, (err, result) => {
 			if (err) {
 				reject(err);
 			} else {
@@ -58,13 +55,18 @@ function lessc(src, dest) {
 		.then(result => fs.writeFileSync(dest.replace(/\.less$/, '.css'), result.css, {encoding: 'utf8'}));
 }
 
-function api({source = '.', output = './build', ignore} = {}) {
+function api({source = '.', output = './build', commonjs = true, ignore} = {}) {
 	process.env.ES5 = 'true';
+	const babelPlugins = [
+		commonjs && require.resolve('@babel/plugin-transform-modules-commonjs'),
+		[require.resolve('babel-plugin-transform-rename-import'), babelRename]
+	].filter(Boolean);
+
 	const filter = (src, dest) => {
 		if (ignore && ignore.test && ignore.test(src)) {
 			return false;
 		} else if (/\.(js|js|ts|tsx)$/i.test(src)) {
-			return fs.ensureDir(path.dirname(dest)).then(() => transpile(src, dest));
+			return fs.ensureDir(path.dirname(dest)).then(() => transpile(src, dest, babelPlugins));
 		} else if (/\.(less|css)$/i.test(src)) {
 			// LESS/CSS within a 'styles' directory will not be run through LESS compiler
 			if (/[\\/]+styles[\\/]+/i.test('./' + src)) {
@@ -91,8 +93,8 @@ function api({source = '.', output = './build', ignore} = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		string: ['output', 'ignore'],
-		boolean: ['help'],
-		default: {output: './build'},
+		boolean: ['commonjs', 'help'],
+		default: {output: './build', commonjs: true},
 		alias: {i: 'ignore', o: 'output', h: 'help'}
 	});
 	if (opts.help) displayHelp();
