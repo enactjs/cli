@@ -27,6 +27,8 @@ function displayHelp() {
 	console.log('  Options');
 	console.log('    -i, --ignore      Pattern of filepaths to ignore');
 	console.log('    -o, --output      Directory to transpile to');
+	console.log('    -c, --commonjs    Whether to transform ES6 imports/exports');
+	console.log('                      to CommonJS (defaults to true)');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -95,7 +97,7 @@ function cli(args) {
 		string: ['output', 'ignore'],
 		boolean: ['commonjs', 'help'],
 		default: {output: './build', commonjs: true},
-		alias: {i: 'ignore', o: 'output', h: 'help'}
+		alias: {i: 'ignore', c: 'commonjs', o: 'output', h: 'help'}
 	});
 	if (opts.help) displayHelp();
 
