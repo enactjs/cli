@@ -26,7 +26,13 @@ const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeM
 const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
-const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
+const {
+	optionParser: app,
+	CSSLessFallbackPlugin,
+	GracefulFsPlugin,
+	ILibPlugin,
+	WebOSMetaPlugin
+} = require('@enact/dev-utils');
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
@@ -378,6 +384,10 @@ module.exports = function(env) {
 			// makes the discovery automatic so you don't have to restart.
 			// See https://github.com/facebookincubator/create-react-app/issues/186
 			!isEnvProduction && new WatchMissingNodeModulesPlugin('./node_modules'),
+			// Linking in Enact or Enact-based packages may contain LESS files where
+			// we'd expect CSS files (such as when published on NPM). This plugin allow
+			// external packages to fallback CSS imports to LESS files.
+			new CSSLessFallbackPlugin(),
 			// Switch the internal NodeOutputFilesystem to use graceful-fs to avoid
 			// EMFILE errors when hanndling mass amounts of files at once, such as
 			// what happens when using ilib bundles/resources.
