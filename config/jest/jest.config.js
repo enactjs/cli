@@ -9,6 +9,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+const path = require('path');
 const {packageRoot} = require('@enact/dev-utils');
 
 // Do this as the first thing so that any code reading it knows the right env.
@@ -56,7 +57,9 @@ module.exports = {
 	],
 	moduleNameMapper: {
 		'^.+\\.module\\.(css|less)$': require.resolve('identity-obj-proxy'),
-		'^enzyme$': require.resolve('enzyme')
+		'^enzyme$': require.resolve('enzyme'),
+		'^ilib$': path.join(pkg.path, globals.ILIB_BASE_PATH, 'lib', 'ilib.js'),
+		'^ilib[/\\\\](.*)$': path.join(pkg.path, globals.ILIB_BASE_PATH, 'lib', '$1')
 	},
 	moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx'],
 	globals
