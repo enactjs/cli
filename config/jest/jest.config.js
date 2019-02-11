@@ -40,10 +40,11 @@ module.exports = {
 	setupFiles: [require.resolve('../polyfills')],
 	setupFilesAfterEnv: [require.resolve('./setupTests')],
 	testMatch: [
-		'<rootDir>/!(node_modules|dist|build)/**/__tests__/**/*.{js,jsx,ts,tsx}',
-		'<rootDir>/!(node_modules|dist|build)/**/?(*.)(spec|test).{js,jsx,ts,tsx}',
-		'<rootDir>/!(node_modules|dist|build)/**/*-specs.{js,jsx,ts,tsx}'
+		'<rootDir>/**/__tests__/**/*.{js,jsx,ts,tsx}',
+		'<rootDir>/**/?(*.)(spec|test).{js,jsx,ts,tsx}',
+		'<rootDir>/**/*-specs.{js,jsx,ts,tsx}'
 	],
+	testPathIgnorePatterns: ['/node_modules/', '/build/', '/dist/', '/coverage/'],
 	testEnvironment: 'jsdom',
 	testEnvironmentOptions: {pretendToBeVisual: true},
 	testURL: 'http://localhost',
