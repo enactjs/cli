@@ -35,9 +35,10 @@ if (pkg.meta.name === '@enact/moonstone') {
 }
 
 module.exports = {
-	collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}', '!src/**/*.d.ts'],
+	collectCoverageFrom: ['**/*.{js,jsx,ts,tsx}', '!**/*.d.ts'],
+	coveragePathIgnorePatterns: ['/node_modules/', '/build/', '/dist/', '/coverage/'],
 	setupFiles: [require.resolve('../polyfills')],
-	setupTestFrameworkScriptFile: require.resolve('./setupTests'),
+	setupFilesAfterEnv: [require.resolve('./setupTests')],
 	testMatch: [
 		'<rootDir>/!(node_modules|dist|build)/**/__tests__/**/*.{js,jsx,ts,tsx}',
 		'<rootDir>/!(node_modules|dist|build)/**/?(*.)(spec|test).{js,jsx,ts,tsx}',
