@@ -50,8 +50,9 @@ function transpile(src, dest, plugins) {
 function lessc(src, dest) {
 	return less
 		.render(fs.readFileSync(src, {encoding: 'utf8'}), {
-			rewriteUrls: 'off',
-			paths: [path.dirname(src)],
+			rewriteUrls: 'local',
+			filename: src,
+			paths: [],
 			plugins: lessPlugins
 		})
 		.then(result => fs.writeFileSync(dest.replace(/\.less$/, '.css'), result.css, {encoding: 'utf8'}));
