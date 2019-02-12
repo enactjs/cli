@@ -1,6 +1,10 @@
-## 2.0.0-alpha.1 (December 12, 2018)
+## 2.0.0 (February 11, 2019)
 
-Updated all dependencies to latest releases.
+Updated all dependencies to latest releases and added support for TypeScript. In keeping with community standards, CSS/LESS is now processed in the global scope, while modular CSS can be retained by using the `.module.css`/`.module.less` extension or setting the `forceCSSModules` Enact project setting in `package.json`.
+
+### create
+
+* Updated default included moonstone template for latest Enact with `.module.less` modular LESS naming format.
 
 ### link
 
@@ -8,16 +12,25 @@ Updated all dependencies to latest releases.
 
 ### pack
 
-* Refactored build procedure for Webpack 4 and Babel 7.
+* Refactored build procedure for latest Webpack 4 and Babel 7.
 * Added support for stage-3 CSS via `postcss-preset-env`, with `custom-properties` temporarily disabled while a bug is being resolved.
 * Added support for `.env` fileformat to declare environment variables for parsing/app-embedding.
+* Added support for TypeScript compilation.
+* Added opt-in support for TypeScript typechecking at buildtime (via `typescript` app-side dependency).
 * Additional CSS optimization applied via `optimize-css-assets-webpack-plugin`.
 * Modified Babel configuration to use built-in APIs rather than transpiling mini re-implementations.
+* Modified CSS file handling to only process modular CSS on the `.module.css` extension.
+* Modified LESS file handling to be independence (only running LESS files through the LESS compiler), with `.module.lesas` file extension enabled modular context.
+* Switched from `less-plugin-resolution-independence` to `postcss-plugin-resolution-independence` to apply to both LESS and CSS build chains.
 * Switched from `uglifyjs-webpack-plugin` to `terser-webpack-plugin` as Uglify is no longer actively developed.
 * Switched from `extract-text-webpack-plugin` to `mini-css-extract-plugin` for CSS content output.
 * Removed direct autoprefixer usage as `postcss-preset-env` contains embedded support.
 * Removed support for `.__DEV__` CSS class and replaced it with `@__DEV__` LESS variable for usage as a CSS guard.
 * Removed legacy custom browser targetting format and now following `browserslist` standard for desclaring supporting browsers.
+
+### lint
+
+* Added support for TSLint, when linting a TypeScript project and `tslint` is globally or locally installed.
 
 ### test
 
@@ -25,6 +38,15 @@ Updated all dependencies to latest releases.
   * Supports Jest options like `--watch` and `--coverage` as a result.
 * Removed custom Enzyme webpack plugin since we can pre-setup Enyme directly for Jest usage.
 * Removed Sinon in favour of Jest built-in mocking/spy functionality.
+
+### transpile
+
+* Added `--commonjs` option, enabled by default, which will convert all ES6 import/export statements into CommonJS.
+* LESS files will now be transpiled into CSS. Directories named `style` will not transpile LESS and will just copy the files (useful for sharing LESS variables/mixins). Directories named `internal`  within `styles` will be ignored.
+
+## 1.2.1 (December 7, 2018)
+
+* Fixed test execution failures where an old copy of Enzyme was erroring out on the latest React 1.6 releases.
 
 ## 1.2.0 (September 27, 2018)
 

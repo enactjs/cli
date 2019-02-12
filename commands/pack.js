@@ -65,7 +65,7 @@ function details(err, stats, output) {
 	stats.compilation.warnings.forEach(w => {
 		w.message = w.message.replace(/\n.* potentially fixable with the `--fix` option./gm, '');
 	});
-	const statsJSON = stats.toJson({}, true);
+	const statsJSON = stats.toJson({all: false, warnings: true, errors: true});
 	const messages = formatWebpackMessages(statsJSON);
 	if (messages.errors.length) {
 		return new Error(messages.errors.join('\n\n'));
@@ -78,7 +78,7 @@ function details(err, stats, output) {
 		);
 		return new Error(messages.warnings.join('\n\n'));
 	} else {
-		printFileSizes(statsJSON, output);
+		printFileSizes(stats, output);
 		console.log();
 		if (messages.warnings.length) {
 			console.log(chalk.yellow('Compiled with warnings:\n'));
@@ -100,8 +100,9 @@ function details(err, stats, output) {
 
 // Print a detailed summary of build files.
 function printFileSizes(stats, output) {
-	const assets = stats.assets
-		.filter(asset => /\.(js|css|bin)$/.test(asset.name))
+	const assets = stats
+		.toJson({all: false, assets: true})
+		.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
 		.map(asset => {
 			const size = fs.statSync(path.join(output, asset.name)).size;
 			return {
