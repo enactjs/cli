@@ -44,6 +44,10 @@ Updated all dependencies to latest releases and added support for TypeScript. In
 * Added `--commonjs` option, enabled by default, which will convert all ES6 import/export statements into CommonJS.
 * LESS files will now be transpiled into CSS. Directories named `style` will not transpile LESS and will just copy the files (useful for sharing LESS variables/mixins). Directories named `internal`  within `styles` will be ignored.
 
+## 1.2.1 (December 7, 2018)
+
+* Fixed test execution failures where an old copy of Enzyme was erroring out on the latest React 1.6 releases.
+
 ## 1.2.0 (September 27, 2018)
 
 * Updated to latest `@enact/dev-utils` and `mocha-react-proptype-checker` dependency releases.
