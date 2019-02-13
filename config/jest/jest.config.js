@@ -34,9 +34,17 @@ if (pkg.meta.name === '@enact/moonstone') {
 	globals.ILIB_BASE_PATH = 'ilib';
 }
 
+const ignorePatterns = [
+	// Common directories to ignore
+	'/node_modules/',
+	'<rootDir>/(.*/)*coverage/',
+	'<rootDir>/(.*/)*build/',
+	'<rootDir>/(.*/)*dist/'
+];
+
 module.exports = {
 	collectCoverageFrom: ['**/*.{js,jsx,ts,tsx}', '!**/*.d.ts'],
-	coveragePathIgnorePatterns: ['/node_modules/', '/build/', '/dist/', '/coverage/'],
+	coveragePathIgnorePatterns: ignorePatterns,
 	setupFiles: [require.resolve('../polyfills')],
 	setupFilesAfterEnv: [require.resolve('./setupTests')],
 	testMatch: [
@@ -44,7 +52,7 @@ module.exports = {
 		'<rootDir>/**/?(*.)(spec|test).{js,jsx,ts,tsx}',
 		'<rootDir>/**/*-specs.{js,jsx,ts,tsx}'
 	],
-	testPathIgnorePatterns: ['/node_modules/', '/build/', '/dist/', '/coverage/'],
+	testPathIgnorePatterns: ignorePatterns,
 	testEnvironment: 'jsdom',
 	testEnvironmentOptions: {pretendToBeVisual: true},
 	testURL: 'http://localhost',

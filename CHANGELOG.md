@@ -1,3 +1,8 @@
+## 2.0.1 (February 13, 2019)
+
+### test
+* Fixed tests being ignored when out-of-project parent directories are named `coverage`, `dist`, or `build`. Such is the case on TravisCI.
+
 ## 2.0.0 (February 11, 2019)
 
 Updated all dependencies to latest releases and added support for TypeScript. In keeping with community standards, CSS/LESS is now processed in the global scope, while modular CSS can be retained by using the `.module.css`/`.module.less` extension or setting the `forceCSSModules` Enact project setting in `package.json`.
