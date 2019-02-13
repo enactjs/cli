@@ -37,9 +37,9 @@ if (pkg.meta.name === '@enact/moonstone') {
 const ignore = [
 	// Common directories to ignore
 	'/node_modules/',
-	'<rootDir>/.*coverage/',
-	'<rootDir>/.*build/',
-	'<rootDir>/.*dist/'
+	'<rootDir>/(.*/)*coverage/',
+	'<rootDir>/(.*/)*build/',
+	'<rootDir>/(.*/)*dist/'
 ];
 
 module.exports = {
