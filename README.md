@@ -107,7 +107,7 @@ You would need to install an ESLint plugin for your editor first.
 Then, you will need to install some packages *globally*:
 
 ```sh
-npm install -g eslint eslint-plugin-react eslint-plugin-babel babel-eslint eslint-plugin-enact eslint-config-enact
+npm install -g eslint eslint-plugin-react eslint-plugin-babel babel-eslint eslint-plugin-jest eslint-plugin-enact eslint-config-enact
 ```
 
 ## Copyright and License Information
