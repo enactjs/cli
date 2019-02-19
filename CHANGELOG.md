@@ -1,6 +1,13 @@
+## 2.0.2 (February 19, 2019)
+
+### lint
+
+* Added support for `eslint-plugin-jest`, with the `no-focused-tests` rule set to error for the strict ruleset (`--strict`).
+
 ## 2.0.1 (February 13, 2019)
 
 ### test
+
 * Fixed tests being ignored when out-of-project parent directories are named `coverage`, `dist`, or `build`. Such is the case on TravisCI.
 
 ## 2.0.0 (February 11, 2019)
