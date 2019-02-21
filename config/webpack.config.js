@@ -242,6 +242,17 @@ module.exports = function(env) {
 							use: getLessStyleLoaders({modules: app.forceCSSModules}),
 							sideEffects: true
 						},
+						// Support optionally copying JSON assets, rather than pasing/embedding.
+						// When a resource request uses a 'copy' query, it will copy via "file-loader".
+						{
+							test: /\.json$/,
+							resourceQuery: /copy/,
+							loader: require.resolve('file-loader'),
+							type: 'javascript/auto',
+							options: {
+								name: '[path][name].[ext]'
+							}
+						},
 						// "file" loader handles on all files not caught by the above loaders.
 						// When you `import` an asset, you get its output filename and the file
 						// is copied during the build process.
