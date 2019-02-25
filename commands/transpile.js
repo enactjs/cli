@@ -106,7 +106,7 @@ function cli(args) {
 	process.chdir(app.context);
 	console.log('Transpiling via Babel to ' + path.resolve(opts.output));
 
-	api({source: '.', output: opts.output, ignore}).catch(err => {
+	api({source: '.', output: opts.output, commonjs: opts.commonjs, ignore}).catch(err => {
 		console.error(chalk.red('ERROR: ') + err.message);
 	});
 }
