@@ -268,7 +268,17 @@ module.exports = function(env) {
 		devServer: {
 			// Broadcast http server on the localhost, port 8080
 			host: '0.0.0.0',
-			port: 8080
+			port: 8080,
+			// By default WebpackDevServer serves physical files from current directory
+			// in addition to all the virtual build products that it serves from memory.
+			contentBase: path.resolve('./public'),
+			// Any changes to files from `contentBase` should trigger a page reload.
+			watchContentBase: true,
+			// Reportedly, this avoids CPU overload on some systems.
+			// https://github.com/facebookincubator/create-react-app/issues/293
+			watchOptions: {
+				ignored: /node_modules/
+			}
 		},
 		// Target app to build for a specific environment (default 'web')
 		target: app.environment,
@@ -362,7 +372,8 @@ module.exports = function(env) {
 			// It is absolutely essential that NODE_ENV was set to production here.
 			// Otherwise React will be compiled in the very slow development mode.
 			new DefinePlugin({
-				'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development')
+				'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
+				'process.env.PUBLIC_URL': JSON.stringify('.')
 			}),
 			// Inject prefixed environment variables within code, when used
 			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
