@@ -78,6 +78,7 @@ function details(err, stats, output) {
 		);
 		return new Error(messages.warnings.join('\n\n'));
 	} else {
+		copyPublicFolder(output);
 		printFileSizes(stats, output);
 		console.log();
 		if (messages.warnings.length) {
@@ -95,6 +96,15 @@ function details(err, stats, output) {
 			);
 		}
 		console.log();
+	}
+}
+
+function copyPublicFolder(output) {
+	const staticAssets = './public';
+	if (fs.existsSync(staticAssets)) {
+		fs.copySync(staticAssets, output, {
+			dereference: true
+		});
 	}
 }
 
@@ -156,7 +166,7 @@ function watch(config) {
 		console.log('Creating an optimized production build and watching for changes...');
 	}
 	webpack(config).watch({}, (err, stats) => {
-		err = details(err, stats);
+		err = details(err, stats, config.output.path);
 		if (err) {
 			console.log(chalk.red('Failed to compile.\n'));
 			console.log((err.message || err) + '\n');
