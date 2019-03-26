@@ -1,3 +1,20 @@
+## 2.1.0 (March 26, 2019)
+
+Updated all Babel dependencies up to 7.3.x to fix edge-case errors with `let` keyword usage, among other fixes.
+
+### pack
+
+* Added support for a `public` directory, where static assets within are copied, at buildtime, to `./dist`.
+* Added support for `process.env.PUBLIC_URL` which is hardcode to `'.'`, for consistency with 3rd party standards.
+
+### serve
+
+* Added support for serving/watching file contents within `./public`.
+
+### transpiled
+
+* Fixed `--commonjs` option not being respected in transpiling process.
+
 ## 2.0.2 (February 19, 2019)
 
 ### lint
