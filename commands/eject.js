@@ -36,12 +36,12 @@ const internal = [
 ];
 const enhanced = ['chalk', 'cross-spawn', 'filesize', 'fs-extra', 'minimist', 'strip-ansi'];
 const content = ['@babel/polyfill', 'react', 'react-dom'];
-const bareDeps = {rimraf: '^2.6.2'};
+const bareDeps = {'cpy-cli': '^2.0.0', rimraf: '^2.6.2'};
 const bareTasks = {
 	serve: 'webpack-dev-server --hot --inline --env development --config config/webpack.config.js',
-	pack: 'webpack --env development --config config/webpack.config.js',
-	'pack-p': 'webpack --env production --config config/webpack.config.js',
-	watch: 'webpack --env development --config config/webpack.config.js --watch',
+	pack: 'webpack --env development --config config/webpack.config.js && cpy public dist',
+	'pack-p': 'webpack --env production --config config/webpack.config.js && cpy public dist',
+	watch: 'cpy public dist && webpack --env development --config config/webpack.config.js --watch',
 	clean: 'rimraf build dist',
 	lint: 'eslint --no-eslintrc --config enact --ignore-pattern config/* .',
 	license: 'license-checker ',
