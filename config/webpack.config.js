@@ -15,7 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin-alt');
+const ForkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
@@ -406,17 +406,10 @@ module.exports = function(env) {
 					typescript: resolve.sync('typescript', {
 						basedir: 'node_modules'
 					}),
-					async: false,
+					async: !isEnvProduction,
+					useTypescriptIncrementalApi: true,
 					checkSyntacticErrors: true,
 					tsconfig: 'tsconfig.json',
-					compilerOptions: {
-						module: 'esnext',
-						moduleResolution: 'node',
-						resolveJsonModule: true,
-						isolatedModules: true,
-						noEmit: true,
-						jsx: 'preserve'
-					},
 					reportFiles: [
 						'**',
 						'!**/*.json',
@@ -428,7 +421,7 @@ module.exports = function(env) {
 					],
 					watch: app.context,
 					silent: true,
-					formatter: typescriptFormatter
+					formatter: !process.env.DISABLE_TSFORMATTER ? typescriptFormatter : undefined
 				})
 		].filter(Boolean)
 	};
