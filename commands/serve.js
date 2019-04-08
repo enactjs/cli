@@ -11,6 +11,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 // @remove-on-eject-end
+const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const minimist = require('minimist');
@@ -65,9 +66,13 @@ function hotDevServer(config) {
 	// to bring better experience.
 	config.entry.main.unshift(require.resolve('react-dev-utils/webpackHotDevClient'));
 	// This is necessary to emit hot updates
-	config.plugins.push(new webpack.HotModuleReplacementPlugin());
+	config.plugins.unshift(new webpack.HotModuleReplacementPlugin());
 	// Keep webpack alive when there are any errors, so user can fix and rebuild.
 	config.bail = false;
+	// Ensure the CLI version of Chalk is used for webpackHotDevClient
+	// since tslint includes an out-of-date local version.
+	config.resolve.alias.chalk = require.resolve('chalk');
+	config.resolve.alias['ansi-styles'] = require.resolve('ansi-styles');
 	return config;
 }
 
@@ -139,8 +144,38 @@ function serve(config, host, port, open) {
 		}
 		const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
 		const urls = prepareUrls(protocol, host, resolvedPort);
+		const devSocket = {
+			// eslint-disable-next-line no-use-before-define
+			warnings: warnings => devServer.sockWrite(devServer.sockets, 'warnings', warnings),
+			// eslint-disable-next-line no-use-before-define
+			errors: errors => devServer.sockWrite(devServer.sockets, 'errors', errors)
+		};
 		// Create a webpack compiler that is configured with custom messages.
-		const compiler = createCompiler(webpack, config, app.name, urls);
+		const compiler = createCompiler({
+			appName: app.name,
+			config,
+			devSocket,
+			urls,
+			useYarn: false,
+			useTypeScript: fs.existsSync('tsconfig.json'),
+			webpack
+		});
+
+		// Temporary workaround for react-dev-utils/WebpackDevServerUtils
+		// CRA uses a beforeCompile hook to signify the beginning of a compilation, however the
+		// hook is executed for mini-css-extract-plugin too, which results in the promise being
+		// overriden and the system hanging. This fix extracts their hook callback and manually
+		// invokes it on non-CSS compilation events.
+		const taps = compiler.hooks.beforeCompile.taps;
+		const craServeHook = taps[taps.length - 1];
+		const hookFn = craServeHook.fn;
+		craServeHook.fn = function() {};
+		compiler.hooks.compilation.tap('EnactCLI', ({name}) => {
+			if (name && !name.startsWith('mini-css-extract-plugin')) {
+				hookFn();
+			}
+		});
+
 		compiler.hooks.afterEmit.tapAsync('EnactCLI', (compilation, callback) => {
 			compilation.warnings.forEach(w => {
 				if (w.message) {
@@ -191,7 +226,10 @@ function api(opts) {
 		app.applyEnactMeta(meta);
 	}
 
-	// Setup the development config with additional webpack-dev-erver customizations.
+	// Setup the development config with additional webpack-dev-server customizations.
+	// We can disable the typechecker formatter since react-dev-utils includes their
+	// own formatter in their dev client.
+	process.env.DISABLE_TSFORMATTER = 'true';
 	const configFactory = require('../config/webpack.config');
 	const config = hotDevServer(configFactory('development'));
 
