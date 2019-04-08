@@ -62,7 +62,7 @@ module.exports = function(env) {
 		// bundles will stilluse the "style" loader inside the async code so CSS
 		// from them won't be in the main CSS file.
 		const loaders = [
-			MiniCssExtractPlugin.loader,
+			isEnvProduction ? MiniCssExtractPlugin.loader : require.resolve('style-loader'),
 			{
 				loader: require.resolve('css-loader'),
 				options: Object.assign(
@@ -378,10 +378,11 @@ module.exports = function(env) {
 			// Inject prefixed environment variables within code, when used
 			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
 			// Note: this won't work without MiniCssExtractPlugin.loader in `loaders`.
-			new MiniCssExtractPlugin({
-				filename: '[name].css',
-				chunkFilename: 'chunk.[name].css'
-			}),
+			isEnvProduction &&
+				new MiniCssExtractPlugin({
+					filename: '[name].css',
+					chunkFilename: 'chunk.[name].css'
+				}),
 			// Ensure correct casing in module filepathes
 			new CaseSensitivePathsPlugin(),
 			// If you require a missing module and then `npm install` it, you still have

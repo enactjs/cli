@@ -161,21 +161,6 @@ function serve(config, host, port, open) {
 			webpack
 		});
 
-		// Temporary workaround for react-dev-utils/WebpackDevServerUtils
-		// CRA uses a beforeCompile hook to signify the beginning of a compilation, however the
-		// hook is executed for mini-css-extract-plugin too, which results in the promise being
-		// overriden and the system hanging. This fix extracts their hook callback and manually
-		// invokes it on non-CSS compilation events.
-		const taps = compiler.hooks.beforeCompile.taps;
-		const craServeHook = taps[taps.length - 1];
-		const hookFn = craServeHook.fn;
-		craServeHook.fn = function() {};
-		compiler.hooks.compilation.tap('EnactCLI', ({name}) => {
-			if (name && !name.startsWith('mini-css-extract-plugin')) {
-				hookFn();
-			}
-		});
-
 		compiler.hooks.afterEmit.tapAsync('EnactCLI', (compilation, callback) => {
 			compilation.warnings.forEach(w => {
 				if (w.message) {
