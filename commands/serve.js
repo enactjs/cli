@@ -170,8 +170,9 @@ function serve(config, host, port, open) {
 		const craServeHook = taps[taps.length - 1];
 		const hookFn = craServeHook.fn;
 		craServeHook.fn = function() {};
+		const compilationIgnore = ['mini-css-extract-plugin', 'html-webpack-plugin'];
 		compiler.hooks.compilation.tap('EnactCLI', ({name}) => {
-			if (name && !name.startsWith('mini-css-extract-plugin')) {
+			if (!name || !compilationIgnore.some(p => name.startsWith(p))) {
 				hookFn();
 			}
 		});
