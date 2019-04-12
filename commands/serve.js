@@ -211,10 +211,14 @@ function api(opts) {
 		app.applyEnactMeta(meta);
 	}
 
-	// Setup the development config with additional webpack-dev-server customizations.
 	// We can disable the typechecker formatter since react-dev-utils includes their
 	// own formatter in their dev client.
 	process.env.DISABLE_TSFORMATTER = 'true';
+
+	// Use inline styles for serving process.
+	process.env.INLINE_STYLES = 'true';
+
+	// Setup the development config with additional webpack-dev-server customizations.
 	const configFactory = require('../config/webpack.config');
 	const config = hotDevServer(configFactory('development'));
 
