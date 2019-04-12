@@ -12,8 +12,8 @@ if (!global.skipPolyfills && !global._babelPolyfill) {
 	var origToLocaleString = Array.prototype.toLocaleString;
 	Array.prototype.toLocaleString = Array.prototype.toString;
 
-	// Apply Babel polyfills
-	require('./babel-proxy');
+	// Apply core-js polyfills
+	require('./corejs-proxy');
 
 	// Restore real [Array].toLocaleString for runtime usage.
 	Array.prototype.toLocaleString = origToLocaleString;

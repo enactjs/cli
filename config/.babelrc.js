@@ -15,9 +15,23 @@ module.exports = {
 		[
 			'@babel/preset-env',
 			{
-				exclude: ['transform-regenerator', 'web.dom.iterable', 'web.timers', 'web.immediate'],
+				exclude: [
+					'transform-regenerator',
+					// Ignore web features since window and DOM is not available
+					// in a V8 snapshot blob.
+					// TODO: investigates ways to include but delay loading.
+					'web.dom-collections.for-each',
+					'web.dom-collections.iterator',
+					'web.immediate',
+					'web.queue-microtask',
+					'web.timers',
+					'web.url',
+					'web.url.to-json',
+					'web.url-search-params'
+				],
 				forceAllTransforms: es5Standalone,
 				useBuiltIns: 'entry',
+				corejs: 3,
 				modules: false
 			}
 		],
