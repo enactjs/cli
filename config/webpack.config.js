@@ -15,7 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin-alt');
+const ForkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
@@ -61,8 +61,10 @@ module.exports = function(env) {
 		// external file in our build process. If you use code splitting, any async
 		// bundles will stilluse the "style" loader inside the async code so CSS
 		// from them won't be in the main CSS file.
+		// When INLINE_STYLES env var is set, instead of MiniCssExtractPlugin, uses
+		// `style` loader to dynamically inline CSS in style tags at runtime.
 		const loaders = [
-			MiniCssExtractPlugin.loader,
+			process.env.INLINE_STYLES ? require.resolve('style-loader') : MiniCssExtractPlugin.loader,
 			{
 				loader: require.resolve('css-loader'),
 				options: Object.assign(
@@ -378,10 +380,11 @@ module.exports = function(env) {
 			// Inject prefixed environment variables within code, when used
 			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
 			// Note: this won't work without MiniCssExtractPlugin.loader in `loaders`.
-			new MiniCssExtractPlugin({
-				filename: '[name].css',
-				chunkFilename: 'chunk.[name].css'
-			}),
+			!process.env.INLINE_STYLES &&
+				new MiniCssExtractPlugin({
+					filename: '[name].css',
+					chunkFilename: 'chunk.[name].css'
+				}),
 			// Ensure correct casing in module filepathes
 			new CaseSensitivePathsPlugin(),
 			// If you require a missing module and then `npm install` it, you still have
@@ -406,17 +409,10 @@ module.exports = function(env) {
 					typescript: resolve.sync('typescript', {
 						basedir: 'node_modules'
 					}),
-					async: false,
+					async: !isEnvProduction,
+					useTypescriptIncrementalApi: true,
 					checkSyntacticErrors: true,
 					tsconfig: 'tsconfig.json',
-					compilerOptions: {
-						module: 'esnext',
-						moduleResolution: 'node',
-						resolveJsonModule: true,
-						isolatedModules: true,
-						noEmit: true,
-						jsx: 'preserve'
-					},
 					reportFiles: [
 						'**',
 						'!**/*.json',
@@ -428,7 +424,7 @@ module.exports = function(env) {
 					],
 					watch: app.context,
 					silent: true,
-					formatter: typescriptFormatter
+					formatter: !process.env.DISABLE_TSFORMATTER ? typescriptFormatter : undefined
 				})
 		].filter(Boolean)
 	};
