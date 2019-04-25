@@ -50,6 +50,7 @@ module.exports = function(env) {
 	// on or off by setting the GENERATE_SOURCEMAP environment variable.
 	const GENERATE_SOURCEMAP = process.env.GENERATE_SOURCEMAP || (isEnvProduction ? 'false' : 'true');
 	const shouldUseSourceMap = GENERATE_SOURCEMAP !== 'false';
+	const shouldSourceMapStyles = !process.env.INLINE_STYLES && shouldUseSourceMap;
 
 	// common function to get style loaders
 	const getStyleLoaders = (cssLoaderOptions = {}, preProcessor) => {
@@ -68,7 +69,7 @@ module.exports = function(env) {
 			{
 				loader: require.resolve('css-loader'),
 				options: Object.assign(
-					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
+					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldSourceMapStyles},
 					cssLoaderOptions.modules && {getLocalIdent: getCSSModuleLocalIdent},
 					cssLoaderOptions
 				)
@@ -81,7 +82,7 @@ module.exports = function(env) {
 				options: {
 					// https://webpack.js.org/guides/migrating/#complex-options
 					ident: 'postcss',
-					sourceMap: shouldUseSourceMap,
+					sourceMap: shouldSourceMapStyles,
 					plugins: () =>
 						[
 							// Fix and adjust for known flexbox issues
@@ -117,7 +118,7 @@ module.exports = function(env) {
 			loader: require.resolve('less-loader'),
 			options: {
 				modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent),
-				sourceMap: shouldUseSourceMap
+				sourceMap: shouldSourceMapStyles
 			}
 		});
 
