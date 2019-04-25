@@ -68,7 +68,7 @@ module.exports = function(env) {
 			{
 				loader: require.resolve('css-loader'),
 				options: Object.assign(
-					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
+					{importLoaders: preProcessor ? 2 : 1, sourceMap: !process.env.INLINE_STYLES},
 					cssLoaderOptions.modules && {getLocalIdent: getCSSModuleLocalIdent},
 					cssLoaderOptions
 				)
@@ -81,7 +81,7 @@ module.exports = function(env) {
 				options: {
 					// https://webpack.js.org/guides/migrating/#complex-options
 					ident: 'postcss',
-					sourceMap: shouldUseSourceMap,
+					sourceMap: !process.env.INLINE_STYLES && shouldUseSourceMap,
 					plugins: () =>
 						[
 							// Fix and adjust for known flexbox issues
@@ -117,7 +117,7 @@ module.exports = function(env) {
 			loader: require.resolve('less-loader'),
 			options: {
 				modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent),
-				sourceMap: shouldUseSourceMap
+				sourceMap: !process.env.INLINE_STYLES && shouldUseSourceMap
 			}
 		});
 
