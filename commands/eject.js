@@ -36,7 +36,7 @@ const internal = [
 	'validate-npm-package-name'
 ];
 const enhanced = ['chalk', 'cross-spawn', 'filesize', 'fs-extra', 'minimist', 'strip-ansi'];
-const content = ['@babel/polyfill', 'react', 'react-dom'];
+const content = ['core-js', 'react', 'react-dom'];
 const bareDeps = {'cpy-cli': '^2.0.0', rimraf: '^2.6.2'};
 const bareTasks = {
 	serve: 'webpack-dev-server --hot --inline --env development --config config/webpack.config.js',
@@ -160,7 +160,6 @@ function configurePackage(bare) {
 	const enactCLI = new RegExp('enact (' + availScripts.join('|') + ')', 'g');
 	const eslintConfig = {extends: 'enact'};
 	const eslintIgnore = ['build/*', 'config/*', 'dist/*', 'node_modules/*', 'scripts/*'];
-	const babel = {extends: './config/.babelrc.js'};
 	const conflicts = [];
 
 	app.dependencies = app.dependencies || [];
@@ -217,14 +216,6 @@ function configurePackage(bare) {
 	app.eslintIgnore = app.eslintIgnore || [];
 	app.eslintIgnore = app.eslintIgnore.concat(eslintIgnore.filter(l => !app.eslintIgnore.includes(l)));
 	backupOld(['.eslintignore', '.eslintrc.js', '.eslintrc.yaml', '.eslintrc.yml', '.eslintrc.json', '.eslintrc']);
-
-	// Update Babel settings
-	console.log(`	Setting up ${chalk.cyan('Babel')} config in package.json`);
-	if (app.babel && JSON.stringify(app.babel) !== JSON.stringify(babel)) {
-		conflicts.push(chalk.cyan('Babel'));
-	}
-	app.babel = babel;
-	backupOld(['.babelrc', '.babelrc.js']);
 
 	// Sort the package.json output
 	['dependencies', 'devDependencies'].forEach(obj => {

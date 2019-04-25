@@ -201,10 +201,8 @@ module.exports = function(env) {
 								{
 									loader: require.resolve('babel-loader'),
 									options: {
-										// @remove-on-eject-begin
-										extends: path.join(__dirname, '.babelrc.js'),
+										configFile: path.join(__dirname, 'babel.config.js'),
 										babelrc: false,
-										// @remove-on-eject-end
 										// This is a feature of `babel-loader` for webpack (not Babel itself).
 										// It enables caching results in ./node_modules/.cache/babel-loader/
 										// directory for faster rebuilds.
