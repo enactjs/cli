@@ -21,6 +21,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
+const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const resolve = require('resolve');
@@ -38,6 +39,9 @@ module.exports = function(env) {
 
 	// Sets the browserslist default fallback set of browsers to the Enact default browser support list.
 	app.setEnactTargetsAsDefault();
+	const reactAppEnv = Object.key(process.env)
+		.filter(key => /^REACT_APP_/.test(key))
+		.reduce((o, key) => Object.assign(o, {[key]: process.env[key]}), {});
 
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
@@ -370,6 +374,22 @@ module.exports = function(env) {
 					minifyURLs: true
 				}
 			}),
+			// Makes some environment variables available in index.html.
+			// The public URL is available as %PUBLIC_URL% in index.html, e.g.:
+			// <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
+			// In production, it will be an empty string unless you specify "homepage"
+			// in `package.json`, in which case it will be the pathname of that URL.
+			// In development, this will be an empty string.
+			new InterpolateHtmlPlugin(
+				HtmlWebpackPlugin,
+				Object.assign(
+					{
+						PUBLIC_URL: '.',
+						VIEWPORT: app.viewport
+					},
+					reactAppEnv
+				)
+			),
 			// Make NODE_ENV environment variable available to the JS code, for example:
 			// if (process.env.NODE_ENV === 'production') { ... }.
 			// It is absolutely essential that NODE_ENV was set to production here.
@@ -379,7 +399,7 @@ module.exports = function(env) {
 				'process.env.PUBLIC_URL': JSON.stringify('.')
 			}),
 			// Inject prefixed environment variables within code, when used
-			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
+			new EnvironmentPlugin(Object.keys(reactAppEnv)),
 			// Note: this won't work without MiniCssExtractPlugin.loader in `loaders`.
 			!process.env.INLINE_STYLES &&
 				new MiniCssExtractPlugin({

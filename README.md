@@ -62,6 +62,7 @@ The @enact/cli tool will check the project's **package.json** looking for an opt
 * `template` _[string]_ - Filepath to an alternate HTML template to use with the [Webpack html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin).
 * `isomorphic` _[string]_ - Alternate filepath to a custom isomorphic-compatible entry point. Not needed if main entry point is already isomorphic-compatible.
 * `title` _[string]_ - Title text that should be put within the HTML's `<title></title>` tags. Note: if this is a webOS-project, the title will, by default, be auto-detected from the **appinfo.json** content.
+* `viewport` _[string|object]_ - Viewport content parameters which should be put within the HTML's `<meta name="viewport"/>` header tag. Can be a string or object which would be dynamically converted into key-value pair string. Defaults to `"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"`
 * `theme` _[object]_ - A simplified string name to extrapolate `fontGenerator`, `ri`, and `screenTypes` preset values from. For example, `"moonstone"`
 * `fontGenerator` _[string]_ - Filepath to a CommonJS fontGenerator module which will build locale-specific font CSS to inject into the HTML. By default, will use any preset for a specified theme or fallback to moonstone.
 * `ri` _[object]_ - Resolution independence options to be forwarded to the [LESS plugin](https://github.com/enyojs/less-plugin-resolution-independence). By default, will use any preset for a specified theme or fallback to moonstone
