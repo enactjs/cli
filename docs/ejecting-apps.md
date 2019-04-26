@@ -32,8 +32,8 @@ my-app/
   node_modules/
   config/
     polyfills.js
-    babel-proxy.js
-    .babelrc.js
+    corejs-proxy.js
+    babel.config.js
     dotenv.js
     html-template.ejs
     webpack.config.js
