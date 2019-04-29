@@ -1,4 +1,3 @@
-// @remove-file-on-eject
 /**
  * Portions of this source code file are from create-react-app, used under the
  * following MIT license:

@@ -1,3 +1,26 @@
+## 2.2.0 (April 28, 2019)
+
+Updated all dependencies to latest releases.
+
+# pack
+
+* Switched from `@babel/polyfill` to `core-js@3` for dynamic polyfill support.
+* Switched to `.babelrc` Babel config to isolated `babel.config.js`.
+
+# serve
+
+* Fixed serve failing on TypeScript projects.
+* Projects no longer use external CSS and now will use inline `<style>` tags (similar to `create-react-app`).
+* Disable stylesheet sourcemaps to avoid async blob-based style loading in `style-loader`.
+
+## link
+
+* Fixed linking when custom NPM prefixes are used via `.npmrc` files.
+
+## eject
+
+* Fixed ejected apps not correctly using Babel configuration and failing to transpile JSX during pack/serve.
+
 ## 2.1.0 (March 26, 2019)
 
 Updated all Babel dependencies up to 7.3.x to fix edge-case errors with `let` keyword usage, among other fixes.

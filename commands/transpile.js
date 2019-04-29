@@ -10,7 +10,7 @@ const LessPluginRi = require('resolution-independence');
 const {optionParser: app} = require('@enact/dev-utils');
 
 const blacklist = ['node_modules', 'build', 'dist', '.git', '.gitignore'];
-const babelrc = path.join(__dirname, '..', 'config', '.babelrc.js');
+const babelConfig = path.join(__dirname, '..', 'config', 'babel.config.js');
 const babelRename = {original: '^(\\.(?!.*\\bstyles\\b.*).*)\\.less$', replacement: '$1.css'};
 
 // Temporary until PLAT-72711, hardcode expected libraries to 24px base size
@@ -37,7 +37,7 @@ function displayHelp() {
 
 function transpile(src, dest, plugins) {
 	return new Promise((resolve, reject) => {
-		babel.transformFile(src, {extends: babelrc, plugins}, (err, result) => {
+		babel.transformFile(src, {extends: babelConfig, plugins}, (err, result) => {
 			if (err) {
 				reject(err);
 			} else {
