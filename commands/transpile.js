@@ -37,7 +37,7 @@ function displayHelp() {
 
 function transpile(src, dest, plugins) {
 	return new Promise((resolve, reject) => {
-		babel.transformFile(src, {extends: babelConfig, plugins}, (err, result) => {
+		babel.transformFile(src, {extends: babelConfig, plugins, sourceType: 'unambiguous'}, (err, result) => {
 			if (err) {
 				reject(err);
 			} else {
@@ -60,6 +60,7 @@ function lessc(src, dest) {
 
 function api({source = '.', output = './build', commonjs = true, ignore} = {}) {
 	process.env.ES5 = 'true';
+	process.env.NO_POLYFILLS = 'true'
 	const babelPlugins = [
 		commonjs && require.resolve('@babel/plugin-transform-modules-commonjs'),
 		[require.resolve('babel-plugin-transform-rename-import'), babelRename]

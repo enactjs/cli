@@ -131,8 +131,6 @@ module.exports = function(env) {
 		// These are the "entry points" to our application.
 		entry: {
 			main: [
-				// Include any polyfills needed for the target browsers.
-				require.resolve('./polyfills'),
 				// This is your app's code
 				app.context
 			]
@@ -156,7 +154,8 @@ module.exports = function(env) {
 			modules: [path.resolve('./node_modules'), 'node_modules'],
 			alias: {
 				// Support ilib shorthand alias for ilib modules
-				ilib: '@enact/i18n/ilib/lib'
+				ilib: '@enact/i18n/ilib/lib',
+				'core-js': path.dirname(require.resolve('core-js/package.json'))
 			}
 		},
 		// @remove-on-eject-begin
@@ -210,7 +209,8 @@ module.exports = function(env) {
 										cacheDirectory: !isEnvProduction,
 										cacheCompression: false,
 										highlightCode: true,
-										compact: isEnvProduction
+										compact: isEnvProduction,
+										sourceType: 'unambiguous'
 									}
 								}
 							]

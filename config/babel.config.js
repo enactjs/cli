@@ -21,18 +21,18 @@ module.exports = function(api) {
 						// Ignore web features since window and DOM is not available
 						// in a V8 snapshot blob.
 						// TODO: investigates ways to include but delay loading.
-						'web.dom-collections.for-each',
-						'web.dom-collections.iterator',
-						'web.immediate',
-						'web.queue-microtask',
-						'web.timers',
-						'web.url',
-						'web.url.to-json',
-						'web.url-search-params'
-					],
+						!process.env.NO_POLYFILLS && 'web.dom-collections.for-each',
+						!process.env.NO_POLYFILLS && 'web.dom-collections.iterator',
+						!process.env.NO_POLYFILLS && 'web.immediate',
+						!process.env.NO_POLYFILLS && 'web.queue-microtask',
+						!process.env.NO_POLYFILLS && 'web.timers',
+						!process.env.NO_POLYFILLS && 'web.url',
+						!process.env.NO_POLYFILLS && 'web.url.to-json',
+						!process.env.NO_POLYFILLS && 'web.url-search-params'
+					].filter(Boolean),
 					forceAllTransforms: es5Standalone,
-					useBuiltIns: 'entry',
-					corejs: 3,
+					useBuiltIns: !process.env.NO_POLYFILLS && 'usage',
+					corejs: !process.env.NO_POLYFILLS && 3,
 					modules: false
 				}
 			],
