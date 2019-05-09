@@ -270,9 +270,9 @@ module.exports = function(env) {
 			// Broadcast http server on the localhost, port 8080
 			host: '0.0.0.0',
 			port: 8080,
-			// By default WebpackDevServer serves physical files from current directory
+			// By default WebpackDevServer serves files from public and __mocks__ directories
 			// in addition to all the virtual build products that it serves from memory.
-			contentBase: path.resolve('./public'),
+			contentBase: [path.resolve('./public'), path.resolve('./__mocks__')],
 			// Any changes to files from `contentBase` should trigger a page reload.
 			watchContentBase: true,
 			// Reportedly, this avoids CPU overload on some systems.
