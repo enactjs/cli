@@ -8,8 +8,8 @@
  *  transforms.
  */
 
-// Apply core-js polyfills
-require('core-js');
+// Apply stable core-js polyfills
+require('core-js/stable');
 
 // Manually set global._babelPolyfill as a flag to avoid multiple loading.
 // Uses 'babelPolyfill' name for historical meaning and external/backward
