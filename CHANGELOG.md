@@ -1,23 +1,36 @@
+## 2.3.0 (June 10, 2019)
+
+### pack
+
+* Added React hook linting to help with adhering to the [rules of hooks](https://reactjs.org/docs/hooks-rules.html).
+* Updated polyfills to the `core-js/stable` stable featureset rather than all stable+draft polyfills.
+* Updated default browserslist config from `last 2` stable versions of Chrome and Firefox to `last 5`.
+* Fixed build failing when prerendering for multiple locales.
+
+### serve
+
+Added `./__mocks__` project directory as an optional allback directory for server asset contents (secondary to `./public`).
+
 ## 2.2.0 (April 28, 2019)
 
 Updated all dependencies to latest releases.
 
-# pack
+### pack
 
 * Switched from `@babel/polyfill` to `core-js@3` for dynamic polyfill support.
 * Switched to `.babelrc` Babel config to isolated `babel.config.js`.
 
-# serve
+### serve
 
 * Fixed serve failing on TypeScript projects.
 * Projects no longer use external CSS and now will use inline `<style>` tags (similar to `create-react-app`).
 * Disable stylesheet sourcemaps to avoid async blob-based style loading in `style-loader`.
 
-## link
+### link
 
 * Fixed linking when custom NPM prefixes are used via `.npmrc` files.
 
-## eject
+### eject
 
 * Fixed ejected apps not correctly using Babel configuration and failing to transpile JSX during pack/serve.
 
