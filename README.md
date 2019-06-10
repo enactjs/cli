@@ -9,7 +9,7 @@ All that's needed to install @enact/cli is to use npm to install it globally. Fo
 npm install -g @enact/cli
 ```
 
->Note: Node 6.x or greater required.
+>Note: Node 8.10 or greater required.
 
 ## Creating a new App
 
