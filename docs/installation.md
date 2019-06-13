@@ -4,7 +4,7 @@ order: 1
 ---
 ## Requirements
 
-Node 8.10 or later.
+Node 10 LTS or later.
 
 ## Installation via npm
 
