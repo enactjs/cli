@@ -156,7 +156,7 @@ module.exports = function(env) {
 			modules: [path.resolve('./node_modules'), 'node_modules'],
 			alias: {
 				// Support ilib shorthand alias for ilib modules
-				ilib: '@enact/i18n/ilib/lib'
+				ilib: '@enact/i18n/node_modules/ilib-webos-tv/lib'
 			}
 		},
 		// @remove-on-eject-begin

@@ -20,7 +20,7 @@ process.env.BROWSERSLIST = 'current node';
 const pkg = packageRoot();
 const globals = {
 	__DEV__: true,
-	ILIB_BASE_PATH: 'node_modules/@enact/i18n/ilib',
+	ILIB_BASE_PATH: 'node_modules/@enact/i18n/node_modules/ilib-webos-tv',
 	ILIB_RESOURCES_PATH: 'resources',
 	ILIB_CACHE_ID: new Date().getTime() + '',
 	ILIB_MOONSTONE_PATH: 'node_modules/@enact/moonstone/resources'
