@@ -102,7 +102,7 @@ module.exports = function(env) {
 								features: {'custom-properties': false}
 							}),
 							// Resolution indepedence support
-							app.ri && require('postcss-resolution-independence')(app.ri)
+							app.ri !== false && require('postcss-resolution-independence')(app.ri)
 						].filter(Boolean)
 				}
 			}
