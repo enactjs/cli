@@ -1,3 +1,7 @@
+## 2.3.1 (July 2, 2019)
+
+Fixed "Unexpected identifier" error on Node 6.x by using a compatible release of `find-cache-dir` subdependency.
+
 ## 2.3.0 (June 10, 2019)
 
 ### pack
