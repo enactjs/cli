@@ -22,7 +22,7 @@ const pkg = packageRoot();
 const iLibPkgs = ['node_modules/ilib-webos-tv', 'node_modules/@enact/i18n/node_modules/ilib-webos-tv'];
 const globals = {
 	__DEV__: true,
-	ILIB_BASE_PATH: iLibPkgs.find(f => fs.existsSync(path.join(pkg.path, f))),
+	ILIB_BASE_PATH: iLibPkgs.find(f => fs.existsSync(path.join(pkg.path, f))) || iLibPkgs[0],
 	ILIB_RESOURCES_PATH: 'resources',
 	ILIB_CACHE_ID: new Date().getTime() + '',
 	ILIB_MOONSTONE_PATH: 'node_modules/@enact/moonstone/resources'
