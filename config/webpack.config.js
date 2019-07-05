@@ -36,6 +36,11 @@ module.exports = function(env) {
 	// Load applicable .env files into environment variables.
 	require('./dotenv').load(app.context);
 
+	// Determine dynamic iLib location for aliasing
+	const iLib = ['ilib-webos-tv', '@enact/i18n/node_modules/ilib-webos-tv'].find(f =>
+		fs.existsSync(path.join(app.context, 'node_modules', f))
+	);
+
 	// Sets the browserslist default fallback set of browsers to the Enact default browser support list.
 	app.setEnactTargetsAsDefault();
 
@@ -156,7 +161,9 @@ module.exports = function(env) {
 			modules: [path.resolve('./node_modules'), 'node_modules'],
 			alias: {
 				// Support ilib shorthand alias for ilib modules
-				ilib: '@enact/i18n/node_modules/ilib-webos-tv/lib'
+				ilib$: '@enact/i18n',
+				ilib: iLib,
+				'@enact/i18n/ilib': iLib
 			}
 		},
 		// @remove-on-eject-begin
