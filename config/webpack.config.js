@@ -161,7 +161,7 @@ module.exports = function(env) {
 			modules: [path.resolve('./node_modules'), 'node_modules'],
 			// Backward compatibility for apps using new ilib references with old Enact
 			// and old apps referencing old iLib location with new Enact
-			alias: Object.assign({}, !iLib ? {ilib: '@enact/i18n/ilib'} : {'@enact/i18n/ilib': iLib})
+			alias: !iLib ? {ilib: '@enact/i18n/ilib'} : {'@enact/i18n/ilib': iLib}
 		},
 		// @remove-on-eject-begin
 		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
