@@ -159,10 +159,9 @@ module.exports = function(env) {
 			extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
 			// Allows us to specify paths to check for module resolving.
 			modules: [path.resolve('./node_modules'), 'node_modules'],
-			alias: {
-				// Backward compatibility for old iLib location
-				'@enact/i18n/ilib': iLib
-			}
+			// Backward compatibility for apps using new ilib references with old Enact
+			// and old apps referencing old iLib location with new Enact
+			alias: Object.assign({}, !iLib ? {ilib: '@enact/i18n/ilib'} : {'@enact/i18n/ilib': iLib})
 		},
 		// @remove-on-eject-begin
 		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the

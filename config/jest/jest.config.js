@@ -19,10 +19,15 @@ process.env.PUBLIC_URL = '';
 process.env.BROWSERSLIST = 'current node';
 
 const pkg = packageRoot();
-const iLibPkgs = ['node_modules/ilib', 'node_modules/@enact/i18n/node_modules/ilib'];
+const iLibDirs = [
+	'node_modules/ilib',
+	'node_modules/@enact/i18n/node_modules/ilib',
+	'node_modules/@enact/i18n/ilib',
+	'ilib'
+];
 const globals = {
 	__DEV__: true,
-	ILIB_BASE_PATH: iLibPkgs.find(f => fs.existsSync(path.join(pkg.path, f))) || iLibPkgs[0],
+	ILIB_BASE_PATH: iLibDirs.find(f => fs.existsSync(path.join(pkg.path, f))) || iLibDirs[0],
 	ILIB_RESOURCES_PATH: 'resources',
 	ILIB_CACHE_ID: new Date().getTime() + '',
 	ILIB_MOONSTONE_PATH: 'node_modules/@enact/moonstone/resources'
@@ -67,7 +72,9 @@ module.exports = {
 	moduleNameMapper: {
 		'^.+\\.module\\.(css|less)$': require.resolve('identity-obj-proxy'),
 		'^enzyme$': require.resolve('enzyme'),
-		// Backward compatibility for old iLib location
+		// Backward compatibility for new iLib location with old Enact
+		'^ilib[/](.*)$': path.join(pkg.path, globals.ILIB_BASE_PATH, '$1'),
+		// Backward compatibility for old iLib location with new Enact
 		'^@enact[/]i18n[/]ilib[/](.*)$': path.join(pkg.path, globals.ILIB_BASE_PATH, '$1')
 	},
 	moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx'],
