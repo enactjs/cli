@@ -19,7 +19,7 @@ process.env.PUBLIC_URL = '';
 process.env.BROWSERSLIST = 'current node';
 
 const pkg = packageRoot();
-const iLibPkgs = ['node_modules/ilib-webos-tv', 'node_modules/@enact/i18n/node_modules/ilib-webos-tv'];
+const iLibPkgs = ['node_modules/ilib', 'node_modules/@enact/i18n/node_modules/ilib'];
 const globals = {
 	__DEV__: true,
 	ILIB_BASE_PATH: iLibPkgs.find(f => fs.existsSync(path.join(pkg.path, f))) || iLibPkgs[0],
@@ -67,8 +67,7 @@ module.exports = {
 	moduleNameMapper: {
 		'^.+\\.module\\.(css|less)$': require.resolve('identity-obj-proxy'),
 		'^enzyme$': require.resolve('enzyme'),
-		'^ilib$': path.join(pkg.path, 'node_modules', '@enact', 'i18n', 'src', 'index.js'),
-		'^ilib[/](.*)$': path.join(pkg.path, globals.ILIB_BASE_PATH, '$1'),
+		// Backward compatibility for old iLib location
 		'^@enact[/]i18n[/]ilib[/](.*)$': path.join(pkg.path, globals.ILIB_BASE_PATH, '$1')
 	},
 	moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx'],

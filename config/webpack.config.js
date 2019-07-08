@@ -37,7 +37,7 @@ module.exports = function(env) {
 	require('./dotenv').load(app.context);
 
 	// Determine dynamic iLib location for aliasing
-	const iLib = ['ilib-webos-tv', '@enact/i18n/node_modules/ilib-webos-tv'].find(f =>
+	const iLib = ['ilib', '@enact/i18n/node_modules/ilib'].find(f =>
 		fs.existsSync(path.join(app.context, 'node_modules', f))
 	);
 
@@ -160,9 +160,7 @@ module.exports = function(env) {
 			// Allows us to specify paths to check for module resolving.
 			modules: [path.resolve('./node_modules'), 'node_modules'],
 			alias: {
-				// Support ilib shorthand alias for ilib modules
-				ilib$: '@enact/i18n',
-				ilib: iLib,
+				// Backward compatibility for old iLib location
 				'@enact/i18n/ilib': iLib
 			}
 		},
