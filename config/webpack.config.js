@@ -36,11 +36,6 @@ module.exports = function(env) {
 	// Load applicable .env files into environment variables.
 	require('./dotenv').load(app.context);
 
-	// Determine dynamic iLib location for aliasing
-	const iLib = ['ilib', '@enact/i18n/node_modules/ilib'].find(f =>
-		fs.existsSync(path.join(app.context, 'node_modules', f))
-	);
-
 	// Sets the browserslist default fallback set of browsers to the Enact default browser support list.
 	app.setEnactTargetsAsDefault();
 
@@ -161,7 +156,9 @@ module.exports = function(env) {
 			modules: [path.resolve('./node_modules'), 'node_modules'],
 			// Backward compatibility for apps using new ilib references with old Enact
 			// and old apps referencing old iLib location with new Enact
-			alias: !iLib ? {ilib: '@enact/i18n/ilib'} : {'@enact/i18n/ilib': iLib}
+			alias: !fs.existsSync(path.join(app.context, 'node_modules', 'ilib'))
+				? {ilib: '@enact/i18n/ilib'}
+				: {'@enact/i18n/ilib': 'ilib'}
 		},
 		// @remove-on-eject-begin
 		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the

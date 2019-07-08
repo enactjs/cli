@@ -19,12 +19,7 @@ process.env.PUBLIC_URL = '';
 process.env.BROWSERSLIST = 'current node';
 
 const pkg = packageRoot();
-const iLibDirs = [
-	'node_modules/ilib',
-	'node_modules/@enact/i18n/node_modules/ilib',
-	'node_modules/@enact/i18n/ilib',
-	'ilib'
-];
+const iLibDirs = ['node_modules/ilib', 'node_modules/@enact/i18n/ilib', 'ilib'];
 const globals = {
 	__DEV__: true,
 	ILIB_BASE_PATH: iLibDirs.find(f => fs.existsSync(path.join(pkg.path, f))) || iLibDirs[0],
