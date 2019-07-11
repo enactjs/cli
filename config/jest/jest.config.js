@@ -22,7 +22,7 @@ const pkg = packageRoot();
 const iLibDirs = ['node_modules/@enact/i18n/ilib', 'node_modules/ilib', 'ilib'];
 const globals = {
 	__DEV__: true,
-	ILIB_BASE_PATH: iLibDirs.find(f => fs.existsSync(path.join(pkg.path, f))) || iLibDirs[0],
+	ILIB_BASE_PATH: iLibDirs.find(f => fs.existsSync(path.join(pkg.path, f))) || iLibDirs[1],
 	ILIB_RESOURCES_PATH: 'resources',
 	ILIB_CACHE_ID: new Date().getTime() + '',
 	ILIB_MOONSTONE_PATH: 'node_modules/@enact/moonstone/resources'
