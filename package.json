@@ -1,6 +1,6 @@
 {
   "name": "@enact/cli",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Full-featured build environment tool for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
@@ -26,6 +26,16 @@
     "singleQuote": true,
     "bracketSpacing": false
   },
+  "keywords": [
+    "enact",
+    "toolkit",
+    "react",
+    "mobile",
+    "TV",
+    "LG",
+    "webOS",
+    "upupdowndownleftrightleftrightbastart"
+  ],
   "dependencies": {
     "@babel/core": "7.4.3",
     "@babel/plugin-proposal-class-properties": "7.4.0",
@@ -37,7 +47,7 @@
     "@babel/preset-env": "7.4.3",
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "7.3.3",
-    "@enact/dev-utils": "2.2.2",
+    "@enact/dev-utils": "2.3.0",
     "@enact/template-moonstone": "2.3.3",
     "acorn": "^6.0.0",
     "babel-core": "7.0.0-bridge.0",
