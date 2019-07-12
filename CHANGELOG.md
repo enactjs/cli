@@ -1,3 +1,7 @@
+## 2.4.0 (July 12, 2019)
+
+* Added support for `ilib` external NPM package (with backward compatibility for `@enact/i18n/ilib`).
+
 ## 2.3.1 (July 2, 2019)
 
 Fixed "Unexpected identifier" error on Node 6.x by using a compatible release of `find-cache-dir` subdependency.
