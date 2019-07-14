@@ -1,3 +1,7 @@
+## 2.4.1 (July 14, 2019)
+
+* Fixed alias prioritization for iLib to correctly locate/index iLib when build framework builds.
+
 ## 2.4.0 (July 12, 2019)
 
 * Added support for `ilib` external NPM package (with backward compatibility for `@enact/i18n/ilib`).
