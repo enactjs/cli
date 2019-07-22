@@ -28,7 +28,8 @@ module.exports = function(api) {
 						'web.timers',
 						'web.url',
 						'web.url.to-json',
-						'web.url-search-params'
+						'web.url-search-params',
+						'es.typed-array.to-locale-string'
 					],
 					forceAllTransforms: es5Standalone,
 					useBuiltIns: 'entry',
