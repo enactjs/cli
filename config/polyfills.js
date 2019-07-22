@@ -12,7 +12,7 @@ if (!global.skipPolyfills && !global._babelPolyfill) {
 	var origToLocaleString = Array.prototype.toLocaleString,
 		origTypedToLocaleString;
 	Array.prototype.toLocaleString = Array.prototype.toString;
-	if (global.Int8Array && Int8Array.prototype) {
+	if (global.Int8Array && Int8Array.prototype.toLocaleString) {
 		origTypedToLocaleString = Int8Array.prototype.toLocaleString;
 		Int8Array.prototype.toLocaleString = Int8Array.prototype.toString;
 	}
