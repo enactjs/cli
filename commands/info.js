@@ -5,7 +5,6 @@ const chalk = require('chalk');
 const spawn = require('cross-spawn');
 const minimist = require('minimist');
 const resolveSync = require('resolve').sync;
-const {optionParser: app} = require('@enact/dev-utils');
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -15,6 +14,7 @@ function displayHelp() {
 	console.log(`    ${e} [options]`);
 	console.log();
 	console.log('  Options');
+	console.log('    --dev             Include dev dependencies');
 	console.log('    --cli             Display CLI information');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
@@ -57,7 +57,7 @@ function gitInfo(dir) {
 	}
 }
 
-function api({cliInfo = false} = {}) {
+function api({cliInfo = false, dev = false} = {}) {
 	return new Promise((resolve, reject) => {
 		try {
 			if (cliInfo) {
@@ -87,13 +87,16 @@ function api({cliInfo = false} = {}) {
 				console.log(`LESS: ${require('less/package.json').version}`);
 				console.log(`Webpack: ${require('webpack/package.json').version}`);
 			} else {
+				const app = require('@enact/dev-utils').optionParser;
 				const meta = require(path.join(app.context, 'package.json'));
 				const bl = require(resolveSync('browserslist', {
-					basedir: path.dirname(require.resolve('@enact/dev-utils/package.json'))
+					basedir: path.dirname(require.resolve('@enact/dev-utils/package.json')),
+					preserveSymlinks: false
 				}));
 				app.setEnactTargetsAsDefault();
 				console.log(chalk.yellow.bold('==Project Info=='));
 				console.log(`Name: ${app.name}`);
+				console.log(`Version: ${gitInfo(app.context) || meta.version}`);
 				console.log(`Path: ${app.context}`);
 				console.log(`Theme: ${(app.theme || {}).name}`);
 				if (app.proxer) console.log(`Serve Proxy: ${app.proxy}`);
@@ -109,6 +112,13 @@ function api({cliInfo = false} = {}) {
 				Object.keys(meta.dependencies).forEach(dep => {
 					logVersion(dep, app.context);
 				});
+				if (dev && meta.devDependencies) {
+					console.log();
+					console.log(chalk.yellow.bold('==Dev Dependencies=='));
+					Object.keys(meta.devDependencies).forEach(dep => {
+						logVersion(dep, app.context);
+					});
+				}
 			}
 			resolve();
 		} catch (e) {
@@ -124,8 +134,7 @@ function cli(args) {
 	});
 	if (opts.help) displayHelp();
 
-	process.chdir(app.context);
-	api({cliInfo: opts.cli}).catch(err => {
+	api({cliInfo: opts.cli, dev: opts.dev}).catch(err => {
 		console.error(chalk.red('ERROR: ') + 'Failed to display info.\n' + err.message);
 		process.exit(1);
 	});
