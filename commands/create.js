@@ -249,7 +249,7 @@ function npmInstall(directory, verbose, ...rest) {
 
 function api(opts = {}) {
 	return resolveTemplateGenerator(opts.template).then(({generator, templatePath}) => {
-		const params = Object.assign({opts, defaultGenerator, type: generator.type}, opts);
+		const params = Object.assign({}, opts, {opts, defaultGenerator, type: generator.type});
 
 		return new Promise(resolve => resolve(generator.validate && generator.validate(params)))
 			.then(() => fs.ensureDir(opts.directory))
