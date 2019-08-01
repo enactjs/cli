@@ -84,3 +84,17 @@ class ILibXHR extends XHR {
 	}
 }
 global.XMLHttpRequest = ILibXHR;
+
+global.Element.prototype.animate = jest.fn().mockImplementation(() => {
+	const animation = {
+		onfinish: null,
+		cancel: () => {
+			if (animation.onfinish) animation.onfinish();
+		},
+		finish: () => {
+			if (animation.onfinish) animation.onfinish();
+		}
+	};
+
+	return animation;
+});
