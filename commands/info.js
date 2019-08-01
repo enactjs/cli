@@ -57,20 +57,48 @@ function gitInfo(dir) {
 	}
 }
 
+function globalModules() {
+	try {
+		const result = spawn.sync('npm', ['config', 'get', 'prefix', '-g'], {
+			cwd: process.cwd(),
+			env: process.env
+		});
+		if (result.error || result.status !== 0 || !(result.stdout = result.stdout.trim())) {
+			return require('global-modules');
+		} else if (process.platform === 'win32' || ['msys', 'cygwin'].includes(process.env.OSTYPE)) {
+			return path.resolve(result.stdout, 'node_modules');
+		} else {
+			return path.resolve(result.stdout, 'lib/node_modules');
+		}
+	} catch (e) {
+		return require('global-modules');
+	}
+}
+
 function api({cliInfo = false, dev = false} = {}) {
 	return new Promise((resolve, reject) => {
 		try {
 			if (cliInfo) {
-				console.log(chalk.yellow.bold('==Enact CLI Info=='));
 				// Display info on CLI itself
-				if (require.main.filename !== process.argv[1]) {
+				const gm = globalModules();
+				const gCLI = path.join(gm, '@enact', 'cli');
+				const isGlobal =
+					fs.existsSync(gCLI) &&
+					path.dirname(require.resolve(path.join(gCLI, 'package.json'))) === path.dirname(__dirname);
+				console.log(chalk.yellow.bold('==Enact CLI Info=='));
+				if (isGlobal && fs.lstatSync(gCLI).isSymbolicLink()) {
 					const ver = gitInfo(__dirname) || require('../package.json').version;
-					console.log(`@enact/cli: ${ver}`);
+					console.log(`Enact CLI: ${ver}`);
 					console.log(chalk.cyan('\tSymlinked from'), path.dirname(__dirname));
 				} else {
 					console.log(`@enact/cli: ${require('../package.json').version}`);
 				}
+				console.log(`Installed Globally: ${isGlobal}`);
+				if (isGlobal) console.log(`Global Modules: ${gm}`);
+				console.log();
+
 				// Display info on in-house components, likely to be linked in
+				console.log(chalk.yellow.bold('==Enact Components=='));
 				[
 					'@enact/dev-utils',
 					'eslint-config-enact',
