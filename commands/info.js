@@ -137,9 +137,11 @@ function api({cliInfo = false, dev = false} = {}) {
 				console.log(`Environment: ${app.environment}`);
 				console.log();
 				console.log(chalk.yellow.bold('==Dependencies=='));
-				Object.keys(meta.dependencies).forEach(dep => {
-					logVersion(dep, app.context);
-				});
+				if (meta.dependencies) {
+					Object.keys(meta.dependencies).forEach(dep => {
+						logVersion(dep, app.context);
+					});
+				}
 				if (dev && meta.devDependencies) {
 					console.log();
 					console.log(chalk.yellow.bold('==Dev Dependencies=='));
