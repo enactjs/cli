@@ -51,8 +51,11 @@ const bareTasks = {
 };
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact eject';
+
 	console.log('  Usage');
-	console.log('    enact eject [options]');
+	console.log(`    ${e} [options]`);
 	console.log();
 	console.log('  Options');
 	console.log('    -b, --bare        Abandon Enact CLI command enhancements');

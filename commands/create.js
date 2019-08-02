@@ -146,8 +146,11 @@ const defaultGenerator = {
 };
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact create';
+
 	console.log('  Usage');
-	console.log('    enact create [options] [<directory>]');
+	console.log(`    ${e} [options] [<directory>]`);
 	console.log();
 	console.log('  Arguments');
 	console.log('    directory         Optional destination directory');

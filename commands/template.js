@@ -14,8 +14,11 @@ const INCLUDED = path.dirname(require.resolve('@enact/template-moonstone'));
 const DEFAULT_LINK = path.join(TEMPLATE_DIR, 'default');
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact template';
+
 	console.log('  Usage');
-	console.log('    enact template <action> ...');
+	console.log(`    ${e} <action> ...`);
 	console.log();
 	console.log('  Actions');
 	console.log('    enact template install [source] [name]');
