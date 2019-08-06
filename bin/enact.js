@@ -59,6 +59,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 		case 'transpile':
 		case 'pack':
 		case 'clean':
+		case 'info':
 		case 'test':
 		case 'eject':
 		case 'template':
