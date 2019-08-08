@@ -21,8 +21,11 @@ const lessPlugins = [
 ];
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact transpile';
+
 	console.log('  Usage');
-	console.log('    enact transpile [options]');
+	console.log(`    ${e} [options]`);
 	console.log();
 	console.log('  Options');
 	console.log('    -i, --ignore      Pattern of filepaths to ignore');

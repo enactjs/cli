@@ -12,12 +12,6 @@ const fs = require('fs');
 const path = require('path');
 const {optionParser: app} = require('@enact/dev-utils');
 
-// Do this as the first thing so that any code reading it knows the right env.
-process.env.BABEL_ENV = 'test';
-process.env.NODE_ENV = 'test';
-process.env.PUBLIC_URL = '';
-process.env.BROWSERSLIST = 'current node';
-
 const iLibDirs = ['node_modules/@enact/i18n/ilib', 'node_modules/ilib', 'ilib'];
 const globals = {
 	__DEV__: true,
@@ -46,6 +40,15 @@ const ignorePatterns = [
 	'<rootDir>/(.*/)*build/',
 	'<rootDir>/(.*/)*dist/'
 ];
+
+// Setup env var to signify a testing environment
+process.env.BABEL_ENV = 'test';
+process.env.NODE_ENV = 'test';
+process.env.PUBLIC_URL = '';
+process.env.BROWSERSLIST = 'current node';
+
+// Load applicable .env files into environment variables.
+require('../dotenv').load(app.context);
 
 module.exports = {
 	collectCoverageFrom: ['**/*.{js,jsx,ts,tsx}', '!**/*.d.ts'],
