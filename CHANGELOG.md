@@ -1,3 +1,22 @@
+## 2.5.0 (August 12, 2019)
+
+### pack
+
+* Redesigned `option-parser` with encapsulated theme option support and environment variable overriding.
+* Fixed V8 snapshot failure when attempting to polyfill `<TypedArray>.toLocaleString`, but `Int8Array.prototype.toLocaleString` already exists.
+* Fixed bug where undefined `ri` values would result in `Infinity` pixel values.
+
+### test
+
+* Added mock support for `<Element>.animate`.
+* Added support for theme-based iLib resbundle resource paths.
+* Fixed `.env` files not being processed and loaded into `process.env`.
+
+### template
+
+* Added support for `type` template property (used during project creation messages if `prepare` is not overriden). Defaults to `'app'`.
+* Fixed bug where template function parameters `defaultGenerator` and `type` could be accidentally overriden via command line arguments.
+
 ## 2.4.1 (July 14, 2019)
 
 * Fixed alias prioritization for iLib to correctly locate/index iLib when build framework builds.
