@@ -1,13 +1,24 @@
-module.exports = {
-	create: require('./commands/create').api,
-	link: require('./commands/link').api,
-	pack: require('./commands/pack').api,
-	serve: require('./commands/serve').api,
-	clean: require('./commands/clean').ali,
-	lint: require('./commands/lint').api,
-	test: require('./commands/test').api,
-	eject: require('./commands/eject').api,
-	template: require('./commands/template').api,
-	transpile: require('./commands/transpile').api,
-	license: require('./commands/license').api
+const exportAPIs = commands => {
+	commands.forEach(name => {
+		Object.defineProperty(module.exports, name, {
+			configurable: false,
+			enumerable: true,
+			get: () => require(`./commands/${name}`).api
+		});
+	});
 };
+
+exportAPIs([
+	// List of commands to export via getters
+	'create',
+	'link',
+	'pack',
+	'serve',
+	'clean',
+	'lint',
+	'test',
+	'eject',
+	'template',
+	'transpile',
+	'license'
+]);
