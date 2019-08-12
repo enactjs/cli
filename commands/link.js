@@ -7,8 +7,11 @@ const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils').packageRoot;
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact link';
+
 	console.log('  Usage');
-	console.log('    enact link [options]');
+	console.log(`    ${e} [options]`);
 	console.log();
 	console.log('  Options');
 	console.log('    --verbose         Verbose output logging');
