@@ -1,3 +1,13 @@
+## 2.5.1 (September 4, 2019)
+
+### create
+
+* Updated moonstone template for Enact 3.0.0 release.
+
+### pack
+
+* Fixed V8 snapshotting when `ilib` external package is not found.
+
 ## 2.5.0 (August 12, 2019)
 
 ### pack
