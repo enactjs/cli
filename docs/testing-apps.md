@@ -3,7 +3,7 @@ title: Testing Apps
 order: 7
 ---
 ## Running Test Specs
-```
+```bash
   Usage
     enact test [options]
 

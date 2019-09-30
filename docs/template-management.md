@@ -3,7 +3,7 @@ title: Template Management
 order: 9
 ---
 ## Enact CLI Template Support
-```
+```bash
   Usage
     enact template <action> ...');
 

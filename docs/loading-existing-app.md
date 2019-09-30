@@ -6,7 +6,7 @@ order: 3
 
 Download the app's source code, usually, from a git repository. Make sure you have correct SSH access rights for the repo.  For example:
 
-```
+```bash
 git clone git@github.com:user/myapp.git
 ```
 
@@ -14,7 +14,7 @@ git clone git@github.com:user/myapp.git
 
 Enact apps are just like any other npm package. Navigate to the app's root directory (the base directory with the **package.json**). From there, you can install the dependencies the standard way:
 
-```
+```bash
 npm install
 ```
 

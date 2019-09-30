@@ -3,7 +3,7 @@ title: Serving Apps
 order: 6
 ---
 ## Development Server
-```
+```bash
   Usage
     enact serve [options]
 

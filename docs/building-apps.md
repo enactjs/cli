@@ -3,7 +3,7 @@ title: Building Apps
 order: 4
 ---
 ## Packaging Source Code
-```
+```bash
   Usage
     enact pack [options]
 
@@ -67,7 +67,7 @@ The following `.env` files will be processed, in overriding order:
 Ideally `.env` files **should be** checked into source control (with the exclusion of `.env*.local`).
 
 Each `.env` file supports internal variable expansion to allow for composing complex dynamic variables. For example:
-```
+```none
 REACT_APP_NAME=foobar
 REACT_APP_PATH=example/$REACT_APP_NAME
 ```
@@ -80,7 +80,7 @@ Note: Changing any environment variables will require you to restart the develop
 
 It's easiest to begin from the start with TypeScript by using the `typescript` template (`@enact/template-typescript` on NPM). To add TypeScript support to an existing project:
 
-```
+```bash
 npm install --save typescript @types/react @types/react-dom @types/jest
 ```
 
