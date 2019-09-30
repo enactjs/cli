@@ -4,7 +4,7 @@ order: 8
 ---
 ## Converting to a Standalone App Package
 
-```bash
+```none
   Usage
     enact eject [options]
 
