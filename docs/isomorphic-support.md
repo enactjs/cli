@@ -12,7 +12,7 @@ Having the initial app state as HTML allows the app to be visible as soon as the
 
 ## How to Create an Isomorphic Build
 Within your **package.json** file, add an `isomorphic` property to the `enact` object:
-```
+```json
 {
     ...
     "enact": {
@@ -25,7 +25,7 @@ Within your **package.json** file, add an `isomorphic` property to the `enact` o
 If the value is a string filepath instead, it will use that file as the main app entry point instead of the default. Whatever the entry point, ensure it exports the `ReactElement` in non-browser environments. Additionally, ensure the entry point also conditionally renders to to the DOM if the `window` is available.  An example **index.js** entry point can be see [here](https://github.com/enactjs/templates/blob/master/packages/moonstone/template/src/index.js) and is the default included in the Enact app template.
 
 Then, you can choose to build with isomorphic code layout by adding the `--isomorphic` flag to the pack command:
-```
+```bash
 enact pack --isomorphic
 npm pack -- --isomorphic
 npm pack-p -- --isomorphic
@@ -42,7 +42,7 @@ Generally, when a prerender fails, it's due to `window` or `document` being used
 > **Important Note**:
 > Prerendering requires an app to be coded such that it does not require access to `window` or `document` to create its initial state. The act of prerendering take place in a Node-based environment, so neither `window` nor `document` are available. 
 > If your app must use `document` or `window` in creation of its initial state, be sure to wrap those in if-statements to avoid prerender failure. For example:
-> ``` 
+> ```js
 >    if(typeof window !== 'undefined') {
 >        // able to access window
 >    } 
@@ -50,7 +50,7 @@ Generally, when a prerender fails, it's due to `window` or `document` being used
 
 ## Prerendering in Specific Locales
 While the app content built with Enact is designed to run for all locales, the prerendered **index.html** content is based on the `en-US` locale. While the page should load correctly on other locales, the `en-US`-based content will be visible to the user until the app is fully loaded/executed. Enact CLI provides command line options to alter and customize the locales that should be prerendered.  The `-l`/`--locales` option accepts a comma-separated list of locales, path to a file containing a JSON array of desired locales, or a preset name (e.g. `tv`, `signage`, `none`, etc.). For example:
-```
+```bash
 enact pack -i --locales=en-US,ko-KR
 enact pack -i --locales=my-locales.json
 enact pack -i --locales=tv

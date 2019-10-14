@@ -3,7 +3,7 @@ title: Template Management
 order: 9
 ---
 ## Enact CLI Template Support
-```
+```none
   Usage
     enact template <action> ...');
 

@@ -3,7 +3,7 @@ title: Starting a New App
 order: 2
 ---
 ## Generating the Base App Template
-```
+```none
   Usage
     enact create [options] [<directory>]
 

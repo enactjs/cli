@@ -9,7 +9,7 @@ Node 6.4 or later.
 ## Installation via npm
 
 Standard global installation of `@enact/cli` via npm.
-```sh
+```bash
 npm install -g @enact/cli
 ```
 
@@ -21,6 +21,6 @@ When installing under Linux, it may be necessary to prefix the install command w
 Additionally, if you receive an error when the install process attempts to install PhantomJS, try
 the following:
 
-```sh
+```bash
 sudo npm install -g --unsafe-perm @enact/cli
 ```
