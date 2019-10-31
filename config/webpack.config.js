@@ -143,9 +143,9 @@ module.exports = function(env) {
 			// Generated JS file names (with nested folders).
 			// There will be one main bundle, and one file per asynchronous chunk.
 			// We don't currently advertise code splitting but Webpack supports it.
-			filename: '[name].js',
+			filename: '[name].[contenthash:8].js',
 			// There are also additional JS chunk files if you use code splitting.
-			chunkFilename: 'chunk.[name].js',
+			chunkFilename: '[name].[contenthash:8].chunk.js',
 			// Add /* filename */ comments to generated require()s in the output.
 			pathinfo: !isEnvProduction
 		},
@@ -382,8 +382,8 @@ module.exports = function(env) {
 			// Note: this won't work without MiniCssExtractPlugin.loader in `loaders`.
 			!process.env.INLINE_STYLES &&
 				new MiniCssExtractPlugin({
-					filename: '[name].css',
-					chunkFilename: 'chunk.[name].css'
+					filename: '[name].[contenthash:8].css',
+					chunkFilename: '[name].[contenthash:8].chunk.css'
 				}),
 			// Ensure correct casing in module filepathes
 			new CaseSensitivePathsPlugin(),
