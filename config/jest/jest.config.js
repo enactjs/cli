@@ -76,6 +76,7 @@ module.exports = {
 	moduleNameMapper: {
 		'^.+\\.module\\.(css|less)$': require.resolve('identity-obj-proxy'),
 		'^enzyme$': require.resolve('enzyme'),
+		'^react$': require.resolve('react'),
 		// Backward compatibility for new iLib location with old Enact
 		'^ilib[/](.*)$': path.join(app.context, globals.ILIB_BASE_PATH, '$1'),
 		// Backward compatibility for old iLib location with new Enact
