@@ -94,6 +94,7 @@ function shouldTSLint(context) {
 		}
 	}
 	return false;
+}
 
 function tslint({fix = false} = {}, context) {
 	const args = ['-p', context];
