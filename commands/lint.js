@@ -9,7 +9,7 @@ const resolver = require('resolve');
 const {packageRoot} = require('@enact/dev-utils');
 
 const globOpts = {
-	ignore: ['node_modules/**', 'build/**', 'dist/**'],
+	ignore: ['node_modules/**', 'build/**', 'dist/**', 'docs/**', 'samples/**'],
 	nodir: true
 };
 
