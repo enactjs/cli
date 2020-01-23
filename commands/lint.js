@@ -46,6 +46,8 @@ function eslint({strict = false, local = false, fix = false, eslintArgs = []} = 
 		args.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact'));
 	}
 	args.push('--ignore-pattern', 'node_modules/*');
+	args.push('--ignore-pattern', 'docs/*');
+	args.push('--ignore-pattern', 'samples/*');
 	args.push('--ignore-pattern', 'build/*');
 	args.push('--ignore-pattern', 'dist/*');
 	if (fix) args.push('--fix');
