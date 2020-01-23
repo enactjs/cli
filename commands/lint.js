@@ -93,7 +93,7 @@ function shouldTSLint(context) {
 			}
 		}
 	}
-	return falsenodul}
+	return false;
 
 function tslint({fix = false} = {}, context) {
 	const args = ['-p', context];
