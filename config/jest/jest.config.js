@@ -38,7 +38,11 @@ const ignorePatterns = [
 	'/node_modules/',
 	'<rootDir>/(.*/)*coverage/',
 	'<rootDir>/(.*/)*build/',
-	'<rootDir>/(.*/)*dist/'
+	'<rootDir>/(.*/)*dist/',
+	'<rootDir>/(.*/)*docs/',
+	'<rootDir>/(.*/)*samples/',
+	'<rootDir>/(.*/)*tests/screenshot/',
+	'<rootDir>/(.*/)*tests/ui/'
 ];
 
 // Setup env var to signify a testing environment
