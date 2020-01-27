@@ -9,7 +9,7 @@ const minimist = require('minimist');
 const LessPluginRi = require('resolution-independence');
 const {optionParser: app} = require('@enact/dev-utils');
 
-const blacklist = ['node_modules', 'build', 'dist', '.git', '.gitignore'];
+const blacklist = ['node_modules', 'build', 'dist', 'docs', '.git', '.gitignore', 'samples', 'tests'];
 const babelConfig = path.join(__dirname, '..', 'config', 'babel.config.js');
 const babelRename = {original: '^(\\.(?!.*\\bstyles\\b.*).*)\\.less$', replacement: '$1.css'};
 
