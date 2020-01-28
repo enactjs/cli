@@ -9,7 +9,7 @@ const resolver = require('resolve');
 const {packageRoot} = require('@enact/dev-utils');
 
 const globOpts = {
-	ignore: ['**/node_modules/**', 'build/**', '**/dist/**', 'coverage/**'],
+	ignore: ['**/node_modules/**', 'build/**', '**/dist/**', 'coverage/**', 'tests/**'],
 	nodir: true
 };
 
@@ -50,6 +50,7 @@ function eslint({strict = false, local = false, fix = false, eslintArgs = []} = 
 	args.push('--ignore-pattern', 'build/*');
 	args.push('--ignore-pattern', '**/dist/*');
 	args.push('--ignore-pattern', 'coverage/*');
+	args.push('--ignore-pattern', 'tests/*');
 	if (fix) args.push('--fix');
 	if (eslintArgs.length) {
 		args = args.concat(eslintArgs);
