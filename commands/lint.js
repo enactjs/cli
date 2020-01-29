@@ -49,7 +49,9 @@ function eslint({strict = false, local = false, fix = false, eslintArgs = []} = 
 	args.push('--ignore-pattern', 'build/*');
 	args.push('--ignore-pattern', '**/dist/*');
 	args.push('--ignore-pattern', 'coverage/*');
-	args.push('--ignore-pattern', 'tests/*');
+	if (!local) {
+		args.push('--ignore-pattern', 'tests/*');
+	}
 	if (fix) args.push('--fix');
 	if (eslintArgs.length) {
 		args = args.concat(eslintArgs);
