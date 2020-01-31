@@ -11,7 +11,11 @@ function displayHelp() {
 	if (require.main !== module) e = 'enact link';
 
 	console.log('  Usage');
-	console.log(`    ${e} [options]`);
+	console.log(`    ${e} [options] [target]`);
+	console.log();
+	console.log('  Arguments');
+	console.log('    target            Optional target file or directory');
+	console.log('                          (default: cwd)');
 	console.log();
 	console.log('  Options');
 	console.log('    --loglevel        NPM log level to output');
