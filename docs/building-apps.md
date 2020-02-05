@@ -30,6 +30,24 @@ Run within an Enact project's source code, the `enact pack` command (aliased as 
 ## Production Mode
 By default, projects will build in development mode. When you're code is ready for deployment you can build in production mode. Production mode will minify the source code and remove dead code, along with numerous other minor code optimization strategies.
 
+## Browser Support & Polyfills
+The Enact CLI is designed to be compatible with a wide array of browsers and devices. [Browserslist standard](https://github.com/browserslist/browserslist) is used to handle targetting, with Enact's defaults being:
+
+* >1%
+* last 2 versions
+* last 5 Chrome versions
+* last 5 Firefox versions
+* Firefox ESR
+* not ie < 12
+* not ie_mob < 12
+* not dead
+
+For all projects built with Enact CLI, `core-js` polyfill is automatically included, so that all stable ECMAScript features are polyfilled across all target browsers. This means that only what's needed will be transpiled or polyfilled from `core-js`. The Bowserslist settings can be narrowed or widened at will via [`package.json` settings or `BROWSERSLIST` environment variable](https://github.com/browserslist/browserslist#queries). This means the newer the targetted browsers, the fewer the polyfills and less required transpiling.
+
+However keep in mind that `core-js` is solely for ECMAScript and does not polyfill any browser features. Features like this will need to be manually polyfilled in projects with app-level imports.  For example, to add web animation API, you could add the NPM dependency [`web-animations-js`](https://github.com/web-animations/web-animations-js) and import it at the top of your app's roor index.js source file.
+
+Note: Some ui libraries, like Moonstone, may have their own recommended supported browsers and may differ from the core Enact framework.
+
 ## \_\_DEV\_\_ Keyword
 In order to make development and debugging simpler, the enact cli supports a special `__DEV__` keyword in both javascript and LESS.
 
