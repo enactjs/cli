@@ -113,14 +113,21 @@ module.exports = function(env) {
 		return loaders;
 	};
 
-	const getLessStyleLoaders = cssLoaderOptions =>
-		getStyleLoaders(cssLoaderOptions, {
+	const getLessStyleLoaders = cssLoaderOptions => {
+		const s = getStyleLoaders(cssLoaderOptions, {
 			loader: require.resolve('less-loader'),
 			options: {
-				modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent),
+				modifyVars: Object.assign(
+					{__DEV__: !isEnvProduction},
+					process.env.ENACT_SKINS_DEV ? {'@enact-skin-name': JSON.stringify(process.env.ENACT_SKIN_NAME)} : null,
+					app.accent
+				),
 				sourceMap: shouldSourceMapStyles
 			}
 		});
+
+		return s;
+	};
 
 	return {
 		mode: isEnvProduction ? 'production' : 'development',
@@ -161,7 +168,7 @@ module.exports = function(env) {
 				fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
 					? {ilib: '@enact/i18n/ilib'}
 					: {'@enact/i18n/ilib': 'ilib'},
-				{ENACT_THEME_ROOT: path.join(app.context, 'skins')}
+				{ENACT_SKINS_ROOT: path.join(app.context, 'skins')}
 			)
 		},
 		// @remove-on-eject-begin
@@ -379,7 +386,8 @@ module.exports = function(env) {
 			// Otherwise React will be compiled in the very slow development mode.
 			new DefinePlugin({
 				'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
-				'process.env.PUBLIC_URL': JSON.stringify('.')
+				'process.env.PUBLIC_URL': JSON.stringify('.'),
+				'process.env.ENACT_SKINS': JSON.stringify(process.env.ENACT_SKINS)
 			}),
 			// Inject prefixed environment variables within code, when used
 			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
