@@ -12,6 +12,7 @@ exportAPIs([
 	// List of commands to export via getters
 	'create',
 	'link',
+	'bootstrap',
 	'pack',
 	'serve',
 	'clean',

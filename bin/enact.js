@@ -55,6 +55,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 	switch (command) {
 		case 'create':
 		case 'link':
+		case 'bootstrap':
 		case 'serve':
 		case 'transpile':
 		case 'pack':
@@ -76,6 +77,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 			console.log('  Commands');
 			console.log('    create            Create a new project');
 			console.log('    link              Link @enact dependencies');
+			console.log('    bootstrap         Install and link dependencies');
 			console.log('    serve             Development server');
 			console.log('    pack              Bundle source code');
 			console.log('    test              Test specs runner');
