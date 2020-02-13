@@ -1,3 +1,26 @@
+## 2.6.0 (February 12, 2020)
+
+Added new `bootstrap` command, which will act as a simplified shortcut to `npm install` and `enact link` a project, and the subsequently for every child project optionally within `./samples`, also run `npm install` and `enact link`. This is useful for theme repos like moonstone and sandstone.  If a project already has a `npm run bootstrap`, that will be executed instead of installing/linking, to allow compatibility with lerna monorepos.
+
+### pack
+
+* Fixed framework builds to properly include iLib source modules.
+
+### lint
+
+* Updated Enact ESLint config and plugin for ES2018 support and improved support for Enact prop-types.
+* Fixed issue where target file detection was falsly including node_modules in child directories.
+
+### test
+
+* Fixed situations with hooks where multiple copies of React could be loaded at once.
+* Narrowed testing scope to ignore `./docs`, `./samples`, `./tests/screenshot` and `./tests/ui` directories.
+
+### transpile
+
+* Narrowed transpiling scope to ignore `./docs`, `./samples` and `./tests` directories.
+
+
 ## 2.5.1 (September 4, 2019)
 
 ### create
@@ -50,11 +73,11 @@ Fixed "Unexpected identifier" error on Node 6.x by using a compatible release of
 
 ### serve
 
-Added `./__mocks__` project directory as an optional fallback directory for server asset contents (secondary to `./public`).
+* Added `./__mocks__` project directory as an optional fallback directory for server asset contents (secondary to `./public`).
 
 ## 2.2.0 (April 28, 2019)
 
-Updated all dependencies to latest releases.
+* Updated all dependencies to latest releases.
 
 ### pack
 
