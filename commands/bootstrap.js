@@ -37,7 +37,11 @@ function npmExec(args, cwd = process.cwd(), loglevel) {
 	});
 }
 
-function api({cwd = process.cwd(), loglevel, verbose = false} = {}) {
+function newline() {
+	console.log();
+}
+
+function api({cwd = process.cwd(), loglevel = 'error', verbose = false} = {}) {
 	const pkg = packageRoot(cwd);
 	const scripts = pkg.meta.scripts || {};
 
@@ -46,8 +50,8 @@ function api({cwd = process.cwd(), loglevel, verbose = false} = {}) {
 	if (scripts.bootstrap && scripts.bootstrap !== 'enact bootstrap') {
 		return npmExec(['run', 'bootstrap'], pkg.path, loglevel);
 	} else {
-		return npmExec(['install'], pkg.path, loglevel)
-			.then(() => link({cwd: pkg.path, loglevel, verbose}))
+		let onlyDev = false;
+		return Promise.resolve()
 			.then(() => {
 				const samples = path.join(pkg.path, 'samples');
 				if (fs.existsSync(samples)) {
@@ -55,8 +59,26 @@ function api({cwd = process.cwd(), loglevel, verbose = false} = {}) {
 						.readdirSync(samples)
 						.map(p => path.join(samples, p))
 						.filter(p => fs.existsSync(path.join(p, 'package.json')))
-						.reduce((result, p) => result.then(api({cwd: p, loglevel, verbose})), Promise.resolve());
+						.reduce((result, p) => {
+							const s = require(path.resolve(p, 'package.json'));
+							if (s.dependencies && s.dependencies[pkg.meta.name] === '../../') {
+								onlyDev = true;
+							}
+							return result.then(() => api({cwd: p, loglevel, verbose}));
+						}, Promise.resolve());
 				}
+			})
+			.then(() => {
+				console.log('Installing dependencies for', pkg.meta.name);
+				if (onlyDev) {
+					return npmExec(['install', '--only=dev'], pkg.path, loglevel).then(newline);
+				} else {
+					return npmExec(['install'], pkg.path, loglevel).then(newline);
+				}
+			})
+			.then(() => {
+				console.log('Symlinking Enact dependencies for', pkg.meta.name);
+				return link({cwd: pkg.path, loglevel, verbose}).then(newline);
 			});
 	}
 }
