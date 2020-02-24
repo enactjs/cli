@@ -50,7 +50,6 @@ function api({cwd = process.cwd(), loglevel = 'error', verbose = false} = {}) {
 	if (scripts.bootstrap && scripts.bootstrap !== 'enact bootstrap') {
 		return npmExec(['run', 'bootstrap'], pkg.path, loglevel);
 	} else {
-		let onlyDev = false;
 		return Promise.resolve()
 			.then(() => {
 				const samples = path.join(pkg.path, 'samples');
@@ -60,21 +59,13 @@ function api({cwd = process.cwd(), loglevel = 'error', verbose = false} = {}) {
 						.map(p => path.join(samples, p))
 						.filter(p => fs.existsSync(path.join(p, 'package.json')))
 						.reduce((result, p) => {
-							const s = require(path.resolve(p, 'package.json'));
-							if (s.dependencies && s.dependencies[pkg.meta.name] === '../../') {
-								onlyDev = true;
-							}
 							return result.then(() => api({cwd: p, loglevel, verbose}));
 						}, Promise.resolve());
 				}
 			})
 			.then(() => {
 				console.log('Installing dependencies for', pkg.meta.name);
-				if (onlyDev) {
-					return npmExec(['install', '--only=dev'], pkg.path, loglevel).then(newline);
-				} else {
-					return npmExec(['install'], pkg.path, loglevel).then(newline);
-				}
+				return npmExec(['install'], pkg.path, loglevel).then(newline);
 			})
 			.then(() => {
 				console.log('Symlinking Enact dependencies for', pkg.meta.name);
