@@ -59,6 +59,6 @@ module.exports = {
 		'import/no-duplicates': 2,
 		'import/extensions': [1, 'always', {js: 'never', json: 'always'}],
 		'import/newline-after-import': 1,
-		'import/order': [1, {'newlines-between': 'never'}]
+		'import/order': [1, {'newlines-between': 'never', 'groups': ["builtin", "external", "internal", "parent", "sibling", "index"]}]
 	}
 };
