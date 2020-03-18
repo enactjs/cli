@@ -8,29 +8,29 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+const fs = require('fs');
 const path = require('path');
-const {packageRoot} = require('@enact/dev-utils');
+const {optionParser: app} = require('@enact/dev-utils');
 
-// Do this as the first thing so that any code reading it knows the right env.
-process.env.BABEL_ENV = 'test';
-process.env.NODE_ENV = 'test';
-process.env.PUBLIC_URL = '';
-process.env.BROWSERSLIST = 'current node';
-
-const pkg = packageRoot();
+const iLibDirs = ['node_modules/@enact/i18n/ilib', 'node_modules/ilib', 'ilib'];
 const globals = {
 	__DEV__: true,
-	ILIB_BASE_PATH: 'node_modules/@enact/i18n/ilib',
+	ILIB_BASE_PATH: iLibDirs.find(f => fs.existsSync(path.join(app.context, f))) || iLibDirs[1],
 	ILIB_RESOURCES_PATH: 'resources',
-	ILIB_CACHE_ID: new Date().getTime() + '',
-	ILIB_MOONSTONE_PATH: 'node_modules/@enact/moonstone/resources'
+	ILIB_CACHE_ID: new Date().getTime() + ''
 };
 
-if (pkg.meta.name === '@enact/moonstone') {
+for (let t = app.theme; t; t = t.theme) {
+	const themeEnv = path
+		.basename(t.name)
+		.replace(/[-_\s]/g, '_')
+		.toUpperCase();
+	globals[themeEnv] = path.relative(app.context, path.join(t.path, 'resources')).replace(/\\/g, '/');
+}
+
+if (app.name === '@enact/moonstone') {
 	globals.ILIB_MOONSTONE_PATH = 'resources';
 	globals.ILIB_RESOURCES_PATH = '_resources_';
-} else if (pkg.meta.name === '@enact/i18n') {
-	globals.ILIB_BASE_PATH = 'ilib';
 }
 
 const ignorePatterns = [
@@ -38,8 +38,21 @@ const ignorePatterns = [
 	'/node_modules/',
 	'<rootDir>/(.*/)*coverage/',
 	'<rootDir>/(.*/)*build/',
-	'<rootDir>/(.*/)*dist/'
+	'<rootDir>/(.*/)*dist/',
+	'<rootDir>/(.*/)*docs/',
+	'<rootDir>/(.*/)*samples/',
+	'<rootDir>/(.*/)*tests/screenshot/',
+	'<rootDir>/(.*/)*tests/ui/'
 ];
+
+// Setup env var to signify a testing environment
+process.env.BABEL_ENV = 'test';
+process.env.NODE_ENV = 'test';
+process.env.PUBLIC_URL = '';
+process.env.BROWSERSLIST = 'current node';
+
+// Load applicable .env files into environment variables.
+require('../dotenv').load(app.context);
 
 module.exports = {
 	collectCoverageFrom: ['**/*.{js,jsx,ts,tsx}', '!**/*.d.ts'],
@@ -67,8 +80,11 @@ module.exports = {
 	moduleNameMapper: {
 		'^.+\\.module\\.(css|less)$': require.resolve('identity-obj-proxy'),
 		'^enzyme$': require.resolve('enzyme'),
-		'^ilib$': path.join(pkg.path, globals.ILIB_BASE_PATH, 'lib', 'ilib.js'),
-		'^ilib[/\\\\](.*)$': path.join(pkg.path, globals.ILIB_BASE_PATH, 'lib', '$1')
+		'^react$': require.resolve('react'),
+		// Backward compatibility for new iLib location with old Enact
+		'^ilib[/](.*)$': path.join(app.context, globals.ILIB_BASE_PATH, '$1'),
+		// Backward compatibility for old iLib location with new Enact
+		'^@enact[/]i18n[/]ilib[/](.*)$': path.join(app.context, globals.ILIB_BASE_PATH, '$1')
 	},
 	moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx'],
 	globals

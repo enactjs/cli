@@ -4,7 +4,7 @@ order: 8
 ---
 ## Converting to a Standalone App Package
 
-```
+```none
   Usage
     enact eject [options]
 
@@ -24,7 +24,7 @@ A question that may come up during the course of development is whether to eject
 ## Post-Eject Development Environment
 
 Once an app is ejected, its structure will be changed fairly noticeable. All the polyfills and development tools (babel, webpack, less, jest, eslint, etc.) will be added to the **package.json** and the run-scripts will be updated to use them.  Afterwards, your project should look like this:
-```
+```none
 my-app/
   README.md
   .gitignore

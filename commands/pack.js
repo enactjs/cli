@@ -177,11 +177,13 @@ function watch(config) {
 
 function api(opts = {}) {
 	if (opts.meta) {
-		let meta;
-		try {
-			meta = JSON.parse(opts.meta);
-		} catch (e) {
-			throw new Error('Invalid metadata; must be a valid JSON string.\n' + e.message);
+		let meta = opts.meta;
+		if (typeof meta === 'string') {
+			try {
+				meta = JSON.parse(opts.meta);
+			} catch (e) {
+				throw new Error('Invalid metadata; must be a valid JSON string.\n' + e.message);
+			}
 		}
 		app.applyEnactMeta(meta);
 	}

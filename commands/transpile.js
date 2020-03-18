@@ -9,7 +9,7 @@ const minimist = require('minimist');
 const LessPluginRi = require('resolution-independence');
 const {optionParser: app} = require('@enact/dev-utils');
 
-const blacklist = ['node_modules', 'build', 'dist', '.git', '.gitignore'];
+const blacklist = ['node_modules', 'build', 'dist', 'docs', '.git', '.gitignore', 'samples', 'tests'];
 const babelConfig = path.join(__dirname, '..', 'config', 'babel.config.js');
 const babelRename = {original: '^(\\.(?!.*\\bstyles\\b.*).*)\\.less$', replacement: '$1.css'};
 
@@ -21,8 +21,11 @@ const lessPlugins = [
 ];
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact transpile';
+
 	console.log('  Usage');
-	console.log('    enact transpile [options]');
+	console.log(`    ${e} [options]`);
 	console.log();
 	console.log('  Options');
 	console.log('    -i, --ignore      Pattern of filepaths to ignore');

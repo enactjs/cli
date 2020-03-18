@@ -1,19 +1,83 @@
+## 2.6.0 (February 12, 2020)
+
+Added new `bootstrap` command, which will act as a simplified shortcut to `npm install` and `enact link` a project, and the subsequently for every child project optionally within `./samples`, also run `npm install` and `enact link`. This is useful for theme repos like moonstone and sandstone.  If a project already has a `npm run bootstrap`, that will be executed instead of installing/linking, to allow compatibility with lerna monorepos.
+
+### pack
+
+* Fixed framework builds to properly include iLib source modules.
+
+### lint
+
+* Updated Enact ESLint config and plugin for ES2018 support and improved support for Enact prop-types.
+* Fixed issue where target file detection was falsly including node_modules in child directories.
+
+### test
+
+* Fixed situations with hooks where multiple copies of React could be loaded at once.
+* Narrowed testing scope to ignore `./docs`, `./samples`, `./tests/screenshot` and `./tests/ui` directories.
+
+### transpile
+
+* Narrowed transpiling scope to ignore `./docs`, `./samples` and `./tests` directories.
+
+
+## 2.5.1 (September 4, 2019)
+
+### create
+
+* Updated moonstone template for Enact 3.0.0 release.
+
+### pack
+
+* Fixed V8 snapshotting when `ilib` external package is not found.
+
+## 2.5.0 (August 12, 2019)
+
+### pack
+
+* Redesigned `option-parser` with encapsulated theme option support and environment variable overriding.
+* Fixed V8 snapshot failure when attempting to polyfill `<TypedArray>.toLocaleString`, but `Int8Array.prototype.toLocaleString` already exists.
+* Fixed bug where undefined `ri` values would result in `Infinity` pixel values.
+
+### test
+
+* Added mock support for `<Element>.animate`.
+* Added support for theme-based iLib resbundle resource paths.
+* Fixed `.env` files not being processed and loaded into `process.env`.
+
+### template
+
+* Added support for `type` template property (used during project creation messages if `prepare` is not overridden). Defaults to `'app'`.
+* Fixed bug where template function parameters `defaultGenerator` and `type` could be accidentally overridden via command line arguments.
+
+## 2.4.1 (July 14, 2019)
+
+* Fixed alias prioritization for iLib to correctly locate/index iLib when build framework builds.
+
+## 2.4.0 (July 12, 2019)
+
+* Added support for `ilib` external NPM package (with backward compatibility for `@enact/i18n/ilib`).
+
+## 2.3.1 (July 2, 2019)
+
+Fixed "Unexpected identifier" error on Node 6.x by using a compatible release of `find-cache-dir` sub-dependency.
+
 ## 2.3.0 (June 10, 2019)
 
 ### pack
 
 * Added React hook linting to help with adhering to the [rules of hooks](https://reactjs.org/docs/hooks-rules.html).
-* Updated polyfills to the `core-js/stable` stable featureset rather than all stable+draft polyfills.
+* Updated polyfills to the `core-js/stable` stable feature set rather than all stable+draft polyfills.
 * Updated default browserslist config from `last 2` stable versions of Chrome and Firefox to `last 5`.
 * Fixed build failing when prerendering for multiple locales.
 
 ### serve
 
-Added `./__mocks__` project directory as an optional allback directory for server asset contents (secondary to `./public`).
+* Added `./__mocks__` project directory as an optional fallback directory for server asset contents (secondary to `./public`).
 
 ## 2.2.0 (April 28, 2019)
 
-Updated all dependencies to latest releases.
+* Updated all dependencies to latest releases.
 
 ### pack
 
@@ -40,8 +104,8 @@ Updated all Babel dependencies up to 7.3.x to fix edge-case errors with `let` ke
 
 ### pack
 
-* Added support for a `public` directory, where static assets within are copied, at buildtime, to `./dist`.
-* Added support for `process.env.PUBLIC_URL` which is hardcode to `'.'`, for consistency with 3rd party standards.
+* Added support for a `public` directory, where static assets within are copied, at build time, to `./dist`.
+* Added support for `process.env.PUBLIC_URL` which is hardcoded to `'.'`, for consistency with 3rd party standards.
 
 ### serve
 
@@ -81,17 +145,17 @@ Updated all dependencies to latest releases and added support for TypeScript. In
 * Added support for stage-3 CSS via `postcss-preset-env`, with `custom-properties` temporarily disabled while a bug is being resolved.
 * Added support for `.env` fileformat to declare environment variables for parsing/app-embedding.
 * Added support for TypeScript compilation.
-* Added opt-in support for TypeScript typechecking at buildtime (via `typescript` app-side dependency).
+* Added opt-in support for TypeScript type checking at build time (via `typescript` app-side dependency).
 * Additional CSS optimization applied via `optimize-css-assets-webpack-plugin`.
 * Modified Babel configuration to use built-in APIs rather than transpiling mini re-implementations.
 * Modified CSS file handling to only process modular CSS on the `.module.css` extension.
-* Modified LESS file handling to be independence (only running LESS files through the LESS compiler), with `.module.lesas` file extension enabled modular context.
+* Modified LESS file handling to be independence (only running LESS files through the LESS compiler), with `.module.less` file extension enabled modular context.
 * Switched from `less-plugin-resolution-independence` to `postcss-plugin-resolution-independence` to apply to both LESS and CSS build chains.
 * Switched from `uglifyjs-webpack-plugin` to `terser-webpack-plugin` as Uglify is no longer actively developed.
 * Switched from `extract-text-webpack-plugin` to `mini-css-extract-plugin` for CSS content output.
 * Removed direct autoprefixer usage as `postcss-preset-env` contains embedded support.
 * Removed support for `.__DEV__` CSS class and replaced it with `@__DEV__` LESS variable for usage as a CSS guard.
-* Removed legacy custom browser targetting format and now following `browserslist` standard for desclaring supporting browsers.
+* Removed legacy custom browser targeting format and now following `browserslist` standard for declaring supporting browsers.
 
 ### lint
 
@@ -101,7 +165,7 @@ Updated all dependencies to latest releases and added support for TypeScript. In
 
 * Replaced Karma/PhantomJS/Mocha/DirtyChai testing stack with a Jest-based alternative implementation.
   * Supports Jest options like `--watch` and `--coverage` as a result.
-* Removed custom Enzyme webpack plugin since we can pre-setup Enyme directly for Jest usage.
+* Removed custom Enzyme webpack plugin since we can pre-setup Enzyme directly for Jest usage.
 * Removed Sinon in favour of Jest built-in mocking/spy functionality.
 
 ### transpile
@@ -140,11 +204,11 @@ Updated all dependencies to latest releases and added support for TypeScript. In
 
 ### pack
 
-* Added new option `--verbose` which outputs detailed build information as the process ocurrs, for specific information on what modules are being process and when.
+* Added new option `--verbose` which outputs detailed build information as the process occurs, for specific information on what modules are being process and when.
 * Added support for dynamically injecting `REACT_APP_` prefixed environment variables into app code, when used under `process.env`.
 * Added support for `@global-import "<file>";` syntax to import CSS files in a global context.
 * Added support for boolean flag option `externalStartup` in the enact options in a project's `package.json`. When true, any prerender startup scripts will be external file assets, rather than embedded inline javascript.
-* Fixed `@babel/polyfill` failing to be transpiled into targetted `core-js` components. Additionally now ensures polyfills aren't loaded more than once.
+* Fixed `@babel/polyfill` failing to be transpiled into targeted `core-js` components. Additionally now ensures polyfills aren't loaded more than once.
 * Fixed v8 snapshot support for React 16.4.1.
 * Relocated the old `./config/proptype-checker.js` into its own standalone [`mocha-react-proptype-checker`](https://www.npmjs.com/package/mocha-react-proptype-checker) package.
 * Production mode limits the UglifyJS options to ECMA 5 optimizations only.
@@ -156,7 +220,7 @@ Updated all dependencies to latest releases and added support for TypeScript. In
 
 ### template
 
-* Relocated default moonstone app template into a separate standalone [@enact/template-moonstone](https://www.npmjs.com/package/@enact/template-moonstone) package depdendency.
+* Relocated default moonstone app template into a separate standalone [@enact/template-moonstone](https://www.npmjs.com/package/@enact/template-moonstone) package dependency.
 
 ### eject
 
@@ -225,13 +289,13 @@ Enact CLI source code now updated for [`eslint-plugin-import`](https://github.co
 
 ### transpile
 
-* Added support for `-i`/`--ignore` regex string to ignore filepathes when transpiling/copying.
+* Added support for `-i`/`--ignore` regex string to ignore filepaths when transpiling/copying.
 
 ### pack
 
 * Added support for targeted builds. Can be set via a `target` enact `package.json` property or via [Browserslist](https://github.com/ai/browserslist) format.
 * Added support for Electron build target.
-* Switched to use `@babel/preset-env` and `@babel/polyfill` for on-demand transpiling/polyfilling to targetted build platforms.
+* Switched to use `@babel/preset-env` and `@babel/polyfill` for on-demand transpiling/polyfilling to targeted build platforms.
 * Production mode build uses `uglifyjs-webpack-plugin` to support ES6-based minification (until the upgrade to webpack 4)
 * Dynamic handling of the `enact` options with `package.json`, with support for `theme` preset values that simplify setup of for given Enact GUI theme libraries.
 * Allow `electron-renderer` webpack target to support `browser` as a main field.
@@ -309,13 +373,13 @@ Locked down dependencies to avoid potential regressions in patch updates to depe
 	* Array of screen literal values (empty array fo no screen types to pass)
 	* String filepath to a local project json file
 	* String path to a dependency module json file
-	* Undefined/falsey to fallback to default Moonstone
+	* Undefined/falsy to fallback to default Moonstone
 * Added support for `deep` option within the `enact` object in the `package.json`. It represents 1 or more javascript conditions that, when met, indicate the page load was originating from an external deep link, and the prerender should not be shown (as the initial state of the window will not be the prerendered content). This can be a string or a string array.
 
 ## 0.9.0 (August 21, 2017)
 
-Dependencies updated to latestly release, including support for Webpack 3.x.
-Codebased updated for ES6 syntax and the minimum version is NodeJS is now 6.4.0.
+Dependencies updated to latest release, including support for Webpack 3.x.
+Codebase updated for ES6 syntax and the minimum version is NodeJS is now 6.4.0.
 
 ### create
 
@@ -331,7 +395,7 @@ Codebased updated for ES6 syntax and the minimum version is NodeJS is now 6.4.0.
 * Output error messages after build and have watcher mode disable bailing to ensure webpack doesn't exit during watching.
 * Properly bail on error and properly avoid bailing on `--watch` flag.
 * Disable module traces when errors occur.
-* Show any warnings sucessful `pack` executions (not just when there are errors).
+* Show any warnings successful `pack` executions (not just when there are errors).
 * Uses the `react-dev-utils` eslint formatter for displaying eslint warnings and errors.
 * Limited `autoprefixer` flexbox prefixing to final and IE versions of flexbox implementation.
 * Added support for `postcss-flexbugs-fixes` to automatically fix known platform-specific flexbox issues with workarounds.
@@ -411,7 +475,7 @@ Added support for a link command (`enact link`) as a shorthand to link in Enact 
 * Added support for appinfo.json sysAssetsBasePath and $-prefix in webos-meta-webpack-plugin.
 * Will now warn about performance when building in development mode.
 * HTML template will now be used in all situations and can be customized as desired.
-* Vastly rewritten isomorphic app prerendering support with improved reliability and mmemory management.
+* Vastly rewritten isomorphic app prerendering support with improved reliability and memory management.
 * Depreciated prerendering of isomorphic apps within the HTML template has been removed. Please ensure all app entrypoints are able to self-render. See [this example](https://github.com/enactjs/cli/blob/master/template/src/index.js).
 
 ### test
@@ -434,7 +498,7 @@ All enact-dev dependencies have been updated to latest applicable revisions. If 
 
 * Transitioned from the iLib-loader to a new iLibPlugin with enhanced support for compilation-unique caching in Enact 1.0.0-beta.3. This is *not* backward compatible; please update to Enact 1.0.0-beta.3 or use an earlier release of enact-dev.
 * Supports code splitting/lazy-loading via ES6 `import()` syntax (limited to static string values).
-* WebOSMetaPlugin updated to support dynamicalling adding `usePrerendering:true` to appinfo.json files as needed.
+* WebOSMetaPlugin updated to support dynamically adding `usePrerendering:true` to appinfo.json files as needed.
 
 ### test
 
@@ -483,7 +547,7 @@ Several additional documentation files have been added to the `docs` directory, 
 
 ### pack
 
-* Added primary support for singluar entrypoints for both regular and isomorphic code layouts.
+* Added primary support for singular entrypoints for both regular and isomorphic code layouts.
 * Refactored build customization features (like `--isomorphic` and `--stats`) into separate files and cleaned up the implementations.
 * Depreciated isomorphic HTML-side rendering. Isomorphic entrypoints should render to the DOM when in a browser environment.
 
@@ -541,7 +605,7 @@ Several additional documentation files have been added to the `docs` directory, 
 
 ## 0.2.0 (October 21, 2016)
 
-* Refactored entire project into a dedicated standalone global CLI with features/functionality integrated from 
+* Refactored entire project into a dedicated standalone global CLI with features/functionality integrated from
 [create-react-app](https://github.com/facebookincubator/create-react-app)
 
 ### init
@@ -553,13 +617,13 @@ Several additional documentation files have been added to the `docs` directory, 
 * Template updated for Enact 1.0.0-alpha.2
 * The package.json and appinfo.json will update their respective `name`/`id` to the project directory's name.
 * Added `--verbose` flag option to provide detailed logging.
-* Added `--link` flag option to link any dependencies that have been `npm link` rathen than install.
+* Added `--link` flag option to link any dependencies that have been `npm link` rather than install.
 * Added `--local` flag option to include enact-dev as a local devDependency (not recommended for general usage).
-* Rennovated user interface with basic NPM script usage information included.
+* Renovated user interface with basic NPM script usage information included.
 
 ### pack
 
-* Switched from using `babel-polyfill` to a more simplified set of polyfills covering Promise, Object.assign, 
+* Switched from using `babel-polyfill` to a more simplified set of polyfills covering Promise, Object.assign,
   String.prototype.codePointAt, String.fromCodePoint, Math.sign, and Fetch APIs
 * Scans files with ESLint as part of the build process, failing on errors.
 * Switched from OS-level to a local ./node_modules/.cache/ location for babel caching in development mode.
@@ -567,16 +631,16 @@ Several additional documentation files have been added to the `docs` directory, 
 * Supports development-only CSS class `.__DEV__` which will exist withing development builds but be removed in production
   builds.
 * Includes CaseSensitivePathsPlugin to ensure paths meet case-sensitive requirements regardless of system.
-* Converted webos-meta-loader into a standalone plugin that will autodetect the appinfo.json and ensure its webOS meta assets get
-  copied over during buildtime. Additionally, if an appinfo.json is found, the `title` value will be inserted into the output
+* Converted webos-meta-loader into a standalone plugin that will auto-detect the appinfo.json and ensure its webOS meta assets get
+  copied over during build time. Additionally, if an appinfo.json is found, the `title` value will be inserted into the output
   HTML `<title></title>`.
 * PrerenderPlugin now handles Node-based Fetch API to allow isomorphic fetch operations (via @enact/fetch).
-* PrerenderPlugin will output a stack strace on failure and allow continue the build without prerendering.
+* PrerenderPlugin will output a stack trace on failure and allow continue the build without prerendering.
 * Isomorphic build format is no longer its own mode, but is now a `-i`/`--isomorphic` flag option, which will apply isomorphic layout
   to whatever the active build mode is (development or production). When the flag is present, the `isomorphic` package.json enact property
   will be used as the entrypoint.
 * The `prerender` enact property within package.json has been renamed `isomorphic` for clarity (backward compatible)
-* Simplified console output, detailing output files, filesizes, and changes in size from previous build.
+* Simplified console output, detailing output files, file sizes, and changes in size from previous build.
 
 ### serve
 

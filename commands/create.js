@@ -18,13 +18,14 @@ const minimist = require('minimist');
 const validatePackageName = require('validate-npm-package-name');
 
 const ENACT_DEV_NPM = '@enact/cli';
-const CORE_JS_NPM = 'core-js@2';
+const CORE_JS_NPM = 'core-js@3';
 const INCLUDED = path.dirname(require.resolve('@enact/template-moonstone'));
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 
 const defaultGenerator = {
 	overwrite: false,
 	install: true,
+	type: 'app',
 	validate: ({template, name}) => {
 		const validation = validatePackageName(name);
 
@@ -53,7 +54,7 @@ const defaultGenerator = {
 			}
 		}
 	},
-	prepare: ({directory, name}) => {
+	prepare: ({directory, name, type}) => {
 		// After the workspace is ensured to exist, but before template is copied
 		const validFiles = [
 			// Generic project fragments and outside tool configs.
@@ -82,9 +83,9 @@ const defaultGenerator = {
 		];
 		const rel = path.relative(process.cwd(), directory);
 		if (!rel || rel === '.') {
-			console.log('Creating a new Enact app...');
+			console.log(`Creating a new Enact ${type}...`);
 		} else {
-			console.log(`Creating a new Enact app in ${rel}...`);
+			console.log(`Creating a new Enact ${type} in ${rel}...`);
 		}
 
 		console.log();
@@ -146,8 +147,11 @@ const defaultGenerator = {
 };
 
 function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact create';
+
 	console.log('  Usage');
-	console.log('    enact create [options] [<directory>]');
+	console.log(`    ${e} [options] [<directory>]`);
 	console.log();
 	console.log('  Arguments');
 	console.log('    directory         Optional destination directory');
@@ -248,7 +252,7 @@ function npmInstall(directory, verbose, ...rest) {
 
 function api(opts = {}) {
 	return resolveTemplateGenerator(opts.template).then(({generator, templatePath}) => {
-		const params = Object.assign({opts, defaultGenerator}, opts);
+		const params = Object.assign({}, opts, {opts, defaultGenerator, type: generator.type});
 
 		return new Promise(resolve => resolve(generator.validate && generator.validate(params)))
 			.then(() => fs.ensureDir(opts.directory))
