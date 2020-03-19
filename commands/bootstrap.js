@@ -22,6 +22,7 @@ function displayHelp() {
 	console.log('    -a, --allsamples  NPM install all sample packages');
 	console.log('    -l, --link        After install, attempt to link any available');
 	console.log('                      enact-scoped dependencies');
+	console.log('    --loglevel        NPM log level to output');
 	console.log('    --verbose         Verbose output logging');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
