@@ -5,7 +5,7 @@ const spawn = require('cross-spawn');
 const fs = require('fs-extra');
 const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils').packageRoot;
-const link = require('./link').api;
+const doLink = require('./link').api;
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -15,7 +15,13 @@ function displayHelp() {
 	console.log(`    ${e} [options]`);
 	console.log();
 	console.log('  Options');
-	console.log('    --loglevel        NPM log level to output');
+	console.log('    -b, --base        NPM install root level package');
+	console.log('                      (enabled by default)');
+	console.log('    -s, --sampler     NPM install sampler package');
+	console.log('                      (enabled by default)');
+	console.log('    -a, --allsamples  NPM install all sample packages');
+	console.log('    -l, --link        After install, attempt to link any available');
+	console.log('                      enact-scoped dependencies');
 	console.log('    --verbose         Verbose output logging');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
@@ -41,44 +47,77 @@ function newline() {
 	console.log();
 }
 
-function api({cwd = process.cwd(), loglevel = 'error', verbose = false} = {}) {
+function api({
+	cwd = process.cwd(),
+	base = true,
+	sampler = true,
+	allsamples = false,
+	link = true,
+	loglevel = 'error',
+	verbose = false
+} = {}) {
 	const pkg = packageRoot(cwd);
-	const scripts = pkg.meta.scripts || {};
 
 	if (verbose) loglevel = 'verbose';
 
-	if (scripts.bootstrap && scripts.bootstrap !== 'enact bootstrap') {
-		return npmExec(['run', 'bootstrap'], pkg.path, loglevel);
-	} else {
-		return Promise.resolve()
-			.then(() => {
+	return Promise.resolve()
+		.then(() => {
+			// Root package install
+			if (base) {
+				console.log('Installing dependencies for', pkg.meta.name);
+				return npmExec(['install'], pkg.path, loglevel).then(newline);
+			}
+		})
+		.then(() => {
+			// Run bootstrap npm command if present, otherwise attempt to detect
+			// and install desired child packages (sampler, samples, etc.)
+			const {scripts = {}} = pkg.meta;
+			if (scripts.bootstrap && !scripts.bootstrap.startsWith('enact bootstrap')) {
+				return npmExec(['run', 'bootstrap'], pkg.path, loglevel);
+			} else {
 				const samples = path.join(pkg.path, 'samples');
 				if (fs.existsSync(samples)) {
 					return fs
 						.readdirSync(samples)
+						.filter(p => (p === 'sampler' && sampler) || allsamples)
 						.map(p => path.join(samples, p))
 						.filter(p => fs.existsSync(path.join(p, 'package.json')))
 						.reduce((result, p) => {
-							return result.then(() => api({cwd: p, loglevel, verbose}));
+							return result.then(() =>
+								api({
+									cwd: p,
+									base: true,
+									sampler,
+									allsamples,
+									link,
+									loglevel,
+									verbose
+								})
+							);
 						}, Promise.resolve());
 				}
-			})
-			.then(() => {
-				console.log('Installing dependencies for', pkg.meta.name);
-				return npmExec(['install'], pkg.path, loglevel).then(newline);
-			})
-			.then(() => {
-				console.log('Symlinking Enact dependencies for', pkg.meta.name);
-				return link({cwd: pkg.path, loglevel, verbose}).then(newline);
-			});
-	}
+			}
+		})
+		.then(() => {
+			// Link any global @enact/* packages that are dependencies for this package.
+			if (link) {
+				// no need to link if no @enact dependencies
+				const {dependencies = {}, devDependencies = {}} = pkg.meta;
+				const deps = Object.keys(Object.assign({}, dependencies, devDependencies));
+				if (deps.some(d => d.startsWith('@enact'))) {
+					console.log('Symlinking Enact dependencies for', pkg.meta.name);
+					return doLink({cwd: pkg.path, loglevel, verbose}).then(newline);
+				}
+			}
+		});
 }
 
 function cli(args) {
 	const opts = minimist(args, {
-		boolean: ['verbose', 'help'],
+		boolean: ['base', 'sampler', 'allsamples', 'link', 'verbose', 'help'],
 		string: ['loglevel'],
-		alias: {h: 'help'}
+		default: {base: true, sampler: true, link: true},
+		alias: {b: 'base', s: 'sampler', a: 'allsamples', l: 'link', h: 'help'}
 	});
 	if (opts.help) displayHelp();
 
