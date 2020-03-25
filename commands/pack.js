@@ -123,7 +123,10 @@ function printFileSizes(stats, output) {
 			};
 		});
 	assets.sort((a, b) => b.size - a.size);
-	const longestSizeLabelLength = Math.max.apply(null, assets.map(a => stripAnsi(a.sizeLabel).length));
+	const longestSizeLabelLength = Math.max.apply(
+		null,
+		assets.map(a => stripAnsi(a.sizeLabel).length)
+	);
 	assets.forEach(asset => {
 		let sizeLabel = asset.sizeLabel;
 		const sizeLength = stripAnsi(sizeLabel).length;
