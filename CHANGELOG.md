@@ -1,3 +1,23 @@
+## 2.7.0 (March 25, 2020)
+
+### bootstrap
+
+* Added option `-b`/`--base`, enabled by default, which will enable bootstrapping on the root package.
+* Added option `-s`/`--sampler`, enabled by default, which will enable bootstrapping on a relative sampler package (`./samples/sampler`).
+* Added option `-a`/`--allsamples`, disabled by default, which will enable bootstrapping on all detected sample packages (all packages within `./samples`).
+* Added option `-l`/`--link`, enabled by default, which will execute `enact link` after NPM installing a package, as part of the bootstrap process.
+* Fixed a bug where symlinks in theme packages could be overridden during sampler install, on certain versions of NPM.
+
+### pack
+
+* Fixed theme feature detection on local theme files (eg. when a local ThemeDecorator is present)
+* Fixed bug with `--framework` option with regards to erroneously including unneeded or invalid iLib dependencies and test files. 
+
+### clean
+
+* Added support for a `-a`/`--all` flag which will delete `node_modules` in addition to dist/build files.
+* Expanded cleaning support to handle cleaning dist/build files within screenshot and ui test directories.
+
 ## 2.6.0 (February 12, 2020)
 
 Added new `bootstrap` command, which will act as a simplified shortcut to `npm install` and `enact link` a project, and the subsequently for every child project optionally within `./samples`, also run `npm install` and `enact link`. This is useful for theme repos like moonstone and sandstone.  If a project already has a `npm run bootstrap`, that will be executed instead of installing/linking, to allow compatibility with lerna monorepos.
