@@ -1,6 +1,6 @@
 {
   "name": "@enact/cli",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "Full-featured build environment tool for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
@@ -47,7 +47,7 @@
     "@babel/preset-env": "7.4.3",
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "7.3.3",
-    "@enact/dev-utils": "2.4.2",
+    "@enact/dev-utils": "2.5.1",
     "@enact/template-moonstone": "3.0.0",
     "acorn": "^6.0.0",
     "babel-core": "7.0.0-bridge.0",
@@ -65,8 +65,8 @@
     "css-loader": "2.1.1",
     "dotenv": "7.0.0",
     "dotenv-expand": "5.1.0",
-    "enzyme": "3.9.0",
-    "enzyme-adapter-react-16": "1.12.1",
+    "enzyme": "3.11.0",
+    "enzyme-adapter-react-16": "1.15.2",
     "eslint": "5.16.0",
     "eslint-config-enact": "1.6.0",
     "eslint-loader": "2.1.2",
@@ -114,9 +114,9 @@
     "webpack-dev-server": "3.2.1"
   },
   "devDependencies": {
-    "eslint-config-prettier": "^4.0.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-prettier": "^3.0.0",
-    "prettier": "^1.15.3"
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "prettier": "^1.19.1"
   }
 }
