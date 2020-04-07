@@ -12,25 +12,26 @@ const fs = require('fs');
 const path = require('path');
 const {optionParser: app} = require('@enact/dev-utils');
 
+const rbConst = name =>
+	'ILIB_' +
+	path
+		.basename(name)
+		.replace(/[-_\s]/g, '_')
+		.toUpperCase() +
+	'_PATH';
+
 const iLibDirs = ['node_modules/@enact/i18n/ilib', 'node_modules/ilib', 'ilib'];
 const globals = {
 	__DEV__: true,
 	ILIB_BASE_PATH: iLibDirs.find(f => fs.existsSync(path.join(app.context, f))) || iLibDirs[1],
 	ILIB_RESOURCES_PATH: 'resources',
-	ILIB_CACHE_ID: new Date().getTime() + ''
+	ILIB_CACHE_ID: new Date().getTime() + '',
+	[rbConst(app.name.split('/').pop())]: 'resources'
 };
 
 for (let t = app.theme; t; t = t.theme) {
-	const themeEnv = path
-		.basename(t.name)
-		.replace(/[-_\s]/g, '_')
-		.toUpperCase();
-	globals[themeEnv] = path.relative(app.context, path.join(t.path, 'resources')).replace(/\\/g, '/');
-}
-
-if (app.name === '@enact/moonstone') {
-	globals.ILIB_MOONSTONE_PATH = 'resources';
-	globals.ILIB_RESOURCES_PATH = '_resources_';
+	const themeRB = path.join(t.path, 'resources');
+	globals[rbConst(t.name)] = path.relative(app.context, themeRB).replace(/\\/g, '/');
 }
 
 const ignorePatterns = [
