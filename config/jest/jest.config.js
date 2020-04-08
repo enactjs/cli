@@ -26,7 +26,7 @@ const globals = {
 	ILIB_BASE_PATH: iLibDirs.find(f => fs.existsSync(path.join(app.context, f))) || iLibDirs[1],
 	ILIB_RESOURCES_PATH: 'resources',
 	ILIB_CACHE_ID: new Date().getTime() + '',
-	[rbConst(app.name.split('/').pop())]: 'resources'
+	[rbConst(app.name)]: 'resources'
 };
 
 for (let t = app.theme; t; t = t.theme) {
