@@ -1,3 +1,9 @@
+## 2.7.1 (April 8, 2020)
+
+### test
+
+* Fixed iLib loading of internal ResBundles within non-Moonstone themes.
+
 ## 2.7.0 (March 25, 2020)
 
 ### bootstrap
