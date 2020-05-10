@@ -20,8 +20,8 @@ module.exports = function(api) {
 
 	const babelrcPlugins =
 		packageContent && packageContent.enact && packageContent.enact.babel_plugins
-			? packageContent.enact.babel_plugins 
-			: []; 
+			? packageContent.enact.babel_plugins
+			: [];
 
 	return {
 		presets: [
@@ -64,7 +64,7 @@ module.exports = function(api) {
 		plugins: [
 			// Add external plugins using spread operator
 			...babelrcPlugins,
-			
+
 			// Stage 0
 			// '@babel/plugin-proposal-function-bind',
 
