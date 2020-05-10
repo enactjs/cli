@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 /*
  *  babel.config.js
  *
@@ -10,6 +13,16 @@ module.exports = function(api) {
 	const es5Standalone = process.env.ES5 && process.env.ES5 !== 'false';
 
 	api.cache(() => env + es5Standalone);
+	
+	// Load an array of plugins from enact property in package.json
+	const packageFile = path.join(process.cwd(), 'package.json');
+	const packageContent = fs.existsSync(packageFile)
+		? JSON.parse(fs.readFileSync(packageFile))
+		: null;
+
+	const babelrcPlugins = packageContent && packageContent.enact && packageContent.enact.babel_plugins
+		? packageContent.enact.babel_plugins
+		: []; 
 
 	return {
 		presets: [
@@ -50,6 +63,9 @@ module.exports = function(api) {
 			['@babel/preset-typescript']
 		],
 		plugins: [
+			// Add external plugins using spread operator
+			...babelrcPlugins,
+			
 			// Stage 0
 			// '@babel/plugin-proposal-function-bind',
 
