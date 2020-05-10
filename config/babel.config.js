@@ -16,13 +16,9 @@ module.exports = function(api) {
 	
 	// Load an array of plugins from enact property in package.json
 	const packageFile = path.join(process.cwd(), 'package.json');
-	const packageContent = fs.existsSync(packageFile)
-		? JSON.parse(fs.readFileSync(packageFile))
-		: null;
+	const packageContent = fs.existsSync(packageFile) ? JSON.parse(fs.readFileSync(packageFile)) : null;
 
-	const babelrcPlugins = packageContent && packageContent.enact && packageContent.enact.babel_plugins
-		? packageContent.enact.babel_plugins
-		: []; 
+	const babelrcPlugins = packageContent && packageContent.enact && packageContent.enact.babel_plugins ? packageContent.enact.babel_plugins : []; 
 
 	return {
 		presets: [
