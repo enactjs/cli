@@ -47,7 +47,7 @@
     "@babel/preset-env": "7.4.5",
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "7.3.3",
-    "@enact/dev-utils": "2.5.1",
+    "@enact/dev-utils": "2.7.0",
     "@enact/template-moonstone": "3.0.0",
     "acorn": "^6.0.0",
     "babel-core": "7.0.0-bridge.0",
