@@ -128,6 +128,11 @@ function devServerConfig(host, protocol, proxy, allowedHost, publicPath) {
 		public: allowedHost,
 		proxy,
 		before(build) {
+			// Optionally register app-side proxy middleware if it exists
+			const proxySetup = path.join(process.cwd(), 'src', 'setupProxy.js');
+			if (fs.existsSync(proxySetup)) {
+				require(proxySetup)(build);
+			}
 			// This lets us open files from the runtime error overlay.
 			build.use(errorOverlayMiddleware());
 		}
