@@ -1,3 +1,18 @@
+## 2.8.0 (June 3, 2020)
+
+### pack
+
+* Preserves symlink path names when copying files to output.
+* Updated CLI dependency of `react` and `react-dom` to 16.13.1.
+
+### serve
+
+* Added support for custom webpack-dev-server middleware and proxy settings via an option app-side `./src/proxySetup.js` file.
+
+### test
+
+* Updated CLI dependency of `react-test-renderer` to 16.13.1.
+
 ## 2.7.1 (April 8, 2020)
 
 ### test

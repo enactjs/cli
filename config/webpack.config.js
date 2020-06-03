@@ -154,6 +154,8 @@ module.exports = function(env) {
 			extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
 			// Allows us to specify paths to check for module resolving.
 			modules: [path.resolve('./node_modules'), 'node_modules'],
+			// Don't resolve symlinks to their underlying paths
+			symlinks: false,
 			// Backward compatibility for apps using new ilib references with old Enact
 			// and old apps referencing old iLib location with new Enact
 			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
@@ -399,7 +401,7 @@ module.exports = function(env) {
 			// Automatically configure iLib library within @enact/i18n. Additionally,
 			// ensure the locale data files and the resource files are copied during
 			// the build to the output directory.
-			new ILibPlugin(),
+			new ILibPlugin({symlinks: false}),
 			// Automatically detect ./appinfo.json and ./webos-meta/appinfo.json files,
 			// and parses any to copy over any webOS meta assets at build time.
 			new WebOSMetaPlugin(),
