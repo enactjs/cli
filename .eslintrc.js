@@ -1,9 +1,8 @@
 module.exports = {
 	env: {
-		es6: true, // sets the 'ecmaVersion' parser option to 6
 		node: true
 	},
-	extends: ['eslint:recommended', 'plugin:prettier/recommended'],
+	extends: ['enact', 'plugin:prettier/recommended'],
 	plugins: ['import'],
 	rules: {
 		'no-console': 0,
