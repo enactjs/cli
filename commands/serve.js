@@ -17,8 +17,12 @@ const chalk = require('chalk');
 const minimist = require('minimist');
 const clearConsole = require('react-dev-utils/clearConsole');
 const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
+const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
+const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const openBrowser = require('react-dev-utils/openBrowser');
+const redirectServedPathMiddleware = require('react-dev-utils/redirectServedPathMiddleware');
 const {choosePort, createCompiler, prepareProxy, prepareUrls} = require('react-dev-utils/WebpackDevServerUtils');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const {optionParser: app} = require('@enact/dev-utils');
@@ -48,6 +52,7 @@ function displayHelp() {
 	console.log('  Options');
 	console.log('    -b, --browser     Automatically open browser');
 	console.log('    -i, --host        Server host IP address');
+	console.log('    -f, --fast        Enables experimental frast refresh');
 	console.log('    -p, --port        Server port number');
 	console.log('    -m, --meta        JSON to override package.json enact metadata');
 	console.log('    -v, --version     Display version information');
@@ -56,15 +61,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-function hotDevServer(config) {
-	// Include an alternative client for WebpackDevServer. A client's job is to
-	// connect to WebpackDevServer by a socket and get notified about changes.
-	// When you save a file, the client will either apply hot updates (in case
-	// of CSS changes), or refresh the page (in case of JS changes). When you
-	// make a syntax error, this client will display a syntax error overlay.
-	// Note: instead of the default WebpackDevServer client, we use a custom one
-	// to bring better experience.
-	config.entry.main.unshift(require.resolve('react-dev-utils/webpackHotDevClient'));
+function hotDevServer(config, fastRefresh) {
 	// This is necessary to emit hot updates
 	config.plugins.unshift(new webpack.HotModuleReplacementPlugin());
 	// Keep webpack alive when there are any errors, so user can fix and rebuild.
@@ -73,10 +70,42 @@ function hotDevServer(config) {
 	// since tslint includes an out-of-date local version.
 	config.resolve.alias.chalk = require.resolve('chalk');
 	config.resolve.alias['ansi-styles'] = require.resolve('ansi-styles');
+
+	// Include an alternative client for WebpackDevServer. A client's job is to
+	// connect to WebpackDevServer by a socket and get notified about changes.
+	// When you save a file, the client will either apply hot updates (in case
+	// of CSS changes), or refresh the page (in case of JS changes). When you
+	// make a syntax error, this client will display a syntax error overlay.
+	// Note: instead of the default WebpackDevServer client, we use a custom one
+	// to bring better experience.
+	if (!fastRefresh) {
+		config.entry.main.unshift(require.resolve('react-dev-utils/webpackHotDevClient'));
+	} else {
+		// Use experimental fast refresh plugin instead as dev client access point
+		// https://github.com/facebook/react/tree/master/packages/react-refresh
+		config.plugins.unshift(
+			new ReactRefreshWebpackPlugin({
+				overlay: {
+					entry: require.resolve('react-dev-utils/webpackHotDevClient')
+				}
+			})
+		);
+		// Append fast refresh babel plugin
+		config.module.rules[1].oneOf[0].plugins = [require.resolve('react-refresh/babel')];
+	}
 	return config;
 }
 
-function devServerConfig(host, protocol, proxy, allowedHost, publicPath) {
+function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
+	let https = false;
+	const {SSL_CRT_FILE, SSL_KEY_FILE} = process.env;
+	if (protocol === 'https' && [SSL_CRT_FILE, SSL_KEY_FILE].all(f => f && fs.existsSync(f))) {
+		https = {
+			cert: fs.readFileSync(SSL_CRT_FILE),
+			key: fs.readFileSync(SSL_KEY_FILE)
+		};
+	}
+
 	return {
 		// WebpackDevServer 2.4.3 introduced a security fix that prevents remote
 		// websites from potentially accessing local content through DNS rebinding:
@@ -104,15 +133,24 @@ function devServerConfig(host, protocol, proxy, allowedHost, publicPath) {
 		// in the Webpack development configuration. Note that only changes
 		// to CSS are currently hot reloaded. JS changes will refresh the browser.
 		hot: true,
-		// It is important to tell WebpackDevServer to use the same "root" path
-		// as we specified in the config. In development, we always serve from /.
-		publicPath: publicPath || '/',
+		// Use 'ws' instead of 'sockjs-node' on server since we're using native
+		// websockets in `webpackHotDevClient`.
+		transportMode: 'ws',
+		// Prevent a WS client from getting injected as we're already including
+		// `webpackHotDevClient`.
+		injectClient: false,
+		// Enable custom sockjs pathname for websocket connection to hot reloading server.
+		// Enable custom sockjs hostname, pathname and port for websocket connection
+		// to hot reloading server.
+		sockHost: process.env.WDS_SOCKET_HOST,
+		sockPath: process.env.WDS_SOCKET_PATH,
+		sockPort: process.env.WDS_SOCKET_PORT,
 		// WebpackDevServer is noisy by default so we emit custom message instead
 		// by listening to the compiler events with `compiler.plugin` calls above.
 		quiet: true,
 		// Enable HTTPS if the HTTPS environment variable is set to 'true'
-		https: protocol === 'https',
-		host: host,
+		https,
+		host,
 		overlay: false,
 		// Allow cross-origin HTTP requests
 		headers: {
@@ -123,18 +161,30 @@ function devServerConfig(host, protocol, proxy, allowedHost, publicPath) {
 			rewrites: [{from: /.*\.json$/, to: context => context.parsedUrl.pathname}],
 			// Paths with dots should still use the history fallback.
 			// See https://github.com/facebookincubator/create-react-app/issues/387.
-			disableDotRule: true
+			disableDotRule: true,
+			index: publicPath
 		},
 		public: allowedHost,
+		// `proxy` is run between `before` and `after` `webpack-dev-server` hooks
 		proxy,
-		before(build) {
+		before(build, server) {
+			// Keep `evalSourceMapMiddleware` and `errorOverlayMiddleware`
+			// middlewares before `redirectServedPath` otherwise will not have any effect
+			// This lets us fetch source contents from webpack for the error overlay
+			build.use(evalSourceMapMiddleware(server));
+			// This lets us open files from the runtime error overlay.
+			build.use(errorOverlayMiddleware());
+
 			// Optionally register app-side proxy middleware if it exists
 			const proxySetup = path.join(process.cwd(), 'src', 'setupProxy.js');
 			if (fs.existsSync(proxySetup)) {
 				require(proxySetup)(build);
 			}
-			// This lets us open files from the runtime error overlay.
-			build.use(errorOverlayMiddleware());
+		},
+		after(build) {
+			// Redirect to `PUBLIC_URL` or `homepage`/`enact.publicUrl` from `package.json`
+			// if url not match
+			build.use(redirectServedPathMiddleware(publicPath));
 		}
 	};
 }
@@ -148,7 +198,8 @@ function serve(config, host, port, open) {
 			return Promise.reject(new Error('Could not find a free port for the dev-server.'));
 		}
 		const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
-		const urls = prepareUrls(protocol, host, resolvedPort);
+		const publicPath = getPublicUrlOrPath(true, app.publicUrl, process.env.PUBLIC_URL);
+		const urls = prepareUrls(protocol, host, resolvedPort, publicPath.slice(0, -1));
 		const devSocket = {
 			// eslint-disable-next-line no-use-before-define
 			warnings: warnings => devServer.sockWrite(devServer.sockets, 'warnings', warnings),
@@ -163,27 +214,29 @@ function serve(config, host, port, open) {
 			urls,
 			useYarn: false,
 			useTypeScript: fs.existsSync('tsconfig.json'),
+			tscCompileOnError: process.env.TSC_COMPILE_ON_ERROR === 'true',
 			webpack
 		});
-
+		// Hook into compiler to remove potentially confusing messages
 		compiler.hooks.afterEmit.tapAsync('EnactCLI', (compilation, callback) => {
 			compilation.warnings.forEach(w => {
 				if (w.message) {
 					// Remove any --fix ESLintinfo messages since the eslint-loader config is
 					// internal and eslist is used in an embedded context.
-					w.message = w.message.replace(/\n.* potentially fixable with the `--fix` option./gm, '');
+					const eslintFix = /\n.* potentially fixable with the `--fix` option./gm;
+					w.message = w.message.replace(eslintFix, '');
 				}
 			});
 			callback();
 		});
 		// Load proxy config
 		const proxySetting = app.proxy;
-		const proxyConfig = prepareProxy(proxySetting, './');
+		const proxyConfig = prepareProxy(proxySetting, './public', publicPath);
 		// Serve webpack assets generated by the compiler over a web sever.
 		const serverConfig = Object.assign(
 			{},
 			config.devServer,
-			devServerConfig(host, protocol, proxyConfig, urls.lanUrlForConfig, config.output.publicPath)
+			devServerConfig(host, protocol, publicPath, proxyConfig, urls.lanUrlForConfig)
 		);
 		const devServer = new WebpackDevServer(compiler, serverConfig);
 		// Launch WebpackDevServer.
@@ -202,6 +255,14 @@ function serve(config, host, port, open) {
 				process.exit();
 			});
 		});
+
+		if (process.env.CI !== 'true') {
+			// Gracefully exit when stdin ends
+			process.stdin.on('end', () => {
+				devServer.close();
+				process.exit();
+			});
+		}
 	});
 }
 
@@ -225,7 +286,8 @@ function api(opts) {
 
 	// Setup the development config with additional webpack-dev-server customizations.
 	const configFactory = require('../config/webpack.config');
-	const config = hotDevServer(configFactory('development'));
+	const fastRefresh = process.env.FAST_REFRESH || opts.fast;
+	const config = hotDevServer(configFactory('development'), fastRefresh);
 
 	// Tools like Cloud9 rely on this.
 	const host = process.env.HOST || opts.host || config.devServer.host || '0.0.0.0';
@@ -242,8 +304,8 @@ function api(opts) {
 function cli(args) {
 	const opts = minimist(args, {
 		string: ['host', 'port', 'meta'],
-		boolean: ['browser', 'help'],
-		alias: {b: 'browser', i: 'host', p: 'port', m: 'meta', h: 'help'}
+		boolean: ['browser', 'fast', 'help'],
+		alias: {b: 'browser', i: 'host', p: 'port', f: 'fast', m: 'meta', h: 'help'}
 	});
 	if (opts.help) displayHelp();
 

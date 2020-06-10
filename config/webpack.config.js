@@ -68,9 +68,7 @@ module.exports = function (env) {
 		// When INLINE_STYLES env var is set, instead of MiniCssExtractPlugin, uses
 		// `style` loader to dynamically inline CSS in style tags at runtime.
 		const loaders = [
-			process.env.INLINE_STYLES
-				? require.resolve('style-loader')
-				: {loader: MiniCssExtractPlugin.loader, options: {hmr: !isEnvProduction}},
+			process.env.INLINE_STYLES ? require.resolve('style-loader') : MiniCssExtractPlugin.loader,
 			{
 				loader: require.resolve('css-loader'),
 				options: Object.assign(
@@ -294,12 +292,13 @@ module.exports = function (env) {
 			// By default WebpackDevServer serves files from public and __mocks__ directories
 			// in addition to all the virtual build products that it serves from memory.
 			contentBase: [path.resolve('./public'), path.resolve('./__mocks__')],
+			contentBasePublicPath: publicPath,
 			// Any changes to files from `contentBase` should trigger a page reload.
 			watchContentBase: true,
 			// Reportedly, this avoids CPU overload on some systems.
 			// https://github.com/facebookincubator/create-react-app/issues/293
 			watchOptions: {
-				ignored: /node_modules/
+				ignored: /node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
 			}
 		},
 		// Target app to build for a specific environment (default 'web')
@@ -450,7 +449,7 @@ module.exports = function (env) {
 					],
 					silent: true,
 					// The formatter is invoked directly in WebpackDevServerUtils during development
-					formatter: !process.env.DISABLE_TSFORMATTER && isEnvProduction ? typescriptFormatter : undefined
+					formatter: !process.env.DISABLE_TSFORMATTER ? typescriptFormatter : undefined
 				})
 		].filter(Boolean)
 	};
