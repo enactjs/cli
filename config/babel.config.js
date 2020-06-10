@@ -5,7 +5,7 @@
  *  development environment on target platforms.
  */
 
-module.exports = function(api) {
+module.exports = function (api) {
 	const env = process.env.BABEL_ENV || process.env.NODE_ENV;
 	const es5Standalone = process.env.ES5 && process.env.ES5 !== 'false';
 
@@ -88,9 +88,7 @@ module.exports = function(api) {
 		overrides: [
 			{
 				test: /\.tsx?$/,
-				plugins: [
-					[require('@babel/plugin-proposal-decorators').default, {legacy: true}]
-				]
+				plugins: [[require('@babel/plugin-proposal-decorators').default, {legacy: true}]]
 			}
 		]
 	};
