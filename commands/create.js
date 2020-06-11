@@ -19,7 +19,7 @@ const validatePackageName = require('validate-npm-package-name');
 
 const ENACT_DEV_NPM = '@enact/cli';
 const CORE_JS_NPM = 'core-js@3';
-const INCLUDED = path.dirname(require.resolve('@enact/template-moonstone'));
+const INCLUDED = path.dirname(require.resolve('@enact/template-sandstone'));
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 
 const defaultGenerator = {
