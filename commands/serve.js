@@ -91,7 +91,7 @@ function hotDevServer(config, fastRefresh) {
 			})
 		);
 		// Append fast refresh babel plugin
-		config.module.rules[1].oneOf[0].plugins = [require.resolve('react-refresh/babel')];
+		config.module.rules[1].oneOf[0].options.plugins = [require.resolve('react-refresh/babel')];
 	}
 	return config;
 }
@@ -312,7 +312,8 @@ function cli(args) {
 	process.chdir(app.context);
 
 	api(opts).catch(err => {
-		console.error(chalk.red('ERROR: ') + (err.message || err));
+		//console.error(chalk.red('ERROR: ') + (err.message || err));
+		console.log(err)
 		process.exit(1);
 	});
 }

@@ -18,7 +18,7 @@ if (!semver.satisfies(process.version, pkg.engines.node)) {
 }
 
 // Uncaught error handler
-process.on('uncaughtException', err => console.error(chalk.red('ERROR: ') + (err.message || err)));
+process.on('uncaughtException', err => console.error(err.stack));
 
 // Write UTF-8 BOM for Windows PowerShell ISE
 if (process.platform === 'win32' && process.title === 'Windows PowerShell ISE') console.log('\ufeff');
