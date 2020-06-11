@@ -53,7 +53,6 @@ module.exports = function (env) {
 	// on or off by setting the GENERATE_SOURCEMAP environment variable.
 	const GENERATE_SOURCEMAP = process.env.GENERATE_SOURCEMAP || (isEnvProduction ? 'false' : 'true');
 	const shouldUseSourceMap = GENERATE_SOURCEMAP !== 'false';
-	const shouldSourceMapStyles = !process.env.INLINE_STYLES && shouldUseSourceMap;
 
 	// common function to get style loaders
 	const getStyleLoaders = (cssLoaderOptions = {}, preProcessor) => {
@@ -72,7 +71,7 @@ module.exports = function (env) {
 			{
 				loader: require.resolve('css-loader'),
 				options: Object.assign(
-					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldSourceMapStyles},
+					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
 					cssLoaderOptions,
 					cssLoaderOptions.modules && {modules: {getLocalIdent: getCSSModuleLocalIdent}}
 				)
@@ -85,7 +84,7 @@ module.exports = function (env) {
 				options: {
 					// https://webpack.js.org/guides/migrating/#complex-options
 					ident: 'postcss',
-					sourceMap: shouldSourceMapStyles,
+					sourceMap: shouldUseSourceMap,
 					plugins: () =>
 						[
 							// Fix and adjust for known flexbox issues
@@ -123,8 +122,10 @@ module.exports = function (env) {
 		getStyleLoaders(cssLoaderOptions, {
 			loader: require.resolve('less-loader'),
 			options: {
-				modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent),
-				sourceMap: shouldSourceMapStyles
+				lessOptions: {
+					modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent)
+				},
+				sourceMap: shouldUseSourceMap
 			}
 		});
 
@@ -156,9 +157,21 @@ module.exports = function (env) {
 			pathinfo: !isEnvProduction,
 			publicPath,
 			// Improved sourcemap path name mapping for system filepaths
-			devtoolModuleFilenameTemplate: isEnvProduction
-				? info => path.relative(app.context, info.absoluteResourcePath).replace(/\\/g, '/')
-				: info => path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
+			devtoolModuleFilenameTemplate: info => {
+				let file = isEnvProduction
+					? path.relative(app.context, info.absoluteResourcePath)
+					: path.resolve(info.absoluteResourcePath);
+				file = file.replace(/\\/g, '/').replace(/\.\./g, '_');
+				if (info.resource.includes('.less')) {
+					// Temporary special handling for LESS files. The css-loader will
+					// output absolute-path mapped LESS sourcemaps, unaffected by this
+					// function, while both css-loader and style-loader pseudo modules
+					// will get their own sourcemaps. Good to differentiate.
+					return file + '?' + info.allLoaders.match(/[^\\/]+-loader/)[0];
+				} else {
+					return file;
+				}
+			},
 			// Use webpack 5 handling of asset files; remove once upgraded to webpack 5
 			futureEmitAssets: true,
 			// Prevent potential conflicts in muliple runtimes
@@ -172,7 +185,7 @@ module.exports = function (env) {
 				ext => useTypeScript || !ext.includes('ts')
 			),
 			// Allows us to specify paths to check for module resolving.
-			modules: ['node_modules', path.resolve('./node_modules')],
+			modules: [path.resolve('./node_modules'), 'node_modules'],
 			// Don't resolve symlinks to their underlying paths
 			symlinks: false,
 			// Backward compatibility for apps using new ilib references with old Enact
