@@ -87,6 +87,8 @@
     "html-webpack-plugin": "4.3.0",
     "identity-obj-proxy": "3.0.0",
     "jest": "26.0.1",
+    "jest-circus": "26.0.1",
+    "jest-watch-typeahead": "0.6.0",
     "less": "3.11.3",
     "less-loader": "6.1.1",
     "less-plugin-npm-import": "2.1.0",
