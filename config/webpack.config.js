@@ -162,12 +162,13 @@ module.exports = function (env) {
 					? path.relative(app.context, info.absoluteResourcePath)
 					: path.resolve(info.absoluteResourcePath);
 				file = file.replace(/\\/g, '/').replace(/\.\./g, '_');
-				if (info.resource.includes('.less')) {
+				const loader = info.allLoaders.match(/[^\\/]+-loader/);
+				if (info.resource.includes('.less') && loader) {
 					// Temporary special handling for LESS files. The css-loader will
 					// output absolute-path mapped LESS sourcemaps, unaffected by this
 					// function, while both css-loader and style-loader pseudo modules
 					// will get their own sourcemaps. Good to differentiate.
-					return file + '?' + info.allLoaders.match(/[^\\/]+-loader/)[0];
+					return file + '?' + loader[0];
 				} else {
 					return file;
 				}
