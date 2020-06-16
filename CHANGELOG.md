@@ -1,3 +1,9 @@
+## 2.8.1 (June 15, 2020)
+
+### serve
+
+* Fix watching Enact library dependencies, but not their nested children dependencies.
+
 ## 2.8.0 (June 3, 2020)
 
 ### pack
