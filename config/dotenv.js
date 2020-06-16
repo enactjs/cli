@@ -8,7 +8,7 @@ const expand = require('dotenv-expand');
 // Loads all required .env files in correct order, for a given mode.
 // See https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
 module.exports = {
-	load: function(context) {
+	load: function (context) {
 		const mode = process.env.NODE_ENV || 'development';
 		[
 			`.env.${mode}.local`,

@@ -313,7 +313,7 @@ function cli(args) {
 
 	api(opts).catch(err => {
 		//console.error(chalk.red('ERROR: ') + (err.message || err));
-		console.log(err)
+		console.log(err);
 		process.exit(1);
 	});
 }

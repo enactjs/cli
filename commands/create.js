@@ -282,10 +282,7 @@ function cli(args) {
 	if (opts.help) displayHelp();
 
 	opts.directory = path.resolve(typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
-	opts.name = path
-		.basename(opts.directory)
-		.replace(/ /g, '-')
-		.toLowerCase();
+	opts.name = path.basename(opts.directory).replace(/ /g, '-').toLowerCase();
 
 	api(opts).catch(err => {
 		console.error(chalk.red('ERROR: ') + err.message);
