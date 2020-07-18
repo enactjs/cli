@@ -82,6 +82,12 @@ function getMissingClassNames(lessFile, classNames) {
 	});
 }
 
+function getDefaultClasses(classNameArray, component) => {
+	const newArray = [...getDefaultClasses];
+	//TODO
+	return newArray;
+}
+
 function getClassNamesUsed(files) {
 	return new Promise((resolve, reject) => {
 		const promisesToResolve = [];
@@ -90,8 +96,9 @@ function getClassNamesUsed(files) {
 			readFile(file, 'utf8')
 				.then(data => {
 					const lessFileName = data.match(/\w*\.module\.less/g);
-					const dataWithComments = data.replace(/(\/\*([\s\S]*?)\*\/)|(\/\/(.*)$)/gm, '');
-					const classNamesUsed = dataWithComments.match(/css\.\w*/g);
+					const dataWithoutComments = data.replace(/(\/\*([\s\S]*?)\*\/)|(\/\/(.*)$)/gm, '');
+					let classNamesUsed = dataWithoutComments.match(/css\.\w*/g);
+					classNamesUsed = getDefaultClasses(classNamesUsed, dataWithoutComments);
 
 					if (lessFileName && classNamesUsed) {
 						const componentDirectory = file.match(/^(.+)\//g)[0];
