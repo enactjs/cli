@@ -29,7 +29,7 @@ function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
 	if (require.main !== module) e = 'enact check';
 
-	console.log('  Checks for undefined classnames referenced in JSX');
+	console.log('  Checks for potential missing class definitions');
 	console.log();
 	console.log('  Usage');
 	console.log(`    ${e} [options]`);
@@ -46,7 +46,7 @@ function displayHelp() {
 function logWarnings(missingClassNames) {
 	if (missingClassNames.length) {
 		console.log();
-		console.warn('  These classname definitions are missing in the following less files:');
+		console.warn('  There might be missing class definitions in the following less files:');
 		console.log();
 
 		missingClassNames.forEach(component => {
