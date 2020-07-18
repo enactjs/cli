@@ -82,7 +82,7 @@ function getMissingClassNames(lessFile, classNames) {
 	});
 }
 
-function getDefaultClasses(classNameArray, component) => {
+function getDefaultClasses() {
 	const newArray = [...getDefaultClasses];
 	//TODO
 	return newArray;
