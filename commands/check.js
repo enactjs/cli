@@ -3,6 +3,7 @@ const fs = require('fs');
 const {promisify} = require('util');
 const path = require('path');
 const glob = require('glob');
+const minimist = require('minimist');
 
 const globOpts = {
 	ignore: [
@@ -132,6 +133,12 @@ function api() {
 }
 
 function cli(args) {
+	const opts = minimist(args, {
+		boolean: ['help'],
+		alias: {h: 'help'}
+	});
+	if (opts.help) displayHelp();
+
 	api(args).catch(() => {
 		process.exit(1);
 	});
