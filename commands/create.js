@@ -9,15 +9,38 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+/**
+ * https://nodejs.org/api/os.html#os_os_homedir
+ *
+ * Returns the string path of the current user's home directory.
+ * On POSIX, it uses the $HOME environment variable if defined. Otherwise it uses the effective UID to look up the user's home directory.
+ * On Windows, it uses the USERPROFILE environment variable if defined. Otherwise it uses the path to the profile directory of the current user.
+ */
 const os = require('os');
 const path = require('path');
 const chalk = require('chalk');
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
 const minimist = require('minimist');
+/**
+ * https://github.com/npm/validate-npm-package-name
+ *
+ * Give me a string and I'll tell you if it's a valid npm package name.
+ *
+ * var validate = require("validate-npm-package-name")
+ * validate("some-package")
+ * {
+ *   validForNewPackages: true,
+ *   validForOldPackages: true
+ * }
+ */
 const validatePackageName = require('validate-npm-package-name');
 
 const ENACT_DEV_NPM = '@enact/cli';
+/**
+ * https://github.com/zloirock/core-js
+ * https://github.com/zloirock/core-js/blob/master/docs/2019-03-19-core-js-3-babel-and-a-look-into-the-future.md
+ */
 const CORE_JS_NPM = 'core-js@3';
 const INCLUDED = path.dirname(require.resolve('@enact/template-moonstone'));
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');

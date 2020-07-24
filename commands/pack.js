@@ -11,18 +11,210 @@
  * LICENSE file in the root directory of this source tree.
  */
 // @remove-on-eject-end
+
+/**
+ * https://nodejs.org/api/path.html#path_path
+ *
+ * The path module provides utilities for working with file and directory paths. It can be accessed using:
+ *
+ * relative:
+ * 		path.relative('/data/orandea/test/aaa', '/data/orandea/impl/bbb'); // Returns: '../../impl/bbb'
+ *
+ * join:
+ * 		path.join('/foo', 'bar', 'baz/asdf', 'quux', '..'); // Returns: '/foo/bar/baz/asdf'
+ *
+ * dirname:
+ * 		path.dirname('/foo/bar/baz/asdf/quux'); // Returns: '/foo/bar/baz/asdf'
+ *
+ * basename:
+ * 		On POSIX:	path.basename('C:\\temp\\myfile.html'); // Returns: 'C:\\temp\\myfile.html'
+ * 		On Windows:	path.basename('C:\\temp\\myfile.html');	// Returns: 'myfile.html'
+ * 		Recommend to use path.win32.basename or path.posix.basename
+ *
+ * sep:
+ * 		'foo/bar/baz'.split(path.sep); // Returns: ['foo', 'bar', 'baz']
+ * 		on Windows	\
+ * 		on POSIX /
+ *
+ * resolve:
+ * 		path.resolve('/foo/bar', './baz'); // Returns: '/foo/bar/baz'
+ * 		path.resolve('/foo/bar', '/tmp/file/'); // Returns: '/tmp/file'
+ * 		path.resolve('wwwroot', 'static_files/png/', '../gif/image.gif');
+ * 			// If the current working directory is /home/myself/node,
+ * 			// this returns '/home/myself/node/wwwroot/static_files/gif/image.gif'
+ */
 const path = require('path');
+
+/**
+ * https://github.com/chalk/chalk
+ *
+ * Modifiers - bold : chalk.bold.red()
+ * Colors - cyan : chalk.cyan()
+ * Background colors - chalk.bgBlueBright()
+ */
 const chalk = require('chalk');
+
+/**
+ * https://github.com/avoidwork/filesize.js
+ *
+ * filesize.js provides a simple way to get a human readable file size string from a number (float or integer) or string.
+ *
+ * @example
+ * 		filesize(500);                        // "500 B"
+ * 		filesize(500, {bits: true});          // "4 Kb"
+ * 		filesize(265318, {base: 10});         // "265.32 kB"
+ * 		filesize(265318);                     // "259.1 KB"
+ * 		filesize(265318, {round: 0});         // "259 KB"
+ */
 const filesize = require('filesize');
+
+/**
+ * https://github.com/jprichardson/node-fs-extra
+ *
+ * fs-extra adds file system methods that aren't included in the native fs module and adds promise support to the fs methods.
+ * It also uses graceful-fs to prevent EMFILE errors. It should be a drop in replacement for fs.
+ *
+ * fs.copySync:
+ * 		https://github.com/jprichardson/node-fs-extra/blob/master/docs/copy-sync.md
+ * 		Copy a file or directory. The directory can have contents.
+ *
+ * 		fs.copySync('/tmp/myfile', '/tmp/mynewfile') // copy file
+ * 		fs.copySync('/tmp/mydir', '/tmp/mynewdir') // copy directory, even if it has subdirectories or files
+ *
+ * fs.emptyDir:
+ * 		https://github.com/jprichardson/node-fs-extra/blob/master/docs/emptyDir.md
+ * 		Ensures that a directory is empty. Deletes directory contents if the directory is not empty.
+ * 		If the directory does not exist, it is created. The directory itself is not deleted.
+ *
+ * 		fs.emptyDir('/tmp/some/dir', err => {
+ * 			if (err) return console.error(err)
+ * 			console.log('success!')
+ * 		})
+ *
+ * https://nodejs.org/api/fs.html
+ *
+ * The fs module provides an API for interacting with the file system in a manner closely modeled around standard POSIX functions.
+ *
+ * fs.existsSync:
+ * 		Returns true if the path exists, false otherwise.
+ *
+ * 		if (fs.existsSync('/etc/passwd')) { }
+ *
+ * fs.statSync:
+ * 		https://nodejs.org/api/fs.html#fs_class_fs_stats
+ * 		A fs.Stats object provides information about a file.
+ */
 const fs = require('fs-extra');
+
+/**
+ * https://github.com/substack/minimist
+ *
+ * This module is the guts of optimist's argument parser without all the fanciful decoration.
+ *
+ * @example
+ * var argv = require('minimist')(process.argv.slice(2));
+ * console.log(argv);
+ *
+ * $ node example/parse.js -a beep -b boop
+ * { _: [], a: 'beep', b: 'boop' }
+ *
+ * $ node example/parse.js -x 3 -y 4 -n5 -abc --beep=boop foo bar baz
+ *  { _: [ 'foo', 'bar', 'baz' ],
+ *    x: 3,
+ *    y: 4,
+ *    n: 5,
+ *    a: true,
+ *    b: true,
+ *    c: true,
+ *    beep: 'boop'
+ *   }
+ */
 const minimist = require('minimist');
+
+/**
+ * https://github.com/facebook/create-react-app/tree/master/packages/react-dev-utils#formatwebpackmessageserrors-arraystring-warnings-arraystring-errors-arraystring-warnings-arraystring
+ *
+ * Extracts and prettifies warning and error messages from webpack stats object.
+ */
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
+
+/**
+ * https://github.com/chalk/strip-ansi
+ *
+ * Strip ANSI escape codes from a string
+ *
+ * @example
+ * stripAnsi('\u001B[4mUnicorn\u001B[0m'); //=> 'Unicorn'
+ * stripAnsi('\u001B]8;;https://github.com\u0007Click\u001B]8;;\u0007'); //=> 'Click'
+ */
 const stripAnsi = require('strip-ansi');
+
 const webpack = require('webpack');
+
+/**
+ * https://github.com/enactjs/dev-utils
+ *
+ * A collection of development utilities for Enact apps.
+ *
+ * Plugins
+ * 		EnactFrameworkPlugin & EnactFrameworkRefPlugin
+ * 		EnzymeAdapterPlugin
+ * 		GracefulFsPlugin
+ * 		ILibPlugin
+ * 		PrerenderPlugin
+ * 		SnapshotPlugin
+ * 		VerboseLogPlugin
+ * 		WebOSMetaPlugin
+ */
 const {optionParser: app, mixins} = require('@enact/dev-utils');
 
+/**
+ * https://nodejs.org/api/process.html
+ *
+ * The process object is a global that provides information about, and control over, the current Node.js process. As a global, it is always available to Node.js applications without using require(). It can also be explicitly accessed using require():
+ *
+ * process.argv: https://nodejs.org/api/process.html#process_process_argv
+ * 		$ node process-args.js one two=three four
+ * 		0: /usr/local/bin/nodejs
+ * 		1: /Users/mjr/work/node/process-args.jsnodejs
+ * 		2: onenodejs
+ * 		3: two=threenodejs
+ * 		4: four
+ *
+ * process.chdir: https://nodejs.org/api/process.html#process_process_chdir_directory
+ * 		The process.chdir() method changes the current working directory of the Node.js process
+ * 		or throws an exception if doing so fails (for instance, if the specified directory does not exist).
+ *
+ * process.cwd: https://nodejs.org/api/process.html#process_process_cwd
+ * 		The process.cwd() method returns the current working directory of the Node.js process.
+ *
+ * process.env: https://nodejs.org/api/process.html#process_process_env
+ * 		The process.env property returns an object containing the user environment.
+ * 		{
+ * 		  TERM: 'xterm-256color',
+ * 		  SHELL: '/usr/local/bin/bash',
+ * 		  USER: 'maciej',
+ * 		  PATH: '~/.bin/:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin',
+ * 		  PWD: '/Users/maciej',
+ * 		  EDITOR: 'vim',
+ * 		  SHLVL: '1',
+ * 		  HOME: '/Users/maciej',
+ * 		  LOGNAME: 'maciej',
+ * 		  _: '/usr/local/bin/node'
+ * 		}
+ *
+ * process.exit: https://nodejs.org/api/process.html#process_process_exit_code
+ * 		The exit code.
+ * 		Default: 0 - The 'success' code
+ */
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
+	/**
+	 * https://stackoverflow.com/questions/45136831/node-js-require-main-module
+	 *
+	 * require.main === module : this module was run directly from the command line as in node xxx.js
+	 * require.main !== module : this module was not run directly from the command line and probably loaded by something else
+	 */
 	if (require.main !== module) e = 'enact pack';
 
 	console.log('  Usage');
@@ -57,6 +249,7 @@ function displayHelp() {
 			--externals           Specify a local directory path to the standalone external framework
 			--externals-public    Remote public path to the external framework for use injecting into HTML
 	*/
+
 	process.exit(0);
 }
 
@@ -65,6 +258,20 @@ function details(err, stats, output) {
 	stats.compilation.warnings.forEach(w => {
 		w.message = w.message.replace(/\n.* potentially fixable with the `--fix` option./gm, '');
 	});
+	/**
+	 * https://webpack.js.org/api/node/#statstojsonoptions
+	 * Returns compilation information as a JSON object.
+	 * options can be either a string (a preset) or an object for more granular control
+	 *
+	 * https://webpack.js.org/configuration/stats/#statsall
+	 * A fallback value for stats options when an option is not defined. It has precedence over local webpack defaults.
+	 *
+	 * https://webpack.js.org/configuration/stats/#statserrors
+	 * Tells stats whether to display the errors.
+	 *
+	 * https://webpack.js.org/configuration/stats/#statswarnings
+	 * Tells stats to add warnings.
+	 */
 	const statsJSON = stats.toJson({all: false, warnings: true, errors: true});
 	const messages = formatWebpackMessages(statsJSON);
 	if (messages.errors.length) {
@@ -102,6 +309,11 @@ function details(err, stats, output) {
 function copyPublicFolder(output) {
 	const staticAssets = './public';
 	if (fs.existsSync(staticAssets)) {
+		/**
+		 * https://github.com/jprichardson/node-fs-extra/blob/master/docs/copy-sync.md
+		 *
+		 * dereference <boolean>: dereference symlinks, default is false.
+		 */
 		fs.copySync(staticAssets, output, {
 			dereference: true
 		});
@@ -111,6 +323,11 @@ function copyPublicFolder(output) {
 // Print a detailed summary of build files.
 function printFileSizes(stats, output) {
 	const assets = stats
+		/**
+		 * https://webpack.js.org/configuration/stats/#statsassets
+		 *
+		 * Tells stats whether to show the asset information. Set stats.assets to false to hide it.
+		 */
 		.toJson({all: false, assets: true})
 		.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
 		.map(asset => {
@@ -214,6 +431,14 @@ function api(opts = {}) {
 }
 
 function cli(args) {
+	/**
+	 * https://github.com/substack/minimist
+	 *
+	 * opts.boolean - a boolean, string or array of strings to always treat as booleans. if true will treat all double hyphenated arguments without equal signs as boolean (e.g. affects --foo, not -f or --foo=bar)
+	 * opts.string - a string or array of strings argument names to always treat as strings
+	 * opts.default - an object mapping string argument names to default values
+	 * opts.alias - an object mapping string names to strings or arrays of string argument names to use as aliases
+	 */
 	const opts = minimist(args, {
 		boolean: ['minify', 'framework', 'stats', 'production', 'isomorphic', 'snapshot', 'verbose', 'watch', 'help'],
 		string: ['externals', 'externals-public', 'locales', 'output', 'meta'],
@@ -241,4 +466,10 @@ function cli(args) {
 }
 
 module.exports = {api, cli};
+/**
+ * https://stackoverflow.com/questions/45136831/node-js-require-main-module
+ *
+ * require.main === module : this module was run directly from the command line as in node xxx.js
+ * require.main !== module : this module was not run directly from the command line and probably loaded by something else
+ */
 if (require.main === module) cli(process.argv.slice(2));

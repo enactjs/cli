@@ -14,6 +14,30 @@ const os = require('os');
 const path = require('path');
 const chalk = require('chalk');
 const fs = require('fs-extra');
+/**
+ * https://github.com/facebook/create-react-app/blob/master/packages/react-dev-utils/inquirer.js
+ * https://github.com/SBoudrias/Inquirer.js
+ *
+ * A collection of common interactive command line user interfaces.
+ *
+ * @example
+ *
+ * var inquirer = require('inquirer');
+ * inquirer
+ *   .prompt([
+ *	 // Pass your questions in here
+ *   ])
+ *   .then(answers => {
+ *	 // Use user feedback for... whatever!!
+ *   })
+ *   .catch(error => {
+ *	 if(error.isTtyError) {
+ *	   // Prompt couldn't be rendered in the current environment
+ *	 } else {
+ *	   // Something else when wrong
+ *	 }
+ *   });
+ */
 const inquirer = require('react-dev-utils/inquirer');
 const minimist = require('minimist');
 const {packageRoot} = require('@enact/dev-utils');
@@ -25,12 +49,75 @@ const assets = [
 	{src: path.join(__dirname, '..', 'commands'), dest: 'scripts'}
 ];
 const internal = [
+	/**
+	 * https://babeljs.io/docs/en/babel-plugin-transform-modules-commonjs
+	 *
+	 * This plugin transforms ECMAScript modules to CommonJS.
+	 *
+	 * @example
+	 * // In
+	 * export default 42;
+	 * // Out
+	 * Object.defineProperty(exports, "__esModule", {
+	 * 		value: true
+	 * });
+	 *
+	 * exports.default = 42;
+	 */
 	'@babel/plugin-transform-modules-commonjs',
+	/**
+	 * https://github.com/laat/babel-plugin-transform-rename-import
+	 *
+	 * Replace import sources
+	 *
+	 * replace("require('foo')", "foo", "bar"); //=> 'require("bar");'
+	 * replace("import foo from 'foo'", "foo", "bar"); //=> 'import foo from "bar";'
+	 */
 	'babel-plugin-transform-rename-import',
+	/**
+	 * https://github.com/isaacs/node-glob
+	 *
+	 * Match files using the patterns the shell uses, like stars and stuff.
+	 *
+	 * @example
+	 * glob("**\/*.js", options, function (er, files) { }
+	 */
 	'glob',
+	/**
+	 * https://github.com/jonschlinkert/global-modules
+	 *
+	 * @example
+	 * const globalModules = require('global-modules');
+	 * console.log(globalModules); //=> '/usr/local/lib/node_modules'
+	 */
 	'global-modules',
+	/**
+	 * https://github.com/less/less-plugin-npm-import
+	 *
+	 * Adds the ability for less to import from npm packages
+	 *
+	 * @example
+	 * // In less file:
+	 * @import "npm://packagename/path/to/file.less";
+	 * // Command line usage
+	 * lessc --npm-import file.less file.css
+	 */
 	'less-plugin-npm-import',
 	'semver',
+	/**
+	 * https://github.com/npm/node-tar
+	 *
+	 * Fast and full-featured Tar for Node.js
+	 *
+	 * @example
+	 * tar.c(
+	 * 		{
+	 * 		  gzip: <true|gzip options>,
+	 * 		  file: 'my-tarball.tgz'
+	 * 		},
+	 * 		['some', 'files', 'and', 'folders']
+	 * 	  ).then(_ => { .. tarball has been created .. })
+	 */
 	'tar',
 	'v8-compile-cache',
 	'validate-npm-package-name'

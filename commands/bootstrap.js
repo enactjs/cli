@@ -1,6 +1,17 @@
 // @remove-file-on-eject
 const path = require('path');
 const chalk = require('chalk');
+
+/**
+ * https://github.com/moxystudio/node-cross-spawn
+ *
+ * const child = spawn('npm', ['list', '-g', '-depth', '0'], { stdio: 'inherit' }); // Spawn NPM asynchronously
+ * const result = spawn.sync('npm', ['list', '-g', '-depth', '0'], { stdio: 'inherit' }); // Spawn NPM synchronously
+ *
+ * https://nodejs.org/api/child_process.html#child_process_options_stdio
+ *
+ * spawn('prg', [], { stdio: 'inherit' }); // Child will use parent's stdios.
+ */
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
 const minimist = require('minimist');
