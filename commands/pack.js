@@ -12,6 +12,10 @@
  */
 // @remove-on-eject-end
 
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
 /**
  * https://nodejs.org/api/path.html#path_path
  *
@@ -207,6 +211,11 @@ const {optionParser: app, mixins} = require('@enact/dev-utils');
  * 		The exit code.
  * 		Default: 0 - The 'success' code
  */
+
+/*********************************************************
+ *  displayHelp()
+ ********************************************************/
+
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
 	/**
@@ -253,11 +262,19 @@ function displayHelp() {
 	process.exit(0);
 }
 
+/*********************************************************
+ *  webpack()
+ ********************************************************/
+
+/**
+ * api -> build, watch -> details
+ */
 function details(err, stats, output) {
 	if (err) return err;
 	stats.compilation.warnings.forEach(w => {
 		w.message = w.message.replace(/\n.* potentially fixable with the `--fix` option./gm, '');
 	});
+
 	/**
 	 * https://webpack.js.org/api/node/#statstojsonoptions
 	 * Returns compilation information as a JSON object.
@@ -273,6 +290,7 @@ function details(err, stats, output) {
 	 * Tells stats to add warnings.
 	 */
 	const statsJSON = stats.toJson({all: false, warnings: true, errors: true});
+
 	const messages = formatWebpackMessages(statsJSON);
 	if (messages.errors.length) {
 		return new Error(messages.errors.join('\n\n'));
@@ -306,6 +324,9 @@ function details(err, stats, output) {
 	}
 }
 
+/**
+ * api -> build, watch -> details -> copyPublicFolder
+ */
 function copyPublicFolder(output) {
 	const staticAssets = './public';
 	if (fs.existsSync(staticAssets)) {
@@ -320,6 +341,9 @@ function copyPublicFolder(output) {
 	}
 }
 
+/**
+ * api -> build, watch -> details -> printFileSizes
+ */
 // Print a detailed summary of build files.
 function printFileSizes(stats, output) {
 	const assets = stats
@@ -355,6 +379,9 @@ function printFileSizes(stats, output) {
 	});
 }
 
+/**
+ * api -> build
+ */
 // Create the production build and print the deployment instructions.
 function build(config) {
 	if (process.env.NODE_ENV === 'development') {
@@ -376,10 +403,20 @@ function build(config) {
 	});
 }
 
+/**
+ * api -> watch
+ */
 // Create the build and watch for changes.
 function watch(config) {
 	// Make sure webpack doesn't immediate bail on errors when watching.
+
+	/**
+	 * <Webpack Config>
+	 *
+	 * `bail`: false
+	 */
 	config.bail = false;
+
 	if (process.env.NODE_ENV === 'development') {
 		console.log('Creating a development build and watching for changes...');
 	} else {
@@ -395,7 +432,15 @@ function watch(config) {
 	});
 }
 
+/*********************************************************
+ * cli and api
+ ********************************************************/
+
 function api(opts = {}) {
+	/**
+	 * <enact meta>
+	 */
+
 	if (opts.meta) {
 		let meta = opts.meta;
 		if (typeof meta === 'string') {
@@ -408,13 +453,31 @@ function api(opts = {}) {
 		app.applyEnactMeta(meta);
 	}
 
+	/**
+	 * <Webpack config>
+	 */
+
 	// Do this as the first thing so that any code reading it knows the right env.
 	const configFactory = require('../config/webpack.config');
+
+	/**
+	 * <Webpack Config>
+	 *
+	 * `mode`: "development"
+	 */
 	const config = configFactory(opts.production ? 'production' : 'development');
 
+	/**
+	 * <Webpack Config>
+	 *
+	 * output
+	 */
 	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);
 
+	/**
+	 * <Webpack Config>
+	 */
 	mixins.apply(config, opts);
 
 	// Remove all content but keep the directory so that

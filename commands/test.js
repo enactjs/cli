@@ -10,6 +10,11 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
 // @remove-on-eject-end
 const path = require('path');
 const {execSync} = require('child_process');
@@ -18,12 +23,28 @@ const chalk = require('chalk');
 const jest = require('jest');
 const resolve = require('resolve');
 
+/*********************************************************
+ *  Initialize
+ ********************************************************/
+
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
 process.on('unhandledRejection', err => {
 	throw err;
 });
+
+/*********************************************************
+ *  jest.run
+ *
+ * '../config/jest/jest.config'
+ ********************************************************/
+
+/**
+ * <Jest Config>
+ *
+ * `--watch` || `--watchAll`
+ */
 
 function isInGitRepository() {
 	try {
@@ -34,6 +55,12 @@ function isInGitRepository() {
 	}
 }
 
+/**
+ * <Jest Config>
+ *
+ * `--watch` || `--watchAll`
+ */
+
 function isInMercurialRepository() {
 	try {
 		execSync('hg --cwd . root', {stdio: 'ignore'});
@@ -43,6 +70,10 @@ function isInMercurialRepository() {
 	}
 }
 
+/**
+ * <Jest Config>
+ * `--env`
+ */
 // This is a very dirty workaround for https://github.com/facebook/jest/issues/5913.
 // We're trying to resolve the environment ourselves because Jest does it incorrectly.
 function resolveJestDefaultEnvironment(name) {
@@ -52,6 +83,10 @@ function resolveJestDefaultEnvironment(name) {
 	return resolve.sync(name, {basedir: jestConfigDir});
 }
 
+/**
+ * <Jest Config>
+ * `--env`
+ */
 function testEnvironment(args) {
 	const env = (
 		args.reverse().find((curr, i, a) => curr.startsWith('--env=') || a[i + 1] === '--env') || 'jsdom'
@@ -73,6 +108,19 @@ function testEnvironment(args) {
 	return resolvedEnv || env;
 }
 
+/**
+ * <Jest Config>
+ *
+ * `collectCoverageFrom`
+ * `coverageReporters`
+ * `coverageThreshold`
+ * `globalSetup`
+ * `globalTeardown`
+ * `resetMocks`
+ * `resetModules`
+ * `snapshotSerializers`
+ * `watchPathIgnorePatterns`
+ */
 function assignOverrides(config) {
 	const {meta} = packageRoot();
 	const overrides = Object.assign({}, meta.jest);
@@ -96,6 +144,11 @@ function assignOverrides(config) {
 		});
 		const unsupportedKeys = Object.keys(overrides);
 		if (unsupportedKeys.length) {
+	/**
+	 * <Jest Config>
+	 *
+	 * NOT SUPPORT `setupTestFrameworkScriptFile`
+	 */
 			const isOverridingSetupFile = unsupportedKeys.includes('setupTestFrameworkScriptFile');
 
 			if (isOverridingSetupFile) {
@@ -133,10 +186,20 @@ function assignOverrides(config) {
 	}
 }
 
+/*********************************************************
+ *  cli and api
+ ********************************************************/
+
 function api(args = []) {
 	const config = require('../config/jest/jest.config');
 
 	// @TODO: readd dotenv parse support
+
+	/**
+	 * <Jest Config>
+	 *
+	 * `--watch` || `--watchAll`
+	 */
 
 	// Watch unless on CI, in coverage mode, or explicitly running all tests
 	const wIndex = args.indexOf('--watch');
@@ -149,7 +212,19 @@ function api(args = []) {
 	// Apply safe override options from package.json
 	assignOverrides(config);
 
+	/**
+	 * <Jest Config>
+	 *
+	 * `--config`
+	 */
+
 	args.push('--config', JSON.stringify(config));
+
+	/**
+	 * <Jest Config>
+	 * `--env`
+	 */
+
 	args.push('--env', testEnvironment(args));
 
 	return jest.run(args);

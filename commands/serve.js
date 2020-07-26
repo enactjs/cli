@@ -10,18 +10,70 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
 // @remove-on-eject-end
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const minimist = require('minimist');
+/**
+ * https://github.com/facebook/create-react-app/blob/master/packages/react-dev-utils/clearConsole.js
+ *
+ * Clears the console, hopefully in a cross-platform way.
+ */
 const clearConsole = require('react-dev-utils/clearConsole');
+/**
+ * https://github.com/facebook/create-react-app/blob/master/packages/react-dev-utils/errorOverlayMiddleware.js
+ */
 const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
+/**
+ * https://github.com/facebook/create-react-app/tree/master/packages/react-dev-utils#openbrowserurl-string-boolean
+ *
+ * @example
+ * var path = require('path');
+ * var openBrowser = require('react-dev-utils/openBrowser');
+ * if (openBrowser('http://localhost:3000')) {
+ *   console.log('The browser tab has been opened!');
+ * }
+ */
 const openBrowser = require('react-dev-utils/openBrowser');
+/**
+ * https://github.com/facebook/create-react-app/tree/master/packages/react-dev-utils#webpackdevserverutils
+ *
+ * choosePort(host: string, defaultPort: number): Promise<number | null>
+ * Returns a Promise resolving to either defaultPort or next available port if the user confirms it is okay to do. If the port is taken and the user has refused to use another port, or if the terminal is not interactive and can’t present user with the choice, resolves to null.
+ *
+ * createCompiler(args: Object): WebpackCompiler
+ * Creates a webpack compiler instance for WebpackDevServer with built-in helpful messages.
+ *
+ * The args object accepts a number of properties:
+ * - `appName` string: The name that will be printed to the terminal.
+ * - `config` Object: The webpack configuration options to be provided to the webpack constructor.
+ * - `devSocket` Object: Required if useTypeScript is true. This object should include errors and warnings which are functions accepting an array of errors or warnings emitted by the type checking. This is useful when running fork-ts-checker-webpack-plugin with async: true to report errors that are emitted after the webpack build is complete.
+ * - `urls` Object: To provide the urls argument, use prepareUrls() described below.
+ * - `useYarn` boolean: If true, yarn instructions will be emitted in the terminal instead of npm.
+ * - `useTypeScript` boolean: If true, TypeScript type checking will be enabled. Be sure to provide the devSocket argument above if this is set to true.
+ * - `tscCompileOnError` boolean: If true, errors in TypeScript type checking will not prevent start script from running app, and will not cause build script to exit unsuccessfully. Also downgrades all TypeScript type checking error messages to warning messages.
+ * - `webpack` function: A reference to the webpack constructor.
+ *
+ * `prepareProxy`(proxySetting: string, appPublicFolder: string, servedPathname: string): Object
+ * Creates a WebpackDevServer proxy configuration object from the proxy setting in package.json.
+ *
+ * `prepareUrls`(protocol: string, host: string, port: number, pathname: string = '/'): Object
+ * Returns an object with local and remote URLs for the development server. Pass this object to createCompiler() described above.
+ */
 const {choosePort, createCompiler, prepareProxy, prepareUrls} = require('react-dev-utils/WebpackDevServerUtils');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const {optionParser: app} = require('@enact/dev-utils');
+
+/*********************************************************
+ *  Initialize
+ ********************************************************/
 
 // Any unhandled promise rejections should be treated like errors.
 process.on('unhandledRejection', err => {
@@ -37,6 +89,10 @@ console.log = (log => (data, ...rest) =>
 		: typeof data === 'string'
 		? log(data.replace(/npm run build/, 'npm run pack-p'), ...rest)
 		: log.call(this, data, ...rest))(console.log);
+
+/*********************************************************
+ *  displayHelp()
+ ********************************************************/
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -56,7 +112,23 @@ function displayHelp() {
 	process.exit(0);
 }
 
+/*********************************************************
+ * WebpackDevServer
+ *
+ * require('../config/webpack.config')
+ ********************************************************/
+
 function hotDevServer(config) {
+	/**
+	 * <Webpack Config>
+	 *
+	 * `entry`
+	 * `plugins`
+	 * `bail`
+	 * `resolve`
+	 * `resolve`
+	 */
+
 	// Include an alternative client for WebpackDevServer. A client's job is to
 	// connect to WebpackDevServer by a socket and get notified about changes.
 	// When you save a file, the client will either apply hot updates (in case
@@ -76,6 +148,23 @@ function hotDevServer(config) {
 	return config;
 }
 
+/**
+ * <Webpack config>
+ *
+ * `disableHostCheck`
+ * `clientLogLevel`
+ * `hot`
+ * `publicPath`
+ * `quiet`
+ * `https`
+ * `host`
+ * `overlay`
+ * `headers`
+ * `historyApiFallback`
+ * `public`
+ * `proxy`
+ * `before`
+ */
 function devServerConfig(host, protocol, proxy, allowedHost, publicPath) {
 	return {
 		// WebpackDevServer 2.4.3 introduced a security fix that prevents remote
@@ -147,14 +236,33 @@ function serve(config, host, port, open) {
 			// We have not found a port.
 			return Promise.reject(new Error('Could not find a free port for the dev-server.'));
 		}
+
+		/**
+		 * <Webpack Compiler>
+		 *
+		 * urls
+		 */
+
 		const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
 		const urls = prepareUrls(protocol, host, resolvedPort);
+
+		/**
+		 * <Webpack Compiler>
+		 *
+		 * devSocket
+		 */
+
 		const devSocket = {
 			// eslint-disable-next-line no-use-before-define
 			warnings: warnings => devServer.sockWrite(devServer.sockets, 'warnings', warnings),
 			// eslint-disable-next-line no-use-before-define
 			errors: errors => devServer.sockWrite(devServer.sockets, 'errors', errors)
 		};
+
+		/**
+		 * <Webpack Compiler>
+		 */
+
 		// Create a webpack compiler that is configured with custom messages.
 		const compiler = createCompiler({
 			appName: app.name,
@@ -176,15 +284,44 @@ function serve(config, host, port, open) {
 			});
 			callback();
 		});
+
+		/**
+		 * <Webpack config>
+		 * proxy
+		 */
+
 		// Load proxy config
 		const proxySetting = app.proxy;
 		const proxyConfig = prepareProxy(proxySetting, './');
+
+		/**
+		 * <Webpack config>
+		 *
+		* `disableHostCheck`
+		* `clientLogLevel`
+		* `hot`
+		* `publicPath`
+		* `quiet`
+		* `https`
+		* `host`
+		* `overlay`
+		* `headers`
+		* `historyApiFallback`
+		* `public`
+		* `proxy`
+		* `before`
+		*/
+
 		// Serve webpack assets generated by the compiler over a web sever.
 		const serverConfig = Object.assign(
 			{},
 			config.devServer,
 			devServerConfig(host, protocol, proxyConfig, urls.lanUrlForConfig, config.output.publicPath)
 		);
+
+		/**
+		 * <Webpack serve>
+		 */
 		const devServer = new WebpackDevServer(compiler, serverConfig);
 		// Launch WebpackDevServer.
 		devServer.listen(resolvedPort, host, err => {
@@ -196,6 +333,9 @@ function serve(config, host, port, open) {
 			}
 		});
 
+		/**
+		 * event handling
+		 */
 		['SIGINT', 'SIGTERM'].forEach(sig => {
 			process.on(sig, () => {
 				devServer.close();
@@ -205,7 +345,15 @@ function serve(config, host, port, open) {
 	});
 }
 
-function api(opts) {
+/*********************************************************
+ * cli and api
+ ********************************************************/
+
+ function api(opts) {
+	/**
+	 * <enact meta>
+	 */
+
 	if (opts.meta) {
 		let meta;
 		try {
@@ -216,16 +364,43 @@ function api(opts) {
 		app.applyEnactMeta(meta);
 	}
 
+	/**
+	 * <process.env.DISABLE_TSFORMATTER>
+	 */
+
 	// We can disable the typechecker formatter since react-dev-utils includes their
 	// own formatter in their dev client.
 	process.env.DISABLE_TSFORMATTER = 'true';
 
+	/**
+	 * <process.env.INLINE_STYLES>
+	 */
+
 	// Use inline styles for serving process.
 	process.env.INLINE_STYLES = 'true';
 
+	/**
+	 * <Webpack config>
+	 */
+
 	// Setup the development config with additional webpack-dev-server customizations.
 	const configFactory = require('../config/webpack.config');
+
+	/**
+	 * <Webpack Config>
+	 *
+	 * `mode`: "development"
+	 * `entry`
+	 * `resolve`
+	 * `plugins`
+	 * `bail`
+	 */
+
 	const config = hotDevServer(configFactory('development'));
+
+	/**
+	 * <Webpack config> host and port
+	 */
 
 	// Tools like Cloud9 rely on this.
 	const host = process.env.HOST || opts.host || config.devServer.host || '0.0.0.0';

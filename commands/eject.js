@@ -9,6 +9,18 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
+/**
+ * https://nodejs.org/api/child_process.html#child_process_child_process_fork_modulepath_args_options
+ *
+ * child_process.fork(modulePath[, args][, options])
+ *
+ * The child_process.fork() method is a special case of child_process.spawn() used specifically to spawn new Node.js processes.
+ */
 const cp = require('child_process');
 const os = require('os');
 const path = require('path');
@@ -42,6 +54,27 @@ const inquirer = require('react-dev-utils/inquirer');
 const minimist = require('minimist');
 const {packageRoot} = require('@enact/dev-utils');
 const spawn = require('cross-spawn');
+
+/*********************************************************
+ *  displayHelp()
+ ********************************************************/
+
+function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact eject';
+
+	console.log('  Usage');
+	console.log(`    ${e} [options]`);
+	console.log();
+	console.log('  Options');
+	console.log('    -b, --bare        Abandon Enact CLI command enhancements');
+	console.log('                      and eject into a a barebones setup (using');
+	console.log('                      webpack, eslint, karma, etc. directly)');
+	console.log('    -v, --version     Display version information');
+	console.log('    -h, --help        Display help information');
+	console.log();
+	process.exit(0);
+}
 
 const assets = [
 	{src: path.join(__dirname, '..', 'config'), dest: 'config'},
@@ -136,23 +169,6 @@ const bareTasks = {
 	test: 'jest --config config/jest/jest.config.js',
 	'test-watch': 'jest --config config/jest/jest.config.js --watch'
 };
-
-function displayHelp() {
-	let e = 'node ' + path.relative(process.cwd(), __filename);
-	if (require.main !== module) e = 'enact eject';
-
-	console.log('  Usage');
-	console.log(`    ${e} [options]`);
-	console.log();
-	console.log('  Options');
-	console.log('    -b, --bare        Abandon Enact CLI command enhancements');
-	console.log('                      and eject into a a barebones setup (using');
-	console.log('                      webpack, eslint, karma, etc. directly)');
-	console.log('    -v, --version     Display version information');
-	console.log('    -h, --help        Display help information');
-	console.log();
-	process.exit(0);
-}
 
 function validateEject() {
 	return inquirer
@@ -346,6 +362,10 @@ function npmInstall() {
 		});
 	});
 }
+
+/*********************************************************
+ * cli and api
+ ********************************************************/
 
 function api({bare = false} = {}) {
 	if (bare) {

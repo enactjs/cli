@@ -122,52 +122,39 @@ module.exports = function(env) {
 			}
 		});
 
+	/**
+	 * https://webpack.js.org/configuration/
+	 */
 	return {
 		mode: isEnvProduction ? 'production' : 'development',
-		// Don't attempt to continue if there are any errors.
-		bail: true,
-		// Use source maps during development builds or when specified by GENERATE_SOURCEMAP
-		devtool: shouldUseSourceMap && (isEnvProduction ? 'source-map' : 'cheap-module-source-map'),
+
 		// These are the "entry points" to our application.
 		entry: {
 			main: [
 				// Include any polyfills needed for the target browsers.
 				require.resolve('./polyfills'),
+
 				// This is your app's code
 				app.context
 			]
 		},
+
 		output: {
 			// The build output directory.
 			path: path.resolve('./dist'),
+
 			// Generated JS file names (with nested folders).
 			// There will be one main bundle, and one file per asynchronous chunk.
 			// We don't currently advertise code splitting but Webpack supports it.
 			filename: '[name].js',
+
 			// There are also additional JS chunk files if you use code splitting.
 			chunkFilename: 'chunk.[name].js',
+
 			// Add /* filename */ comments to generated require()s in the output.
 			pathinfo: !isEnvProduction
 		},
-		resolve: {
-			// These are the reasonable defaults supported by the React/ES6 ecosystem.
-			extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
-			// Allows us to specify paths to check for module resolving.
-			modules: [path.resolve('./node_modules'), 'node_modules'],
-			// Don't resolve symlinks to their underlying paths
-			symlinks: false,
-			// Backward compatibility for apps using new ilib references with old Enact
-			// and old apps referencing old iLib location with new Enact
-			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
-				? {ilib: '@enact/i18n/ilib'}
-				: {'@enact/i18n/ilib': 'ilib'}
-		},
-		// @remove-on-eject-begin
-		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
-		// directory of `@enact/cli` itself rather than the project directory.
-		resolveLoader: {
-			modules: [path.resolve(__dirname, '../node_modules'), path.resolve('./node_modules')]
-		},
+
 		// @remove-on-eject-end
 		module: {
 			rules: [
@@ -268,31 +255,42 @@ module.exports = function(env) {
 				}
 			]
 		},
-		// Specific webpack-dev-server options
-		devServer: {
-			// Broadcast http server on the localhost, port 8080
-			host: '0.0.0.0',
-			port: 8080,
-			// By default WebpackDevServer serves files from public and __mocks__ directories
-			// in addition to all the virtual build products that it serves from memory.
-			contentBase: [path.resolve('./public'), path.resolve('./__mocks__')],
-			// Any changes to files from `contentBase` should trigger a page reload.
-			watchContentBase: true,
-			// Reportedly, this avoids CPU overload on some systems.
-			// https://github.com/facebookincubator/create-react-app/issues/293
-			watchOptions: {
-				ignored: /node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
-			}
+
+		resolve: {
+			// These are the reasonable defaults supported by the React/ES6 ecosystem.
+			extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+			// Allows us to specify paths to check for module resolving.
+			modules: [path.resolve('./node_modules'), 'node_modules'],
+			// Don't resolve symlinks to their underlying paths
+			symlinks: false,
+			// Backward compatibility for apps using new ilib references with old Enact
+			// and old apps referencing old iLib location with new Enact
+			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
+				? {ilib: '@enact/i18n/ilib'}
+				: {'@enact/i18n/ilib': 'ilib'}
 		},
-		// Target app to build for a specific environment (default 'web')
-		target: app.environment,
-		// Optional configuration for polyfilling NodeJS built-ins.
-		node: app.nodeBuiltins,
+
+		// @remove-on-eject-begin
+		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
+		// directory of `@enact/cli` itself rather than the project directory.
+		resolveLoader: {
+			modules: [path.resolve(__dirname, '../node_modules'), path.resolve('./node_modules')]
+		},
+
 		performance: {
 			hints: false
 		},
+
 		optimization: {
+			/**
+			 * https://webpack.js.org/configuration/optimization/#optimizationminimize
+			 */
 			minimize: isEnvProduction,
+
+			/**
+			 * https://webpack.js.org/configuration/optimization/#optimizationminimizer
+			 *
+			 */
 			// These are only used in production mode
 			minimizer: [
 				new TerserPlugin({
@@ -334,6 +332,7 @@ module.exports = function(env) {
 					cache: true,
 					sourceMap: shouldUseSourceMap
 				}),
+
 				new OptimizeCSSAssetsPlugin({
 					cssProcessorOptions: {
 						calc: false,
@@ -349,6 +348,30 @@ module.exports = function(env) {
 				})
 			]
 		},
+
+		// Use source maps during development builds or when specified by GENERATE_SOURCEMAP
+		devtool: shouldUseSourceMap && (isEnvProduction ? 'source-map' : 'cheap-module-source-map'),
+
+		// Target app to build for a specific environment (default 'web')
+		target: app.environment,
+
+		// Specific webpack-dev-server options
+		devServer: {
+			// Broadcast http server on the localhost, port 8080
+			host: '0.0.0.0',
+			port: 8080,
+			// By default WebpackDevServer serves files from public and __mocks__ directories
+			// in addition to all the virtual build products that it serves from memory.
+			contentBase: [path.resolve('./public'), path.resolve('./__mocks__')],
+			// Any changes to files from `contentBase` should trigger a page reload.
+			watchContentBase: true,
+			// Reportedly, this avoids CPU overload on some systems.
+			// https://github.com/facebookincubator/create-react-app/issues/293
+			watchOptions: {
+				ignored: /node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
+			}
+		},
+
 		plugins: [
 			// Generates an `index.html` file with the js and css tags injected.
 			new HtmlWebpackPlugin({
@@ -371,6 +394,7 @@ module.exports = function(env) {
 					minifyURLs: true
 				}
 			}),
+
 			// Make NODE_ENV environment variable available to the JS code, for example:
 			// if (process.env.NODE_ENV === 'production') { ... }.
 			// It is absolutely essential that NODE_ENV was set to production here.
@@ -379,6 +403,7 @@ module.exports = function(env) {
 				'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
 				'process.env.PUBLIC_URL': JSON.stringify('.')
 			}),
+
 			// Inject prefixed environment variables within code, when used
 			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
 			// Note: this won't work without MiniCssExtractPlugin.loader in `loaders`.
@@ -387,8 +412,10 @@ module.exports = function(env) {
 					filename: '[name].css',
 					chunkFilename: 'chunk.[name].css'
 				}),
+
 			// Ensure correct casing in module filepathes
 			new CaseSensitivePathsPlugin(),
+
 			// If you require a missing module and then `npm install` it, you still have
 			// to restart the development server for Webpack to discover it. This plugin
 			// makes the discovery automatic so you don't have to restart.
@@ -398,13 +425,16 @@ module.exports = function(env) {
 			// EMFILE errors when hanndling mass amounts of files at once, such as
 			// what happens when using ilib bundles/resources.
 			new GracefulFsPlugin(),
+
 			// Automatically configure iLib library within @enact/i18n. Additionally,
 			// ensure the locale data files and the resource files are copied during
 			// the build to the output directory.
 			new ILibPlugin({symlinks: false}),
+
 			// Automatically detect ./appinfo.json and ./webos-meta/appinfo.json files,
 			// and parses any to copy over any webOS meta assets at build time.
 			new WebOSMetaPlugin(),
+
 			// TypeScript type checking
 			useTypeScript &&
 				new ForkTsCheckerWebpackPlugin({
@@ -428,6 +458,14 @@ module.exports = function(env) {
 					silent: true,
 					formatter: !process.env.DISABLE_TSFORMATTER ? typescriptFormatter : undefined
 				})
-		].filter(Boolean)
+		].filter(Boolean),
+
+		/////////////////////////////////////
+
+		// Don't attempt to continue if there are any errors.
+		bail: true,
+
+		// Optional configuration for polyfilling NodeJS built-ins.
+		node: app.nodeBuiltins,
 	};
 };

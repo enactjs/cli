@@ -1,10 +1,25 @@
 /* eslint-env node, es6 */
+
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
 const path = require('path');
 const fs = require('fs');
 const chalk = require('chalk');
 const spawn = require('cross-spawn');
 const minimist = require('minimist');
+/**
+ * https://github.com/browserify/resolve#resolvesyncid-opts
+ *
+ * Synchronously resolve the module path string id, returning the result and throwing an error when id can't be resolved.
+ * resolve.sync(id, opts)
+ */
 const resolveSync = require('resolve').sync;
+
+/*********************************************************
+ *  displayHelp()
+ ********************************************************/
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -24,6 +39,11 @@ function displayHelp() {
 
 function logVersion(pkg, rel = __dirname) {
 	try {
+		/**
+		 * https://github.com/browserify/resolve#resolvesyncid-opts
+		 *
+		 * opts.basedir - directory to begin resolving from
+		 */
 		const jsonPath = resolveSync(pkg + '/package.json', {basedir: rel});
 		const meta = require(jsonPath);
 		const dir = path.dirname(jsonPath);
@@ -75,6 +95,10 @@ function globalModules() {
 	}
 }
 
+/*********************************************************
+ * cli and api
+ ********************************************************/
+
 function api({cliInfo = false, dev = false} = {}) {
 	return new Promise((resolve, reject) => {
 		try {
@@ -117,6 +141,18 @@ function api({cliInfo = false, dev = false} = {}) {
 			} else {
 				const app = require('@enact/dev-utils').optionParser;
 				const meta = require(path.join(app.context, 'package.json'));
+				/**
+				 * https://github.com/browserify/resolve#resolvesyncid-opts
+				 *
+				 * opts.basedir - directory to begin resolving from
+				 * opts.preserveSymlinks - if true, doesn't resolve basedir to real path before resolving. This is the way Node resolves dependencies when executed with the --preserve-symlinks flag.
+				 *
+				 * default opts values:
+				 * {
+				 *     basedir: __dirname,
+				 *     preserveSymlinks: false
+				 * }
+				 */
 				const bl = require(resolveSync('browserslist', {
 					basedir: path.dirname(require.resolve('@enact/dev-utils/package.json')),
 					preserveSymlinks: false

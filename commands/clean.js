@@ -1,4 +1,9 @@
 /* eslint-env node, es6 */
+
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
 const path = require('path');
 const chalk = require('chalk');
 const fs = require('fs-extra');
@@ -11,6 +16,10 @@ const node_modules = 'node_modules';
 const samples = 'samples';
 const ssTests = path.join('tests', 'screenshot');
 const uiTests = path.join('tests', 'ui');
+
+/*********************************************************
+ *  displayHelp()
+ ********************************************************/
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -30,6 +39,10 @@ function displayHelp() {
 	console.log();
 	process.exit(0);
 }
+
+/*********************************************************
+ * cli and api
+ ********************************************************/
 
 function api({paths = [], all = false} = {}) {
 	const known = [build, dist];

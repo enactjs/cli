@@ -1,3 +1,7 @@
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
 // @remove-file-on-eject
 const path = require('path');
 const chalk = require('chalk');
@@ -17,6 +21,10 @@ const fs = require('fs-extra');
 const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils').packageRoot;
 const doLink = require('./link').api;
+
+/*********************************************************
+ *  displayHelp()
+ ********************************************************/
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -58,6 +66,10 @@ function npmExec(args, cwd = process.cwd(), loglevel) {
 function newline() {
 	console.log();
 }
+
+/*********************************************************
+ * cli and api
+ ********************************************************/
 
 function api({
 	cwd = process.cwd(),

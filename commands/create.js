@@ -9,6 +9,11 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
 /**
  * https://nodejs.org/api/os.html#os_os_homedir
  *
@@ -36,6 +41,10 @@ const minimist = require('minimist');
  */
 const validatePackageName = require('validate-npm-package-name');
 
+/*********************************************************
+ *  Initialize
+ ********************************************************/
+
 const ENACT_DEV_NPM = '@enact/cli';
 /**
  * https://github.com/zloirock/core-js
@@ -44,6 +53,31 @@ const ENACT_DEV_NPM = '@enact/cli';
 const CORE_JS_NPM = 'core-js@3';
 const INCLUDED = path.dirname(require.resolve('@enact/template-moonstone'));
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
+
+/*********************************************************
+ *  displayHelp()
+ ********************************************************/
+
+function displayHelp() {
+	let e = 'node ' + path.relative(process.cwd(), __filename);
+	if (require.main !== module) e = 'enact create';
+
+	console.log('  Usage');
+	console.log(`    ${e} [options] [<directory>]`);
+	console.log();
+	console.log('  Arguments');
+	console.log('    directory         Optional destination directory');
+	console.log('                          (default: cwd)');
+	console.log();
+	console.log('  Options');
+	console.log('    -t, --template    Specific template to use');
+	console.log('    --local           Include @enact/cli locally');
+	console.log('    --verbose         Verbose output logging');
+	console.log('    -v, --version     Display version information');
+	console.log('    -h, --help        Display help information');
+	console.log();
+	process.exit(0);
+}
 
 const defaultGenerator = {
 	overwrite: false,
@@ -169,27 +203,6 @@ const defaultGenerator = {
 	}
 };
 
-function displayHelp() {
-	let e = 'node ' + path.relative(process.cwd(), __filename);
-	if (require.main !== module) e = 'enact create';
-
-	console.log('  Usage');
-	console.log(`    ${e} [options] [<directory>]`);
-	console.log();
-	console.log('  Arguments');
-	console.log('    directory         Optional destination directory');
-	console.log('                          (default: cwd)');
-	console.log();
-	console.log('  Options');
-	console.log('    -t, --template    Specific template to use');
-	console.log('    --local           Include @enact/cli locally');
-	console.log('    --verbose         Verbose output logging');
-	console.log('    -v, --version     Display version information');
-	console.log('    -h, --help        Display help information');
-	console.log();
-	process.exit(0);
-}
-
 function resolveTemplateGenerator(template) {
 	return new Promise((resolve, reject) => {
 		let templatePath = path.join(TEMPLATE_DIR, template);
@@ -272,6 +285,10 @@ function npmInstall(directory, verbose, ...rest) {
 		});
 	});
 }
+
+/*********************************************************
+ * cli and api
+ ********************************************************/
 
 function api(opts = {}) {
 	return resolveTemplateGenerator(opts.template).then(({generator, templatePath}) => {

@@ -1,4 +1,8 @@
 // @remove-file-on-eject
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
 const os = require('os');
 const path = require('path');
 const url = require('url');
@@ -9,9 +13,17 @@ const minimist = require('minimist');
 const inquirer = require('react-dev-utils/inquirer');
 const tar = require('tar');
 
+/*********************************************************
+ *  Initialize
+ ********************************************************/
+
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 const INCLUDED = path.dirname(require.resolve('@enact/template-moonstone'));
 const DEFAULT_LINK = path.join(TEMPLATE_DIR, 'default');
+
+/*********************************************************
+ *  displayHelp()
+ ********************************************************/
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -237,6 +249,10 @@ function doList() {
 		console.log(item);
 	});
 }
+
+/*********************************************************
+ * cli and api
+ ********************************************************/
 
 function api({action, target, name} = {}) {
 	return initTemplateArea().then(() => {

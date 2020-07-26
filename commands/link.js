@@ -1,3 +1,7 @@
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
 // @remove-file-on-eject
 const path = require('path');
 const chalk = require('chalk');
@@ -5,6 +9,10 @@ const spawn = require('cross-spawn');
 const fs = require('fs-extra');
 const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils').packageRoot;
+
+/*********************************************************
+ *  displayHelp()
+ ********************************************************/
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -48,6 +56,10 @@ function globalModules(cwd) {
 		});
 	});
 }
+
+/*********************************************************
+ * cli and api
+ ********************************************************/
 
 function api({cwd = process.cwd(), loglevel = 'error', verbose = false} = {}) {
 	const linkArgs = ['--loglevel', verbose ? 'verbose' : loglevel, 'link'];

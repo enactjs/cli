@@ -1,17 +1,99 @@
 /* eslint-env node, es6 */
+
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
+/**
+ * https://nodejs.org/api/child_process.html#child_process_child_process_execsync_command_options
+ *
+ * child_process.execSync(command[, options])
+ *
+ * The child_process.execSync() method is generally identical to child_process.exec() with the exception that the method will not return until the child process has fully closed.
+ */
 const cp = require('child_process');
+/**
+ * https://nodejs.org/api/fs.html#fs_fs_existssync_path
+ *
+ * fs.existsSync(path)
+ * Returns true if the path exists, false otherwise.
+ */
 const fs = require('fs');
+/**
+ * https://nodejs.org/api/path.html
+ *
+ * relative:
+ * 		path.relative('/data/orandea/test/aaa', '/data/orandea/impl/bbb'); // Returns: '../../impl/bbb'
+ *
+ * join:
+ * 		path.join('/foo', 'bar', 'baz/asdf', 'quux', '..'); // Returns: '/foo/bar/baz/asdf'
+ */
 const path = require('path');
+/**
+ * https://github.com/moxystudio/node-cross-spawn
+ *
+ * const child = spawn('npm', ['list', '-g', '-depth', '0'], { stdio: 'inherit' }); // Spawn NPM asynchronously
+ * const result = spawn.sync('npm', ['list', '-g', '-depth', '0'], { stdio: 'inherit' }); // Spawn NPM synchronously
+ *
+ * https://nodejs.org/api/child_process.html#child_process_options_stdio
+ *
+ * spawn('prg', [], { stdio: 'inherit' }); // Child will use parent's stdios.
+ */
 const spawn = require('cross-spawn');
+/**
+ * https://github.com/isaacs/node-glob
+ *
+ * "Globs" are the patterns you type when you do stuff like ls *.js on the command line, or put build/* in a .gitignore file.
+ */
 const glob = require('glob');
+/**
+ * https://github.com/substack/minimist
+ *
+ * This module is the guts of optimist's argument parser without all the fanciful decoration.
+ *
+ * Options
+ * nodir: Do not match directories, only files. (Note: to match only directories, simply put a / at the end of the pattern.)
+ *
+ * @example
+ * var argv = require('minimist')(process.argv.slice(2));
+ * console.log(argv);
+ *
+ * $ node example/parse.js -a beep -b boop
+ * { _: [], a: 'beep', b: 'boop' }
+ *
+ * $ node example/parse.js -x 3 -y 4 -n5 -abc --beep=boop foo bar baz
+ *  { _: [ 'foo', 'bar', 'baz' ],
+ *    x: 3,
+ *    y: 4,
+ *    n: 5,
+ *    a: true,
+ *    b: true,
+ *    c: true,
+ *    beep: 'boop'
+ *   }
+ */
 const minimist = require('minimist');
+/**
+ * https://github.com/browserify/resolve#resolvesyncid-opts
+ *
+ * resolve.sync(id, opts)
+ * Synchronously resolve the module path string id, returning the result and throwing an error when id can't be resolved.
+ */
 const resolver = require('resolve');
 const {packageRoot} = require('@enact/dev-utils');
+
+/*********************************************************
+ *  Initialize
+ ********************************************************/
 
 const globOpts = {
 	ignore: ['**/node_modules/**', 'build/**', '**/dist/**', 'coverage/**', 'tests/**'],
 	nodir: true
 };
+
+/*********************************************************
+ *  displayHelp()
+ ********************************************************/
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -113,6 +195,10 @@ function tslint({fix = false} = {}, context) {
 		});
 	});
 }
+
+/*********************************************************
+ * cli and api
+ ********************************************************/
 
 function api(opts) {
 	const context = packageRoot().path;

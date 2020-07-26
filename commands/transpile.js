@@ -1,4 +1,8 @@
 // @remove-file-on-eject
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
 const path = require('path');
 const babel = require('@babel/core');
 const chalk = require('chalk');
@@ -8,6 +12,10 @@ const LessPluginResolve = require('less-plugin-npm-import');
 const minimist = require('minimist');
 const LessPluginRi = require('resolution-independence');
 const {optionParser: app} = require('@enact/dev-utils');
+
+/*********************************************************
+ *  Initialize
+ ********************************************************/
 
 const blacklist = ['node_modules', 'build', 'dist', 'docs', '.git', '.gitignore', 'samples', 'tests'];
 const babelConfig = path.join(__dirname, '..', 'config', 'babel.config.js');
@@ -19,6 +27,10 @@ const lessPlugins = [
 	new LessPluginResolve({prefix: '~'}),
 	new LessPluginRi(ri24.includes(app.name) ? {baseSize: 24} : app.ri)
 ];
+
+/*********************************************************
+ *  displayHelp()
+ ********************************************************/
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -60,6 +72,10 @@ function lessc(src, dest) {
 		})
 		.then(result => fs.writeFileSync(dest.replace(/\.less$/, '.css'), result.css, {encoding: 'utf8'}));
 }
+
+/*********************************************************
+ * cli and api
+ ********************************************************/
 
 function api({source = '.', output = './build', commonjs = true, ignore} = {}) {
 	process.env.ES5 = 'true';

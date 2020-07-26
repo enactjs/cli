@@ -1,12 +1,25 @@
 /* eslint-env node, es6 */
+
+/*********************************************************
+ *  Dependencies
+ ********************************************************/
+
 const path = require('path');
 const chalk = require('chalk');
 const checker = require('license-checker');
 const minimist = require('minimist');
 
+/*********************************************************
+ *  Initialize
+ ********************************************************/
+
 // The following modules reside in `@enact/cli` but end up in production builds of apps
 const pkgPathResolve = m => path.dirname(require.resolve(m + '/package.json'));
 const enactCLIProdModules = ['@babel/core', 'core-js'].map(pkgPathResolve);
+
+/*********************************************************
+ *  displayHelp()
+ ********************************************************/
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -25,6 +38,10 @@ function displayHelp() {
 	console.log();
 	process.exit(0);
 }
+
+/*********************************************************
+ * cli and api
+ ********************************************************/
 
 function api({modules = []} = {}) {
 	if (!modules.length) {
