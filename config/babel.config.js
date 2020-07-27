@@ -60,22 +60,20 @@ module.exports = function (api) {
 			// Stage 1
 			require('@babel/plugin-proposal-export-default-from').default,
 			// '@babel/plugin-proposal-logical-assignment-operators',
-			// ['@babel/plugin-proposal-optional-chaining', { 'loose': false }],
 			// ['@babel/plugin-proposal-pipeline-operator', { 'proposal': 'minimal' }],
-			// ['@babel/plugin-proposal-nullish-coalescing-operator', { 'loose': false }],
 			// '@babel/plugin-proposal-do-expressions',
 
 			// Stage 2
 			[require('@babel/plugin-proposal-decorators').default, false],
-			// '@babel/plugin-proposal-function-sent',
 			require('@babel/plugin-proposal-export-namespace-from').default,
 			require('@babel/plugin-proposal-numeric-separator').default,
+			// '@babel/plugin-proposal-function-sent',
 			// '@babel/plugin-proposal-throw-expressions',
 
 			// Stage 3
 			require('@babel/plugin-syntax-dynamic-import').default,
-			// '@babel/plugin-syntax-import-meta',
 			[require('@babel/plugin-proposal-class-properties').default, {loose: true}],
+			// '@babel/plugin-syntax-import-meta',
 			// '@babel/plugin-proposal-json-strings'
 
 			// Soon to be included within pre-env; include here until then
