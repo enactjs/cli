@@ -4,6 +4,7 @@
  *  A Babel javascript configuration dynamically setup for Enact
  *  development environment on target platforms.
  */
+const path = require('path');
 
 module.exports = function (api) {
 	const env = process.env.BABEL_ENV || process.env.NODE_ENV;
@@ -81,9 +82,32 @@ module.exports = function (api) {
 			require('@babel/plugin-proposal-optional-chaining').default,
 			require('@babel/plugin-proposal-nullish-coalescing-operator').default,
 
+			[
+				require('@babel/plugin-transform-runtime').default,
+				{
+					corejs: false,
+					helpers: true,
+					// Explicitly resolve runtime version to avoid issue
+					// https://github.com/babel/babel/issues/10261
+					version: require('@babel/runtime/package.json').version,
+					regenerator: false,
+					useESModules: !es5Standalone,
+					// @remove-on-eject-begin
+					// Undocumented option to use CLI-contained runtime, ensuring
+					// the correct version
+					absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package.json'))
+					// @remove-on-eject-end
+				}
+			],
+
 			require('babel-plugin-dev-expression'),
 			env === 'test' && !es5Standalone && require('babel-plugin-dynamic-import-node').default,
-			env === 'production' && !es5Standalone && require('@babel/plugin-transform-react-inline-elements').default
+			env === 'production' && !es5Standalone && require('@babel/plugin-transform-react-inline-elements').default,
+			env === 'production' &&
+				!es5Standalone && [
+					require('babel-plugin-transform-react-remove-prop-types').default,
+					{removeImport: true}
+				]
 		].filter(Boolean),
 		overrides: [
 			{
