@@ -18,7 +18,6 @@ const minimist = require('minimist');
 const validatePackageName = require('validate-npm-package-name');
 
 const ENACT_DEV_NPM = '@enact/cli';
-const CORE_JS_NPM = 'core-js@3';
 const INCLUDED = path.dirname(require.resolve('@enact/template-sandstone'));
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 
@@ -171,7 +170,7 @@ function resolveTemplateGenerator(template) {
 	return new Promise((resolve, reject) => {
 		let templatePath = path.join(TEMPLATE_DIR, template);
 		if (!fs.existsSync(templatePath)) {
-			if (['default', 'moonstone'].includes(template)) {
+			if (['default', 'sandstone'].includes(template)) {
 				templatePath = path.join(INCLUDED, 'template');
 			} else {
 				reject(new Error(`Template ${chalk.bold(template)} not found.`));
@@ -263,7 +262,7 @@ function api(opts = {}) {
 			.then(() => {
 				if (opts.local) {
 					console.log('Installing @enact/cli locally. This might take a couple minutes.');
-					return npmInstall(opts.directory, opts.verbose, '--save', CORE_JS_NPM).then(() =>
+					return npmInstall(opts.directory, opts.verbose, '--save', '@babel/runtime', 'core-js').then(() =>
 						npmInstall(opts.directory, opts.verbose, '--save-dev', ENACT_DEV_NPM)
 					);
 				}
