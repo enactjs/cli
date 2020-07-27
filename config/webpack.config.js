@@ -27,7 +27,13 @@ const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeM
 const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
-const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
+const {
+	optionParser: app,
+	cssModuleIdent: getSimpleCSSModuleLocalIdent,
+	GracefulFsPlugin,
+	ILibPlugin,
+	WebOSMetaPlugin
+} = require('@enact/dev-utils');
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
@@ -54,6 +60,9 @@ module.exports = function (env) {
 	const GENERATE_SOURCEMAP = process.env.GENERATE_SOURCEMAP || (isEnvProduction ? 'false' : 'true');
 	const shouldUseSourceMap = GENERATE_SOURCEMAP !== 'false';
 
+	const getLocalIdent =
+		process.env.SIMPLE_CSS_IDENT !== 'false' ? getSimpleCSSModuleLocalIdent : getCSSModuleLocalIdent;
+
 	// common function to get style loaders
 	const getStyleLoaders = (cssLoaderOptions = {}, preProcessor) => {
 		// Multiple styling-support features are used together, bottom-to-top.
@@ -73,7 +82,7 @@ module.exports = function (env) {
 				options: Object.assign(
 					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
 					cssLoaderOptions,
-					cssLoaderOptions.modules && {modules: {getLocalIdent: getCSSModuleLocalIdent}}
+					cssLoaderOptions.modules && {modules: {getLocalIdent}}
 				)
 			},
 			{
@@ -192,8 +201,8 @@ module.exports = function (env) {
 			// Backward compatibility for apps using new ilib references with old Enact
 			// and old apps referencing old iLib location with new Enact
 			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
-				? {ilib: '@enact/i18n/ilib'}
-				: {'@enact/i18n/ilib': 'ilib'}
+				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias)
+				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias)
 		},
 		// @remove-on-eject-begin
 		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
