@@ -52,7 +52,7 @@ module.exports = function (env) {
 	process.env.NODE_ENV = env || process.env.NODE_ENV;
 	const isEnvProduction = process.env.NODE_ENV === 'production';
 
-	const publicPath = getPublicUrlOrPath(!isEnvProduction, app.publicUrl, process.env.PUBLIC_URL);
+	const publicPath = getPublicUrlOrPath(!isEnvProduction, app.publicUrl, process.env.PUBLIC_URL).replace(/^\/$/, '');
 
 	// Source maps are resource heavy and can cause out of memory issue for large source files.
 	// By default, sourcemaps will be used in development, however it can universally forced
@@ -310,12 +310,12 @@ module.exports = function (env) {
 			// Broadcast http server on the localhost, port 8080.
 			host: '0.0.0.0',
 			port: 8080,
-			// Support the same public path as webpack config, with trailing slash removed.
-			publicPath: publicPath.slice(0, -1),
+			// Support the same public path as webpack config.
+			publicPath: publicPath,
 			// By default WebpackDevServer serves files from public and __mocks__ directories
 			// in addition to all the virtual build products that it serves from memory.
 			contentBase: [path.resolve('./public'), path.resolve('./__mocks__')],
-			contentBasePublicPath: publicPath,
+			contentBasePublicPath: publicPath + '/',
 			// Any changes to files from `contentBase` should trigger a page reload.
 			watchContentBase: true,
 			// Reportedly, this avoids CPU overload on some systems.
@@ -423,7 +423,7 @@ module.exports = function (env) {
 			// Otherwise React will be compiled in the very slow development mode.
 			new DefinePlugin({
 				'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
-				'process.env.PUBLIC_URL': JSON.stringify(publicPath.slice(0, -1))
+				'process.env.PUBLIC_URL': JSON.stringify(publicPath)
 			}),
 			// Inject prefixed environment variables within code, when used
 			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^(REACT_APP|WDS_SOCKET)/.test(key))),
