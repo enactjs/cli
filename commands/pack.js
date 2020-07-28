@@ -53,10 +53,12 @@ function displayHelp() {
 	console.log();
 	/*
 		Private Options:
+			--entry               Specify an override entrypoint
 			--no-minify           Will skip minification during production build
 			--framework           Builds the @enact/*, react, and react-dom into an external framework
 			--externals           Specify a local directory path to the standalone external framework
 			--externals-public    Remote public path to the external framework for use injecting into HTML
+			--externals-corejs    Flag whether to use an external core-js (or include in framework build)
 	*/
 	process.exit(0);
 }
@@ -240,6 +242,9 @@ function api(opts = {}) {
 	const configFactory = require('../config/webpack.config');
 	const config = configFactory(opts.production ? 'production' : 'development');
 
+	// Set any entry path override
+	if (opts.entry) config.entry.main[1] = path.resolve(opts.entry);
+
 	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);
 
@@ -260,8 +265,19 @@ function api(opts = {}) {
 
 function cli(args) {
 	const opts = minimist(args, {
-		boolean: ['minify', 'framework', 'stats', 'production', 'isomorphic', 'snapshot', 'verbose', 'watch', 'help'],
-		string: ['externals', 'externals-public', 'locales', 'output', 'meta'],
+		boolean: [
+			'minify',
+			'framework',
+			'externals-corejs',
+			'stats',
+			'production',
+			'isomorphic',
+			'snapshot',
+			'verbose',
+			'watch',
+			'help'
+		],
+		string: ['externals', 'externals-public', 'locales', 'entry', 'output', 'meta'],
 		default: {minify: true},
 		alias: {
 			o: 'output',
