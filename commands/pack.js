@@ -58,7 +58,7 @@ function displayHelp() {
 			--framework           Builds the @enact/*, react, and react-dom into an external framework
 			--externals           Specify a local directory path to the standalone external framework
 			--externals-public    Remote public path to the external framework for use injecting into HTML
-			--externals-corejs    Flag whether to use an external core-js (or include in framework build)
+			--externals-polyfill  Flag whether to use external polyfill (or include in framework build)
 	*/
 	process.exit(0);
 }
