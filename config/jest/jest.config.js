@@ -55,11 +55,16 @@ process.env.BROWSERSLIST = 'current node';
 // Load applicable .env files into environment variables.
 require('../dotenv').load(app.context);
 
+// Find any applicable user test setup file
+const userSetupFile = ['mjs', 'js', 'jsx', 'ts', 'tsx']
+	.map(ext => path.join(app.context, 'src', 'setupTests' + ext))
+	.find(file => fs.existsSync(file));
+
 module.exports = {
 	collectCoverageFrom: ['**/*.{js,jsx,ts,tsx}', '!**/*.d.ts'],
 	coveragePathIgnorePatterns: ignorePatterns,
 	setupFiles: [require.resolve('../polyfills')],
-	setupFilesAfterEnv: [require.resolve('./setupTests')],
+	setupFilesAfterEnv: [require.resolve('./setupTests'), userSetupFile].filter(Boolean),
 	testMatch: [
 		'<rootDir>/**/__tests__/**/*.{js,jsx,ts,tsx}',
 		'<rootDir>/**/?(*.)(spec|test).{js,jsx,ts,tsx}',
@@ -68,14 +73,15 @@ module.exports = {
 	testPathIgnorePatterns: ignorePatterns,
 	testEnvironment: 'jsdom',
 	testEnvironmentOptions: {pretendToBeVisual: true},
+	testRunner: require.resolve('jest-circus/runner'),
 	testURL: 'http://localhost',
 	transform: {
 		'^.+\\.(js|jsx|ts|tsx)$': require.resolve('./babelTransform'),
-		'^.+\\.css$': require.resolve('./cssTransform.js'),
-		'^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': require.resolve('./fileTransform')
+		'^.+\\.(css|less)$': require.resolve('./cssTransform.js'),
+		'^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|less|json)$)': require.resolve('./fileTransform')
 	},
 	transformIgnorePatterns: [
-		'[/\\\\]node_modules[/\\\\](?!@enact).+\\.(js|jsx|ts|tsx)$',
+		'[/\\\\]node_modules[/\\\\](?!@enact).+\\.(js|jsx|mjs|cjs|ts|tsx)$',
 		'^.+\\.module\\.(css|less)$'
 	],
 	moduleNameMapper: {
@@ -88,5 +94,7 @@ module.exports = {
 		'^@enact[/]i18n[/]ilib[/](.*)$': path.join(app.context, globals.ILIB_BASE_PATH, '$1')
 	},
 	moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx'],
-	globals
+	globals,
+	watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'].map(m => require.resolve(m)),
+	resetMocks: true
 };

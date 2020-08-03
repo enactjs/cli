@@ -1,3 +1,57 @@
+## 3.0.0 (August 3, 2020)
+
+All dependencies updated to latest release.
+
+### create
+
+* Changed to `@enact/template-sandstone` as default for new apps.
+
+### pack
+
+* Added support for `TSC_COMPILE_ON_ERROR` environment variable which, when `'true'`, will succeed/compile a Typescript build, regardless of whether errors exist on the webpack stack.
+* Added descriptive PostCSS error details on failure.
+* Added full public URL support via `PUBLIC_URL` environment variable, `publicUrl` Enact option, or `package.json` homepage value.
+* Added support for mjs file extension.
+* Added `postcss-normalize` PostCSS plugin to normalize browser quirks according to BROWSERSLIST.
+* Added `postcss-safe-parser` for production optimization to handle common CSS syntax issues without failing.
+* Updated Babel support:
+  * Added `plugin-proposal-decorators`, `plugin-proposal-numeric-separator`, `plugin-proposal-optional-chaining`, and `plugin-proposal-nullish-coalescing-operator`
+  * Disabled `transform-typeof-symbol` plugin as it is known to make code slower.
+  * For Jest testing, include `babel-plugin-dynamic-import-node` to rewrite dynamic `import()`
+  * For Typescript files, use `plugin-proposal-decorators` in loose mode
+* Updated eslint pre-loader to scan typescript files as well as javascript
+* Updated webpack config to only support `.ts` and `.tsx` files when `tsconfig.json` is found, to avoid confusing error messages.
+
+### serve
+
+* Added support for experimental fast react refresh. This can be enabled via the commandline option `-f`/`--fast`. It may not work for all cases, but for general usage, will provide inline hot code reloading without the browser needing to refresh the webpage.
+* Added devserver support for public URL via `PUBLIC_URL` environment variable, `publicUrl` Enact option, or `package.json` homepage value.
+* Added support for LESS sourcemaps.
+* Added custom sourcemap handling to provide organized filepaths and avoid css/style loader naming collisions.
+* Added support for `WDS_SOCKET_HOST`, `WDS_SOCKET_PATH`, and `WDS_SOCKET_PORT` environment variables to control hot reloading websocket details.
+* Added support for `SSL_CRT_FILE` and `SSL_KEY_FILE` environment variables to specify filepaths for relevant SSL files for `https` support.
+* Added support for `TSC_COMPILE_ON_ERROR` environment variable flag to serve/compile Typescript even when there's webpack errors.
+* Updated to use newest webpack dev server client and error overlay middleware.
+* Changed to native websockets for hot reloading
+
+### test
+
+* Added additional supported Jest keys/options in `package.json` jest object.
+* Added support for a local `./src/setupTests.js` setup file
+* Added `jest-circus` test runner
+* Added `jest-watch-typeahead` watch plugins to support dynamic filtering by file name and test name.
+* Fixed `import()` in tests not being transpiled to dynamic `require()` calls.
+* Updated test handling to reset mock functions between testing blocks.
+
+### transpile
+
+* Removed workaround for `baseSize: 24` themes now that all resolution independence settings can be correctly detected and used.
+
+### lint
+
+* Uses latest linting standards, including jsx-a11y, babel rules, and optional support for Typescript. See [linting config changelog](https://github.com/enactjs/eslint-config-enact/blob/master/CHANGELOG.md#200) for full details.
+* Removed `tslint` logic/support and ESLint config will cover Typescript files as well.
+
 ## 2.8.1 (June 15, 2020)
 
 ### serve

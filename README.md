@@ -9,7 +9,7 @@ All that's needed to install @enact/cli is to use npm to install it globally. Fo
 npm install -g @enact/cli
 ```
 
->Note: Node 6.x or greater required.
+>Note: Node 10 LTS or greater required.
 
 ## Creating a new App
 
@@ -62,6 +62,7 @@ The @enact/cli tool will check the project's **package.json** looking for an opt
 * `template` _[string]_ - Filepath to an alternate HTML template to use with the [Webpack html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin).
 * `isomorphic` _[string]_ - Alternate filepath to a custom isomorphic-compatible entry point. Not needed if main entry point is already isomorphic-compatible.
 * `title` _[string]_ - Title text that should be put within the HTML's `<title></title>` tags. Note: if this is a webOS-project, the title will, by default, be auto-detected from the **appinfo.json** content.
+* `alias` _[object]_ - String mapping of webpack alias paths to use when building.
 * `theme` _[object]_ - A simplified string name to extrapolate `fontGenerator`, `ri`, and `screenTypes` preset values from. For example, `"moonstone"`
 * `fontGenerator` _[string]_ - Filepath to a CommonJS fontGenerator module which will build locale-specific font CSS to inject into the HTML. By default, will use any preset for a specified theme or fallback to moonstone.
 * `ri` _[object]_ - Resolution independence options to be forwarded to the [LESS plugin](https://github.com/enyojs/less-plugin-resolution-independence). By default, will use any preset for a specified theme or fallback to moonstone
@@ -71,6 +72,7 @@ The @enact/cli tool will check the project's **package.json** looking for an opt
 * `forceCSSModules` _[boolean]_ - Flag whether to force all LESS/CSS to be processed in a modular context (not just the `*.module.css` and `*.module.less` files).
 * `deep` _[string|array]_ - 1 or more JavaScript conditions that, when met, indicate deeplinking and any prerender should be discarded.
 * `target` _[string|array]_ - A build-type generic preset string (see `target` [webpack option](https://webpack.js.org/configuration/target/)) or alternatively a specific [browserslist array](https://github.com/ai/browserslist) of desired targets.
+* `publicUrl` _[string]_ - Public path URL at which the app is served or destined to be hosted. This can also be set via the package.json `homepage` field.
 * `proxy` _[string]_ - Proxy target during project `serve` to be used within the [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware).
 
 For example:

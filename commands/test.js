@@ -77,32 +77,47 @@ function assignOverrides(config) {
 	const {meta} = packageRoot();
 	const overrides = Object.assign({}, meta.jest);
 	const supportedKeys = [
+		'clearMocks',
 		'collectCoverageFrom',
+		'coveragePathIgnorePatterns',
 		'coverageReporters',
 		'coverageThreshold',
+		'displayName',
+		'extraGlobals',
 		'globalSetup',
 		'globalTeardown',
+		'moduleNameMapper',
 		'resetMocks',
 		'resetModules',
+		'restoreMocks',
 		'snapshotSerializers',
+		'testMatch',
+		'transform',
+		'transformIgnorePatterns',
 		'watchPathIgnorePatterns'
 	];
 	if (overrides) {
 		supportedKeys.forEach(key => {
-			if (overrides.hasOwnProperty(key)) {
-				config[key] = overrides[key];
+			if (Object.prototype.hasOwnProperty.call(overrides, key)) {
+				if (Array.isArray(config[key]) || typeof config[key] !== 'object') {
+					// for arrays or primitive types, directly override the config key
+					config[key] = overrides[key];
+				} else {
+					// for object types, extend gracefully
+					config[key] = Object.assign({}, config[key], overrides[key]);
+				}
 				delete overrides[key];
 			}
 		});
 		const unsupportedKeys = Object.keys(overrides);
 		if (unsupportedKeys.length) {
-			const isOverridingSetupFile = unsupportedKeys.includes('setupTestFrameworkScriptFile');
+			const isOverridingSetupFile = unsupportedKeys.includes('setupFilesAfterEnv');
 
 			if (isOverridingSetupFile) {
 				console.error(
 					chalk.red(
 						'We detected ' +
-							chalk.bold('setupTestFrameworkScriptFile') +
+							chalk.bold('setupFilesAfterEnv') +
 							' in your package.json.\n\n' +
 							'Remove it from Jest configuration, and put the initialization code in ' +
 							chalk.bold('src/setupTests.js') +

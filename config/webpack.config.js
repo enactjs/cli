@@ -19,18 +19,25 @@ const ForkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpack
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
+const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
+const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
-const {optionParser: app, GracefulFsPlugin, ILibPlugin, WebOSMetaPlugin} = require('@enact/dev-utils');
+const {
+	optionParser: app,
+	cssModuleIdent: getSimpleCSSModuleLocalIdent,
+	GracefulFsPlugin,
+	ILibPlugin,
+	WebOSMetaPlugin
+} = require('@enact/dev-utils');
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
-module.exports = function(env) {
+module.exports = function (env) {
 	process.chdir(app.context);
 
 	// Load applicable .env files into environment variables.
@@ -45,12 +52,16 @@ module.exports = function(env) {
 	process.env.NODE_ENV = env || process.env.NODE_ENV;
 	const isEnvProduction = process.env.NODE_ENV === 'production';
 
+	const publicPath = getPublicUrlOrPath(!isEnvProduction, app.publicUrl, process.env.PUBLIC_URL).replace(/^\/$/, '');
+
 	// Source maps are resource heavy and can cause out of memory issue for large source files.
 	// By default, sourcemaps will be used in development, however it can universally forced
 	// on or off by setting the GENERATE_SOURCEMAP environment variable.
 	const GENERATE_SOURCEMAP = process.env.GENERATE_SOURCEMAP || (isEnvProduction ? 'false' : 'true');
 	const shouldUseSourceMap = GENERATE_SOURCEMAP !== 'false';
-	const shouldSourceMapStyles = !process.env.INLINE_STYLES && shouldUseSourceMap;
+
+	const getLocalIdent =
+		process.env.SIMPLE_CSS_IDENT !== 'false' ? getSimpleCSSModuleLocalIdent : getCSSModuleLocalIdent;
 
 	// common function to get style loaders
 	const getStyleLoaders = (cssLoaderOptions = {}, preProcessor) => {
@@ -69,9 +80,9 @@ module.exports = function(env) {
 			{
 				loader: require.resolve('css-loader'),
 				options: Object.assign(
-					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldSourceMapStyles},
-					cssLoaderOptions.modules && {getLocalIdent: getCSSModuleLocalIdent},
-					cssLoaderOptions
+					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
+					cssLoaderOptions,
+					cssLoaderOptions.modules && {modules: {getLocalIdent}}
 				)
 			},
 			{
@@ -82,7 +93,7 @@ module.exports = function(env) {
 				options: {
 					// https://webpack.js.org/guides/migrating/#complex-options
 					ident: 'postcss',
-					sourceMap: shouldSourceMapStyles,
+					sourceMap: shouldUseSourceMap,
 					plugins: () =>
 						[
 							// Fix and adjust for known flexbox issues
@@ -101,6 +112,9 @@ module.exports = function(env) {
 								stage: 3,
 								features: {'custom-properties': false}
 							}),
+							// Adds PostCSS Normalize to standardize browser quirks based on
+							// the browserslist targets.
+							require('postcss-normalize')(),
 							// Resolution indepedence support
 							app.ri !== false && require('postcss-resolution-independence')(app.ri)
 						].filter(Boolean)
@@ -117,8 +131,10 @@ module.exports = function(env) {
 		getStyleLoaders(cssLoaderOptions, {
 			loader: require.resolve('less-loader'),
 			options: {
-				modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent),
-				sourceMap: shouldSourceMapStyles
+				lessOptions: {
+					modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent)
+				},
+				sourceMap: shouldUseSourceMap
 			}
 		});
 
@@ -147,11 +163,37 @@ module.exports = function(env) {
 			// There are also additional JS chunk files if you use code splitting.
 			chunkFilename: 'chunk.[name].js',
 			// Add /* filename */ comments to generated require()s in the output.
-			pathinfo: !isEnvProduction
+			pathinfo: !isEnvProduction,
+			publicPath,
+			// Improved sourcemap path name mapping for system filepaths
+			devtoolModuleFilenameTemplate: info => {
+				let file = isEnvProduction
+					? path.relative(app.context, info.absoluteResourcePath)
+					: path.resolve(info.absoluteResourcePath);
+				file = file.replace(/\\/g, '/').replace(/\.\./g, '_');
+				const loader = info.allLoaders.match(/[^\\/]+-loader/);
+				if (info.resource.includes('.less') && loader) {
+					// Temporary special handling for LESS files. The css-loader will
+					// output absolute-path mapped LESS sourcemaps, unaffected by this
+					// function, while both css-loader and style-loader pseudo modules
+					// will get their own sourcemaps. Good to differentiate.
+					return file + '?' + loader[0];
+				} else {
+					return file;
+				}
+			},
+			// Use webpack 5 handling of asset files; remove once upgraded to webpack 5
+			futureEmitAssets: true,
+			// Prevent potential conflicts in muliple runtimes
+			jsonpFunction: 'webpackJsonp' + app.name,
+			// Allow versatile 'global' mapping across multiple deploy formats
+			globalObject: 'this'
 		},
 		resolve: {
 			// These are the reasonable defaults supported by the React/ES6 ecosystem.
-			extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+			extensions: ['.js', '.mjs', '.jsx', '.ts', '.tsx', '.json'].filter(
+				ext => useTypeScript || !ext.includes('ts')
+			),
 			// Allows us to specify paths to check for module resolving.
 			modules: [path.resolve('./node_modules'), 'node_modules'],
 			// Don't resolve symlinks to their underlying paths
@@ -159,8 +201,8 @@ module.exports = function(env) {
 			// Backward compatibility for apps using new ilib references with old Enact
 			// and old apps referencing old iLib location with new Enact
 			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
-				? {ilib: '@enact/i18n/ilib'}
-				: {'@enact/i18n/ilib': 'ilib'}
+				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias)
+				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias)
 		},
 		// @remove-on-eject-begin
 		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
@@ -174,15 +216,15 @@ module.exports = function(env) {
 				// First, run the linter.
 				// It's important to do this before Babel processes the JS.
 				{
-					test: /\.(js|jsx)$/,
+					test: /\.(js|mjs|jsx|ts|tsx)$/,
 					enforce: 'pre',
-					include: process.cwd(),
 					exclude: /node_modules/,
 					loader: require.resolve('eslint-loader'),
 					// Point ESLint to our predefined config.
 					options: {
-						formatter: eslintFormatter,
+						formatter: require.resolve('react-dev-utils/eslintFormatter'),
 						eslintPath: require.resolve('eslint'),
+						resolvePluginsRelativeTo: __dirname,
 						// @remove-on-eject-begin
 						baseConfig: {
 							extends: [require.resolve('eslint-config-enact')]
@@ -199,24 +241,19 @@ module.exports = function(env) {
 					oneOf: [
 						// Process JS with Babel.
 						{
-							test: /\.(js|jsx|ts|tsx)$/,
+							test: /\.(js|mjs|jsx|ts|tsx)$/,
 							exclude: /node_modules.(?!@enact)/,
-							use: [
-								{
-									loader: require.resolve('babel-loader'),
-									options: {
-										configFile: path.join(__dirname, 'babel.config.js'),
-										babelrc: false,
-										// This is a feature of `babel-loader` for webpack (not Babel itself).
-										// It enables caching results in ./node_modules/.cache/babel-loader/
-										// directory for faster rebuilds.
-										cacheDirectory: !isEnvProduction,
-										cacheCompression: false,
-										highlightCode: true,
-										compact: isEnvProduction
-									}
-								}
-							]
+							loader: require.resolve('babel-loader'),
+							options: {
+								configFile: path.join(__dirname, 'babel.config.js'),
+								babelrc: false,
+								// This is a feature of `babel-loader` for webpack (not Babel itself).
+								// It enables caching results in ./node_modules/.cache/babel-loader/
+								// directory for faster rebuilds.
+								cacheDirectory: !isEnvProduction,
+								cacheCompression: false,
+								compact: isEnvProduction
+							}
 						},
 						// Style-based rules support both LESS and CSS format, with *.module.* extension format
 						// to designate CSS modular support.
@@ -268,14 +305,17 @@ module.exports = function(env) {
 				}
 			]
 		},
-		// Specific webpack-dev-server options
+		// Specific webpack-dev-server options.
 		devServer: {
-			// Broadcast http server on the localhost, port 8080
+			// Broadcast http server on the localhost, port 8080.
 			host: '0.0.0.0',
 			port: 8080,
+			// Support the same public path as webpack config.
+			publicPath: publicPath,
 			// By default WebpackDevServer serves files from public and __mocks__ directories
 			// in addition to all the virtual build products that it serves from memory.
 			contentBase: [path.resolve('./public'), path.resolve('./__mocks__')],
+			contentBasePublicPath: publicPath + '/',
 			// Any changes to files from `contentBase` should trigger a page reload.
 			watchContentBase: true,
 			// Reportedly, this avoids CPU overload on some systems.
@@ -288,9 +328,7 @@ module.exports = function(env) {
 		target: app.environment,
 		// Optional configuration for polyfilling NodeJS built-ins.
 		node: app.nodeBuiltins,
-		performance: {
-			hints: false
-		},
+		performance: false,
 		optimization: {
 			minimize: isEnvProduction,
 			// These are only used in production mode
@@ -319,6 +357,9 @@ module.exports = function(env) {
 							// https://github.com/terser-js/terser/issues/120
 							inline: 2
 						},
+						mangle: {
+							safari10: true
+						},
 						output: {
 							ecma: 5,
 							comments: false,
@@ -336,7 +377,9 @@ module.exports = function(env) {
 				}),
 				new OptimizeCSSAssetsPlugin({
 					cssProcessorOptions: {
-						calc: false,
+						// TODO: verify calc issue fixed. Related: https://github.com/postcss/postcss-calc/issues/50
+						// calc: false,
+						parser: require('postcss-safe-parser'),
 						map: shouldUseSourceMap && {
 							// `inline: false` forces the sourcemap to be output into a
 							// separate file
@@ -345,6 +388,9 @@ module.exports = function(env) {
 							// the css file, helping the browser find the sourcemap
 							annotation: true
 						}
+					},
+					cssProcessorPluginOptions: {
+						preset: ['default', {minifyFontValues: {removeQuotes: false}}]
 					}
 				})
 			]
@@ -377,16 +423,18 @@ module.exports = function(env) {
 			// Otherwise React will be compiled in the very slow development mode.
 			new DefinePlugin({
 				'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
-				'process.env.PUBLIC_URL': JSON.stringify('.')
+				'process.env.PUBLIC_URL': JSON.stringify(publicPath)
 			}),
 			// Inject prefixed environment variables within code, when used
-			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^REACT_APP_/.test(key))),
+			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^(REACT_APP|WDS_SOCKET)/.test(key))),
 			// Note: this won't work without MiniCssExtractPlugin.loader in `loaders`.
 			!process.env.INLINE_STYLES &&
 				new MiniCssExtractPlugin({
 					filename: '[name].css',
 					chunkFilename: 'chunk.[name].css'
 				}),
+			// Provide meaningful information when modules are not found
+			new ModuleNotFoundPlugin(app.context),
 			// Ensure correct casing in module filepathes
 			new CaseSensitivePathsPlugin(),
 			// If you require a missing module and then `npm install` it, you still have
@@ -412,20 +460,18 @@ module.exports = function(env) {
 						basedir: 'node_modules'
 					}),
 					async: !isEnvProduction,
-					useTypescriptIncrementalApi: true,
 					checkSyntacticErrors: true,
 					tsconfig: 'tsconfig.json',
 					reportFiles: [
-						'**',
-						'!**/*.json',
-						'!**/__tests__/**',
-						'!**/?(*.)(spec|test).*',
-						'!**/*-specs.*',
+						'../**/src/**/*.{ts,tsx}',
+						'**/src/**/*.{ts,tsx}',
+						'!**/src/**/__tests__/**',
+						'!**/src/**/?(*.)(spec|test).*',
 						'!**/src/setupProxy.*',
 						'!**/src/setupTests.*'
 					],
-					watch: app.context,
 					silent: true,
+					// The formatter is invoked directly in WebpackDevServerUtils during development
 					formatter: !process.env.DISABLE_TSFORMATTER ? typescriptFormatter : undefined
 				})
 		].filter(Boolean)

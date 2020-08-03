@@ -12,13 +12,7 @@ const {optionParser: app} = require('@enact/dev-utils');
 const blacklist = ['node_modules', 'build', 'dist', 'docs', '.git', '.gitignore', 'samples', 'tests'];
 const babelConfig = path.join(__dirname, '..', 'config', 'babel.config.js');
 const babelRename = {original: '^(\\.(?!.*\\bstyles\\b.*).*)\\.less$', replacement: '$1.css'};
-
-// Temporary until PLAT-72711, hardcode expected libraries to 24px base size
-const ri24 = ['@enact/ui', '@enact/moonstone', '@enact/spotlight', '@enact/agate'];
-const lessPlugins = [
-	new LessPluginResolve({prefix: '~'}),
-	new LessPluginRi(ri24.includes(app.name) ? {baseSize: 24} : app.ri)
-];
+const lessPlugins = [new LessPluginResolve({prefix: '~'}), new LessPluginRi(app.ri)];
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);

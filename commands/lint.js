@@ -1,12 +1,8 @@
 /* eslint-env node, es6 */
 const cp = require('child_process');
-const fs = require('fs');
 const path = require('path');
-const spawn = require('cross-spawn');
 const glob = require('glob');
 const minimist = require('minimist');
-const resolver = require('resolve');
-const {packageRoot} = require('@enact/dev-utils');
 
 const globOpts = {
 	ignore: ['**/node_modules/**', 'build/**', '**/dist/**', 'coverage/**', 'tests/**'],
@@ -45,12 +41,11 @@ function eslint({strict = false, local = false, fix = false, eslintArgs = []} = 
 	} else if (!local) {
 		args.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact'));
 	}
-	args.push('--ignore-pattern', '**/node_modules/*');
-	args.push('--ignore-pattern', 'build/*');
-	args.push('--ignore-pattern', '**/dist/*');
-	args.push('--ignore-pattern', 'coverage/*');
-	if (!local) {
-		args.push('--ignore-pattern', 'tests/*');
+	if (local) {
+		args.push('--ignore-pattern', '**/node_modules/*');
+		args.push('--ignore-pattern', 'build/*');
+		args.push('--ignore-pattern', '**/dist/*');
+		args.push('--ignore-pattern', 'coverage/*');
 	}
 	if (fix) args.push('--fix');
 	if (eslintArgs.length) {
@@ -71,54 +66,8 @@ function eslint({strict = false, local = false, fix = false, eslintArgs = []} = 
 	});
 }
 
-function tslintBin(context) {
-	try {
-		resolver.sync('tslint', {basedir: context});
-		return path.join(context, 'node_modules', '.bin', 'tslint');
-	} catch (e) {
-		return 'tslint';
-	}
-}
-
-function shouldTSLint(context) {
-	if (glob.sync('**/*.+(ts|tsx)', globOpts).length > 0) {
-		try {
-			return !spawn.sync(tslintBin(context), ['-v'], {stdio: 'ignore'}).error;
-		} catch (e) {
-			if (fs.existsSync(path.join(context, 'tslint.json'))) {
-				console.warn(
-					'TSLint config file found, however TSLint could not be resolved.\n' +
-						'Install TSLint globally or locally on this project to ' +
-						'enable TypeScript linting.'
-				);
-			}
-		}
-	}
-	return false;
-}
-
-function tslint({fix = false} = {}, context) {
-	const args = ['-p', context];
-	if (fix) args.push('--fix');
-
-	return new Promise((resolve, reject) => {
-		const opts = {env: process.env, cwd: process.cwd(), stdio: 'inherit'};
-		const child = spawn(tslintBin(context), args, opts);
-		child.on('close', code => {
-			if (code !== 0) {
-				reject();
-			} else {
-				resolve();
-			}
-		});
-	});
-}
-
 function api(opts) {
-	const context = packageRoot().path;
-	return Promise.resolve()
-		.then(() => shouldESLint() && eslint(opts))
-		.then(() => shouldTSLint(context) && tslint(opts, context));
+	return Promise.resolve().then(() => shouldESLint() && eslint(opts));
 }
 
 function cli(args) {
