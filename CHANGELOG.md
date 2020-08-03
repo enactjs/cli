@@ -1,3 +1,9 @@
+## 3.0.1 (August 3, 2020)
+
+### pack
+
+* Fixed builds with external framework delegating local ignoring modules.
+
 ## 3.0.0 (August 3, 2020)
 
 All dependencies updated to latest release.
