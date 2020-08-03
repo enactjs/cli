@@ -45,7 +45,9 @@ function gitInfo(dir) {
 		try {
 			const result = spawn.sync('git', args, {encoding: 'utf8', cwd: dir, env: process.env});
 			if (!result.error && result.status === 0) return result.stdout.trim();
-		} catch (e) {}
+		} catch (e) {
+			// do nothing
+		}
 	};
 	const tag = git(['describe', '--tags', '--exact-match']);
 	if (tag) {

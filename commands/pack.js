@@ -17,6 +17,7 @@ const filesize = require('filesize');
 const fs = require('fs-extra');
 const minimist = require('minimist');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
+const printBuildError = require('react-dev-utils/printBuildError');
 const stripAnsi = require('strip-ansi');
 const webpack = require('webpack');
 const {optionParser: app, mixins} = require('@enact/dev-utils');
@@ -52,24 +53,52 @@ function displayHelp() {
 	console.log();
 	/*
 		Private Options:
+			--entry               Specify an override entrypoint
 			--no-minify           Will skip minification during production build
 			--framework           Builds the @enact/*, react, and react-dom into an external framework
 			--externals           Specify a local directory path to the standalone external framework
 			--externals-public    Remote public path to the external framework for use injecting into HTML
+			--externals-polyfill  Flag whether to use external polyfill (or include in framework build)
 	*/
 	process.exit(0);
 }
 
 function details(err, stats, output) {
-	if (err) return err;
-	stats.compilation.warnings.forEach(w => {
-		w.message = w.message.replace(/\n.* potentially fixable with the `--fix` option./gm, '');
-	});
-	const statsJSON = stats.toJson({all: false, warnings: true, errors: true});
-	const messages = formatWebpackMessages(statsJSON);
+	let messages;
+	if (err) {
+		if (!err.message) return err;
+		let msg = err.message;
+
+		// Add additional information for postcss errors
+		if (Object.prototype.hasOwnProperty.call(err, 'postcssNode')) {
+			msg += '\nCompileError: Begins at CSS selector ' + err['postcssNode'].selector;
+		}
+
+		// Generate pretty/formatted warnins/errors
+		messages = formatWebpackMessages({
+			errors: [msg],
+			warnings: []
+		});
+	} else {
+		// Remove any ESLint fixable notices since we're not running via eslint command
+		// and don't support a `--fix` optiob ourselves; don't want to confuse devs
+		stats.compilation.warnings.forEach(w => {
+			const eslintFix = /\n.* potentially fixable with the `--fix` option./gm;
+			w.message = w.message.replace(eslintFix, '');
+		});
+
+		// Generate pretty/formatted warnins/errors
+		const statsJSON = stats.toJson({all: false, warnings: true, errors: true});
+		messages = formatWebpackMessages(statsJSON);
+	}
+
 	if (messages.errors.length) {
 		return new Error(messages.errors.join('\n\n'));
-	} else if (process.env.CI && messages.warnings.length) {
+	} else if (
+		typeof process.env.CI === 'string' &&
+		process.env.CI.toLowerCase() !== 'false' &&
+		messages.warnings.length
+	) {
 		console.log(
 			chalk.yellow(
 				'Treating warnings as errors because process.env.CI = true. ' +
@@ -79,8 +108,6 @@ function details(err, stats, output) {
 		return new Error(messages.warnings.join('\n\n'));
 	} else {
 		copyPublicFolder(output);
-		printFileSizes(stats, output);
-		console.log();
 		if (messages.warnings.length) {
 			console.log(chalk.yellow('Compiled with warnings:\n'));
 			console.log(messages.warnings.join('\n\n') + '\n');
@@ -95,6 +122,9 @@ function details(err, stats, output) {
 				)
 			);
 		}
+		console.log();
+
+		printFileSizes(stats, output);
 		console.log();
 	}
 }
@@ -138,6 +168,23 @@ function printFileSizes(stats, output) {
 	});
 }
 
+function printErrorDetails(err, handler) {
+	console.log();
+	if (process.env.TSC_COMPILE_ON_ERROR === 'true') {
+		console.log(
+			chalk.yellow(
+				'Compiled with the following type errors (you may want to check ' +
+					'these before deploying your app):\n'
+			)
+		);
+		printBuildError(err);
+	} else {
+		console.log(chalk.red('Failed to compile.\n'));
+		printBuildError(err);
+		if (handler) handler();
+	}
+}
+
 // Create the production build and print the deployment instructions.
 function build(config) {
 	if (process.env.NODE_ENV === 'development') {
@@ -168,11 +215,11 @@ function watch(config) {
 	} else {
 		console.log('Creating an optimized production build and watching for changes...');
 	}
+	copyPublicFolder(config.output.path);
 	webpack(config).watch({}, (err, stats) => {
 		err = details(err, stats, config.output.path);
 		if (err) {
-			console.log(chalk.red('Failed to compile.\n'));
-			console.log((err.message || err) + '\n');
+			printErrorDetails(err);
 		}
 		console.log();
 	});
@@ -195,6 +242,9 @@ function api(opts = {}) {
 	const configFactory = require('../config/webpack.config');
 	const config = configFactory(opts.production ? 'production' : 'development');
 
+	// Set any entry path override
+	if (opts.entry) config.entry.main[1] = path.resolve(opts.entry);
+
 	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);
 
@@ -215,8 +265,19 @@ function api(opts = {}) {
 
 function cli(args) {
 	const opts = minimist(args, {
-		boolean: ['minify', 'framework', 'stats', 'production', 'isomorphic', 'snapshot', 'verbose', 'watch', 'help'],
-		string: ['externals', 'externals-public', 'locales', 'output', 'meta'],
+		boolean: [
+			'minify',
+			'framework',
+			'externals-corejs',
+			'stats',
+			'production',
+			'isomorphic',
+			'snapshot',
+			'verbose',
+			'watch',
+			'help'
+		],
+		string: ['externals', 'externals-public', 'locales', 'entry', 'output', 'meta'],
 		default: {minify: true},
 		alias: {
 			o: 'output',
@@ -233,10 +294,9 @@ function cli(args) {
 
 	process.chdir(app.context);
 	api(opts).catch(err => {
-		console.log();
-		console.log(chalk.red('Failed to compile.\n'));
-		console.log((err.message || err) + '\n');
-		process.exit(1);
+		printErrorDetails(err, () => {
+			process.exit(1);
+		});
 	});
 }
 
