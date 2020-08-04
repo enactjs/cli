@@ -20,7 +20,7 @@ const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const printBuildError = require('react-dev-utils/printBuildError');
 const stripAnsi = require('strip-ansi');
 const webpack = require('webpack');
-const {optionParser: app, mixins} = require('@enact/dev-utils');
+const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -243,7 +243,7 @@ function api(opts = {}) {
 	const config = configFactory(opts.production ? 'production' : 'development');
 
 	// Set any entry path override
-	if (opts.entry) config.entry.main[1] = path.resolve(opts.entry);
+	if (opts.entry) helper.replaceMain(config, path.resolve(opts.entry));
 
 	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);
