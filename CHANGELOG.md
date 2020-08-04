@@ -1,3 +1,9 @@
+## 3.0.2 (August 3, 2020)
+
+### pack
+
+* Fixed framework builds on `enact/i18n` package source to include local files as appropriate.
+
 ## 3.0.1 (August 3, 2020)
 
 ### pack
