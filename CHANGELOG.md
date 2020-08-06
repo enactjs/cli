@@ -1,3 +1,10 @@
+## 3.0.3 (August 5, 2020)
+
+### transpile
+
+* When transpiling in standalone mode, do not use `@babel/plugin-transform-runtime`.
+
+
 ## 3.0.2 (August 3, 2020)
 
 ### pack
