@@ -10,7 +10,7 @@ const inquirer = require('react-dev-utils/inquirer');
 const tar = require('tar');
 
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
-const INCLUDED = path.dirname(require.resolve('@enact/template-sandstone'));
+const INCLUDED = path.dirname(require.resolve('@enact/template-moonstone'));
 const DEFAULT_LINK = path.join(TEMPLATE_DIR, 'default');
 
 function displayHelp() {
@@ -58,10 +58,21 @@ function displayHelp() {
 function initTemplateArea() {
 	if (!fs.existsSync(TEMPLATE_DIR)) {
 		fs.mkdirSync(TEMPLATE_DIR);
+	} else {
+		// Remove any dead/unreadable link
+		fs.readdirSync(TEMPLATE_DIR)
+			.map(d => path.join(TEMPLATE_DIR, d))
+			.forEach(d => {
+				try {
+					fs.realpathSync(d);
+				} catch (e) {
+					fs.removeSync(d);
+				}
+			});
 	}
-	const init = doLink(path.join(INCLUDED, 'template'), 'sandstone');
-	const sandstoneLink = path.join(TEMPLATE_DIR, 'sandstone');
-	return init.then(() => !fs.existsSync(DEFAULT_LINK) && doLink(sandstoneLink, 'default'));
+	const init = doLink(path.join(INCLUDED, 'template'), 'moonstone');
+	const moonstoneLink = path.join(TEMPLATE_DIR, 'moonstone');
+	return init.then(() => !fs.existsSync(DEFAULT_LINK) && doLink(moonstoneLink, 'default'));
 }
 
 function doInstall(target, name) {

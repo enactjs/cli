@@ -56,7 +56,7 @@
     "@babel/preset-typescript": "7.10.4",
     "@babel/runtime": "7.10.5",
     "@enact/dev-utils": "3.1.0",
-    "@enact/template-sandstone": "1.0.0-pre.1",
+    "@enact/template-moonstone": "3.1.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.3.3",
     "@typescript-eslint/eslint-plugin": "3.6.0",
     "@typescript-eslint/parser": "3.6.0",
