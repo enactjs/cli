@@ -1,3 +1,13 @@
+## 3.0.4 (August 10, 2020)
+
+### create
+
+* Switched back to `@enact/template-moonstone` as default templated included in CLI.
+
+### template
+
+* Fixed error being thrown when dead symlinks are detected in template userspace.
+
 ## 3.0.3 (August 5, 2020)
 
 ### transpile
