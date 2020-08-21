@@ -27,6 +27,11 @@ function displayHelp() {
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
+	/*
+		Private Options:
+			--override            Directory containing package .tgz archives to override dependencies.
+	*/
+
 	process.exit(0);
 }
 
@@ -55,6 +60,7 @@ function api({
 	allsamples = false,
 	link = true,
 	loglevel = 'error',
+	override,
 	verbose = false
 } = {}) {
 	const pkg = packageRoot(cwd);
@@ -62,6 +68,50 @@ function api({
 	if (verbose) loglevel = 'verbose';
 
 	return Promise.resolve()
+		.then(() => {
+			// Override dependencies in package.json, package-lock.json and npm-shrinkwrap.json
+			if (override) {
+				console.log('Overrides with local dependencies from', override);
+				// Collect list of all valid local package tgz archives found
+				const scoped = s => fs.readdirSync(path.join(override, s)).map(d => path.join(s, d));
+				const local = fs
+					.readdirSync(override)
+					.reduce((a, curr) => a.concat(curr.startsWith('@') ? scoped(curr) : curr), [])
+					.filter(d => fs.existsSync(path.join(override, d, 'package.tgz')));
+				if (path.isAbsolute(override)) override = path.relative(cwd, override);
+				['package.json', 'package-lock.json', 'npm-shrinkwrap.json']
+					.map(f => path.join(cwd, f))
+					.filter(f => fs.existsSync(f))
+					.forEach((f, i) => {
+						const lockfile = i > 0;
+						// Restore any detected backups
+						if (fs.existsSync(f + '.bak')) {
+							fs.unlinkSync(f);
+							fs.renameSync(f + '.bak', f);
+						}
+						const obj = JSON.parse(fs.readFileSync(f, {encoding: 'utf8'}));
+						// Update dependency entry for local entries that exist
+						local
+							.filter(dep => obj.dependencies && obj.dependencies[dep])
+							.forEach(dep => {
+								if (lockfile) {
+									obj.lockfileVersion = obj.lockfileVersion || 1;
+									obj.requires = true;
+									obj.dependencies[dep].version = `file:${path.join(override, dep, 'package.tgz')}`;
+									// Remove unneeded properties to avoid issues
+									['resolved', 'from', 'integrity', 'requires'].forEach(
+										key => delete obj.dependencies[dep][key]
+									);
+								} else {
+									obj.dependencies[dep] = `file:${path.join(override, dep, 'package.tgz')}`;
+								}
+							});
+						// Backup existing and write the newly modified file
+						fs.renameSync(f, f + '.bak');
+						fs.writeFileSync(f, JSON.stringify(obj, null, '  '), {encoding: 'utf8'});
+					});
+			}
+		})
 		.then(() => {
 			// Root package install
 			if (base) {
@@ -116,11 +166,13 @@ function api({
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: ['base', 'sampler', 'allsamples', 'link', 'verbose', 'help'],
-		string: ['loglevel'],
+		string: ['loglevel', 'override'],
 		default: {base: true, sampler: true, link: true},
 		alias: {b: 'base', s: 'sampler', a: 'allsamples', l: 'link', h: 'help'}
 	});
 	if (opts.help) displayHelp();
+
+	if (opts._[0] && fs.statSync(opts._[0]).isDirectory()) opts.cwd = opts._[0];
 
 	api(opts).catch(err => {
 		console.error(chalk.red('ERROR: ') + err.message);
