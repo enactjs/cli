@@ -94,16 +94,17 @@ function api({
 						local
 							.filter(dep => obj.dependencies && obj.dependencies[dep])
 							.forEach(dep => {
+								const tgz = path.join(override, dep, 'package.tgz');
 								if (lockfile) {
 									obj.lockfileVersion = obj.lockfileVersion || 1;
 									obj.requires = true;
-									obj.dependencies[dep].version = `file:${path.join(override, dep, 'package.tgz')}`;
+									obj.dependencies[dep].version = 'file:' + tgz;
 									// Remove unneeded properties to avoid issues
 									['resolved', 'from', 'integrity', 'requires'].forEach(
 										key => delete obj.dependencies[dep][key]
 									);
 								} else {
-									obj.dependencies[dep] = `file:${path.join(override, dep, 'package.tgz')}`;
+									obj.dependencies[dep] = 'file:' + tgz;
 								}
 							});
 						// Backup existing and write the newly modified file
