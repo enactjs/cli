@@ -159,7 +159,7 @@ function configurePackage(bare) {
 	const own = require('../package.json');
 	const app = require(path.resolve('package.json'));
 	const backup = JSON.stringify(app, null, 2) + os.EOL;
-	const availScripts = fs.readdirSync('./scripts').map(f => f.replace(/\.js$/, ''));
+	const availScripts = fs.existsSync('./scripts') ? fs.readdirSync('./scripts').map(f => f.replace(/\.js$/, '')) : [];
 	const enactCLI = new RegExp('enact (' + availScripts.join('|') + ')', 'g');
 	const eslintConfig = {extends: 'enact'};
 	const eslintIgnore = ['build/*', 'config/*', 'dist/*', 'node_modules/*', 'scripts/*'];
