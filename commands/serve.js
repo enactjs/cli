@@ -99,7 +99,7 @@ function hotDevServer(config, fastRefresh) {
 function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 	let https = false;
 	const {SSL_CRT_FILE, SSL_KEY_FILE} = process.env;
-	if (protocol === 'https' && [SSL_CRT_FILE, SSL_KEY_FILE].every(f => f && fs.existsSync(f))) {
+	if (protocol === 'https' && [SSL_CRT_FILE, SSL_KEY_FILE].all(f => f && fs.existsSync(f))) {
 		https = {
 			cert: fs.readFileSync(SSL_CRT_FILE),
 			key: fs.readFileSync(SSL_KEY_FILE)
