@@ -1,3 +1,9 @@
+## unrelease
+
+### eject
+
+* fix 'eject --bare' doesn't work issue via checking '/scripts' folder exists or not
+
 ## 3.0.4 (August 10, 2020)
 
 ### create
