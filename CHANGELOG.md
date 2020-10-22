@@ -1,3 +1,9 @@
+## [unreleased]
+
+### serve
+
+* Fixed https serve is not working.
+
 ## 3.0.4 (August 10, 2020)
 
 ### create
