@@ -1,3 +1,9 @@
+## [unreleased]
+
+### eject
+
+* Fixed `--bare` option to work.
+
 ## 3.0.4 (August 10, 2020)
 
 ### create
