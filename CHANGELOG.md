@@ -1,8 +1,8 @@
-## unrelease
+## [unreleased]
 
 ### eject
 
-* fix 'eject --bare' doesn't work issue via checking '/scripts' folder exists or not
+* fixed `--bare` option to work.
 
 ## 3.0.4 (August 10, 2020)
 
