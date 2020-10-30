@@ -1,5 +1,9 @@
 ## [unreleased]
 
+### serve
+
+* Fixed https serve is not working.
+
 ### eject
 
 * Fixed `--bare` option to work.
