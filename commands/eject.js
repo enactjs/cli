@@ -14,7 +14,7 @@ const os = require('os');
 const path = require('path');
 const chalk = require('chalk');
 const fs = require('fs-extra');
-const inquirer = require('react-dev-utils/inquirer');
+const prompts = require('prompts');
 const minimist = require('minimist');
 const {packageRoot} = require('@enact/dev-utils');
 const spawn = require('cross-spawn');
@@ -68,8 +68,7 @@ function displayHelp() {
 }
 
 function validateEject() {
-	return inquirer
-		.prompt({
+	return prompts({
 			type: 'confirm',
 			name: 'shouldEject',
 			message: 'Are you sure you want to eject? This action is permanent.',

@@ -36,8 +36,7 @@ module.exports = function (api) {
 					],
 					forceAllTransforms: es5Standalone,
 					useBuiltIns: 'entry',
-					corejs: 3,
-					modules: false
+					corejs: 3
 				}
 			],
 			[

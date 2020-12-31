@@ -12,10 +12,10 @@ module.exports = {
 		const mode = process.env.NODE_ENV || 'development';
 		[
 			`.env.${mode}.local`,
-			`.env.${mode}`,
 			// Similar to create-react app, don't include `.env.local` for
 			// `test` environment for test result consistency.
 			mode !== 'test' && `.env.local`,
+			`.env.${mode}`,
 			'.env'
 		]
 			.filter(Boolean)
