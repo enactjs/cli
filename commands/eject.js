@@ -69,36 +69,35 @@ function displayHelp() {
 
 function validateEject() {
 	return prompts({
-			type: 'confirm',
-			name: 'shouldEject',
-			message: 'Are you sure you want to eject? This action is permanent.',
-			default: false
-		})
-		.then(answer => {
-			if (!answer.shouldEject) {
-				console.log(chalk.cyan('Close one! Eject aborted.'));
-				return {abort: true};
-			} else {
-				checkGitStatus();
+		type: 'confirm',
+		name: 'shouldEject',
+		message: 'Are you sure you want to eject? This action is permanent.',
+		default: false
+	}).then(answer => {
+		if (!answer.shouldEject) {
+			console.log(chalk.cyan('Close one! Eject aborted.'));
+			return {abort: true};
+		} else {
+			checkGitStatus();
 
-				// Make shallow array of files paths
-				const files = assets.reduce((list, dir) => {
-					return list.concat(
-						fs
-							.readdirSync(dir.src)
-							// set full relative path
-							.map(file => ({
-								src: path.join(dir.src, file),
-								dest: path.join(dir.dest, file)
-							}))
-							// omit dirs from file list
-							.filter(file => fs.lstatSync(file.src).isFile())
-					);
-				}, []);
-				files.forEach(verifyAbsent);
-				return {files};
-			}
-		});
+			// Make shallow array of files paths
+			const files = assets.reduce((list, dir) => {
+				return list.concat(
+					fs
+						.readdirSync(dir.src)
+						// set full relative path
+						.map(file => ({
+							src: path.join(dir.src, file),
+							dest: path.join(dir.dest, file)
+						}))
+						// omit dirs from file list
+						.filter(file => fs.lstatSync(file.src).isFile())
+				);
+			}, []);
+			files.forEach(verifyAbsent);
+			return {files};
+		}
+	});
 }
 
 function checkGitStatus() {
