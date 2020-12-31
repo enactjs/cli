@@ -3,7 +3,6 @@
 ### serve
 
 * Fixed https serve is not working.
-* Updated CLI dependency of `react-refresh-webpack-plugin` to 0.4.1.
 
 ### eject
 
