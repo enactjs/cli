@@ -2,7 +2,7 @@ name: Update copyright year(s) in license file
 
 on:
   schedule:
-    - cron: "0 7 11 1 *"
+    - cron: "30 7 11 1 *"
 
 jobs:
   run:
@@ -20,4 +20,3 @@ jobs:
         commitBody: Let's keep legal happy.
         prTitle: Update copyright years in README.md file
         prBody: It's that time of the year, let's update the license.
-© 2021 GitHub, Inc.
