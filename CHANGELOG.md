@@ -1,5 +1,9 @@
 ## [unreleased]
 
+### pack
+
+* Added `shebang-loader` for removing the hashbag
+
 ### serve
 
 * Fixed https serve is not working.
