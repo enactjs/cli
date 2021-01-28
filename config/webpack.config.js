@@ -463,7 +463,7 @@ module.exports = function (env) {
 				resolvePluginsRelativeTo: __dirname,
 				// @remove-on-eject-begin
 				baseConfig: {
-					extends: [require.resolve('eslint-config-enact')],
+					extends: [require.resolve('eslint-config-enact')]
 				},
 				useEslintrc: false,
 				// @remove-on-eject-end
