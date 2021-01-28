@@ -243,17 +243,24 @@ module.exports = function (env) {
 						{
 							test: /\.(js|mjs|jsx|ts|tsx)$/,
 							exclude: /node_modules.(?!@enact)/,
-							loader: require.resolve('babel-loader'),
-							options: {
-								configFile: path.join(__dirname, 'babel.config.js'),
-								babelrc: false,
-								// This is a feature of `babel-loader` for webpack (not Babel itself).
-								// It enables caching results in ./node_modules/.cache/babel-loader/
-								// directory for faster rebuilds.
-								cacheDirectory: !isEnvProduction,
-								cacheCompression: false,
-								compact: isEnvProduction
-							}
+							use: [
+								{
+									loader: require.resolve('babel-loader'),
+									options: {
+										configFile: path.join(__dirname, 'babel.config.js'),
+										babelrc: false,
+										// This is a feature of `babel-loader` for webpack (not Babel itself).
+										// It enables caching results in ./node_modules/.cache/babel-loader/
+										// directory for faster rebuilds.
+										cacheDirectory: !isEnvProduction,
+										cacheCompression: false,
+										compact: isEnvProduction
+									}
+								},
+								{
+									loader: 'shebang-loader'
+								}
+							]
 						},
 						// Style-based rules support both LESS and CSS format, with *.module.* extension format
 						// to designate CSS modular support.
