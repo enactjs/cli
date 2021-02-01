@@ -47,7 +47,7 @@ module.exports = function (api) {
 					development: env !== 'production' && !es5Standalone,
 					// Will use the native built-in instead of trying to polyfill
 					// behavior for any plugins that require one.
-					useBuiltIns: true
+					...(process.env.DISABLE_NEW_JSX_TRANSFORM ? { useBuiltIns: true } : { runtime: 'automatic' }),
 				}
 			],
 			['@babel/preset-typescript']

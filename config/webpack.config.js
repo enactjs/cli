@@ -463,7 +463,13 @@ module.exports = function (env) {
 				resolvePluginsRelativeTo: __dirname,
 				// @remove-on-eject-begin
 				baseConfig: {
-					extends: [require.resolve('eslint-config-enact')]
+					extends: [require.resolve('eslint-config-enact')],
+					rules: {
+						...(process.env.DISABLE_NEW_JSX_TRANSFORM && {
+							'react/jsx-uses-react': 'warn',
+							'react/react-in-jsx-scope': 'warn'
+						})
+					}
 				},
 				useEslintrc: false,
 				// @remove-on-eject-end
