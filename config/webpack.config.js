@@ -47,6 +47,20 @@ module.exports = function (env) {
 	// Sets the browserslist default fallback set of browsers to the Enact default browser support list.
 	app.setEnactTargetsAsDefault();
 
+	// Check if JSX transform is able
+	const hasJsxRuntime = (() => {
+		if (process.env.DISABLE_NEW_JSX_TRANSFORM === 'true') {
+			return false;
+		}
+
+		try {
+			require.resolve('react/jsx-runtime');
+			return true;
+		} catch (e) {
+			return false;
+		}
+	})();
+
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
 
@@ -463,7 +477,13 @@ module.exports = function (env) {
 				resolvePluginsRelativeTo: __dirname,
 				// @remove-on-eject-begin
 				baseConfig: {
-					extends: [require.resolve('eslint-config-enact')]
+					extends: [require.resolve('eslint-config-enact')],
+					rules: {
+						...(!hasJsxRuntime && {
+							'react/jsx-uses-react': 'warn',
+							'react/react-in-jsx-scope': 'warn'
+						})
+					}
 				},
 				useEslintrc: false,
 				// @remove-on-eject-end
