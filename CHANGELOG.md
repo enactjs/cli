@@ -1,3 +1,13 @@
+## 3.0.5 (February 3, 2021)
+
+### serve
+
+* Fixed https serve is not working.
+
+### eject
+
+* Fixed `--bare` option to work.
+
 ## 3.0.4 (August 10, 2020)
 
 ### create
@@ -13,7 +23,6 @@
 ### transpile
 
 * When transpiling in standalone mode, do not use `@babel/plugin-transform-runtime`.
-
 
 ## 3.0.2 (August 3, 2020)
 
