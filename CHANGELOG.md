@@ -1,4 +1,4 @@
-## [unreleased]
+## 3.0.5 (February 3, 2021)
 
 ### serve
 
@@ -23,7 +23,6 @@
 ### transpile
 
 * When transpiling in standalone mode, do not use `@babel/plugin-transform-runtime`.
-
 
 ## 3.0.2 (August 3, 2020)
 
