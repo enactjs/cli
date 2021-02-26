@@ -15,6 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -45,6 +46,20 @@ module.exports = function (env) {
 
 	// Sets the browserslist default fallback set of browsers to the Enact default browser support list.
 	app.setEnactTargetsAsDefault();
+
+	// Check if JSX transform is able
+	const hasJsxRuntime = (() => {
+		if (process.env.DISABLE_NEW_JSX_TRANSFORM === 'true') {
+			return false;
+		}
+
+		try {
+			require.resolve('react/jsx-runtime');
+			return true;
+		} catch (e) {
+			return false;
+		}
+	})();
 
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
@@ -213,27 +228,6 @@ module.exports = function (env) {
 		// @remove-on-eject-end
 		module: {
 			rules: [
-				// First, run the linter.
-				// It's important to do this before Babel processes the JS.
-				{
-					test: /\.(js|mjs|jsx|ts|tsx)$/,
-					enforce: 'pre',
-					exclude: /node_modules/,
-					loader: require.resolve('eslint-loader'),
-					// Point ESLint to our predefined config.
-					options: {
-						formatter: require.resolve('react-dev-utils/eslintFormatter'),
-						eslintPath: require.resolve('eslint'),
-						resolvePluginsRelativeTo: __dirname,
-						// @remove-on-eject-begin
-						baseConfig: {
-							extends: [require.resolve('eslint-config-enact')]
-						},
-						useEslintrc: false,
-						// @remove-on-eject-end
-						cache: true
-					}
-				},
 				{
 					// "oneOf" will traverse all following loaders until one will
 					// match the requirements. When no loader matches it will fall
@@ -473,7 +467,28 @@ module.exports = function (env) {
 					silent: true,
 					// The formatter is invoked directly in WebpackDevServerUtils during development
 					formatter: !process.env.DISABLE_TSFORMATTER ? typescriptFormatter : undefined
-				})
+				}),
+			new ESLintPlugin({
+				// Plugin options
+				extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx'],
+				formatter: require.resolve('react-dev-utils/eslintFormatter'),
+				eslintPath: require.resolve('eslint'),
+				// ESLint class options
+				resolvePluginsRelativeTo: __dirname,
+				// @remove-on-eject-begin
+				baseConfig: {
+					extends: [require.resolve('eslint-config-enact')],
+					rules: {
+						...(!hasJsxRuntime && {
+							'react/jsx-uses-react': 'warn',
+							'react/react-in-jsx-scope': 'warn'
+						})
+					}
+				},
+				useEslintrc: false,
+				// @remove-on-eject-end
+				cache: true
+			})
 		].filter(Boolean)
 	};
 };

@@ -1,3 +1,32 @@
+## 4.0.0-alpha.1 (February 26, 2021)
+
+### create
+
+* Updated moonstone template for Enact 4.0.0-alpha.1 release.
+
+### eject, template
+
+* Replaced `inquirer` with `prompts`.
+
+### pack
+
+* Updated CLI dependency of `react` and `react-dom` to 17.0.1.
+* Added `typescript` 4.x as peerDependency.
+* Replaced deprecated `eslint-loader` by `eslint-webpack-plugin`.
+* Added support for new JSX Transform.
+
+### serve
+
+* Updated CLI dependency of `@pmmmwh/react-refresh-webpack-plugin` to 0.4.3.
+
+### test
+
+* Updated CLI dependency of `react-test-renderer` to 17.0.1.
+
+### lint
+
+* Added support for new JSX Transform.
+
 ## 3.0.5 (February 3, 2021)
 
 ### serve
