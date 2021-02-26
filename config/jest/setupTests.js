@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const enzyme = require('enzyme');
-const Adapter = require('enzyme-adapter-react-16');
+const Adapter = require('@wojtekmaj/enzyme-adapter-react-17');
 const {packageRoot} = require('@enact/dev-utils');
 
 const filters = [

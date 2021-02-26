@@ -6,6 +6,20 @@
  */
 const path = require('path');
 
+// Check if JSX transform is able
+const hasJsxRuntime = (() => {
+	if (process.env.DISABLE_NEW_JSX_TRANSFORM === 'true') {
+		return false;
+	}
+
+	try {
+		require.resolve('react/jsx-runtime');
+		return true;
+	} catch (e) {
+		return false;
+	}
+})();
+
 module.exports = function (api) {
 	const env = process.env.BABEL_ENV || process.env.NODE_ENV;
 	const es5Standalone = process.env.ES5 && process.env.ES5 !== 'false';
@@ -36,8 +50,7 @@ module.exports = function (api) {
 					],
 					forceAllTransforms: es5Standalone,
 					useBuiltIns: 'entry',
-					corejs: 3,
-					modules: false
+					corejs: 3
 				}
 			],
 			[
@@ -48,7 +61,7 @@ module.exports = function (api) {
 					development: env !== 'production' && !es5Standalone,
 					// Will use the native built-in instead of trying to polyfill
 					// behavior for any plugins that require one.
-					useBuiltIns: true
+					...(!hasJsxRuntime ? {useBuiltIns: true} : {runtime: 'automatic'})
 				}
 			],
 			['@babel/preset-typescript']
