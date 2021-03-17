@@ -460,7 +460,7 @@ module.exports = function (env) {
 						'../**/src/**/*.{ts,tsx}',
 						'**/src/**/*.{ts,tsx}',
 						'!**/src/**/__tests__/**',
-						'!**/src/**/?(*.)(spec|test).*',
+						'!**/src/**/?(*.)+(spec|test).*',
 						'!**/src/setupProxy.*',
 						'!**/src/setupTests.*'
 					],
