@@ -1,3 +1,9 @@
+## unreleased
+
+### pack, test
+
+* Fixed the glob patterns for test files
+
 ## 4.0.0-alpha.1 (February 26, 2021)
 
 ### create
