@@ -1,5 +1,9 @@
 ## unreleased
 
+### create, template
+
+* Changed to `@enact/template-sandstone` as default for new apps.
+
 ### pack, test
 
 * Fixed the glob patterns for test files
