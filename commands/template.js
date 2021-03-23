@@ -6,7 +6,7 @@ const chalk = require('chalk');
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
 const minimist = require('minimist');
-const inquirer = require('react-dev-utils/inquirer');
+const prompts = require('prompts');
 const tar = require('tar');
 
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
@@ -218,7 +218,7 @@ function doDefault(name) {
 		choice = Promise.resolve({template: name});
 	} else {
 		const i = all.find(t => fs.realpathSync(path.join(TEMPLATE_DIR, t)) === fs.realpathSync(DEFAULT_LINK));
-		choice = inquirer.prompt([
+		choice = prompts([
 			{
 				name: 'template',
 				type: 'list',
