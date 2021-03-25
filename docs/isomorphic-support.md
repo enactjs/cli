@@ -22,7 +22,7 @@ Within your **package.json** file, add an `isomorphic` property to the `enact` o
     ...
 } 
 ```
-If the value is a string filepath instead, it will use that file as the main app entry point instead of the default. Whatever the entry point, ensure it exports the `ReactElement` in non-browser environments. Additionally, ensure the entry point also conditionally renders to to the DOM if the `window` is available.  An example **index.js** entry point can be see [here](https://github.com/enactjs/templates/blob/master/packages/moonstone/template/src/index.js) and is the default included in the Enact app template.
+If the value is a string filepath instead, it will use that file as the main app entry point instead of the default. Whatever the entry point, ensure it exports the `ReactElement` in non-browser environments. Additionally, ensure the entry point also conditionally renders to to the DOM if the `window` is available.  An example **index.js** entry point can be see [here](https://github.com/enactjs/templates/blob/master/packages/sandstone/template/src/index.js) and is the default included in the Enact app template.
 
 Then, you can choose to build with isomorphic code layout by adding the `--isomorphic` flag to the pack command:
 ```bash
