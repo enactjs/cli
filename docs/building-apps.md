@@ -46,7 +46,7 @@ For all projects built with Enact CLI, `core-js` polyfill is automatically inclu
 
 However keep in mind that `core-js` is solely for ECMAScript and does not polyfill any browser features. Features like this will need to be manually polyfilled in projects with app-level imports.  For example, to add web animation API, you could add the NPM dependency [`web-animations-js`](https://github.com/web-animations/web-animations-js) and import it at the top of your app's root **`index.js`** source file.
 
-Note: Some ui libraries, like Sandstone, may have their own recommended supported browsers and may differ from the core Enact framework.
+Note: Some ui libraries, like Moonstone, may have their own recommended supported browsers and may differ from the core Enact framework.
 
 ## \_\_DEV\_\_ Keyword
 In order to make development and debugging simpler, the enact cli supports a special `__DEV__` keyword in both javascript and LESS.
