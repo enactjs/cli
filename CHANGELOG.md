@@ -1,3 +1,13 @@
+## 4.0.0 (March 26, 2021)
+
+### create, template
+
+* Changed to `@enact/template-sandstone` as default for new apps.
+
+### pack, test
+
+* Fixed the glob patterns for test files
+
 ## 4.0.0-alpha.1 (February 26, 2021)
 
 ### create

@@ -19,7 +19,7 @@ Available optional properties that can be exported:
 * `setup` _[function]_ Code run just after copying the static files, but before running `npm install`. 
 * `complete` _[function]_ Code run just after everything is finished. Useful to output instructions or a message to the user.
 
-When omitted/`undefined`, the function/promise properties will fallback to the [default application template handler property values](https://github.com/enactjs/cli/blob/master/commands/create.js#L38). If explicitly set as `false`, those events will be disabled during `enact create`.  When defining a function property, it must be synchronous or otherwise return a _Promise_ for asynchronous evaluation.
+When omitted/`undefined`, the function/promise properties will fallback to the [default application template handler property values](https://github.com/enactjs/cli/blob/master/commands/create.js#L24). If explicitly set as `false`, those events will be disabled during `enact create`.  When defining a function property, it must be synchronous or otherwise return a _Promise_ for asynchronous evaluation.
 
 Note: template generators can even have their own root **package.json** with dependencies that will be installed locally when the template is installed.
 
