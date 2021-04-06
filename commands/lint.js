@@ -31,7 +31,7 @@ function displayHelp() {
 }
 
 function shouldESLint() {
-	return glob.sync('**/*.+(js|jsx)', globOpts).length > 0;
+	return glob.sync('**/*.+(js|jsx|ts|tsx)', globOpts).length > 0;
 }
 
 function eslint({strict = false, local = false, fix = false, eslintArgs = []} = {}) {

@@ -1,3 +1,9 @@
+## unreleased
+
+### lint
+
+* Added ts/tsx conditions for linting typescript codes.
+
 ## 4.0.0 (March 26, 2021)
 
 ### create, template
