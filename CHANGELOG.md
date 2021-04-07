@@ -2,7 +2,7 @@
 
 ### lint
 
-* Added ts/tsx conditions for linting typescript codes.
+* Added conditions for linting Typescript files.
 
 ## 4.0.0 (March 26, 2021)
 
