@@ -1,3 +1,9 @@
+## unreleased
+
+### lint
+
+* Added conditions for linting Typescript files.
+
 ## 4.0.0 (March 26, 2021)
 
 ### create, template
