@@ -1,5 +1,9 @@
 ## unreleased
 
+### pack
+
+* Added a parameter in WebOSMetaPlugin constructor.
+
 ### lint
 
 * Added conditions for linting Typescript files.
