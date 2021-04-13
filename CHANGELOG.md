@@ -2,7 +2,7 @@
 
 ### pack
 
-* Added a parameter in WebOSMetaPlugin constructor.
+* Fixed not inserting title into the output HTML.
 
 ### lint
 
