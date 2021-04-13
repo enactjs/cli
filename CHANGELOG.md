@@ -1,5 +1,9 @@
 ## unreleased
 
+### pack
+
+* Fixed not inserting title into the output HTML.
+
 ### lint
 
 * Added conditions for linting Typescript files.
