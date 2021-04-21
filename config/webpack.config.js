@@ -35,6 +35,7 @@ const {
 	ILibPlugin,
 	WebOSMetaPlugin
 } = require('@enact/dev-utils');
+const WebpackObfuscator = require('obfuscator-webpackloader');
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
@@ -233,6 +234,30 @@ module.exports = function (env) {
 					// match the requirements. When no loader matches it will fall
 					// back to the "file" loader at the end of the loader list.
 					oneOf: [
+						{
+							test: /\.js$/,
+							exclude: /node_modules/,
+							// White List로 실행되기 때문에, 난독화 하고자 하는 대상을 모두 여기에 적는다.
+							include: [
+								// Directory의 경우
+								path.resolve(app.context, './src/App/actions'),   //   actions/ DIR 아래 모든 .js 파일
+								path.resolve(app.context, './src/App/constants'),  //  constants/  DIR 아래 모든 .js 파일
+								// File 의 경우,
+								path.resolve(app.context, './src/App/containers/App.js'),   //   containers/App.js 파일
+								path.resolve(app.context, './src/App/containers/CodeContainer.js'),   //   containers/CodeContainer.js 파일
+								// cli 를 통한 webpack자동 설정의 경우, 앱 별로 이런 설정을 할 수 없기 때문에, src/privates  등의 DIR을 지정하고,
+								// 개발자에게 중요 정보가 포함뙨 .js 파일은 src/privates DIR 에 위치시키도록 가이드 하는 방법을 제안한다.
+								path.resolve(app.context, './src/privates')
+							],
+							enforce: 'post',
+							use: {
+								loader: WebpackObfuscator.loader,
+								options: {
+									identifierNamesGenerator: 'hexadecimal',
+									selfDefending: false
+								}
+							}
+						},
 						// Process JS with Babel.
 						{
 							test: /\.(js|mjs|jsx|ts|tsx)$/,
