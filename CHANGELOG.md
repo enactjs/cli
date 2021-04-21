@@ -1,5 +1,9 @@
 ## unreleased
 
+### test
+
+* Updated CLI dependency of `jest` to 26.6.3.
+
 ### pack
 
 * Fixed not inserting title into the output HTML.
