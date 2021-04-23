@@ -1,3 +1,17 @@
+## 4.0.1 (April 23, 2021)
+
+### test
+
+* Updated CLI dependency of `jest` to 26.6.3.
+
+### pack
+
+* Fixed not inserting title into the output HTML.
+
+### lint
+
+* Added conditions for linting Typescript files.
+
 ## 4.0.0 (March 26, 2021)
 
 ### create, template

@@ -446,7 +446,7 @@ module.exports = function (env) {
 			new ILibPlugin({symlinks: false}),
 			// Automatically detect ./appinfo.json and ./webos-meta/appinfo.json files,
 			// and parses any to copy over any webOS meta assets at build time.
-			new WebOSMetaPlugin(),
+			new WebOSMetaPlugin({htmlPlugin: HtmlWebpackPlugin}),
 			// TypeScript type checking
 			useTypeScript &&
 				new ForkTsCheckerWebpackPlugin({
