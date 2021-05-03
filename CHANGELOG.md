@@ -1,3 +1,9 @@
+## unreleased
+
+### pack
+
+* Updated webpack config to not support css/less files when absolute paths is found, to avoid build fails.
+
 ## 4.0.1 (April 23, 2021)
 
 ### test
