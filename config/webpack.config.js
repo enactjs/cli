@@ -97,7 +97,17 @@ module.exports = function (env) {
 				options: Object.assign(
 					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
 					cssLoaderOptions,
-					cssLoaderOptions.modules && {modules: {getLocalIdent}}
+					cssLoaderOptions.modules && {modules: {getLocalIdent}},
+					{
+						url: url => {
+							// Don't handle absolute path urls
+							if (url[0] === '/') {
+								return false;
+							}
+
+							return true;
+						}
+					}
 				)
 			},
 			{
