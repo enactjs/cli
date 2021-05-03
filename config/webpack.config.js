@@ -101,7 +101,7 @@ module.exports = function (env) {
 					{
 						url: url => {
 							// Don't handle absolute path urls
-							if (url[0] === '/') {
+							if (url.startsWith('/')) {
 								return false;
 							}
 
