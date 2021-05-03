@@ -2,7 +2,7 @@
 
 ### pack
 
-* Updated webpack config to not support css/less files when absolute paths is found, to avoid build fails.
+* Changed `css-loader` options to not resolving url() of the absolute path to avoid build failures.
 
 ## 4.0.1 (April 23, 2021)
 
