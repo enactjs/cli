@@ -1,3 +1,9 @@
+## 4.0.2 (May 3, 2021)
+
+### pack
+
+* Changed `css-loader` options to not resolving url() of the absolute path to avoid build failures.
+
 ## 4.0.1 (April 23, 2021)
 
 ### test
