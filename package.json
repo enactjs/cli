@@ -1,6 +1,6 @@
 {
   "name": "@enact/cli",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Full-featured build environment tool for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
@@ -55,7 +55,7 @@
     "@babel/preset-react": "7.10.4",
     "@babel/preset-typescript": "7.10.4",
     "@babel/runtime": "7.10.5",
-    "@enact/dev-utils": "3.1.1",
+    "@enact/dev-utils": "3.1.2",
     "@enact/template-moonstone": "3.1.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.3.3",
     "@typescript-eslint/eslint-plugin": "3.6.0",

@@ -1,4 +1,4 @@
-## unreleased
+## 3.0.6 (May 11, 2021)
 
 ### pack
 
