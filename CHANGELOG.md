@@ -1,3 +1,9 @@
+## unreleased
+
+### pack
+
+* Fixed not inserting title into the output HTML.
+
 ## 3.0.5 (February 3, 2021)
 
 ### serve
