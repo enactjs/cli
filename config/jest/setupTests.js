@@ -31,7 +31,10 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-	const actual = console.warn.mock.calls.concat(console.error.mock.calls).filter(([m]) => filterExp.test(m));
+	const actual =
+		console.warn.mock && console.error.mock
+			? console.warn.mock.calls.concat(console.error.mock.calls).filter(([m]) => filterExp.test(m))
+			: 0;
 	const expected = 0;
 	console.warn.mockRestore();
 	console.error.mockRestore();
