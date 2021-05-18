@@ -57,7 +57,7 @@ require('../dotenv').load(app.context);
 
 // Find any applicable user test setup file
 const userSetupFile = ['mjs', 'js', 'jsx', 'ts', 'tsx']
-	.map(ext => path.join(app.context, 'src', 'setupTests' + ext))
+	.map(ext => path.join(app.context, 'src', 'setupTests.' + ext))
 	.find(file => fs.existsSync(file));
 
 module.exports = {
