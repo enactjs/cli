@@ -31,14 +31,13 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-	const actual =
-		console.warn.mock && console.error.mock
-			? console.warn.mock.calls.concat(console.error.mock.calls).filter(([m]) => filterExp.test(m))
-			: 0;
-	const expected = 0;
-	console.warn.mockRestore();
-	console.error.mockRestore();
-	expect(actual).toHaveLength(expected);
+	if (console.warn.mock && console.error.mock) {
+		const actual = console.warn.mock.calls.concat(console.error.mock.calls).filter(([m]) => filterExp.test(m));
+		const expected = 0;
+		console.warn.mockRestore();
+		console.error.mockRestore();
+		expect(actual).toHaveLength(expected);
+	}
 });
 
 // Configure Enzyme to use React16 adapter.
