@@ -2,7 +2,7 @@
 
 ### test
 
-* Fixed `./config/jest/jest.config.js` cannot reading userSetupFile that exists.
+* Fixed cannot read a local `./src/setupTests.js` setup file.
 
 ## 4.0.2 (May 3, 2021)
 
