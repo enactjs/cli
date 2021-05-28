@@ -2,7 +2,7 @@
 
 ### test
 
-* Fixed cannot read a local `./src/setupTests.js` setup file.
+* Fixed not reading a local `./src/setupTests.js` setup file.
 
 ## 4.0.2 (May 3, 2021)
 
