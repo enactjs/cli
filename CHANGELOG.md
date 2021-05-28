@@ -4,6 +4,8 @@
 
 * Fixed not reading a local `./src/setupTests.js` setup file.
 
+* Fixed `jest.restoreAllMocks()` throws errors.
+
 ## 4.0.2 (May 3, 2021)
 
 ### pack

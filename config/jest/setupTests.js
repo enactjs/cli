@@ -31,10 +31,18 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-	const actual = console.warn.mock.calls.concat(console.error.mock.calls).filter(([m]) => filterExp.test(m));
+	const actual = (console.warn.mock ? console.warn.mock.calls : [])
+		.concat(console.error.mock ? console.error.mock.calls : [])
+		.filter(([m]) => filterExp.test(m));
 	const expected = 0;
-	console.warn.mockRestore();
-	console.error.mockRestore();
+
+	if (console.warn.mock) {
+		console.warn.mockRestore();
+	}
+	if (console.error.mock) {
+		console.error.mockRestore();
+	}
+
 	expect(actual).toHaveLength(expected);
 });
 
