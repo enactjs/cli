@@ -2,7 +2,7 @@
 
 ### test
 
-* Fixed `./config/jest/setupTests.js` not reading mocks that already restored.
+* Fixed `jest.restoreAllMocks()` throws errors.
 
 ## 4.0.2 (May 3, 2021)
 
