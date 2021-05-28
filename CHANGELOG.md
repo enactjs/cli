@@ -1,3 +1,9 @@
+## unreleased
+
+### test
+
+* Fixed `./config/jest/jest.config.js` cannot reading userSetupFile that exists.
+
 ## 4.0.2 (May 3, 2021)
 
 ### pack
