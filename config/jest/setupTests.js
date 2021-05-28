@@ -35,7 +35,7 @@ afterEach(() => {
 		.concat(console.error.mock ? console.error.mock.calls : [])
 		.filter(([m]) => filterExp.test(m));
 	const expected = 0;
-		
+
 	if (console.warn.mock) {
 		console.warn.mockRestore();
 	}
