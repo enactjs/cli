@@ -1,3 +1,9 @@
+## unreleased
+
+### test
+
+* Fixed `jest.restoreAllMocks()` throws errors.
+
 ## 4.0.2 (May 3, 2021)
 
 ### pack
