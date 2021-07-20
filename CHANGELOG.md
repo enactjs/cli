@@ -1,3 +1,9 @@
+## unreleased
+
+### test
+
+* Added `@testing-library/react` aliases within the Jest moduleNameMapper, to use the libraries sourced within the CLI.
+
 ## 4.0.3 (June 21, 2021)
 
 ### test
