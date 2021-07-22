@@ -2,7 +2,8 @@
 
 ### test
 
-* Added `@testing-library/react` aliases within the Jest moduleNameMapper, to use the libraries sourced within the CLI.
+* Added `@testing-library/react` support.
+* Deprecated `enzyme` support.
 
 ## 4.0.3 (June 21, 2021)
 
