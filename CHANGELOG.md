@@ -1,3 +1,10 @@
+## unreleased
+
+### test
+
+* Added `@testing-library/react` support.
+* Deprecated `enzyme` support.
+
 ## 4.0.3 (June 21, 2021)
 
 ### test
