@@ -14,7 +14,8 @@ order: 7
 ```
 The `enact test` command (aliased as `npm run test`) will activate a [Jest](https://jestjs.io/) test runner on all discovered *-specs.js files. All the complicated configuration is hidden away within Enact CLI to avoid any confusion or additional difficulty in testing source code.
 
-Internally Enact CLI supports [Enzyme](https://enzymejs.github.io/enzyme/) out of the box, so there's no need to install them locally on your project. Simply import/require it within specs files and it'll be there. You will want to familiarize your self with Enzyme's utilities in order to write more complex tests.
+Internally Enact CLI supports [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) out of the box, so there's no need to install them locally on your project. Simply import/require it within specs files and it'll be there. You will want to familiarize yourself with React Testing Library's utilities in order to write more complex tests.
+Enzyme support is deprecated and will be removed in a future major release.
 
 To create a test please create a ***-specs.js** file in the folder of the component you wish to test.
 

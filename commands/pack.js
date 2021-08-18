@@ -59,6 +59,7 @@ function displayHelp() {
 			--externals           Specify a local directory path to the standalone external framework
 			--externals-public    Remote public path to the external framework for use injecting into HTML
 			--externals-polyfill  Flag whether to use external polyfill (or include in framework build)
+			--custom-skin         To use a custom skin for build
 	*/
 	process.exit(0);
 }
@@ -238,6 +239,10 @@ function api(opts = {}) {
 		app.applyEnactMeta(meta);
 	}
 
+	if (opts['custom-skin']) {
+		app.applyEnactMeta({template: path.join(__dirname, '..', 'config', 'custom-skin-template.ejs')});
+	}
+
 	// Do this as the first thing so that any code reading it knows the right env.
 	const configFactory = require('../config/webpack.config');
 	const config = configFactory(opts.production ? 'production' : 'development');
@@ -266,6 +271,7 @@ function api(opts = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: [
+			'custom-skin',
 			'minify',
 			'framework',
 			'externals-corejs',
