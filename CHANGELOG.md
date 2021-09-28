@@ -1,3 +1,9 @@
+## 4.1.2 (September 29, 2021)
+
+### pack
+
+* Added `sanitize.css` dependency.
+
 ## 4.1.1 (August 27, 2021)
 
 * No significant changes.
