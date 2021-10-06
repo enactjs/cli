@@ -116,11 +116,8 @@ module.exports = function (env) {
 				// package.json
 				loader: require.resolve('postcss-loader'),
 				options: {
-					// https://webpack.js.org/guides/migrating/#complex-options
-					ident: 'postcss',
-					sourceMap: shouldUseSourceMap,
-					plugins: () =>
-						[
+					postcssOptions: {
+						plugins: [
 							// Fix and adjust for known flexbox issues
 							// See https://github.com/philipwalton/flexbugs
 							require('postcss-flexbugs-fixes'),
@@ -143,6 +140,8 @@ module.exports = function (env) {
 							// Resolution indepedence support
 							app.ri !== false && require('postcss-resolution-independence')(app.ri)
 						].filter(Boolean)
+					},
+					sourceMap: shouldUseSourceMap
 				}
 			}
 		];
