@@ -116,33 +116,32 @@ module.exports = function (env) {
 				// package.json
 				loader: require.resolve('postcss-loader'),
 				options: {
-					// https://webpack.js.org/guides/migrating/#complex-options
 					postcssOptions: {
 						plugins: [
-								// Fix and adjust for known flexbox issues
-								// See https://github.com/philipwalton/flexbugs
-								require('postcss-flexbugs-fixes'),
-								// Support @global-import syntax to import css in a global context.
-								require('postcss-global-import'),
-								// Transpile stage-3 CSS standards based on browserslist targets.
-								// See https://preset-env.cssdb.org/features for supported features.
-								// Includes support for targetted auto-prefixing.
-								require('postcss-preset-env')({
-									autoprefixer: {
-										flexbox: 'no-2009',
-										remove: false
-									},
-									stage: 3,
-									features: {'custom-properties': false}
-								}),
-								// Adds PostCSS Normalize to standardize browser quirks based on
-								// the browserslist targets.
-								require('postcss-normalize')(),
-								// Resolution indepedence support
-								app.ri !== false && require('postcss-resolution-independence')(app.ri)
-							].filter(Boolean)
+							// Fix and adjust for known flexbox issues
+							// See https://github.com/philipwalton/flexbugs
+							require('postcss-flexbugs-fixes'),
+							// Support @global-import syntax to import css in a global context.
+							require('postcss-global-import'),
+							// Transpile stage-3 CSS standards based on browserslist targets.
+							// See https://preset-env.cssdb.org/features for supported features.
+							// Includes support for targetted auto-prefixing.
+							require('postcss-preset-env')({
+								autoprefixer: {
+									flexbox: 'no-2009',
+									remove: false
+								},
+								stage: 3,
+								features: {'custom-properties': false}
+							}),
+							// Adds PostCSS Normalize to standardize browser quirks based on
+							// the browserslist targets.
+							require('postcss-normalize')(),
+							// Resolution indepedence support
+							app.ri !== false && require('postcss-resolution-independence')(app.ri)
+						].filter(Boolean)
 					},
-					sourceMap: shouldUseSourceMap,
+					sourceMap: shouldUseSourceMap
 				}
 			}
 		];
