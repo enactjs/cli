@@ -3,7 +3,7 @@
 ### pack
 
 * Removed `sanitize.css` dependency.
-* Updated CLI dependency of `postcss-normalize` to 10.0.1. 
+* Updated CLI dependency of `postcss` related modules including `postcss-normalize` 10.0.1. 
 
 ## 4.1.2 (September 29, 2021)
 
