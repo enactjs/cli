@@ -1,9 +1,19 @@
+## unreleased
+
+### lint
+
+* Added `eslint-plugin-testing-library` as a dependency.
+
 ## 4.1.3 (October 12, 2021)
 
 ### pack
 
 * Removed `sanitize.css` dependency.
-* Updated CLI dependency of `postcss` related modules including `postcss-normalize` 10.0.1. 
+* Updated CLI dependency of `postcss` related modules including `postcss-normalize` 10.0.1.
+
+### lint
+
+* Enabled `testing-library` lint rules.
 
 ## 4.1.2 (September 29, 2021)
 
