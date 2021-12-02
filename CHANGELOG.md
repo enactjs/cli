@@ -1,3 +1,9 @@
+## 4.1.6 (December 2, 2021)
+
+### pack
+
+* Fixed V8 snapshot failure.
+
 ## 4.1.5 (November 29, 2021)
 
 * No significant changes.
