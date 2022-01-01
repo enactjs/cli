@@ -119,7 +119,7 @@ npm remove -g eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-babel 
 
 Unless otherwise specified, all content, including all source code files and documentation files in this repository are:
 
-Copyright (c) 2016-2021 LG Electronics
+Copyright (c) 2016-2022 LG Electronics
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
