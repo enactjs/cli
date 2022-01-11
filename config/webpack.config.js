@@ -219,7 +219,7 @@ module.exports = function (env) {
 				ext => useTypeScript || !ext.includes('ts')
 			),
 			// Allows us to specify paths to check for module resolving.
-			modules: [path.resolve('./node_modules'), 'node_modules'],
+			modules: [path.resolve('./node_modules'), 'node_modules', ...app.webpackExtraResolvePaths],
 			// Don't resolve symlinks to their underlying paths
 			symlinks: false,
 			// Backward compatibility for apps using new ilib references with old Enact
