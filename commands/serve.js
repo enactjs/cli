@@ -1,4 +1,5 @@
 /* eslint-env node, es6 */
+/* eslint-disable prettier/prettier */
 // @remove-on-eject-begin
 /**
  * Portions of this source code file are from create-react-app, used under the
