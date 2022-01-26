@@ -1,3 +1,9 @@
+## unreleased
+
+### pack
+
+* Updated `postcss` related dependencies including `postcss-normalize` 10.0.1.
+
 ## 3.0.6 (May 11, 2021)
 
 ### pack
