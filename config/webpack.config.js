@@ -162,6 +162,14 @@ module.exports = function (env) {
 			}
 		});
 
+	const getScssStyleLoaders = cssLoaderOptions =>
+		getStyleLoaders(cssLoaderOptions, {
+			loader: require.resolve('sass-loader'),
+			options: {
+				sourceMap: shouldUseSourceMap
+			}
+		});
+
 	return {
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
@@ -285,6 +293,15 @@ module.exports = function (env) {
 							test: /\.less$/,
 							use: getLessStyleLoaders({modules: app.forceCSSModules}),
 							sideEffects: true
+						},
+						// Adds support for CSS Modules, but using SASS
+						// using the extension .module.scss or .module.sass
+						{
+							test: /\.module\.(scss|sass)$/,
+							use: getScssStyleLoaders({
+								importLoaders: 3,
+								modules: true
+							})
 						},
 						// "file" loader handles on all files not caught by the above loaders.
 						// When you `import` an asset, you get its output filename and the file

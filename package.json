@@ -124,6 +124,7 @@
     "react-test-renderer": "17.0.1",
     "resolution-independence": "1.0.0",
     "resolve": "1.17.0",
+    "sass-loader": "^12.3.0",
     "semver": "7.3.2",
     "strip-ansi": "6.0.0",
     "style-loader": "1.2.1",
