@@ -162,7 +162,7 @@ module.exports = function (env) {
 			}
 		});
 
-	const getAdditionalModulePaths = (paths) => {
+	const getAdditionalModulePaths = paths => {
 		if (!paths) return [];
 		return Array.isArray(paths) ? paths : [paths];
 	};
