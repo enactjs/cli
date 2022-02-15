@@ -162,6 +162,11 @@ module.exports = function (env) {
 			}
 		});
 
+	const getAdditionalModulePaths = (paths) => {
+		if (!paths) return [];
+		return Array.isArray(paths) ? paths : [paths];
+	};
+
 	return {
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
@@ -219,7 +224,11 @@ module.exports = function (env) {
 				ext => useTypeScript || !ext.includes('ts')
 			),
 			// Allows us to specify paths to check for module resolving.
-			modules: [path.resolve('./node_modules'), 'node_modules'],
+			modules: [
+				path.resolve('./node_modules'),
+				'node_modules',
+				...getAdditionalModulePaths(app.additionalModulePaths)
+			],
 			// Don't resolve symlinks to their underlying paths
 			symlinks: false,
 			// Backward compatibility for apps using new ilib references with old Enact
