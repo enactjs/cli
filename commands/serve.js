@@ -138,7 +138,10 @@ function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 				pathname: process.env.WDS_SOCKET_PATH,
 				port: process.env.WDS_SOCKET_PORT
 			},
-			overlay: true
+			overlay: {
+				errors: true,
+				warnings: false
+			}
 		},
 		sockHost: process.env.WDS_SOCKET_HOST,
 		sockPath: process.env.WDS_SOCKET_PATH,
