@@ -23,8 +23,6 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
-const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
-const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
@@ -226,7 +224,9 @@ module.exports = function (env) {
 			// and old apps referencing old iLib location with new Enact
 			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
 				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias)
-				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias)
+				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias),
+			// Optional configuration for polyfilling NodeJS built-ins.
+			fallback: app.fallbackNodeBuiltins,
 		},
 		// @remove-on-eject-begin
 		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
@@ -329,7 +329,7 @@ module.exports = function (env) {
 		},
 		// Target app to build for a specific environment (default 'web')
 		target: app.environment,
-		// Optional configuration for polyfilling NodeJS built-ins.
+		// Optional configuration for polyfilling NodeJS built-ins(only global, __filename or __dirname).
 		node: app.nodeBuiltins,
 		performance: false,
 		optimization: {
@@ -440,11 +440,6 @@ module.exports = function (env) {
 			new ModuleNotFoundPlugin(app.context),
 			// Ensure correct casing in module filepathes
 			new CaseSensitivePathsPlugin(),
-			// If you require a missing module and then `npm install` it, you still have
-			// to restart the development server for Webpack to discover it. This plugin
-			// makes the discovery automatic so you don't have to restart.
-			// See https://github.com/facebookincubator/create-react-app/issues/186
-			!isEnvProduction && new WatchMissingNodeModulesPlugin('./node_modules'),
 			// Switch the internal NodeOutputFilesystem to use graceful-fs to avoid
 			// EMFILE errors when hanndling mass amounts of files at once, such as
 			// what happens when using ilib bundles/resources.
@@ -473,9 +468,7 @@ module.exports = function (env) {
 						'!**/src/setupProxy.*',
 						'!**/src/setupTests.*'
 					],
-					silent: true,
-					// The formatter is invoked directly in WebpackDevServerUtils during development
-					formatter: !process.env.DISABLE_TSFORMATTER ? typescriptFormatter : undefined
+					silent: true
 				}),
 			new ESLintPlugin({
 				// Plugin options

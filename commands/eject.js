@@ -22,7 +22,8 @@ const spawn = require('cross-spawn');
 const assets = [
 	{src: path.join(__dirname, '..', 'config'), dest: 'config'},
 	{src: path.join(__dirname, '..', 'config', 'jest'), dest: 'config/jest'},
-	{src: path.join(__dirname, '..', 'commands'), dest: 'scripts'}
+	{src: path.join(__dirname, '..', 'commands'), dest: 'scripts'},
+	{src: path.join(__dirname, '..', 'config', 'webpack', 'persistentCache'), dest: 'config/webpack/persistentCache'}
 ];
 const internal = [
 	'@babel/plugin-transform-modules-commonjs',
@@ -267,7 +268,7 @@ function api({bare = false} = {}) {
 			console.log('Ejecting...');
 			console.log();
 			console.log(chalk.cyan(`Copying files into ${process.cwd()}`));
-			assets.forEach(dir => !fs.existsSync(dir.dest) && fs.mkdirSync(dir.dest));
+			assets.forEach(dir => !fs.existsSync(dir.dest) && fs.mkdirSync(dir.dest, {recursive: true}));
 			files.forEach(copySanitizedFile);
 			console.log();
 			console.log(chalk.cyan('Configuring package.json'));

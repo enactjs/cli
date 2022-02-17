@@ -35,12 +35,15 @@ process.on('unhandledRejection', err => {
 // As react-dev-utils assumes the webpack production packaging command is
 // "npm run build" with no way to modify it yet, we provide a basic override
 // to console.log to ensure the correct output is displayed to the user.
-console.log = (log => (data, ...rest) =>
-	typeof data === 'undefined'
-		? log()
-		: typeof data === 'string'
-		? log(data.replace(/npm run build/, 'npm run pack-p'), ...rest)
-		: log.call(this, data, ...rest))(console.log);
+console.log = (
+	log =>
+	(data, ...rest) =>
+		typeof data === 'undefined'
+			? log()
+			: typeof data === 'string'
+			? log(data.replace(/npm run build/, 'npm run pack-p'), ...rest)
+			: log.call(this, data, ...rest)
+)(console.log);
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -105,7 +108,7 @@ function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 			key: fs.readFileSync(SSL_KEY_FILE)
 		};
 	}
-
+	const disableFirewall = !proxy || process.env.DANGEROUSLY_DISABLE_HOST_CHECK === 'true';
 	return {
 		// WebpackDevServer 2.4.3 introduced a security fix that prevents remote
 		// websites from potentially accessing local content through DNS rebinding:
@@ -123,25 +126,20 @@ function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 		// So we will disable the host check normally, but enable it if you have
 		// specified the `proxy` setting. Finally, we let you override it if you
 		// really know what you're doing with a special environment variable.
-		disableHostCheck: !proxy || process.env.DANGEROUSLY_DISABLE_HOST_CHECK === 'true',
-		// Silence WebpackDevServer's own logs since they're generally not useful.
-		// It will still show compile warnings and errors with this setting.
-		clientLogLevel: 'none',
-		// Enable hot reloading server. It will provide /sockjs-node/ endpoint
-		// for the WebpackDevServer client so it can learn when the files were
-		// updated. The WebpackDevServer client is included as an entry point
-		// in the Webpack development configuration. Note that only changes
-		// to CSS are currently hot reloaded. JS changes will refresh the browser.
-		hot: true,
-		// Use 'ws' instead of 'sockjs-node' on server since we're using native
-		// websockets in `webpackHotDevClient`.
-		transportMode: 'ws',
-		// Prevent a WS client from getting injected as we're already including
-		// `webpackHotDevClient`.
-		injectClient: false,
-		// Enable custom sockjs pathname for websocket connection to hot reloading server.
-		// Enable custom sockjs hostname, pathname and port for websocket connection
-		// to hot reloading server.
+		// Note: ["localhost", ".localhost"] will support subdomains - but we might
+		// want to allow setting the allowedHosts manually for more complex setups
+		allowedHosts: disableFirewall ? 'all' : [allowedHost],
+		client: {
+			webSocketURL: {
+				// Enable custom sockjs pathname for websocket connection to hot reloading server.
+				// Enable custom sockjs hostname, pathname and port for websocket connection
+				// to hot reloading server.
+				hostname: process.env.WDS_SOCKET_HOST,
+				pathname: process.env.WDS_SOCKET_PATH,
+				port: process.env.WDS_SOCKET_PORT
+			},
+			overlay: true
+		},
 		sockHost: process.env.WDS_SOCKET_HOST,
 		sockPath: process.env.WDS_SOCKET_PATH,
 		sockPort: process.env.WDS_SOCKET_PORT,
@@ -151,7 +149,6 @@ function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 		// Enable HTTPS if the HTTPS environment variable is set to 'true'
 		https,
 		host,
-		overlay: false,
 		// Allow cross-origin HTTP requests
 		headers: {
 			'Access-Control-Allow-Origin': '*'
@@ -164,16 +161,13 @@ function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 			disableDotRule: true,
 			index: publicPath
 		},
-		public: allowedHost,
 		// `proxy` is run between `before` and `after` `webpack-dev-server` hooks
 		proxy,
-		before(build, server) {
-			// Keep `evalSourceMapMiddleware` and `errorOverlayMiddleware`
+		onBeforeSetupMiddleware(build, server) {
+			// Keep `evalSourceMapMiddleware`
 			// middlewares before `redirectServedPath` otherwise will not have any effect
 			// This lets us fetch source contents from webpack for the error overlay
 			build.use(evalSourceMapMiddleware(server));
-			// This lets us open files from the runtime error overlay.
-			build.use(errorOverlayMiddleware());
 
 			// Optionally register app-side proxy middleware if it exists
 			const proxySetup = path.join(process.cwd(), 'src', 'setupProxy.js');
@@ -181,7 +175,7 @@ function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 				require(proxySetup)(build);
 			}
 		},
-		after(build) {
+		onAfterSetupMiddleware(build) {
 			// Redirect to `PUBLIC_URL` or `homepage`/`enact.publicUrl` from `package.json`
 			// if url not match
 			build.use(redirectServedPathMiddleware(publicPath));
@@ -200,21 +194,13 @@ function serve(config, host, port, open) {
 		const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
 		const publicPath = getPublicUrlOrPath(true, app.publicUrl, process.env.PUBLIC_URL);
 		const urls = prepareUrls(protocol, host, resolvedPort, publicPath.slice(0, -1));
-		const devSocket = {
-			// eslint-disable-next-line no-use-before-define
-			warnings: warnings => devServer.sockWrite(devServer.sockets, 'warnings', warnings),
-			// eslint-disable-next-line no-use-before-define
-			errors: errors => devServer.sockWrite(devServer.sockets, 'errors', errors)
-		};
 		// Create a webpack compiler that is configured with custom messages.
 		const compiler = createCompiler({
 			appName: app.name,
 			config,
-			devSocket,
 			urls,
 			useYarn: false,
 			useTypeScript: fs.existsSync('tsconfig.json'),
-			tscCompileOnError: process.env.TSC_COMPILE_ON_ERROR === 'true',
 			webpack
 		});
 		// Hook into compiler to remove potentially confusing messages
