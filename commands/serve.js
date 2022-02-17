@@ -154,7 +154,9 @@ function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 		host,
 		// Allow cross-origin HTTP requests
 		headers: {
-			'Access-Control-Allow-Origin': '*'
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': '*',
+			'Access-Control-Allow-Headers': '*'
 		},
 		historyApiFallback: {
 			// ensure JSON file requests correctly 404 error when not found.
