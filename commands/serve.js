@@ -16,7 +16,6 @@ const path = require('path');
 const chalk = require('chalk');
 const minimist = require('minimist');
 const clearConsole = require('react-dev-utils/clearConsole');
-const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
 const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const openBrowser = require('react-dev-utils/openBrowser');
