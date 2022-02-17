@@ -62,6 +62,9 @@ module.exports = function (env) {
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
 
+	// Check if Tailwind config exists
+	const useTailwind = fs.existsSync(path.join(app.context, 'tailwind.config.js'));
+
 	process.env.NODE_ENV = env || process.env.NODE_ENV;
 	const isEnvProduction = process.env.NODE_ENV === 'production';
 
@@ -116,6 +119,7 @@ module.exports = function (env) {
 				options: {
 					postcssOptions: {
 						plugins: [
+							useTailwind && require('tailwindcss'),
 							// Fix and adjust for known flexbox issues
 							// See https://github.com/philipwalton/flexbugs
 							require('postcss-flexbugs-fixes'),
@@ -134,7 +138,7 @@ module.exports = function (env) {
 							}),
 							// Adds PostCSS Normalize to standardize browser quirks based on
 							// the browserslist targets.
-							require('postcss-normalize')(),
+							!useTailwind && require('postcss-normalize')(),
 							// Resolution indepedence support
 							app.ri !== false && require('postcss-resolution-independence')(app.ri)
 						].filter(Boolean)
@@ -226,7 +230,7 @@ module.exports = function (env) {
 				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias)
 				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias),
 			// Optional configuration for polyfilling NodeJS built-ins.
-			fallback: app.fallbackNodeBuiltins,
+			fallback: app.fallbackNodeBuiltins
 		},
 		// @remove-on-eject-begin
 		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
