@@ -246,7 +246,7 @@ module.exports = function (env) {
 					enforce: 'pre',
 					exclude: /@babel(?:\/|\\{1,2})runtime/,
 					test: /\.(js|mjs|jsx|ts|tsx|css)$/,
-					use: 'source-map-loader'
+					loader: require.resolve('source-map-loader')
 				},
 				{
 					// "oneOf" will traverse all following loaders until one will
