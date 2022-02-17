@@ -17,6 +17,7 @@ const chalk = require('chalk');
 const minimist = require('minimist');
 const clearConsole = require('react-dev-utils/clearConsole');
 const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
+const noopServiceWorkerMiddleware = require('react-dev-utils/noopServiceWorkerMiddleware');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const openBrowser = require('react-dev-utils/openBrowser');
 const redirectServedPathMiddleware = require('react-dev-utils/redirectServedPathMiddleware');
@@ -142,12 +143,6 @@ function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 				warnings: false
 			}
 		},
-		sockHost: process.env.WDS_SOCKET_HOST,
-		sockPath: process.env.WDS_SOCKET_PATH,
-		sockPort: process.env.WDS_SOCKET_PORT,
-		// WebpackDevServer is noisy by default so we emit custom message instead
-		// by listening to the compiler events with `compiler.plugin` calls above.
-		quiet: true,
 		// Enable HTTPS if the HTTPS environment variable is set to 'true'
 		https,
 		host,
@@ -167,22 +162,29 @@ function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 		},
 		// `proxy` is run between `before` and `after` `webpack-dev-server` hooks
 		proxy,
-		onBeforeSetupMiddleware(build, server) {
+		onBeforeSetupMiddleware(devServer) {
 			// Keep `evalSourceMapMiddleware`
 			// middlewares before `redirectServedPath` otherwise will not have any effect
 			// This lets us fetch source contents from webpack for the error overlay
-			build.use(evalSourceMapMiddleware(server));
+			devServer.app.use(evalSourceMapMiddleware(devServer));
 
 			// Optionally register app-side proxy middleware if it exists
 			const proxySetup = path.join(process.cwd(), 'src', 'setupProxy.js');
 			if (fs.existsSync(proxySetup)) {
-				require(proxySetup)(build);
+				require(proxySetup)(devServer.app);
 			}
 		},
-		onAfterSetupMiddleware(build) {
+		onAfterSetupMiddleware(devServer) {
 			// Redirect to `PUBLIC_URL` or `homepage`/`enact.publicUrl` from `package.json`
 			// if url not match
-			build.use(redirectServedPathMiddleware(publicPath));
+			devServer.app.use(redirectServedPathMiddleware(publicPath));
+
+			// This service worker file is effectively a 'no-op' that will reset any
+			// previous service worker registered for the same host:port combination.
+			// We do this in development to avoid hitting the production cache if
+			// it used the same host and port.
+			// https://github.com/facebook/create-react-app/issues/2272#issuecomment-302832432
+			devServer.app.use(noopServiceWorkerMiddleware(publicPath));
 		}
 	};
 }

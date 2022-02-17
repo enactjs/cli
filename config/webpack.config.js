@@ -98,7 +98,7 @@ module.exports = function (env) {
 				options: Object.assign(
 					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
 					cssLoaderOptions,
-					cssLoaderOptions.modules ? {modules: {getLocalIdent: getLocalIdent}} : {modules: {mode: 'icss'}},
+					cssLoaderOptions.modules ? {modules: {getLocalIdent}} : {modules: {mode: 'icss'}},
 					{
 						url: url => {
 							// Don't handle absolute path urls
@@ -208,10 +208,6 @@ module.exports = function (env) {
 					return file;
 				}
 			},
-			// Use webpack 5 handling of asset files; remove once upgraded to webpack 5
-			futureEmitAssets: true,
-			// Prevent potential conflicts in muliple runtimes
-			jsonpFunction: 'webpackJsonp' + app.name,
 			// Allow versatile 'global' mapping across multiple deploy formats
 			globalObject: 'this'
 		},
@@ -324,18 +320,24 @@ module.exports = function (env) {
 			// Broadcast http server on the localhost, port 8080.
 			host: '0.0.0.0',
 			port: 8080,
-			// Support the same public path as webpack config.
-			publicPath: publicPath,
-			// By default WebpackDevServer serves files from public and __mocks__ directories
-			// in addition to all the virtual build products that it serves from memory.
-			contentBase: [path.resolve('./public'), path.resolve('./__mocks__')],
-			contentBasePublicPath: publicPath + '/',
-			// Any changes to files from `contentBase` should trigger a page reload.
-			watchContentBase: true,
-			// Reportedly, this avoids CPU overload on some systems.
-			// https://github.com/facebookincubator/create-react-app/issues/293
-			watchOptions: {
-				ignored: /node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
+			static: {
+				// By default WebpackDevServer serves files from public and __mocks__ directories
+				// in addition to all the virtual build products that it serves from memory.
+				directory: path.resolve('./public'),
+				publicPath: [publicPath + '/'],
+				// Any changes to files from `contentBase` should trigger a page reload.
+				watch: {
+					// Reportedly, this avoids CPU overload on some systems.
+					// https://github.com/facebookincubator/create-react-app/issues/293
+					ignored: /node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
+				}
+			},
+			devMiddleware: {
+				// It is important to tell WebpackDevServer to use the same "publicPath" path as
+				// we specified in the webpack config. When homepage is '.', default to serving
+				// from the root.
+				// remove last slash so user can land on `/test` instead of `/test/`
+				publicPath: publicPath
 			}
 		},
 		// Target app to build for a specific environment (default 'web')
@@ -374,6 +376,9 @@ module.exports = function (env) {
 						mangle: {
 							safari10: true
 						},
+						// Added for profiling in devtools
+						keep_classnames: isEnvProduction,
+						keep_fnames: isEnvProduction,
 						output: {
 							ecma: 5,
 							comments: false,
@@ -384,10 +389,7 @@ module.exports = function (env) {
 					},
 					// Use multi-process parallel running to improve the build speed
 					// Default number of concurrent runs: os.cpus().length - 1
-					parallel: true,
-					// Enable file caching
-					cache: true,
-					sourceMap: shouldUseSourceMap
+					parallel: true
 				}),
 				new OptimizeCSSAssetsPlugin({
 					cssProcessorOptions: {
