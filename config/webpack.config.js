@@ -241,6 +241,13 @@ module.exports = function (env) {
 		// @remove-on-eject-end
 		module: {
 			rules: [
+				// Handle node_modules packages that contain sourcemaps
+				shouldUseSourceMap && {
+					enforce: 'pre',
+					exclude: /@babel(?:\/|\\{1,2})runtime/,
+					test: /\.(js|mjs|jsx|ts|tsx|css)$/,
+					use: 'source-map-loader'
+				},
 				{
 					// "oneOf" will traverse all following loaders until one will
 					// match the requirements. When no loader matches it will fall
@@ -310,7 +317,7 @@ module.exports = function (env) {
 						// Make sure to add the new loader(s) before the "file" loader.
 					]
 				}
-			]
+			].filter(Boolean)
 		},
 		// Specific webpack-dev-server options.
 		devServer: {

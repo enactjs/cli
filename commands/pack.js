@@ -100,13 +100,17 @@ function details(err, stats, output) {
 		process.env.CI.toLowerCase() !== 'false' &&
 		messages.warnings.length
 	) {
-		console.log(
-			chalk.yellow(
-				'Treating warnings as errors because process.env.CI = true. ' +
-					'Most CI servers set it automatically.\n'
-			)
-		);
-		return new Error(messages.warnings.join('\n\n'));
+		// Ignore sourcemap warnings in CI builds. See #8227 for more info.
+		const filteredWarnings = messages.warnings.filter(w => !/Failed to parse source map/.test(w));
+		if (filteredWarnings.length) {
+			console.log(
+				chalk.yellow(
+					'Treating warnings as errors because process.env.CI = true. ' +
+						'Most CI servers set it automatically.\n'
+				)
+			);
+			return new Error(messages.warnings.join('\n\n'));
+		}
 	} else {
 		copyPublicFolder(output);
 		if (messages.warnings.length) {
