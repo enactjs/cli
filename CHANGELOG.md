@@ -1,3 +1,9 @@
+## unreleased
+
+### pack
+
+* Added `additionalModulePaths` to enact options to specify paths to check when resolving modules.
+
 ## 4.1.6 (December 2, 2021)
 
 ### pack
