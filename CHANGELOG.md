@@ -1,4 +1,4 @@
-## unreleased
+## 3.0.7 (February 17, 2022)
 
 ### pack
 
@@ -142,7 +142,7 @@ All dependencies updated to latest release.
 ### pack
 
 * Fixed theme feature detection on local theme files (eg. when a local ThemeDecorator is present)
-* Fixed bug with `--framework` option with regards to erroneously including unneeded or invalid iLib dependencies and test files. 
+* Fixed bug with `--framework` option with regards to erroneously including unneeded or invalid iLib dependencies and test files.
 
 ### clean
 
