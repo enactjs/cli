@@ -1,3 +1,7 @@
+## unreleased 
+
+* Update postcss related modules and remove version pinning
+
 ## 4.1.7 (February 18, 2022)
 
 ### pack
