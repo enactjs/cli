@@ -1,3 +1,9 @@
+## 4.1.7 (February 18, 2022)
+
+### pack
+
+* Added `additionalModulePaths` to enact options to specify paths to check when resolving modules.
+
 ## 4.1.6 (December 2, 2021)
 
 ### pack
@@ -240,7 +246,7 @@ All dependencies updated to latest release.
 ### pack
 
 * Fixed theme feature detection on local theme files (eg. when a local ThemeDecorator is present)
-* Fixed bug with `--framework` option with regards to erroneously including unneeded or invalid iLib dependencies and test files. 
+* Fixed bug with `--framework` option with regards to erroneously including unneeded or invalid iLib dependencies and test files.
 
 ### clean
 
