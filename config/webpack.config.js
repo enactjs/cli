@@ -23,8 +23,6 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
-const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
-const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
@@ -64,6 +62,9 @@ module.exports = function (env) {
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
 
+	// Check if Tailwind config exists
+	const useTailwind = fs.existsSync(path.join(app.context, 'tailwind.config.js'));
+
 	process.env.NODE_ENV = env || process.env.NODE_ENV;
 	const isEnvProduction = process.env.NODE_ENV === 'production';
 
@@ -97,7 +98,7 @@ module.exports = function (env) {
 				options: Object.assign(
 					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
 					cssLoaderOptions,
-					cssLoaderOptions.modules && {modules: {getLocalIdent}},
+					cssLoaderOptions.modules ? {modules: {getLocalIdent}} : {modules: {mode: 'icss'}},
 					{
 						url: url => {
 							// Don't handle absolute path urls
@@ -118,6 +119,7 @@ module.exports = function (env) {
 				options: {
 					postcssOptions: {
 						plugins: [
+							useTailwind && require('tailwindcss'),
 							// Fix and adjust for known flexbox issues
 							// See https://github.com/philipwalton/flexbugs
 							require('postcss-flexbugs-fixes'),
@@ -136,7 +138,7 @@ module.exports = function (env) {
 							}),
 							// Adds PostCSS Normalize to standardize browser quirks based on
 							// the browserslist targets.
-							require('postcss-normalize')(),
+							!useTailwind && require('postcss-normalize')(),
 							// Resolution indepedence support
 							app.ri !== false && require('postcss-resolution-independence')(app.ri)
 						].filter(Boolean)
@@ -211,10 +213,6 @@ module.exports = function (env) {
 					return file;
 				}
 			},
-			// Use webpack 5 handling of asset files; remove once upgraded to webpack 5
-			futureEmitAssets: true,
-			// Prevent potential conflicts in muliple runtimes
-			jsonpFunction: 'webpackJsonp' + app.name,
 			// Allow versatile 'global' mapping across multiple deploy formats
 			globalObject: 'this'
 		},
@@ -235,7 +233,9 @@ module.exports = function (env) {
 			// and old apps referencing old iLib location with new Enact
 			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
 				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias)
-				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias)
+				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias),
+			// Optional configuration for polyfilling NodeJS built-ins.
+			fallback: app.fallbackNodeBuiltins
 		},
 		// @remove-on-eject-begin
 		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
@@ -246,6 +246,13 @@ module.exports = function (env) {
 		// @remove-on-eject-end
 		module: {
 			rules: [
+				// Handle node_modules packages that contain sourcemaps
+				shouldUseSourceMap && {
+					enforce: 'pre',
+					exclude: /@babel(?:\/|\\{1,2})runtime/,
+					test: /\.(js|mjs|jsx|ts|tsx|css)$/,
+					loader: require.resolve('source-map-loader')
+				},
 				{
 					// "oneOf" will traverse all following loaders until one will
 					// match the requirements. When no loader matches it will fall
@@ -315,30 +322,36 @@ module.exports = function (env) {
 						// Make sure to add the new loader(s) before the "file" loader.
 					]
 				}
-			]
+			].filter(Boolean)
 		},
 		// Specific webpack-dev-server options.
 		devServer: {
 			// Broadcast http server on the localhost, port 8080.
 			host: '0.0.0.0',
 			port: 8080,
-			// Support the same public path as webpack config.
-			publicPath: publicPath,
-			// By default WebpackDevServer serves files from public and __mocks__ directories
-			// in addition to all the virtual build products that it serves from memory.
-			contentBase: [path.resolve('./public'), path.resolve('./__mocks__')],
-			contentBasePublicPath: publicPath + '/',
-			// Any changes to files from `contentBase` should trigger a page reload.
-			watchContentBase: true,
-			// Reportedly, this avoids CPU overload on some systems.
-			// https://github.com/facebookincubator/create-react-app/issues/293
-			watchOptions: {
-				ignored: /node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
+			static: {
+				// By default WebpackDevServer serves files from public and __mocks__ directories
+				// in addition to all the virtual build products that it serves from memory.
+				directory: path.resolve('./public'),
+				publicPath: [publicPath + '/'],
+				// Any changes to files from `contentBase` should trigger a page reload.
+				watch: {
+					// Reportedly, this avoids CPU overload on some systems.
+					// https://github.com/facebookincubator/create-react-app/issues/293
+					ignored: /node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
+				}
+			},
+			devMiddleware: {
+				// It is important to tell WebpackDevServer to use the same "publicPath" path as
+				// we specified in the webpack config. When homepage is '.', default to serving
+				// from the root.
+				// remove last slash so user can land on `/test` instead of `/test/`
+				publicPath: publicPath
 			}
 		},
 		// Target app to build for a specific environment (default 'web')
 		target: app.environment,
-		// Optional configuration for polyfilling NodeJS built-ins.
+		// Optional configuration for polyfilling NodeJS built-ins(only global, __filename or __dirname).
 		node: app.nodeBuiltins,
 		performance: false,
 		optimization: {
@@ -372,6 +385,9 @@ module.exports = function (env) {
 						mangle: {
 							safari10: true
 						},
+						// Added for profiling in devtools
+						keep_classnames: isEnvProduction,
+						keep_fnames: isEnvProduction,
 						output: {
 							ecma: 5,
 							comments: false,
@@ -382,10 +398,7 @@ module.exports = function (env) {
 					},
 					// Use multi-process parallel running to improve the build speed
 					// Default number of concurrent runs: os.cpus().length - 1
-					parallel: true,
-					// Enable file caching
-					cache: true,
-					sourceMap: shouldUseSourceMap
+					parallel: true
 				}),
 				new OptimizeCSSAssetsPlugin({
 					cssProcessorOptions: {
@@ -449,11 +462,6 @@ module.exports = function (env) {
 			new ModuleNotFoundPlugin(app.context),
 			// Ensure correct casing in module filepathes
 			new CaseSensitivePathsPlugin(),
-			// If you require a missing module and then `npm install` it, you still have
-			// to restart the development server for Webpack to discover it. This plugin
-			// makes the discovery automatic so you don't have to restart.
-			// See https://github.com/facebookincubator/create-react-app/issues/186
-			!isEnvProduction && new WatchMissingNodeModulesPlugin('./node_modules'),
 			// Switch the internal NodeOutputFilesystem to use graceful-fs to avoid
 			// EMFILE errors when hanndling mass amounts of files at once, such as
 			// what happens when using ilib bundles/resources.
@@ -482,9 +490,7 @@ module.exports = function (env) {
 						'!**/src/setupProxy.*',
 						'!**/src/setupTests.*'
 					],
-					silent: true,
-					// The formatter is invoked directly in WebpackDevServerUtils during development
-					formatter: !process.env.DISABLE_TSFORMATTER ? typescriptFormatter : undefined
+					silent: true
 				}),
 			new ESLintPlugin({
 				// Plugin options
