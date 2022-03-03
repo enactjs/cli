@@ -16,10 +16,13 @@ const fs = require('fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpackPlugin');
+const ForkTsCheckerWebpackPlugin =
+	process.env.TSC_COMPILE_ON_ERROR === 'true'
+		? require('react-dev-utils/ForkTsCheckerWarningWebpackPlugin')
+		: require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
@@ -98,7 +101,7 @@ module.exports = function (env) {
 				options: Object.assign(
 					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
 					cssLoaderOptions,
-					cssLoaderOptions.modules ? {modules: {getLocalIdent}} : {modules: {mode: 'icss'}},
+					cssLoaderOptions.modules && {modules: {getLocalIdent}},
 					{
 						url: url => {
 							// Don't handle absolute path urls
@@ -118,6 +121,10 @@ module.exports = function (env) {
 				loader: require.resolve('postcss-loader'),
 				options: {
 					postcssOptions: {
+						// Necessary for external CSS imports to work
+						// https://github.com/facebook/create-react-app/issues/2677
+						ident: 'postcss',
+						config: false,
 						plugins: [
 							useTailwind && require('tailwindcss'),
 							// Fix and adjust for known flexbox issues
@@ -212,9 +219,10 @@ module.exports = function (env) {
 				} else {
 					return file;
 				}
-			},
-			// Allow versatile 'global' mapping across multiple deploy formats
-			globalObject: 'this'
+			}
+		},
+		infrastructureLogging: {
+			level: 'none'
 		},
 		resolve: {
 			// These are the reasonable defaults supported by the React/ES6 ecosystem.
@@ -246,13 +254,6 @@ module.exports = function (env) {
 		// @remove-on-eject-end
 		module: {
 			rules: [
-				// Handle node_modules packages that contain sourcemaps
-				shouldUseSourceMap && {
-					enforce: 'pre',
-					exclude: /@babel(?:\/|\\{1,2})runtime/,
-					test: /\.(js|mjs|jsx|ts|tsx|css)$/,
-					loader: require.resolve('source-map-loader')
-				},
 				{
 					// "oneOf" will traverse all following loaders until one will
 					// match the requirements. When no loader matches it will fall
@@ -329,18 +330,32 @@ module.exports = function (env) {
 			// Broadcast http server on the localhost, port 8080.
 			host: '0.0.0.0',
 			port: 8080,
-			static: {
-				// By default WebpackDevServer serves files from public and __mocks__ directories
-				// in addition to all the virtual build products that it serves from memory.
-				directory: path.resolve('./public'),
-				publicPath: [publicPath + '/'],
-				// Any changes to files from `contentBase` should trigger a page reload.
-				watch: {
-					// Reportedly, this avoids CPU overload on some systems.
-					// https://github.com/facebookincubator/create-react-app/issues/293
-					ignored: /node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
+			static: [
+				{
+					// By default WebpackDevServer serves files from public and __mocks__ directories
+					// in addition to all the virtual build products that it serves from memory.
+					directory: path.resolve('./public'),
+					publicPath: [publicPath + '/'],
+					// Any changes to files from `contentBase` should trigger a page reload.
+					watch: {
+						// Reportedly, this avoids CPU overload on some systems.
+						// https://github.com/facebookincubator/create-react-app/issues/293
+						ignored: /node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
+					}
+				},
+				{
+					// By default WebpackDevServer serves files from public and __mocks__ directories
+					// in addition to all the virtual build products that it serves from memory.
+					directory: path.resolve('./__mocks__'),
+					publicPath: [publicPath + '/'],
+					// Any changes to files from `contentBase` should trigger a page reload.
+					watch: {
+						// Reportedly, this avoids CPU overload on some systems.
+						// https://github.com/facebookincubator/create-react-app/issues/293
+						ignored: /node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
+					}
 				}
-			},
+			],
 			devMiddleware: {
 				// It is important to tell WebpackDevServer to use the same "publicPath" path as
 				// we specified in the webpack config. When homepage is '.', default to serving
@@ -351,7 +366,7 @@ module.exports = function (env) {
 		},
 		// Target app to build for a specific environment (default 'web')
 		target: app.environment,
-		// Optional configuration for polyfilling NodeJS built-ins(only global, __filename or __dirname).
+		// Optional configuration for polyfilling NodeJS built-ins.
 		node: app.nodeBuiltins,
 		performance: false,
 		optimization: {
@@ -400,24 +415,7 @@ module.exports = function (env) {
 					// Default number of concurrent runs: os.cpus().length - 1
 					parallel: true
 				}),
-				new OptimizeCSSAssetsPlugin({
-					cssProcessorOptions: {
-						// TODO: verify calc issue fixed. Related: https://github.com/postcss/postcss-calc/issues/50
-						// calc: false,
-						parser: require('postcss-safe-parser'),
-						map: shouldUseSourceMap && {
-							// `inline: false` forces the sourcemap to be output into a
-							// separate file
-							inline: false,
-							// `annotation: true` appends the sourceMappingURL to the end of
-							// the css file, helping the browser find the sourcemap
-							annotation: true
-						}
-					},
-					cssProcessorPluginOptions: {
-						preset: ['default', {minifyFontValues: {removeQuotes: false}}]
-					}
-				})
+				new CssMinimizerPlugin()
 			]
 		},
 		plugins: [
@@ -476,21 +474,45 @@ module.exports = function (env) {
 			// TypeScript type checking
 			useTypeScript &&
 				new ForkTsCheckerWebpackPlugin({
-					typescript: resolve.sync('typescript', {
-						basedir: 'node_modules'
-					}),
 					async: !isEnvProduction,
-					checkSyntacticErrors: true,
-					tsconfig: 'tsconfig.json',
-					reportFiles: [
-						'../**/src/**/*.{ts,tsx}',
-						'**/src/**/*.{ts,tsx}',
-						'!**/src/**/__tests__/**',
-						'!**/src/**/?(*.)+(spec|test).*',
-						'!**/src/setupProxy.*',
-						'!**/src/setupTests.*'
-					],
-					silent: true
+					typescript: {
+						typescriptPath: resolve.sync('typescript', {
+							basedir: 'node_modules'
+						}),
+						configOverwrite: {
+							compilerOptions: {
+								sourceMap: shouldUseSourceMap,
+								skipLibCheck: true,
+								inlineSourceMap: false,
+								declarationMap: false,
+								noEmit: true,
+								incremental: true,
+								// tsBuildInfoFile: path.join(
+								// 	app.context,
+								// 	'node_modules',
+								// 	'.cache',
+								// 	'tsconfig.tsbuildinfo'
+								// )
+							}
+						},
+						context: app.context,
+						diagnosticOptions: {
+							syntactic: true
+						},
+						mode: 'write-references'
+					},
+					issue: {
+						include: [{file: '../**/src/**/*.{ts,tsx}'}, {file: '**/src/**/*.{ts,tsx}'}],
+						exclude: [
+							{file: '!**/src/**/__tests__/**'},
+							{file: '!**/src/**/?(*.)+(spec|test).*'},
+							{file: '!**/src/setupProxy.*'},
+							{file: '!**/src/setupTests.*'}
+						]
+					},
+					logger: {
+						infrastructure: 'silent'
+					}
 				}),
 			new ESLintPlugin({
 				// Plugin options

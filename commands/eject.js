@@ -22,8 +22,7 @@ const spawn = require('cross-spawn');
 const assets = [
 	{src: path.join(__dirname, '..', 'config'), dest: 'config'},
 	{src: path.join(__dirname, '..', 'config', 'jest'), dest: 'config/jest'},
-	{src: path.join(__dirname, '..', 'commands'), dest: 'scripts'},
-	{src: path.join(__dirname, '..', 'config', 'webpack', 'persistentCache'), dest: 'config/webpack/persistentCache'}
+	{src: path.join(__dirname, '..', 'commands'), dest: 'scripts'}
 ];
 const internal = [
 	'@babel/plugin-transform-modules-commonjs',

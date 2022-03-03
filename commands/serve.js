@@ -81,15 +81,13 @@ function hotDevServer(config, fastRefresh) {
 	// make a syntax error, this client will display a syntax error overlay.
 	// Note: instead of the default WebpackDevServer client, we use a custom one
 	// to bring better experience.
-	if (!fastRefresh) {
-		config.entry.main.unshift(require.resolve('react-dev-utils/webpackHotDevClient'));
-	} else {
+	if (fastRefresh) {
 		// Use experimental fast refresh plugin instead as dev client access point
 		// https://github.com/facebook/react/tree/master/packages/react-refresh
 		config.plugins.unshift(
 			new ReactRefreshWebpackPlugin({
 				overlay: {
-					entry: require.resolve('react-dev-utils/webpackHotDevClient')
+					entry: false
 				}
 			})
 		);
