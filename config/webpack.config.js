@@ -19,7 +19,7 @@ const ESLintPlugin = require('eslint-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
@@ -63,6 +63,9 @@ module.exports = function (env) {
 
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
+
+	// Check if Tailwind config exists
+	const useTailwind = fs.existsSync(path.join(app.context, 'tailwind.config.js'));
 
 	process.env.NODE_ENV = env || process.env.NODE_ENV;
 	const isEnvProduction = process.env.NODE_ENV === 'production';
@@ -118,6 +121,7 @@ module.exports = function (env) {
 				options: {
 					postcssOptions: {
 						plugins: [
+							useTailwind && require('tailwindcss'),
 							// Fix and adjust for known flexbox issues
 							// See https://github.com/philipwalton/flexbugs
 							require('postcss-flexbugs-fixes'),
@@ -136,7 +140,7 @@ module.exports = function (env) {
 							}),
 							// Adds PostCSS Normalize to standardize browser quirks based on
 							// the browserslist targets.
-							require('postcss-normalize')(),
+							!useTailwind && require('postcss-normalize')(),
 							// Resolution indepedence support
 							app.ri !== false && require('postcss-resolution-independence')(app.ri)
 						].filter(Boolean)
@@ -372,6 +376,9 @@ module.exports = function (env) {
 						mangle: {
 							safari10: true
 						},
+						// Added for profiling in devtools
+						keep_classnames: isEnvProduction,
+						keep_fnames: isEnvProduction,
 						output: {
 							ecma: 5,
 							comments: false,
@@ -382,29 +389,9 @@ module.exports = function (env) {
 					},
 					// Use multi-process parallel running to improve the build speed
 					// Default number of concurrent runs: os.cpus().length - 1
-					parallel: true,
-					// Enable file caching
-					cache: true,
-					sourceMap: shouldUseSourceMap
+					parallel: true
 				}),
-				new OptimizeCSSAssetsPlugin({
-					cssProcessorOptions: {
-						// TODO: verify calc issue fixed. Related: https://github.com/postcss/postcss-calc/issues/50
-						// calc: false,
-						parser: require('postcss-safe-parser'),
-						map: shouldUseSourceMap && {
-							// `inline: false` forces the sourcemap to be output into a
-							// separate file
-							inline: false,
-							// `annotation: true` appends the sourceMappingURL to the end of
-							// the css file, helping the browser find the sourcemap
-							annotation: true
-						}
-					},
-					cssProcessorPluginOptions: {
-						preset: ['default', {minifyFontValues: {removeQuotes: false}}]
-					}
-				})
+				new CssMinimizerPlugin()
 			]
 		},
 		plugins: [
