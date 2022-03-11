@@ -40,6 +40,7 @@
   ],
   "dependencies": {
     "@babel/core": "7.12.3",
+    "@babel/eslint-parser": "^7.16.3",
     "@babel/plugin-proposal-class-properties": "7.12.1",
     "@babel/plugin-proposal-decorators": "7.10.4",
     "@babel/plugin-proposal-export-default-from": "7.10.4",
@@ -57,7 +58,7 @@
     "@babel/runtime": "7.12.1",
     "@enact/dev-utils": "github:enactjs/dev-utils#feature/WRN-12124",
     "@enact/template-sandstone": "1.0.0",
-    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.4",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.4.3",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.0.0",
     "@testing-library/react-hooks": "^7.0.1",
