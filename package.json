@@ -72,6 +72,7 @@
     "babel-plugin-dynamic-import-node": "2.3.3",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "babel-plugin-transform-rename-import": "2.3.0",
+    "babel-preset-react-app": "^10.0.1",
     "case-sensitive-paths-webpack-plugin": "2.3.0",
     "chalk": "4.1.0",
     "core-js": "3.6.5",
