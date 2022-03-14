@@ -418,7 +418,9 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			// Otherwise React will be compiled in the very slow development mode.
 			new DefinePlugin({
 				'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
-				'process.env.PUBLIC_URL': JSON.stringify(publicPath)
+				'process.env.PUBLIC_URL': JSON.stringify(publicPath),
+				// Workaround for error of "process is undefined from react-dev-utils/webpackHotDevClient.js"
+				'process.env': JSON.stringify(process.env)
 			}),
 			// Inject prefixed environment variables within code, when used
 			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^(REACT_APP|WDS_SOCKET)/.test(key))),

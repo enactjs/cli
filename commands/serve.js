@@ -35,6 +35,7 @@ process.on('unhandledRejection', err => {
 // As react-dev-utils assumes the webpack production packaging command is
 // "npm run build" with no way to modify it yet, we provide a basic override
 // to console.log to ensure the correct output is displayed to the user.
+// prettier-ignore
 console.log = (log => (data, ...rest) =>
 	typeof data === 'undefined'
 		? log()
@@ -185,7 +186,7 @@ function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 		// `proxy` is run between `before` and `after` `webpack-dev-server` hooks
 		proxy,
 		onBeforeSetupMiddleware(devServer) {
-			// Keep `evalSourceMapMiddleware` and `errorOverlayMiddleware`
+			// Keep `evalSourceMapMiddleware`
 			// middlewares before `redirectServedPath` otherwise will not have any effect
 			// This lets us fetch source contents from webpack for the error overlay
 			devServer.app.use(evalSourceMapMiddleware(devServer));
