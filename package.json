@@ -10,7 +10,7 @@
     "enact": "./bin/enact.js"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=10.16.0"
   },
   "publishConfig": {
     "access": "public"
