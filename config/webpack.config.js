@@ -36,6 +36,7 @@ const {
 	ILibPlugin,
 	WebOSMetaPlugin
 } = require('@enact/dev-utils');
+const createEnvironmentHash = require('./createEnvironmentHash');
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
@@ -220,6 +221,17 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 				} else {
 					return file;
 				}
+			}
+		},
+		cache: {
+			type: 'filesystem',
+			version: createEnvironmentHash(Object.keys(process.env)),
+			cacheDirectory: path.resolve('./node_modules/.cache'),
+			store: 'pack',
+			buildDependencies: {
+				defaultWebpack: ['webpack/lib/'],
+				config: [__filename],
+				tsconfig: useTypeScript ? ['tsconfig.json'] : []
 			}
 		},
 		infrastructureLogging: {
