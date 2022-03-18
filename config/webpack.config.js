@@ -99,7 +99,6 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 				options: Object.assign(
 					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
 					cssLoaderOptions,
-					cssLoaderOptions.modules && {modules: {getLocalIdent}},
 					{
 						url: {
 							filter: url => {
@@ -265,6 +264,12 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 		// @remove-on-eject-end
 		module: {
 			rules: [
+				shouldUseSourceMap && {
+					enforce: 'pre',
+					exclude: /@babel(?:\/|\\{1,2})runtime/,
+					test: /\.(js|mjs|jsx|ts|tsx|css)$/,
+					loader: require.resolve('source-map-loader')
+				},
 				{
 					// "oneOf" will traverse all following loaders until one will
 					// match the requirements. When no loader matches it will fall
@@ -293,8 +298,10 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						{
 							test: /\.module\.css$/,
 							use: getStyleLoaders({
-								//mode: 'local',
-								modules: true
+								modules: {
+									getLocalIdent,
+									mode: 'local'
+								}
 							})
 						},
 						{
@@ -302,8 +309,10 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 							// The `forceCSSModules` Enact build option can be set true to universally apply
 							// modular CSS support.
 							use: getStyleLoaders({
-								//mode: 'icss',
-								modules: app.forceCSSModules
+								modules: {
+									...(app.forceCSSModules ? {getLocalIdent} : {}),
+									mode: 'icss'
+								}
 							}),
 							// Don't consider CSS imports dead code even if the
 							// containing package claims to have no side effects.
@@ -314,15 +323,19 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						{
 							test: /\.module\.less$/,
 							use: getLessStyleLoaders({
-								//mode: 'local',
-								modules: true
+								modules: {
+									getLocalIdent,
+									mode: 'local'
+								}
 							})
 						},
 						{
 							test: /\.less$/,
 							use: getLessStyleLoaders({
-								//mode: 'icss',
-								modules: app.forceCSSModules
+								modules: {
+									...(app.forceCSSModules ? {getLocalIdent} : {}),
+									mode: 'icss'
+								}
 							}),
 							sideEffects: true
 						},
@@ -343,7 +356,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						// Make sure to add the new loader(s) before the "file" loader.
 					]
 				}
-			]
+			].filter(Boolean)
 		},
 		// Specific webpack-dev-server options.
 		devServer: {

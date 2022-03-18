@@ -114,6 +114,7 @@
     "resolution-independence": "1.0.0",
     "resolve": "1.20.0",
     "semver": "7.3.5",
+    "source-map-loader": "^3.0.0",
     "strip-ansi": "6.0.0",
     "style-loader": "3.0.0",
     "tar": "6.0.2",

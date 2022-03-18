@@ -129,7 +129,9 @@ function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 		host,
 		// Allow cross-origin HTTP requests
 		headers: {
-			'Access-Control-Allow-Origin': '*'
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': '*',
+			'Access-Control-Allow-Headers': '*'
 		},
 		static: {
 			// By default WebpackDevServer serves physical files from current directory
@@ -166,7 +168,10 @@ function devServerConfig(host, protocol, publicPath, proxy, allowedHost) {
 				pathname: process.env.WDS_SOCKET_PATH,
 				port: process.env.WDS_SOCKET_PORT
 			},
-			overlay: true
+			overlay: {
+				errors: true,
+				warnings: false
+			}
 		},
 		devMiddleware: {
 			// It is important to tell WebpackDevServer to use the same "publicPath" path as
