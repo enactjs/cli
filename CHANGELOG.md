@@ -1,3 +1,19 @@
+## unreleased
+
+All dependencies updated to latest release.
+
+### create
+
+* Coerce Node versions with metadata
+
+### pack
+
+* Add support for Tailwind
+
+### test
+
+* Upgrade `jest` and related packages from 26.6.0 to 27.1.0
+
 ## 4.1.7 (February 18, 2022)
 
 ### pack
