@@ -35,12 +35,15 @@ process.on('unhandledRejection', err => {
 // As react-dev-utils assumes the webpack production packaging command is
 // "npm run build" with no way to modify it yet, we provide a basic override
 // to console.log to ensure the correct output is displayed to the user.
-console.log = (log => (data, ...rest) =>
-	typeof data === 'undefined'
-		? log()
-		: typeof data === 'string'
-		? log(data.replace(/npm run build/, 'npm run pack-p'), ...rest)
-		: log.call(this, data, ...rest))(console.log);
+console.log = (
+	log =>
+	(data, ...rest) =>
+		typeof data === 'undefined'
+			? log()
+			: typeof data === 'string'
+			? log(data.replace(/npm run build/, 'npm run pack-p'), ...rest)
+			: log.call(this, data, ...rest)
+)(console.log);
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
