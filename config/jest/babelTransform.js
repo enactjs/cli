@@ -10,7 +10,7 @@
  */
 
 const path = require('path');
-const babelJest = require('babel-jest').default;
+const babelJest = require('babel-jest');
 
 module.exports = babelJest.createTransformer({
 	extends: path.join(__dirname, '..', 'babel.config.js'),

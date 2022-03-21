@@ -73,6 +73,7 @@ module.exports = {
 	testPathIgnorePatterns: ignorePatterns,
 	testEnvironment: 'jsdom',
 	testEnvironmentOptions: {pretendToBeVisual: true},
+	testRunner: require.resolve('jest-circus/runner'),
 	testURL: 'http://localhost',
 	transform: {
 		'^.+\\.(js|jsx|ts|tsx)$': require.resolve('./babelTransform'),
