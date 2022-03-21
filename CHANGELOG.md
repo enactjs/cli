@@ -10,12 +10,11 @@
 ### serve
 
 * Fixed to disable overlay for warnings.
-* Fixed to allow CORS on `webpack-dev-server`
+* Fixed to allow CORS on `webpack-dev-server`.
 
 ### test
 
 * Updated to Jest 27.
-
 
 ## 4.1.7 (February 18, 2022)
 
