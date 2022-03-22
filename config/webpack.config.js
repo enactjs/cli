@@ -149,7 +149,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 							],
 							// Adds PostCSS Normalize to standardize browser quirks based on
 							// the browserslist targets.
-							!useTailwind && require('postcss-normalize')(),
+							!useTailwind && require('postcss-normalize'),
 							// Resolution indepedence support
 							app.ri !== false && require('postcss-resolution-independence')(app.ri)
 						].filter(Boolean)
@@ -404,9 +404,6 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						mangle: {
 							safari10: true
 						},
-						// Added for profiling in devtools
-						keep_classnames: isEnvProduction,
-						keep_fnames: isEnvProduction,
 						output: {
 							ecma: 5,
 							comments: false,
