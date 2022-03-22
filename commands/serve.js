@@ -252,9 +252,9 @@ function serve(config, host, port, open) {
 			config.devServer,
 			devServerConfig(host, protocol, publicPath, proxyConfig, urls.lanUrlForConfig)
 		);
-		const devServer = new WebpackDevServer(compiler, serverConfig);
+		const devServer = new WebpackDevServer(serverConfig, compiler);
 		// Launch WebpackDevServer.
-		devServer.listen(resolvedPort, host, err => {
+		devServer.startCallback(err => {
 			if (err) return console.log(err);
 			if (process.stdout.isTTY) clearConsole();
 			console.log(chalk.cyan('Starting the development server...\n'));
