@@ -124,7 +124,6 @@
     "validate-npm-package-name": "^3.0.0",
     "webpack": "^5.64.4",
     "webpack-dev-server": "^4.6.0"
-
   },
   "optionalDependencies": {
     "fsevents": "^2.3.2"
