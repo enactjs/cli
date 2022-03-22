@@ -66,6 +66,9 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
 
+	// Check if Tailwind config exists
+	const useTailwind = fs.existsSync(path.join(app.context, 'tailwind.config.js'));
+
 	process.env.NODE_ENV = env || process.env.NODE_ENV;
 	const isEnvProduction = process.env.NODE_ENV === 'production';
 
@@ -124,6 +127,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						// https://github.com/facebook/create-react-app/issues/2677
 						ident: 'postcss',
 						plugins: [
+							useTailwind && require('tailwindcss'),
 							// Fix and adjust for known flexbox issues
 							// See https://github.com/philipwalton/flexbugs
 							'postcss-flexbugs-fixes',
@@ -145,7 +149,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 							],
 							// Adds PostCSS Normalize to standardize browser quirks based on
 							// the browserslist targets.
-							'postcss-normalize',
+							!useTailwind && require('postcss-normalize'),
 							// Resolution indepedence support
 							app.ri !== false && require('postcss-resolution-independence')(app.ri)
 						].filter(Boolean)
