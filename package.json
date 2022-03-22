@@ -50,7 +50,7 @@
     "@babel/runtime": "^7.16.7",
     "@enact/dev-utils": "^4.1.4",
     "@enact/template-sandstone": "^1.0.0",
-    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.4",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.0.0",
     "@testing-library/react-hooks": "^7.0.1",
