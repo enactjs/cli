@@ -2,10 +2,11 @@
 
 ### pack
 
-* Updated to the latest Webpack 5.
+* Updated all dependencies to the latest including Webpack 5.
 * Replaced `optimize-css-assets-webpack-plugin` to `css-minimizer-webpack-plugin`.
 * Fixed ICSS syntax in stylesheets.
-* Added `source-map-loader` for debugging into original source of node_modules libraries that contain sourcemaps
+* Added `source-map-loader` for debugging into original source of node_modules libraries that contain sourcemaps.
+* Added `tailwindcss` support.
 
 ### serve
 
