@@ -200,7 +200,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			filename: '[name].js',
 			// There are also additional JS chunk files if you use code splitting.
 			chunkFilename: 'chunk.[name].js',
-			assetModuleFilename: '[path][name].[ext]',
+			assetModuleFilename: '[path][name][ext]',
 			// Add /* filename */ comments to generated require()s in the output.
 			pathinfo: !isEnvProduction,
 			publicPath,
