@@ -53,13 +53,14 @@ function displayHelp() {
 	console.log();
 	/*
 		Private Options:
-			--entry               Specify an override entrypoint
-			--no-minify           Will skip minification during production build
-			--framework           Builds the @enact/*, react, and react-dom into an external framework
-			--externals           Specify a local directory path to the standalone external framework
-			--externals-public    Remote public path to the external framework for use injecting into HTML
-			--externals-polyfill  Flag whether to use external polyfill (or include in framework build)
-			--custom-skin         To use a custom skin for build
+			--entry              	 Specify an override entrypoint
+			--no-minify           	Will skip minification during production build
+			--framework           	Builds the @enact/*, react, and react-dom into an external framework
+			--externals           	Specify a local directory path to the standalone external framework
+			--externals-public    	Remote public path to the external framework for use injecting into HTML
+			--externals-polyfill  	Flag whether to use external polyfill (or include in framework build)
+			--custom-skin         	To use a custom skin for build
+			--ilib-additional-path	Specify iLib additional resources path
 	*/
 	process.exit(0);
 }
@@ -100,13 +101,17 @@ function details(err, stats, output) {
 		process.env.CI.toLowerCase() !== 'false' &&
 		messages.warnings.length
 	) {
-		console.log(
-			chalk.yellow(
-				'Treating warnings as errors because process.env.CI = true. ' +
-					'Most CI servers set it automatically.\n'
-			)
-		);
-		return new Error(messages.warnings.join('\n\n'));
+		// Ignore sourcemap warnings in CI builds. See #8227 for more info.
+		const filteredWarnings = messages.warnings.filter(w => !/Failed to parse source map/.test(w));
+		if (filteredWarnings.length) {
+			console.log(
+				chalk.yellow(
+					'\nTreating warnings as errors because process.env.CI = true. \n' +
+						'Most CI servers set it automatically.\n'
+				)
+			);
+			return new Error(filteredWarnings.join('\n\n'));
+		}
 	} else {
 		copyPublicFolder(output);
 		if (messages.warnings.length) {
@@ -245,7 +250,7 @@ function api(opts = {}) {
 
 	// Do this as the first thing so that any code reading it knows the right env.
 	const configFactory = require('../config/webpack.config');
-	const config = configFactory(opts.production ? 'production' : 'development');
+	const config = configFactory(opts.production ? 'production' : 'development', opts['ilib-additional-path']);
 
 	// Set any entry path override
 	if (opts.entry) helper.replaceMain(config, path.resolve(opts.entry));
@@ -283,7 +288,7 @@ function cli(args) {
 			'watch',
 			'help'
 		],
-		string: ['externals', 'externals-public', 'locales', 'entry', 'output', 'meta'],
+		string: ['externals', 'externals-public', 'locales', 'entry', 'ilib-additional-path', 'output', 'meta'],
 		default: {minify: true},
 		alias: {
 			o: 'output',
