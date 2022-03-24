@@ -112,7 +112,7 @@ npm install -g eslint
 Then, you will need to uninstall any previous globally-installed Enact linting package (everything but eslint itself):
 
 ```sh
-npm remove -g eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-babel @babel/eslint-parser babel-preset-react-app eslint-plugin-jest eslint-plugin-enact eslint-config-enact
+npm remove -g eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-babel @babel/eslint-parser eslint-plugin-jest eslint-plugin-enact eslint-config-enact
 ```
 
 ## Copyright and License Information
