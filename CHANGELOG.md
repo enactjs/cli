@@ -7,6 +7,7 @@
 * Fixed ICSS syntax in stylesheets.
 * Added `source-map-loader` for debugging into original source of node_modules libraries that contain sourcemaps.
 * Added `tailwindcss` support.
+* Replaced deprecated `babel-eslint` with `@babel/eslint-parser`
 
 ### serve
 
