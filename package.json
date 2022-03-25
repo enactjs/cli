@@ -39,7 +39,7 @@
     "upupdowndownleftrightleftrightbastart"
   ],
   "dependencies": {
-    "@babel/core": "^7.16.7",
+    "@babel/core": "^7.17.8",
     "@babel/eslint-parser": "^7.17.0",
     "@babel/plugin-proposal-decorators": "^7.16.7",
     "@babel/plugin-proposal-export-default-from": "^7.16.7",
