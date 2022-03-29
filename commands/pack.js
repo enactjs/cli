@@ -19,7 +19,7 @@ const minimist = require('minimist');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const printBuildError = require('react-dev-utils/printBuildError');
 const stripAnsi = require('strip-ansi');
-const webpack = require('webpack');
+const {ProgressPlugin, webpack} = require('webpack');
 const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
 
 function displayHelp() {
@@ -257,6 +257,8 @@ function api(opts = {}) {
 
 	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);
+
+	if (opts.verbose) opts.ProgressPlugin = ProgressPlugin;
 
 	mixins.apply(config, opts);
 
