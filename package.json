@@ -99,7 +99,7 @@
     "postcss-resolution-independence": "^1.0.1",
     "postcss-safe-parser": "^6.0.0",
     "prompts": "^2.4.2",
-    "react": "^18.0.0-rc.3",
+    "react": "^18.0.0",
     "react-dev-utils": "^12.0.0",
     "react-dom": "^18.0.0-rc.3",
     "react-refresh": "^0.11.0",
