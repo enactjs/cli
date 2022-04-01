@@ -55,7 +55,7 @@ function eslint({strict = false, local = false, fix = false, eslintArgs = []} = 
 	}
 	return new Promise((resolve, reject) => {
 		const opts = {env: process.env, cwd: process.cwd()};
-		const child = cp.fork(require.resolve('eslint/bin/eslint'), args, opts);
+		const child = cp.fork(path.join(require.resolve('eslint'), '..', '..', 'bin', 'eslint'), args, opts);
 		child.on('close', code => {
 			if (code !== 0) {
 				reject();

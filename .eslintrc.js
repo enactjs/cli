@@ -2,7 +2,7 @@ module.exports = {
 	env: {
 		node: true
 	},
-	extends: ['enact', 'plugin:prettier/recommended'],
+	extends: ['enact', 'plugin:prettier/recommended', 'prettier'],
 	plugins: ['import'],
 	rules: {
 		'import/no-unresolved': ['error', {commonjs: true, caseSensitive: true}],
