@@ -257,7 +257,10 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			// and old apps referencing old iLib location with new Enact
 			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
 				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias)
-				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias)
+				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias),
+			fallback: {
+				'stream': require.resolve('stream-browserify')
+			}
 		},
 		// @remove-on-eject-begin
 		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
