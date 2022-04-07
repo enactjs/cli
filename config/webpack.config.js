@@ -26,6 +26,7 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
@@ -459,6 +460,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 					filename: '[name].css',
 					chunkFilename: 'chunk.[name].css'
 				}),
+			new NodePolyfillPlugin(),
 			// Provide meaningful information when modules are not found
 			new ModuleNotFoundPlugin(app.context),
 			// Ensure correct casing in module filepathes
