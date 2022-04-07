@@ -26,6 +26,7 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
@@ -447,9 +448,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			// Otherwise React will be compiled in the very slow development mode.
 			new DefinePlugin({
 				'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
-				'process.env.PUBLIC_URL': JSON.stringify(publicPath),
-				// Workaround for error of "process is undefined from react-dev-utils/webpackHotDevClient.js"
-				'process.env': JSON.stringify(process.env)
+				'process.env.PUBLIC_URL': JSON.stringify(publicPath)
 			}),
 			// Inject prefixed environment variables within code, when used
 			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^(REACT_APP|WDS_SOCKET)/.test(key))),
@@ -459,6 +458,8 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 					filename: '[name].css',
 					chunkFilename: 'chunk.[name].css'
 				}),
+			// Webpack5 removed node polyfills but we need this to run screenshot tests
+			new NodePolyfillPlugin(),
 			// Provide meaningful information when modules are not found
 			new ModuleNotFoundPlugin(app.context),
 			// Ensure correct casing in module filepathes
