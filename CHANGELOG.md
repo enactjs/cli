@@ -1,3 +1,23 @@
+## unreleased
+
+### pack
+
+* Updated all dependencies to the latest including Webpack 5, React 18, and ESLint 8.
+* Replaced `optimize-css-assets-webpack-plugin` to `css-minimizer-webpack-plugin`.
+* Fixed ICSS syntax in stylesheets.
+* Added `source-map-loader` for debugging into original source of node_modules libraries that contain sourcemaps.
+* Added `tailwindcss` support.
+* Added `node-polyfill-webpack-plugin` to fix screenshot build fail.
+
+### serve
+
+* Fixed to disable overlay for warnings.
+* Fixed to allow CORS on `webpack-dev-server`.
+
+### test
+
+* Updated to Jest 27.
+
 ## 4.1.7 (February 18, 2022)
 
 ### pack

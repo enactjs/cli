@@ -16,15 +16,17 @@ const fs = require('fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpackPlugin');
+const ForkTsCheckerWebpackPlugin =
+	process.env.TSC_COMPILE_ON_ERROR === 'true'
+		? require('react-dev-utils/ForkTsCheckerWarningWebpackPlugin')
+		: require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
-const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
-const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
@@ -35,10 +37,11 @@ const {
 	ILibPlugin,
 	WebOSMetaPlugin
 } = require('@enact/dev-utils');
+const createEnvironmentHash = require('./createEnvironmentHash');
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
-module.exports = function (env) {
+module.exports = function (env, ilibAdditionalResourcesPath) {
 	process.chdir(app.context);
 
 	// Load applicable .env files into environment variables.
@@ -63,6 +66,9 @@ module.exports = function (env) {
 
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
+
+	// Check if Tailwind config exists
+	const useTailwind = fs.existsSync(path.join(app.context, 'tailwind.config.js'));
 
 	process.env.NODE_ENV = env || process.env.NODE_ENV;
 	const isEnvProduction = process.env.NODE_ENV === 'production';
@@ -97,15 +103,16 @@ module.exports = function (env) {
 				options: Object.assign(
 					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
 					cssLoaderOptions,
-					cssLoaderOptions.modules && {modules: {getLocalIdent}},
 					{
-						url: url => {
-							// Don't handle absolute path urls
-							if (url.startsWith('/')) {
-								return false;
-							}
+						url: {
+							filter: url => {
+								// Don't handle absolute path urls
+								if (url.startsWith('/')) {
+									return false;
+								}
 
-							return true;
+								return true;
+							}
 						}
 					}
 				)
@@ -117,26 +124,33 @@ module.exports = function (env) {
 				loader: require.resolve('postcss-loader'),
 				options: {
 					postcssOptions: {
+						// Necessary for external CSS imports to work
+						// https://github.com/facebook/create-react-app/issues/2677
+						ident: 'postcss',
 						plugins: [
+							useTailwind && require('tailwindcss'),
 							// Fix and adjust for known flexbox issues
 							// See https://github.com/philipwalton/flexbugs
-							require('postcss-flexbugs-fixes'),
+							'postcss-flexbugs-fixes',
 							// Support @global-import syntax to import css in a global context.
-							require('postcss-global-import'),
+							'postcss-global-import',
 							// Transpile stage-3 CSS standards based on browserslist targets.
 							// See https://preset-env.cssdb.org/features for supported features.
 							// Includes support for targetted auto-prefixing.
-							require('postcss-preset-env')({
-								autoprefixer: {
-									flexbox: 'no-2009',
-									remove: false
-								},
-								stage: 3,
-								features: {'custom-properties': false}
-							}),
+							[
+								'postcss-preset-env',
+								{
+									autoprefixer: {
+										flexbox: 'no-2009',
+										remove: false
+									},
+									stage: 3,
+									features: {'custom-properties': false}
+								}
+							],
 							// Adds PostCSS Normalize to standardize browser quirks based on
 							// the browserslist targets.
-							require('postcss-normalize')(),
+							!useTailwind && require('postcss-normalize'),
 							// Resolution indepedence support
 							app.ri !== false && require('postcss-resolution-independence')(app.ri)
 						].filter(Boolean)
@@ -191,6 +205,7 @@ module.exports = function (env) {
 			filename: '[name].js',
 			// There are also additional JS chunk files if you use code splitting.
 			chunkFilename: 'chunk.[name].js',
+			assetModuleFilename: '[path][name][ext]',
 			// Add /* filename */ comments to generated require()s in the output.
 			pathinfo: !isEnvProduction,
 			publicPath,
@@ -210,13 +225,21 @@ module.exports = function (env) {
 				} else {
 					return file;
 				}
-			},
-			// Use webpack 5 handling of asset files; remove once upgraded to webpack 5
-			futureEmitAssets: true,
-			// Prevent potential conflicts in muliple runtimes
-			jsonpFunction: 'webpackJsonp' + app.name,
-			// Allow versatile 'global' mapping across multiple deploy formats
-			globalObject: 'this'
+			}
+		},
+		cache: {
+			type: 'filesystem',
+			version: createEnvironmentHash(Object.keys(process.env)),
+			cacheDirectory: path.resolve('./node_modules/.cache'),
+			store: 'pack',
+			buildDependencies: {
+				defaultWebpack: ['webpack/lib/'],
+				config: [__filename],
+				tsconfig: useTypeScript ? ['tsconfig.json'] : []
+			}
+		},
+		infrastructureLogging: {
+			level: 'none'
 		},
 		resolve: {
 			// These are the reasonable defaults supported by the React/ES6 ecosystem.
@@ -246,6 +269,12 @@ module.exports = function (env) {
 		// @remove-on-eject-end
 		module: {
 			rules: [
+				shouldUseSourceMap && {
+					enforce: 'pre',
+					exclude: /@babel(?:\/|\\{1,2})runtime/,
+					test: /\.(js|mjs|jsx|ts|tsx|css)$/,
+					loader: require.resolve('source-map-loader')
+				},
 				{
 					// "oneOf" will traverse all following loaders until one will
 					// match the requirements. When no loader matches it will fall
@@ -273,13 +302,23 @@ module.exports = function (env) {
 						// options used at each level of processing.
 						{
 							test: /\.module\.css$/,
-							use: getStyleLoaders({modules: true})
+							use: getStyleLoaders({
+								modules: {
+									getLocalIdent,
+									mode: 'local'
+								}
+							})
 						},
 						{
 							test: /\.css$/,
 							// The `forceCSSModules` Enact build option can be set true to universally apply
 							// modular CSS support.
-							use: getStyleLoaders({modules: app.forceCSSModules}),
+							use: getStyleLoaders({
+								modules: {
+									...(app.forceCSSModules ? {getLocalIdent} : {}),
+									mode: 'icss'
+								}
+							}),
 							// Don't consider CSS imports dead code even if the
 							// containing package claims to have no side effects.
 							// Remove this when webpack adds a warning or an error for this.
@@ -288,18 +327,27 @@ module.exports = function (env) {
 						},
 						{
 							test: /\.module\.less$/,
-							use: getLessStyleLoaders({modules: true})
+							use: getLessStyleLoaders({
+								modules: {
+									getLocalIdent,
+									mode: 'local'
+								}
+							})
 						},
 						{
 							test: /\.less$/,
-							use: getLessStyleLoaders({modules: app.forceCSSModules}),
+							use: getLessStyleLoaders({
+								modules: {
+									...(app.forceCSSModules ? {getLocalIdent} : {}),
+									mode: 'icss'
+								}
+							}),
 							sideEffects: true
 						},
 						// "file" loader handles on all files not caught by the above loaders.
 						// When you `import` an asset, you get its output filename and the file
 						// is copied during the build process.
 						{
-							loader: require.resolve('file-loader'),
 							// Exclude `js` files to keep "css" loader working as it injects
 							// its runtime that would otherwise be processed through "file" loader.
 							// Also exclude `html` and `json` extensions so they get processed
@@ -307,36 +355,21 @@ module.exports = function (env) {
 							// Exclude `ejs` HTML templating language as that's handled by
 							// the HtmlWebpackPlugin.
 							exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.ejs$/, /\.json$/],
-							options: {
-								name: '[path][name].[ext]'
-							}
+							type: 'asset/resource'
 						}
 						// ** STOP ** Are you adding a new loader?
 						// Make sure to add the new loader(s) before the "file" loader.
 					]
 				}
-			]
+			].filter(Boolean)
 		},
 		// Specific webpack-dev-server options.
 		devServer: {
 			// Broadcast http server on the localhost, port 8080.
 			host: '0.0.0.0',
-			port: 8080,
-			// Support the same public path as webpack config.
-			publicPath: publicPath,
-			// By default WebpackDevServer serves files from public and __mocks__ directories
-			// in addition to all the virtual build products that it serves from memory.
-			contentBase: [path.resolve('./public'), path.resolve('./__mocks__')],
-			contentBasePublicPath: publicPath + '/',
-			// Any changes to files from `contentBase` should trigger a page reload.
-			watchContentBase: true,
-			// Reportedly, this avoids CPU overload on some systems.
-			// https://github.com/facebookincubator/create-react-app/issues/293
-			watchOptions: {
-				ignored: /node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
-			}
+			port: 8080
 		},
-		// Target app to build for a specific environment (default 'web')
+		// Target app to build for a specific environment (default 'browserslist')
 		target: app.environment,
 		// Optional configuration for polyfilling NodeJS built-ins.
 		node: app.nodeBuiltins,
@@ -382,29 +415,9 @@ module.exports = function (env) {
 					},
 					// Use multi-process parallel running to improve the build speed
 					// Default number of concurrent runs: os.cpus().length - 1
-					parallel: true,
-					// Enable file caching
-					cache: true,
-					sourceMap: shouldUseSourceMap
+					parallel: true
 				}),
-				new OptimizeCSSAssetsPlugin({
-					cssProcessorOptions: {
-						// TODO: verify calc issue fixed. Related: https://github.com/postcss/postcss-calc/issues/50
-						// calc: false,
-						parser: require('postcss-safe-parser'),
-						map: shouldUseSourceMap && {
-							// `inline: false` forces the sourcemap to be output into a
-							// separate file
-							inline: false,
-							// `annotation: true` appends the sourceMappingURL to the end of
-							// the css file, helping the browser find the sourcemap
-							annotation: true
-						}
-					},
-					cssProcessorPluginOptions: {
-						preset: ['default', {minifyFontValues: {removeQuotes: false}}]
-					}
-				})
+				new CssMinimizerPlugin()
 			]
 		},
 		plugins: [
@@ -445,15 +458,12 @@ module.exports = function (env) {
 					filename: '[name].css',
 					chunkFilename: 'chunk.[name].css'
 				}),
+			// Webpack5 removed node polyfills but we need this to run screenshot tests
+			new NodePolyfillPlugin(),
 			// Provide meaningful information when modules are not found
 			new ModuleNotFoundPlugin(app.context),
 			// Ensure correct casing in module filepathes
 			new CaseSensitivePathsPlugin(),
-			// If you require a missing module and then `npm install` it, you still have
-			// to restart the development server for Webpack to discover it. This plugin
-			// makes the discovery automatic so you don't have to restart.
-			// See https://github.com/facebookincubator/create-react-app/issues/186
-			!isEnvProduction && new WatchMissingNodeModulesPlugin('./node_modules'),
 			// Switch the internal NodeOutputFilesystem to use graceful-fs to avoid
 			// EMFILE errors when hanndling mass amounts of files at once, such as
 			// what happens when using ilib bundles/resources.
@@ -461,30 +471,52 @@ module.exports = function (env) {
 			// Automatically configure iLib library within @enact/i18n. Additionally,
 			// ensure the locale data files and the resource files are copied during
 			// the build to the output directory.
-			new ILibPlugin({symlinks: false}),
+			new ILibPlugin({publicPath, symlinks: false, ilibAdditionalResourcesPath}),
 			// Automatically detect ./appinfo.json and ./webos-meta/appinfo.json files,
 			// and parses any to copy over any webOS meta assets at build time.
 			new WebOSMetaPlugin({htmlPlugin: HtmlWebpackPlugin}),
 			// TypeScript type checking
 			useTypeScript &&
 				new ForkTsCheckerWebpackPlugin({
-					typescript: resolve.sync('typescript', {
-						basedir: 'node_modules'
-					}),
 					async: !isEnvProduction,
-					checkSyntacticErrors: true,
-					tsconfig: 'tsconfig.json',
-					reportFiles: [
-						'../**/src/**/*.{ts,tsx}',
-						'**/src/**/*.{ts,tsx}',
-						'!**/src/**/__tests__/**',
-						'!**/src/**/?(*.)+(spec|test).*',
-						'!**/src/setupProxy.*',
-						'!**/src/setupTests.*'
-					],
-					silent: true,
-					// The formatter is invoked directly in WebpackDevServerUtils during development
-					formatter: !process.env.DISABLE_TSFORMATTER ? typescriptFormatter : undefined
+					typescript: {
+						typescriptPath: resolve.sync('typescript', {
+							basedir: 'node_modules'
+						}),
+						configOverwrite: {
+							compilerOptions: {
+								sourceMap: shouldUseSourceMap,
+								skipLibCheck: true,
+								inlineSourceMap: false,
+								declarationMap: false,
+								noEmit: true,
+								incremental: true,
+								tsBuildInfoFile: 'node_modules/.cache/tsconfig.tsbuildinfo'
+							}
+						},
+						context: app.context,
+						diagnosticOptions: {
+							syntactic: true
+						},
+						mode: 'write-references'
+						// profile: true,
+					},
+					issue: {
+						// prettier-ignore
+						include: [
+							{file: '../**/src/**/*.{ts,tsx}'},
+							{file: '**/src/**/*.{ts,tsx}'}
+						],
+						exclude: [
+							{file: '**/src/**/__tests__/**'},
+							{file: '**/src/**/?(*.){spec|test}.*'},
+							{file: '**/src/setupProxy.*'},
+							{file: '**/src/setupTests.*'}
+						]
+					},
+					logger: {
+						infrastructure: 'silent'
+					}
 				}),
 			new ESLintPlugin({
 				// Plugin options
