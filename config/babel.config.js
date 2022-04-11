@@ -86,6 +86,8 @@ module.exports = function (api) {
 			// Stage 3
 			require('@babel/plugin-syntax-dynamic-import').default,
 			[require('@babel/plugin-proposal-class-properties').default, {loose: true}],
+			[require('@babel/plugin-proposal-private-methods').default, {loose: true}],
+			[require('@babel/plugin-proposal-private-property-in-object').default, {loose: true}],
 			// '@babel/plugin-syntax-import-meta',
 			// '@babel/plugin-proposal-json-strings'
 

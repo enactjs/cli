@@ -267,7 +267,7 @@ function api({bare = false} = {}) {
 			console.log('Ejecting...');
 			console.log();
 			console.log(chalk.cyan(`Copying files into ${process.cwd()}`));
-			assets.forEach(dir => !fs.existsSync(dir.dest) && fs.mkdirSync(dir.dest));
+			assets.forEach(dir => !fs.existsSync(dir.dest) && fs.mkdirSync(dir.dest, {recursive: true}));
 			files.forEach(copySanitizedFile);
 			console.log();
 			console.log(chalk.cyan('Configuring package.json'));

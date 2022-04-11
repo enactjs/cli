@@ -9,7 +9,13 @@ const semver = require('semver');
 const pkg = require('../package.json');
 
 // Verify the correct version of Node is in use.
-if (!semver.satisfies(process.version, pkg.engines.node)) {
+if (
+	!semver.satisfies(
+		// Coerce strings with metadata (i.e. `15.0.0-nightly`).
+		semver.coerce(process.version),
+		pkg.engines.node
+	)
+) {
 	console.log(
 		chalk.red(`You are running Node ${process.version}, but @enact/cli requires Node ${pkg.engines.node}.\n`) +
 			chalk.bold.red('Please update your version of Node.')
