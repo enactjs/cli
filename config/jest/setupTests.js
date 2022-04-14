@@ -1,8 +1,6 @@
 /* eslint-env jest */
 const fs = require('fs');
 const path = require('path');
-const enzyme = require('enzyme');
-const Adapter = require('@wojtekmaj/enzyme-adapter-react-17');
 const {packageRoot} = require('@enact/dev-utils');
 
 const filters = [
@@ -45,10 +43,6 @@ afterEach(() => {
 
 	expect(actual).toHaveLength(expected);
 });
-
-// Configure Enzyme to use React16 adapter.
-
-enzyme.configure({adapter: new Adapter()});
 
 // Set initial resolution to VGA, similar to PhantomJS.
 // Will ideally want to use a more modern resolution later.

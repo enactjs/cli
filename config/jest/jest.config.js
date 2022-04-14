@@ -85,7 +85,6 @@ module.exports = {
 	],
 	moduleNameMapper: {
 		'^.+\\.module\\.(css|less)$': require.resolve('identity-obj-proxy'),
-		'^enzyme$': require.resolve('enzyme'),
 		'^@testing-library/jest-dom$': require.resolve('@testing-library/jest-dom'),
 		'^@testing-library/react$': require.resolve('@testing-library/react'),
 		'^@testing-library/react-hooks$': require.resolve('@testing-library/react-hooks'),

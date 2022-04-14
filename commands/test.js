@@ -151,9 +151,9 @@ function assignOverrides(config) {
 function api(args = []) {
 	const config = require('../config/jest/jest.config');
 
-	// Notify users that Enzyme is deprecated and will be removed in Enact CLI 5.0.0.
+	// Notify users that Enzyme was removed in Enact CLI 5.0.0.
 	console.warn(
-		"\nWarning: 'enzyme' support is deprecated and will be removed in Enact CLI 5.0.0. Consider using '@testing-library/react' instead."
+		"\nWarning: 'enzyme' support was removed in Enact CLI 5.0.0. Consider using '@testing-library/react' instead."
 	);
 
 	// @TODO: readd dotenv parse support
