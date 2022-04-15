@@ -1,3 +1,9 @@
+## 5.0.0-alpha.2 (April 15, 2022)
+
+### create, template
+
+* Updated `@enact/template-sandstone` dependency.
+
 ## 5.0.0-alpha.1 (April 11, 2022)
 
 ### pack
