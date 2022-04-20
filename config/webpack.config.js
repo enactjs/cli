@@ -182,12 +182,12 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 	};
 
 	const getScssStyleLoaders = cssLoaderOptions =>
-	getStyleLoaders(cssLoaderOptions, {
-		loader: require.resolve('sass-loader'),
-		options: {
-			sourceMap: shouldUseSourceMap
-		}
-	});
+		getStyleLoaders(cssLoaderOptions, {
+			loader: require.resolve('sass-loader'),
+			options: {
+				sourceMap: shouldUseSourceMap
+			}
+		});
 
 	return {
 		mode: isEnvProduction ? 'production' : 'development',
