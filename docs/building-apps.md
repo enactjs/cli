@@ -33,7 +33,7 @@ By default, projects will build in development mode. When you're code is ready f
 ## Browser Support & Polyfills
 The Enact CLI is designed to be compatible with a wide array of browsers and devices. [Browserslist standard](https://github.com/browserslist/browserslist) is used to handle targeting, with Enact's defaults being:
 
-* >1%
+* \>1%
 * last 2 versions
 * last 5 Chrome versions
 * last 5 Firefox versions
@@ -105,7 +105,7 @@ npm install --save typescript @types/react @types/react-dom @types/jest
 Optionally, [ESLint](https://eslint.org) can be installed globally or locally and configured within a project to enable linting support within the `enact lint` command.
 
 ## Isomorphic Support & Prerendering
-By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wade variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
+By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wide variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
 
 ## V8 Snapshot Generation
 The v8 snapshot blob creation feature is highly experimental and temperamental depending on your code. It is considered an extension of the isomorphic code layout, bringing along all the same requirements. Given the highly-specific nature of a v8 snapshot blob being tied to particular versions of Chrome/Chromium/Electron/etc., developers must provide their own copy of the `mksnapshot` binary and have its filepath set to the `V8_MKSNAPSHOT` environment variable.
