@@ -1,3 +1,9 @@
+## unreleased
+
+### pack, serve
+
+* Added `sass-loader` and releated modules for supporting sass/scss files.
+
 ## 5.0.0-alpha.2 (April 15, 2022)
 
 ### create, template
