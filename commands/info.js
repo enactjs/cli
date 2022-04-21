@@ -115,6 +115,7 @@ function api({cliInfo = false, dev = false} = {}) {
 				console.log(`ESLint: ${require('eslint/package.json').version}`);
 				console.log(`Jest: ${require('jest/package.json').version}`);
 				console.log(`LESS: ${require('less/package.json').version}`);
+				console.log(`SASS: ${require('sass/package.json').version}`);
 				console.log(`Webpack: ${require('webpack/package.json').version}`);
 			} else {
 				const app = require('@enact/dev-utils').optionParser;
