@@ -1,5 +1,9 @@
 ## unreleased
 
+### lint
+
+* Fixed `enact lint` is not working on node 16 by moving ESLint plugins to dependencies.
+
 ### test
 
 * Fixed `--watch` option is not working by fixing the version of `jest-watch-typeahead` to `0.6.5`.
