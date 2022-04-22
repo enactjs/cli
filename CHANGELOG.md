@@ -2,7 +2,7 @@
 
 ### lint
 
-* Fixed `eslint` related modules from devDependencies to dependencies, for preventing installation missing.
+* Fixed `enact lint` is not working on node 16 by moving ESLint plugins to dependencies.
 
 ### test
 
