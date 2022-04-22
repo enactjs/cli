@@ -1,3 +1,9 @@
+## unreleased
+
+### test
+
+* Fixed `jest-watch-typeahead` version for using `--watch` option.
+
 ## 5.0.0-alpha.2 (April 15, 2022)
 
 ### create, template
