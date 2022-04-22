@@ -1,3 +1,9 @@
+## unreleased
+
+### test
+
+* Fixed `--watch` option is not working by fixing the version of `jest-watch-typeahead` to `0.6.5`.
+
 ## 5.0.0-alpha.2 (April 15, 2022)
 
 ### create, template

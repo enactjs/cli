@@ -1,6 +1,6 @@
 {
   "name": "@enact/cli",
-  "version": "5.0.0-alpha.1",
+  "version": "5.0.0-alpha.2",
   "lockfileVersion": 1,
   "requires": true,
   "dependencies": {
@@ -20698,51 +20698,17 @@
       }
     },
     "jest-watch-typeahead": {
-      "version": "1.0.0",
-      "resolved": "https://registry.npmjs.org/jest-watch-typeahead/-/jest-watch-typeahead-1.0.0.tgz",
-      "integrity": "sha512-jxoszalAb394WElmiJTFBMzie/RDCF+W7Q29n5LzOPtcoQoHWfdUtHFkbhgf5NwWe8uMOxvKb/g7ea7CshfkTw==",
+      "version": "0.6.5",
+      "resolved": "https://registry.npmjs.org/jest-watch-typeahead/-/jest-watch-typeahead-0.6.5.tgz",
+      "integrity": "sha512-GIbV6h37/isatMDtqZlA8Q5vC6T3w+5qdvtF+3LIkPc58zEWzbKmTHvlUIp3wvBm400RzrQWcVPcsAJqKWu7XQ==",
       "requires": {
         "ansi-escapes": "^4.3.1",
         "chalk": "^4.0.0",
         "jest-regex-util": "^27.0.0",
         "jest-watcher": "^27.0.0",
-        "slash": "^4.0.0",
-        "string-length": "^5.0.1",
-        "strip-ansi": "^7.0.1"
-      },
-      "dependencies": {
-        "ansi-regex": {
-          "version": "6.0.1",
-          "resolved": "https://registry.npmjs.org/ansi-regex/-/ansi-regex-6.0.1.tgz",
-          "integrity": "sha512-n5M855fKb2SsfMIiFFoVrABHJC8QtHwVx+mHWP3QcEqBHYienj5dHSgjbxtC0WEZXYt4wcD6zrQElDPhFuZgfA=="
-        },
-        "char-regex": {
-          "version": "2.0.1",
-          "resolved": "https://registry.npmjs.org/char-regex/-/char-regex-2.0.1.tgz",
-          "integrity": "sha512-oSvEeo6ZUD7NepqAat3RqoucZ5SeqLJgOvVIwkafu6IP3V0pO38s/ypdVUmDDK6qIIHNlYHJAKX9E7R7HoKElw=="
-        },
-        "slash": {
-          "version": "4.0.0",
-          "resolved": "https://registry.npmjs.org/slash/-/slash-4.0.0.tgz",
-          "integrity": "sha512-3dOsAHXXUkQTpOYcoAxLIorMTp4gIQr5IW3iVb7A7lFIp0VHhnynm9izx6TssdrIcVIESAlVjtnO2K8bg+Coew=="
-        },
-        "string-length": {
-          "version": "5.0.1",
-          "resolved": "https://registry.npmjs.org/string-length/-/string-length-5.0.1.tgz",
-          "integrity": "sha512-9Ep08KAMUn0OadnVaBuRdE2l615CQ508kr0XMadjClfYpdCyvrbFp6Taebo8yyxokQ4viUd/xPPUA4FGgUa0ow==",
-          "requires": {
-            "char-regex": "^2.0.0",
-            "strip-ansi": "^7.0.1"
-          }
-        },
-        "strip-ansi": {
-          "version": "7.0.1",
-          "resolved": "https://registry.npmjs.org/strip-ansi/-/strip-ansi-7.0.1.tgz",
-          "integrity": "sha512-cXNxvT8dFNRVfhVME3JAe98mkXDYN2O1l7jmcwMnOslDeESg1rF/OZMtK0nRAhiari1unG5cD4jG3rapUAkLbw==",
-          "requires": {
-            "ansi-regex": "^6.0.1"
-          }
-        }
+        "slash": "^3.0.0",
+        "string-length": "^4.0.1",
+        "strip-ansi": "^6.0.0"
       }
     },
     "jest-watcher": {
