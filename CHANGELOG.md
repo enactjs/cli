@@ -1,5 +1,9 @@
 ## unreleased
 
+### lint
+
+* Fixed `eslint` related modules from devDependencies to dependencies, for preventing installation missing.
+
 ### test
 
 * Fixed `--watch` option is not working by fixing the version of `jest-watch-typeahead` to `0.6.5`.
