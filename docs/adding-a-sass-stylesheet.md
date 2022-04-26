@@ -9,7 +9,7 @@ Generally, we recommend that you don’t reuse the same CSS classes across diffe
 
 Following this rule often makes CSS preprocessors less useful, as features like mixins and nesting are replaced by component composition. You can, however, integrate a CSS preprocessor if you find it valuable.
 
-Thanks to enactjs/cli, you can use Sass without installing `sass`.
+Thanks to Enact CLI, you can use Sass without installing `sass`.
 Now you can rename `src/App/App.module.less` to `src/App/App.module.scss` and update `src/App/App.js` to import `./App.module.scss`.
 This file and any other file will be automatically compiled if imported with the extension `.scss` or `.sass`.
 
