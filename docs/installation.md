@@ -18,9 +18,3 @@ All releases are published, with the default (and `latest` tag) being the curren
 ### Linux Notes
 
 When installing under Linux, it may be necessary to prefix the install command with `sudo`.
-Additionally, if you receive an error when the install process attempts to install PhantomJS, try
-the following:
-
-```bash
-sudo npm install -g --unsafe-perm @enact/cli
-```
