@@ -4,6 +4,16 @@
 
 * Added `sass-loader` and releated modules for supporting sass/scss files.
 
+## 5.0.0-alpha.3 (April 22, 2022)
+
+### lint
+
+* Fixed `enact lint` is not working on node 16 by moving ESLint plugins to dependencies.
+
+### test
+
+* Fixed `--watch` option is not working by fixing the version of `jest-watch-typeahead` to `0.6.5`.
+
 ## 5.0.0-alpha.2 (April 15, 2022)
 
 ### create, template

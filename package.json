@@ -1,6 +1,6 @@
 {
   "name": "@enact/cli",
-  "version": "5.0.0-alpha.2",
+  "version": "5.0.0-alpha.3",
   "description": "Full-featured build environment tool for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
@@ -73,6 +73,12 @@
     "enzyme": "3.11.0",
     "eslint": "^8.12.0",
     "eslint-config-enact": "^4.0.0",
+    "eslint-plugin-babel": "^5.3.1",
+    "eslint-plugin-enact": "^1.0.0",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.29.4",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "eslint-plugin-testing-library": "^5.2.1",
     "eslint-webpack-plugin": "^3.1.1",
     "expose-loader": "^3.1.0",
     "file-loader": "^6.2.0",
@@ -83,7 +89,7 @@
     "html-webpack-plugin": "^5.5.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^27.5.1",
-    "jest-watch-typeahead": "^1.0.0",
+    "jest-watch-typeahead": "0.6.5",
     "less": "^4.1.2",
     "less-loader": "^8.1.1",
     "less-plugin-npm-import": "^2.1.0",
@@ -134,14 +140,8 @@
   },
   "devDependencies": {
     "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-babel": "^5.3.1",
-    "eslint-plugin-enact": "^1.0.0",
     "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-react": "^7.29.4",
-    "eslint-plugin-react-hooks": "^4.3.0",
-    "eslint-plugin-testing-library": "^5.2.1",
     "prettier": "^2.6.0"
   }
 }
