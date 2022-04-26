@@ -11,6 +11,7 @@ The following sections describe its installation and usage:
 * [Loading an Existing App](./loading-existing-app.md)
 * [Building Apps](./building-apps.md)
   * [Isomorphic Support](./isomorphic-support.md)
+  * [Adding a Sass Stylesheet](./adding-a-sass-stylesheet.md)
 * [Serving Apps](./serving-apps.md)
 * [Testing Apps](./testing-apps.md)
 * [Ejecting Apps](./ejecting-apps.md)

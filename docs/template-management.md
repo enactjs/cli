@@ -1,6 +1,6 @@
 ---
 title: Template Management
-order: 9
+order: 10
 ---
 ## Enact CLI Template Support
 ```none

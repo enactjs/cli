@@ -1,6 +1,6 @@
 ---
 title: Ejecting Apps
-order: 8
+order: 9
 ---
 ## Converting to a Standalone App Package
 

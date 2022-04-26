@@ -1,6 +1,6 @@
 ---
 title: Developing a Template
-order: 10
+order: 11
 ---
 ## Static Templates
 
