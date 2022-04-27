@@ -66,9 +66,9 @@ module.exports = {
 	setupFiles: [require.resolve('../polyfills')],
 	setupFilesAfterEnv: [require.resolve('./setupTests'), userSetupFile].filter(Boolean),
 	testMatch: [
-		'<rootDir>/**/__tests__/**/*.[jt]s?(x)',
-		'<rootDir>/**/*.+(spec|test).[jt]s?(x)',
-		'<rootDir>/**/*-specs.[jt]s?(x)'
+		'<rootDir>/**/__tests__/**/*.{js,jsx,ts,tsx}',
+		'<rootDir>/**/*.+(spec|test).{js,jsx,ts,tsx}',
+		'<rootDir>/**/*-specs.{js,jsx,ts,tsx}'
 	],
 	testPathIgnorePatterns: ignorePatterns,
 	testEnvironment: 'jsdom',
