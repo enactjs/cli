@@ -67,7 +67,7 @@ module.exports = {
 	setupFilesAfterEnv: [require.resolve('./setupTests'), userSetupFile].filter(Boolean),
 	testMatch: [
 		'<rootDir>/**/__tests__/**/*.[jt]s?(x)',
-		'<rootDir>/**/?(*.)+(spec|test).[jt]s?(x)',
+		'<rootDir>/**/*.+(spec|test).[jt]s?(x)',
 		'<rootDir>/**/(spec|test).[jt]s?(x)',
 		'<rootDir>/**/*-specs.[jt]s?(x)'
 	],
