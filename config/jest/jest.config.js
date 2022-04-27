@@ -68,7 +68,6 @@ module.exports = {
 	testMatch: [
 		'<rootDir>/**/__tests__/**/*.[jt]s?(x)',
 		'<rootDir>/**/*.+(spec|test).[jt]s?(x)',
-		'<rootDir>/**/(spec|test).[jt]s?(x)',
 		'<rootDir>/**/*-specs.[jt]s?(x)'
 	],
 	testPathIgnorePatterns: ignorePatterns,
