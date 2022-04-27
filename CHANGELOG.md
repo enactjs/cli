@@ -1,3 +1,9 @@
+## unreleased
+
+### pack
+
+* Fixed `enact pack` fails on windows by excluding unnecessary file emitting from `html-webpack-plugin`.
+
 ## 5.0.0-alpha.3 (April 22, 2022)
 
 ### lint
