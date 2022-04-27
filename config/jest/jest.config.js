@@ -67,7 +67,7 @@ module.exports = {
 	setupFilesAfterEnv: [require.resolve('./setupTests'), userSetupFile].filter(Boolean),
 	testMatch: [
 		'<rootDir>/**/__tests__/**/*.{js,jsx,ts,tsx}',
-		'<rootDir>/**/?(*.)+(spec|test).[jt]s?(x)',
+		'<rootDir>/**/*.+(spec|test).{js,jsx,ts,tsx}',
 		'<rootDir>/**/*-specs.{js,jsx,ts,tsx}'
 	],
 	testPathIgnorePatterns: ignorePatterns,
