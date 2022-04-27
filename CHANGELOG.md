@@ -1,3 +1,9 @@
+## unreleased
+
+### pack
+
+* Fixed `html-webpack-plugin` emitting unnecessary file issue.
+
 ## 5.0.0-alpha.3 (April 22, 2022)
 
 ### lint
