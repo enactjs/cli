@@ -7,6 +7,7 @@
 ### test
 
 * Fixed `enact test` fails on windows by modifying glob patterns.
+* Removed `enzyme` and related modules.
 
 ## 5.0.0-alpha.3 (April 22, 2022)
 
