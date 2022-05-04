@@ -12609,9 +12609,8 @@
       }
     },
     "eslint-config-enact": {
-      "version": "4.0.0",
-      "resolved": "https://registry.npmjs.org/eslint-config-enact/-/eslint-config-enact-4.0.0.tgz",
-      "integrity": "sha512-1sK6Lwi8VB7Ar/3VxTqtPHYJyyXQJwrzlLnoJoUKQkzmq3eYMpI8fnBcLJso43u8pXifbnNz9oas9TaIiZ9Duw==",
+      "version": "github:enactjs/eslint-config-enact#5cdbfcc2b923ea467a1fc753f4ac6cf88ad9ed89",
+      "from": "github:enactjs/eslint-config-enact#develop",
       "requires": {
         "@babel/core": "^7.17.8",
         "@babel/eslint-parser": "^7.17.0",
