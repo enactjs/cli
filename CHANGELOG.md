@@ -1,4 +1,10 @@
-## 5.0.0-alpha.3 (April 28, 2022)
+## unrelease
+
+### template
+
+* Added support for `web-vitals` in templates for measuring performance.
+
+## 5.0.0-alpha.4 (April 28, 2022)
 
 ### pack
 
