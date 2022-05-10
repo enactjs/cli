@@ -202,9 +202,9 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			// Generated JS file names (with nested folders).
 			// There will be one main bundle, and one file per asynchronous chunk.
 			// We don't currently advertise code splitting but Webpack supports it.
-			filename: isEnvProduction ? '[chunkhash].js' : '[name].js',
+			filename: '[name].js',
 			// There are also additional JS chunk files if you use code splitting.
-			chunkFilename: isEnvProduction ? '[chunkhash].js' : 'chunk.[name].js',
+			chunkFilename: 'chunk.[name].js',
 			assetModuleFilename: '[path][name][ext]',
 			// Add /* filename */ comments to generated require()s in the output.
 			pathinfo: !isEnvProduction,
