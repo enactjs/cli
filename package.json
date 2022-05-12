@@ -101,7 +101,7 @@
     "postcss-loader": "^6.2.1",
     "postcss-normalize": "^10.0.1",
     "postcss-preset-env": "^7.4.3",
-    "postcss-resolution-independence": "github:enactjs/postcss-resolution-independence#feature/webpack5",
+    "postcss-resolution-independence": "github:enactjs/postcss-resolution-independence#develop",
     "postcss-safe-parser": "^6.0.0",
     "prompts": "^2.4.2",
     "react": "^18.0.0",
