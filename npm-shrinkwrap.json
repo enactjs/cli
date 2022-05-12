@@ -22270,8 +22270,9 @@
       "integrity": "sha512-KmF7SBPphT4gPPcKZc7aDkweHiKEEO8cla/GjcBK+ckKxiZslIu3C4GCRW3DNfL0o7yW7kMQu9xlZ1kXRXLXtw=="
     },
     "postcss-resolution-independence": {
-      "version": "github:enactjs/postcss-resolution-independence#16a35f250d1a82a3e08588061b050599440f084a",
-      "from": "github:enactjs/postcss-resolution-independence#develop",
+      "version": "1.1.0",
+      "resolved": "https://registry.npmjs.org/postcss-resolution-independence/-/postcss-resolution-independence-1.1.0.tgz",
+      "integrity": "sha512-r+46qOHC9N962nKynGjPL/XYM/uMgZmyIljjbQ/KPkNVMERKTbTDeLraOo1eO8qpdetHGHjuTLY7PIot9IkJ3Q==",
       "requires": {
         "postcss-values-parser": "^6.0.2"
       }
