@@ -4,6 +4,21 @@
 
 * Added `sass-loader` and releated modules for supporting sass/scss files.
 
+### create, template
+
+* Updated `@enact/template-sandstone` dependency.
+
+## 5.0.0-alpha.4 (April 28, 2022)
+
+### pack
+
+* Fixed `enact pack` fails on windows by excluding unnecessary file emitting from `html-webpack-plugin`.
+
+### test
+
+* Fixed `enact test` fails on windows by modifying glob patterns.
+* Removed `enzyme` and related modules.
+
 ## 5.0.0-alpha.3 (April 22, 2022)
 
 ### lint

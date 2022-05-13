@@ -67,7 +67,7 @@ module.exports = {
 	setupFilesAfterEnv: [require.resolve('./setupTests'), userSetupFile].filter(Boolean),
 	testMatch: [
 		'<rootDir>/**/__tests__/**/*.{js,jsx,ts,tsx}',
-		'<rootDir>/**/?(*.)+(spec|test).[jt]s?(x)',
+		'<rootDir>/**/*.+(spec|test).{js,jsx,ts,tsx}',
 		'<rootDir>/**/*-specs.{js,jsx,ts,tsx}'
 	],
 	testPathIgnorePatterns: ignorePatterns,
@@ -85,7 +85,6 @@ module.exports = {
 	],
 	moduleNameMapper: {
 		'^.+\\.module\\.(css|less|sass|scss)$': require.resolve('identity-obj-proxy'),
-		'^enzyme$': require.resolve('enzyme'),
 		'^@testing-library/jest-dom$': require.resolve('@testing-library/jest-dom'),
 		'^@testing-library/react$': require.resolve('@testing-library/react'),
 		'^@testing-library/react-hooks$': require.resolve('@testing-library/react-hooks'),

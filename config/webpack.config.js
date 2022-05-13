@@ -371,7 +371,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 							// by webpacks internal loaders.
 							// Exclude `ejs` HTML templating language as that's handled by
 							// the HtmlWebpackPlugin.
-							exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.ejs$/, /\.json$/],
+							exclude: [/^$/, /\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.ejs$/, /\.json$/],
 							type: 'asset/resource'
 						}
 						// ** STOP ** Are you adding a new loader?
