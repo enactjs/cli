@@ -22292,10 +22292,10 @@
       "integrity": "sha512-KmF7SBPphT4gPPcKZc7aDkweHiKEEO8cla/GjcBK+ckKxiZslIu3C4GCRW3DNfL0o7yW7kMQu9xlZ1kXRXLXtw=="
     },
     "postcss-resolution-independence": {
-      "version": "1.1.0",
-      "resolved": "https://registry.npmjs.org/postcss-resolution-independence/-/postcss-resolution-independence-1.1.0.tgz",
-      "integrity": "sha512-r+46qOHC9N962nKynGjPL/XYM/uMgZmyIljjbQ/KPkNVMERKTbTDeLraOo1eO8qpdetHGHjuTLY7PIot9IkJ3Q==",
+      "version": "github:enactjs/postcss-resolution-independence#247e0136a34038eae85f3708b731e77f5c4e7263",
+      "from": "github:enactjs/postcss-resolution-independence#feature/WRO-471",
       "requires": {
+        "postcss": "^8.4.4",
         "postcss-values-parser": "^6.0.2"
       }
     },
