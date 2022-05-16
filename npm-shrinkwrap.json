@@ -1289,9 +1289,8 @@
       }
     },
     "@enact/dev-utils": {
-      "version": "5.0.0-alpha.2",
-      "resolved": "https://registry.npmjs.org/@enact/dev-utils/-/dev-utils-5.0.0-alpha.2.tgz",
-      "integrity": "sha512-2KUN1HDoL2wAJyYKUua0xZqk/6COEBWv85MWfbwBw33xf7kFsBa3Elb1H/KaJwSqIuhyFxyXv0fFFJ0fMIGRgA==",
+      "version": "github:enactjs/dev-utils#12af665364dce6a281206e6a45edd82190f19f30",
+      "from": "github:enactjs/dev-utils#feature/WRO-3917",
       "requires": {
         "browserslist": "^4.20.2",
         "chalk": "^4.1.2",
