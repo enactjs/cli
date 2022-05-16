@@ -10085,15 +10085,6 @@
         "@types/react-dom": "^18.0.0"
       }
     },
-    "@testing-library/react-hooks": {
-      "version": "8.0.0",
-      "resolved": "https://registry.npmjs.org/@testing-library/react-hooks/-/react-hooks-8.0.0.tgz",
-      "integrity": "sha512-uZqcgtcUUtw7Z9N32W13qQhVAD+Xki2hxbTR461MKax8T6Jr8nsUvZB+vcBTkzY2nFvsUet434CsgF0ncW2yFw==",
-      "requires": {
-        "@babel/runtime": "^7.12.5",
-        "react-error-boundary": "^3.1.0"
-      }
-    },
     "@testing-library/user-event": {
       "version": "13.5.0",
       "resolved": "https://registry.npmjs.org/@testing-library/user-event/-/user-event-13.5.0.tgz",
@@ -10806,9 +10797,9 @@
       "integrity": "sha1-9wtzXGvKGlycItmCw+Oef+ujva0="
     },
     "async": {
-      "version": "2.6.3",
-      "resolved": "https://registry.npmjs.org/async/-/async-2.6.3.tgz",
-      "integrity": "sha512-zflvls11DCy+dQWzTW2dzuilv8Z5X/pjfmZOWba6TNIVDm+2UDaJmXSOXlasHKfNBs8oo3M0aT50fDEWfKZjXg==",
+      "version": "2.6.4",
+      "resolved": "https://registry.npmjs.org/async/-/async-2.6.4.tgz",
+      "integrity": "sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==",
       "requires": {
         "lodash": "^4.17.14"
       }
@@ -22608,14 +22599,6 @@
       "requires": {
         "loose-envify": "^1.1.0",
         "scheduler": "^0.21.0"
-      }
-    },
-    "react-error-boundary": {
-      "version": "3.1.4",
-      "resolved": "https://registry.npmjs.org/react-error-boundary/-/react-error-boundary-3.1.4.tgz",
-      "integrity": "sha512-uM9uPzZJTF6wRQORmSrvOIgt4lJ9MC1sNgEOj2XGsDTRE4kmpWxg7ENK9EWNKJRMAOY9z0MuF4yIfl6gp4sotA==",
-      "requires": {
-        "@babel/runtime": "^7.12.5"
       }
     },
     "react-error-overlay": {
