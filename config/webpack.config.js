@@ -101,7 +101,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			{
 				loader: require.resolve('css-loader'),
 				options: Object.assign(
-					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
+					{sourceMap: shouldUseSourceMap},
 					cssLoaderOptions,
 					{
 						url: {
@@ -180,14 +180,6 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 		if (!paths) return [];
 		return Array.isArray(paths) ? paths : [paths];
 	};
-
-	const getScssStyleLoaders = cssLoaderOptions =>
-		getStyleLoaders(cssLoaderOptions, {
-			loader: require.resolve('sass-loader'),
-			options: {
-				sourceMap: shouldUseSourceMap
-			}
-		});
 
 	return {
 		mode: isEnvProduction ? 'production' : 'development',
@@ -311,6 +303,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						{
 							test: /\.module\.css$/,
 							use: getStyleLoaders({
+								importLoaders: 1,
 								modules: {
 									getLocalIdent,
 									mode: 'local'
@@ -322,6 +315,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 							// The `forceCSSModules` Enact build option can be set true to universally apply
 							// modular CSS support.
 							use: getStyleLoaders({
+								importLoaders: 1,
 								modules: {
 									...(app.forceCSSModules ? {getLocalIdent} : {}),
 									mode: 'icss'
@@ -336,6 +330,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						{
 							test: /\.module\.less$/,
 							use: getLessStyleLoaders({
+								importLoaders: 2,
 								modules: {
 									getLocalIdent,
 									mode: 'local'
@@ -345,6 +340,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						{
 							test: /\.less$/,
 							use: getLessStyleLoaders({
+								importLoaders: 2,
 								modules: {
 									...(app.forceCSSModules ? {getLocalIdent} : {}),
 									mode: 'icss'
@@ -356,10 +352,31 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						// using the extension .module.scss or .module.sass
 						{
 							test: /\.module\.(scss|sass)$/,
-							use: getScssStyleLoaders({
-								importLoaders: 3,
-								modules: true
-							})
+							use: getStyleLoaders(
+								{
+									importLoaders: 3,
+									modules: {
+										mode: 'local',
+										getLocalIdent
+									}
+								},
+								'sass-loader'
+							)
+						},
+						// Opt-in support for SASS (using .scss or .sass extensions).
+						// By default we support SASS Modules with the
+						// extensions .module.scss or .module.sass
+						{
+							test: /\.(scss|sass)$/,
+							use: getStyleLoaders(
+								{
+									importLoaders: 3,
+									modules: {
+										mode: 'icss'
+									}
+								},
+								'sass-loader'
+							)
 						},
 						// "file" loader handles on all files not caught by the above loaders.
 						// When you `import` an asset, you get its output filename and the file
