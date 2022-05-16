@@ -72,8 +72,10 @@ module.exports = {
 	],
 	testPathIgnorePatterns: ignorePatterns,
 	testEnvironment: 'jsdom',
-	testEnvironmentOptions: {pretendToBeVisual: true},
-	testURL: 'http://localhost',
+	testEnvironmentOptions: {
+		pretendToBeVisual: true,
+		url: 'http://localhost'
+	},
 	transform: {
 		'^.+\\.(js|jsx|ts|tsx)$': require.resolve('./babelTransform'),
 		'^.+\\.(css|less)$': require.resolve('./cssTransform.js'),

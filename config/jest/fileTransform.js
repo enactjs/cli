@@ -18,8 +18,9 @@ const path = require('path');
 // http://facebook.github.io/jest/docs/en/webpack.html
 
 module.exports = {
-	process(src, filename) {
-		const assetFilename = JSON.stringify(path.basename(filename));
-		return `module.exports = ${assetFilename};`;
+	process(sourceText, sourcePath) {
+		return {
+			code: `module.exports = ${JSON.stringify(path.basename(sourcePath))};`
+		};
 	}
 };
