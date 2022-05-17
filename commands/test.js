@@ -84,6 +84,7 @@ function assignOverrides(config) {
 		'coverageThreshold',
 		'displayName',
 		'extraGlobals',
+		'sandboxInjectedGlobals',
 		'globalSetup',
 		'globalTeardown',
 		'moduleNameMapper',
