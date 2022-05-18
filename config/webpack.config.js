@@ -285,6 +285,9 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 							test: /\.(js|mjs|jsx|ts|tsx)$/,
 							exclude: /node_modules.(?!@enact)/,
 							loader: require.resolve('babel-loader'),
+							resolve: {
+								fullySpecified: false
+							},
 							options: {
 								configFile: path.join(__dirname, 'babel.config.js'),
 								babelrc: false,

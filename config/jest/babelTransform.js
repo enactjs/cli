@@ -10,9 +10,9 @@
  */
 
 const path = require('path');
-const babelJest = require('babel-jest').default;
+const {createTransformer} = require('babel-jest');
 
-module.exports = babelJest.createTransformer({
+module.exports = createTransformer({
 	extends: path.join(__dirname, '..', 'babel.config.js'),
 	plugins: [
 		require.resolve('@babel/plugin-transform-modules-commonjs'),
