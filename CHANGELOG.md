@@ -4,6 +4,10 @@
 
 * Updated `@enact/template-sandstone` dependency.
 
+### lint
+
+* Updated Enact ESLint config to `4.1.0` including replacing deprecated modules and updated lint rules.
+
 ## 5.0.0-alpha.4 (April 28, 2022)
 
 ### pack
