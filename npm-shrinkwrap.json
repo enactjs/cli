@@ -2232,7 +2232,7 @@
     },
     "node_modules/@enact/dev-utils": {
       "version": "5.0.0-alpha.2",
-      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#d6253fbda6cf9eef4d6bbfa031f1fa36134e735c",
+      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#4615442325b29f5d2819f45889043d5f17852897",
       "license": "Apache-2.0",
       "dependencies": {
         "browserslist": "^4.20.2",
@@ -6200,7 +6200,7 @@
     },
     "node_modules/eslint-config-enact": {
       "version": "4.1.0",
-      "resolved": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#d518d081bcba57fe1a8e65141d037824d25a07a3",
+      "resolved": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#38066042f84fe6849dc4fe02ea2567115b850c88",
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/core": "^7.17.8",
@@ -16277,7 +16277,7 @@
       "requires": {}
     },
     "@enact/dev-utils": {
-      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#d6253fbda6cf9eef4d6bbfa031f1fa36134e735c",
+      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#4615442325b29f5d2819f45889043d5f17852897",
       "from": "@enact/dev-utils@github:enactjs/dev-utils#feature/WRO-3879",
       "requires": {
         "browserslist": "^4.20.2",
@@ -19317,7 +19317,7 @@
       }
     },
     "eslint-config-enact": {
-      "version": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#d518d081bcba57fe1a8e65141d037824d25a07a3",
+      "version": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#38066042f84fe6849dc4fe02ea2567115b850c88",
       "from": "eslint-config-enact@github:enactjs/eslint-config-enact#feature/WRO-3879",
       "requires": {
         "@babel/core": "^7.17.8",
