@@ -1330,8 +1330,8 @@
       "integrity": "sha512-RkYG5KiGNX0fJ5YoI0f4Wfq2Yo74D25Hru4fxTOioYdQvHBxcrrtTTyT5Ozzh2ejcNrhFy7IEts2WyEY7yi5yw=="
     },
     "@enact/dev-utils": {
-      "version": "github:enactjs/dev-utils#12af665364dce6a281206e6a45edd82190f19f30",
-      "from": "github:enactjs/dev-utils#feature/WRO-3917",
+      "version": "github:enactjs/dev-utils#6257b0cd695d87a1705ebec620a6d7f3d268c1a6",
+      "from": "github:enactjs/dev-utils#develop",
       "requires": {
         "browserslist": "^4.20.2",
         "chalk": "^4.1.2",
