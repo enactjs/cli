@@ -1330,9 +1330,8 @@
       "integrity": "sha512-RkYG5KiGNX0fJ5YoI0f4Wfq2Yo74D25Hru4fxTOioYdQvHBxcrrtTTyT5Ozzh2ejcNrhFy7IEts2WyEY7yi5yw=="
     },
     "@enact/dev-utils": {
-      "version": "5.0.0-alpha.2",
-      "resolved": "https://registry.npmjs.org/@enact/dev-utils/-/dev-utils-5.0.0-alpha.2.tgz",
-      "integrity": "sha512-2KUN1HDoL2wAJyYKUua0xZqk/6COEBWv85MWfbwBw33xf7kFsBa3Elb1H/KaJwSqIuhyFxyXv0fFFJ0fMIGRgA==",
+      "version": "github:enactjs/dev-utils#533ed07389f950b4e1917023296f35ab4c2a86b6",
+      "from": "github:enactjs/dev-utils#feature/WRO-4469",
       "requires": {
         "browserslist": "^4.20.2",
         "chalk": "^4.1.2",

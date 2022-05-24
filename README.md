@@ -68,6 +68,7 @@ The @enact/cli tool will check the project's **package.json** looking for an opt
 * `ri` _[object]_ - Resolution independence options to be forwarded to the [LESS plugin](https://github.com/enactjs/less-plugin-resolution-independence). By default, will use any preset for a specified theme or fallback to sandstone.
 * `screenTypes` _[array|string]_ - Array of 1 or more screentype definitions to be used with prerender HTML initialization. Can alternatively reference a json filepath to read for screentype definitions.  By default, will use any preset for a specified theme or fallback to sandstone.
 * `nodeBuiltins` _[object]_ - Configuration settings for polyfilling NodeJS built-ins. See `node` [webpack option](https://webpack.js.org/configuration/node/).
+* `resolveFallbackBuiltins` _[object]_ - Configuration settings for redirecting module requests when normal resolving fails. See `resolve.fallback` [webpack option](https://webpack.js.org/configuration/resolve/#resolvefallback).
 * `externalStartup` _[boolean]_ - Flag whether to externalize the startup/update js that is normally inlined within prerendered app HTML output.
 * `forceCSSModules` _[boolean]_ - Flag whether to force all LESS/CSS to be processed in a modular context (not just the `*.module.css` and `*.module.less` files).
 * `deep` _[string|array]_ - 1 or more JavaScript conditions that, when met, indicate deeplinking and any prerender should be discarded.
@@ -81,10 +82,10 @@ For example:
 	...
 	"enact": {
 		"theme": "sandstone",
-		"nodeBuiltins": {
-			fs: 'empty',
-			net: 'empty',
-			tls: 'empty'
+		"resolveFallbackBuiltins": {
+			fs: false,
+			net: false,
+			tls: false
 		}
 	}
 	...
