@@ -260,7 +260,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias)
 				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias),
 			// Optional configuration for redirecting module requests.
-			fallback: app.resolveFallbackBuiltins
+			fallback: app.resolveFallback
 		},
 		// @remove-on-eject-begin
 		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
