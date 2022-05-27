@@ -258,7 +258,9 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			// and old apps referencing old iLib location with new Enact
 			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
 				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias)
-				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias)
+				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias),
+			// Optional configuration for redirecting module requests.
+			fallback: app.resolveFallback
 		},
 		// @remove-on-eject-begin
 		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
