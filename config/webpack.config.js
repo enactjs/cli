@@ -356,8 +356,9 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 								{
 									importLoaders: 3,
 									modules: {
-										mode: 'local',
-										getLocalIdent
+										getLocalIdent,
+										mode: 'local'
+
 									}
 								},
 								'sass-loader'
