@@ -6,7 +6,7 @@
 
 ### pack, serve
 
-* Added `sass-loader` for supporting sass/scss files.
+* Added `sass-loader` for opt-in support of SASS/SCSS files.
 
 ### lint
 
