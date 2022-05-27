@@ -1,12 +1,12 @@
 ## unreleased
 
-### pack, serve
-
-* Added `sass-loader` and releated modules for supporting sass/scss files.
-
 ### create, template
 
 * Updated `@enact/template-sandstone` dependency.
+
+### pack, serve
+
+* Added `sass-loader` for supporting sass/scss files.
 
 ### lint
 
