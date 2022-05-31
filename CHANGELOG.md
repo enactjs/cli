@@ -13,7 +13,7 @@
 
 ### test
 
-* Replaced `@testing-library/react-hooks` to `@testing-library/react` for testing react 18 apps.
+* Replaced `@testing-library/react-hooks` to `@testing-library/react` for React 18 support.
 
 ## 5.0.0-alpha.4 (April 28, 2022)
 
