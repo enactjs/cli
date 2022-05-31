@@ -16,3 +16,4 @@ The following sections describe its installation and usage:
 * [Ejecting Apps](./ejecting-apps.md)
 * [Template Management](./template-management.md)
   * [Developing a Custom Template](./developing-a-template.md)
+* [Measuring Performance](./measuring-performance.md)
