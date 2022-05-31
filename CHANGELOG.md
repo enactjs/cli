@@ -1,4 +1,4 @@
-## unreleased
+## 5.0.0-alpha.5 (May 31, 2022)
 
 * Updated the `lockfileVersion` of npm-shrinkwrap file to v2.
 * Updated to the latest `eslint-config-enact`, `eslint-plugin-enact`, and `@enact/dev-utils` dependency releases.
