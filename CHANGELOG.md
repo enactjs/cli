@@ -1,5 +1,7 @@
 ## unreleased
 
+* Updated the `lockfileVersion` of npm-shrinkwrap file to v2.
+
 ### create, template
 
 * Updated `@enact/template-sandstone` dependency.
