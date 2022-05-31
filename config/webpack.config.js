@@ -128,7 +128,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						// https://github.com/facebook/create-react-app/issues/2677
 						ident: 'postcss',
 						plugins: [
-							useTailwind && require('tailwindcss'),
+							useTailwind && 'tailwindcss',
 							// Fix and adjust for known flexbox issues
 							// See https://github.com/philipwalton/flexbugs
 							'postcss-flexbugs-fixes',
