@@ -1,7 +1,7 @@
 ## unreleased
 
 * Updated the `lockfileVersion` of npm-shrinkwrap file to v2.
-* Updated to latest `eslint-config-enact`, `eslint-plugin-enact` and `@enact/dev-utils` dependency releases.
+* Updated to the latest `eslint-config-enact`, `eslint-plugin-enact`, and `@enact/dev-utils` dependency releases.
 
 ### create, template
 
