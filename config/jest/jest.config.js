@@ -87,7 +87,6 @@ module.exports = {
 		'^.+\\.module\\.(css|less|sass|scss)$': require.resolve('identity-obj-proxy'),
 		'^@testing-library/jest-dom$': require.resolve('@testing-library/jest-dom'),
 		'^@testing-library/react$': require.resolve('@testing-library/react'),
-		'^@testing-library/react-hooks$': require.resolve('@testing-library/react-hooks'),
 		'^@testing-library/user-event$': require.resolve('@testing-library/user-event'),
 		'^react$': require.resolve('react'),
 		// Backward compatibility for new iLib location with old Enact
