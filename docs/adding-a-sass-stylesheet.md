@@ -9,6 +9,10 @@ Generally, we recommend that you don’t reuse the same CSS classes across diffe
 
 Following this rule often makes CSS preprocessors less useful, as features like mixins and nesting are replaced by component composition. You can, however, integrate a CSS preprocessor if you find it valuable.
 
-Thanks to Enact CLI, you can use Sass without installing `sass`.
+To add Sass/Scss support to an existing project:
+
+```bash
+npm install --save sass sass-loader
+```
 
 To share variables between Sass files, you can use Sass's [`@use` rule](https://sass-lang.com/documentation/at-rules/use).
