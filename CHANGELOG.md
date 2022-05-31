@@ -1,5 +1,8 @@
 ## unreleased
 
+* Updated the `lockfileVersion` of npm-shrinkwrap file to v2.
+* Updated to the latest `eslint-config-enact`, `eslint-plugin-enact`, and `@enact/dev-utils` dependency releases.
+
 ### create, template
 
 * Updated `@enact/template-sandstone` dependency.
@@ -7,6 +10,10 @@
 ### lint
 
 * Updated Enact ESLint config to `4.1.0` including replacing deprecated modules and updated lint rules.
+
+### test
+
+* Replaced `@testing-library/react-hooks` to `@testing-library/react` for React 18 support.
 
 ## 5.0.0-alpha.4 (April 28, 2022)
 
