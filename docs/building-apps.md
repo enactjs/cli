@@ -118,7 +118,6 @@ npm install -g sass
 Now you can rename `src/App.css` to `src/App.scss` or `src/App.sass` and for using CSS modules, `src/App.module.scss` or `src/App.module.sass`. And update `src/App.js` to import `src/App.scss`. Enact CLI will compile these files properly through webpack for you.
 More information can be found [here](https://sass-lang.com/guide) to learn about Sass.
 
-
 ## Isomorphic Support & Prerendering
 By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wide variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
 
