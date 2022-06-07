@@ -115,6 +115,13 @@ To use Sass, install Sass globally:
 npm install -g sass
 ```
 
+Note: If you receive an error when building the app that says `Cannot find module 'sass'`, try to set `NODE_PATH` to point global
+node_modules directory like below.
+
+```bash
+export NODE_PATH=/path/to/your/global/node_modules
+```
+
 Now you can rename `src/App.css` to `src/App.scss` or `src/App.sass` and for using CSS modules, `src/App.module.scss` or `src/App.module.sass`. And update `src/App.js` to import `src/App.scss`. Enact CLI will compile these files properly through webpack for you.
 More information can be found [here](https://sass-lang.com/guide) to learn about Sass.
 
