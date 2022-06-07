@@ -367,8 +367,6 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 							})
 						},
 						// Opt-in support for SASS (using .scss or .sass extensions).
-						// By default we support SASS Modules with the
-						// extensions .module.scss or .module.sass
 						{
 							test: /\.(scss|sass)$/,
 							use: getScssStyleLoaders({
