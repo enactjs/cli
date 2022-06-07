@@ -9,7 +9,6 @@ The following sections describe its installation and usage:
 * [Installation](./installation.md)
 * [Starting a New App](./starting-a-new-app.md)
 * [Loading an Existing App](./loading-existing-app.md)
-* [Styling Apps](./adding-a-sass-stylesheet.md)
 * [Building Apps](./building-apps.md)
   * [Isomorphic Support](./isomorphic-support.md)
 * [Serving Apps](./serving-apps.md)
