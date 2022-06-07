@@ -1,6 +1,6 @@
 ---
 title: Serving Apps
-order: 7
+order: 6
 ---
 ## Development Server
 ```none

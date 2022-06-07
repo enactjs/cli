@@ -1,6 +1,6 @@
 ---
 title: Testing Apps
-order: 8
+order: 7
 ---
 ## Running Test Specs
 ```none
