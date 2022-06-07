@@ -100,22 +100,18 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			process.env.INLINE_STYLES ? require.resolve('style-loader') : MiniCssExtractPlugin.loader,
 			{
 				loader: require.resolve('css-loader'),
-				options: Object.assign(
-					{sourceMap: shouldUseSourceMap},
-					cssLoaderOptions,
-					{
-						url: {
-							filter: url => {
-								// Don't handle absolute path urls
-								if (url.startsWith('/')) {
-									return false;
-								}
-
-								return true;
+				options: Object.assign({sourceMap: shouldUseSourceMap}, cssLoaderOptions, {
+					url: {
+						filter: url => {
+							// Don't handle absolute path urls
+							if (url.startsWith('/')) {
+								return false;
 							}
+
+							return true;
 						}
 					}
-				)
+				})
 			},
 			{
 				// Options for PostCSS as we reference these options twice
@@ -172,6 +168,14 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 				lessOptions: {
 					modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent)
 				},
+				sourceMap: shouldUseSourceMap
+			}
+		});
+
+	const getScssStyleLoaders = cssLoaderOptions =>
+		getStyleLoaders(cssLoaderOptions, {
+			loader: require.resolve('sass-loader'),
+			options: {
 				sourceMap: shouldUseSourceMap
 			}
 		});
@@ -354,32 +358,26 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						// using the extension .module.scss or .module.sass
 						{
 							test: /\.module\.(scss|sass)$/,
-							use: getStyleLoaders(
-								{
-									importLoaders: 3,
-									modules: {
-										getLocalIdent,
-										mode: 'local'
-
-									}
-								},
-								'sass-loader'
-							)
+							use: getScssStyleLoaders({
+								importLoaders: 3,
+								modules: {
+									getLocalIdent,
+									mode: 'local'
+								}
+							})
 						},
 						// Opt-in support for SASS (using .scss or .sass extensions).
 						// By default we support SASS Modules with the
 						// extensions .module.scss or .module.sass
 						{
 							test: /\.(scss|sass)$/,
-							use: getStyleLoaders(
-								{
-									importLoaders: 3,
-									modules: {
-										mode: 'icss'
-									}
-								},
-								'sass-loader'
-							)
+							use: getScssStyleLoaders({
+								importLoaders: 3,
+								modules: {
+									...(app.forceCSSModules ? {getLocalIdent} : {}),
+									mode: 'icss'
+								}
+							})
 						},
 						// "file" loader handles on all files not caught by the above loaders.
 						// When you `import` an asset, you get its output filename and the file
