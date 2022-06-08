@@ -107,7 +107,7 @@ Optionally, [ESLint](https://eslint.org) can be installed globally or locally an
 ## Sass Support
 
 CSS stylesheets could get larger and more complex as you develop. To help and enrich the styling of your apps, there are great CSS processors
-out there.  Enact CLI provides LESS as the default and [Sass](https://sass-lang.com) support is an optional feature since Enact CLI 5.0.0.
+out there.  Enact CLI provides [LESS](https://lesscss.org) as the default and [Sass](https://sass-lang.com) support is an optional feature since Enact CLI 5.0.0.
 
 To use Sass, install Sass globally:
 
@@ -123,6 +123,7 @@ export NODE_PATH=/path/to/your/global/node_modules
 ```
 
 Now you can rename `src/App.css` to `src/App.scss` or `src/App.sass` and for using CSS modules, `src/App.module.scss` or `src/App.module.sass`. And update `src/App.js` to import `src/App.scss`. Enact CLI will compile these files properly through webpack for you.
+
 More information can be found [here](https://sass-lang.com/guide) to learn about Sass.
 
 ## Isomorphic Support & Prerendering
