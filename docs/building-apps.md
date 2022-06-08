@@ -106,7 +106,7 @@ Optionally, [ESLint](https://eslint.org) can be installed globally or locally an
 
 ## Sass Support
 
-CSS stylesheets could get larger and more complex as you develop. To help and enrich the styling of your apps, there are great CSS processors
+CSS stylesheets could get larger and more complex as you develop. To help and enrich the styling of your apps, there are great CSS preprocessors
 out there.  Enact CLI provides [LESS](https://lesscss.org) as the default and [Sass](https://sass-lang.com) support is an optional feature since Enact CLI 5.0.0.
 
 To use Sass, install Sass globally:
