@@ -1,3 +1,9 @@
+## unreleased
+
+### pack, serve
+
+* Updated webpack config to support `sass-loader` for opt-in support of SASS/SCSS files.
+
 ## 5.0.0-alpha.5 (May 31, 2022)
 
 * Updated the `lockfileVersion` of npm-shrinkwrap file to v2.
