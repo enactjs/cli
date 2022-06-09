@@ -50,7 +50,7 @@ module.exports = function (api) {
 					],
 					forceAllTransforms: es5Standalone,
 					useBuiltIns: 'entry',
-					corejs: 3
+					corejs: '3.21'
 				}
 			],
 			[
@@ -66,6 +66,10 @@ module.exports = function (api) {
 			],
 			['@babel/preset-typescript']
 		],
+		assumptions: {
+			setPublicClassFields: true,
+			privateFieldsAsProperties: true
+		},
 		plugins: [
 			// Stage 0
 			// '@babel/plugin-proposal-function-bind',
@@ -77,23 +81,23 @@ module.exports = function (api) {
 			// '@babel/plugin-proposal-do-expressions',
 
 			// Stage 2
-			[require('@babel/plugin-proposal-decorators').default, false],
-			require('@babel/plugin-proposal-export-namespace-from').default,
-			require('@babel/plugin-proposal-numeric-separator').default,
+			[require('@babel/plugin-proposal-decorators').default, {decoratorsBeforeExport: true}],
+			//require('@babel/plugin-proposal-export-namespace-from').default,
+			//require('@babel/plugin-proposal-numeric-separator').default,
 			// '@babel/plugin-proposal-function-sent',
 			// '@babel/plugin-proposal-throw-expressions',
 
 			// Stage 3
-			require('@babel/plugin-syntax-dynamic-import').default,
-			[require('@babel/plugin-proposal-class-properties').default, {loose: true}],
-			[require('@babel/plugin-proposal-private-methods').default, {loose: true}],
-			[require('@babel/plugin-proposal-private-property-in-object').default, {loose: true}],
+			//require('@babel/plugin-syntax-dynamic-import').default,
+			//[require('@babel/plugin-proposal-class-properties').default, {loose: true}],
+			//[require('@babel/plugin-proposal-private-methods').default, {loose: true}],
+			//[require('@babel/plugin-proposal-private-property-in-object').default, {loose: true}],
 			// '@babel/plugin-syntax-import-meta',
 			// '@babel/plugin-proposal-json-strings'
 
 			// Soon to be included within pre-env; include here until then
-			require('@babel/plugin-proposal-optional-chaining').default,
-			require('@babel/plugin-proposal-nullish-coalescing-operator').default,
+			//require('@babel/plugin-proposal-optional-chaining').default,
+			//require('@babel/plugin-proposal-nullish-coalescing-operator').default,
 
 			!es5Standalone && [
 				require('@babel/plugin-transform-runtime').default,
