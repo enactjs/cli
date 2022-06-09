@@ -33,10 +33,10 @@ if (process.platform === 'win32' && process.title === 'Windows PowerShell ISE') 
 if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 	// Enact-CLI ascii art title
 	const title = `                                               
-    ┌─┐┌┐┌┌─┐┌─┐┌┬┐  ┌─┐┬  ┬    ▐██▄▄    ▄▄██▌ 
-    │  ││││ ││   │   │  │  │    ▐██▀██████▀▀   
-    ├┤ │││├─┤│   │ ──│  │  │    ▐██▄▄ ▀▀ ▄▄    
-    │  ││││ ││   │   │  │  │    ▐██▀██████▀    
+                                ▐██▄▄    ▄▄██▌ 
+    ────────────────────────    ▐██▀██████▀▀   
+    ┌─┐┌┐┌┌─┐┌─┐┌┬┐  ┌─┐┬  ┬    ▐██▄▄ ▀▀ ▄▄    
+    ├─ │││├─┤│   │ ──│  │  │    ▐██▀██████▀    
     └─┘┘└┘┴ ┴└─┘ ┴   └─┘┴─┘┴    ▐██▄▄ ▀▀ ▄▄██▌ 
     ────────────────────────      ▀▀██████▀▀   
                                       ▀▀       `;
@@ -53,7 +53,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 		.join('\n');
 	console.log();
 	console.log(colourTitle);
-	console.log('    Version ' + pkg.version);
+	console.log('    Version ' + pkg.version + ' for LIT');
 	console.log();
 } else {
 	const command = process.argv[2];
