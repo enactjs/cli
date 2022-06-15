@@ -100,22 +100,18 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			process.env.INLINE_STYLES ? require.resolve('style-loader') : MiniCssExtractPlugin.loader,
 			{
 				loader: require.resolve('css-loader'),
-				options: Object.assign(
-					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
-					cssLoaderOptions,
-					{
-						url: {
-							filter: url => {
-								// Don't handle absolute path urls
-								if (url.startsWith('/')) {
-									return false;
-								}
-
-								return true;
+				options: Object.assign({sourceMap: shouldUseSourceMap}, cssLoaderOptions, {
+					url: {
+						filter: url => {
+							// Don't handle absolute path urls
+							if (url.startsWith('/')) {
+								return false;
 							}
+
+							return true;
 						}
 					}
-				)
+				})
 			},
 			{
 				// Options for PostCSS as we reference these options twice
@@ -172,6 +168,14 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 				lessOptions: {
 					modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent)
 				},
+				sourceMap: shouldUseSourceMap
+			}
+		});
+
+	const getScssStyleLoaders = cssLoaderOptions =>
+		getStyleLoaders(cssLoaderOptions, {
+			loader: require.resolve('sass-loader'),
+			options: {
 				sourceMap: shouldUseSourceMap
 			}
 		});
@@ -258,7 +262,9 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			// and old apps referencing old iLib location with new Enact
 			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
 				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias)
-				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias)
+				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias),
+			// Optional configuration for redirecting module requests.
+			fallback: app.resolveFallback
 		},
 		// @remove-on-eject-begin
 		// Resolve loaders (webpack plugins for CSS, images, transpilation) from the
@@ -303,6 +309,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						{
 							test: /\.module\.css$/,
 							use: getStyleLoaders({
+								importLoaders: 1,
 								modules: {
 									getLocalIdent,
 									mode: 'local'
@@ -314,6 +321,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 							// The `forceCSSModules` Enact build option can be set true to universally apply
 							// modular CSS support.
 							use: getStyleLoaders({
+								importLoaders: 1,
 								modules: {
 									...(app.forceCSSModules ? {getLocalIdent} : {}),
 									mode: 'icss'
@@ -328,6 +336,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						{
 							test: /\.module\.less$/,
 							use: getLessStyleLoaders({
+								importLoaders: 2,
 								modules: {
 									getLocalIdent,
 									mode: 'local'
@@ -337,12 +346,36 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						{
 							test: /\.less$/,
 							use: getLessStyleLoaders({
+								importLoaders: 2,
 								modules: {
 									...(app.forceCSSModules ? {getLocalIdent} : {}),
 									mode: 'icss'
 								}
 							}),
 							sideEffects: true
+						},
+						// Opt-in support for CSS Modules, but using SASS
+						// using the extension .module.scss or .module.sass
+						{
+							test: /\.module\.(scss|sass)$/,
+							use: getScssStyleLoaders({
+								importLoaders: 3,
+								modules: {
+									getLocalIdent,
+									mode: 'local'
+								}
+							})
+						},
+						// Opt-in support for SASS (using .scss or .sass extensions)
+						{
+							test: /\.(scss|sass)$/,
+							use: getScssStyleLoaders({
+								importLoaders: 3,
+								modules: {
+									...(app.forceCSSModules ? {getLocalIdent} : {}),
+									mode: 'icss'
+								}
+							})
 						},
 						// "file" loader handles on all files not caught by the above loaders.
 						// When you `import` an asset, you get its output filename and the file
