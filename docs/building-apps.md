@@ -126,6 +126,85 @@ Now you can rename `src/App.css` to `src/App.scss` or `src/App.sass` and for usi
 
 More information can be found [here](https://sass-lang.com/guide) to learn about Sass.
 
+## Tailwindcss Support
+
+Tailwind CSS works by scanning all of your HTML files, JavaScript components, and any other templates for class names, generating the corresponding styles and then writing them to a static CSS file.
+
+It's fast, flexible, and reliable — with zero-runtime.
+
+To use Tailwindcss, install Tailwindcss globally:
+
+```bash
+npm install -g tailwindcss
+```
+
+Note: If you receive an error when building the app that says `Cannot find module 'tailwindcss'`, try to set `NODE_PATH` to point global
+node_modules directory like below.
+
+```bash
+export NODE_PATH=/path/to/your/global/node_modules
+```
+
+And then run the init command to generate both tailwind.config.js and postcss.config.js:
+
+```bash
+npx tailwindcss init -p
+```
+
+Add the paths to all of your template files in your tailwind.config.js file.
+
+```bash
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+Create `src/tailwind.css` file and add the @tailwind directives for each of Tailwind’s layers to your file.
+
+```bash
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+Import `src/tailwind.css` into your `src/index.js` file.
+
+```bash
+    import {render} from 'react-dom';
+    import App from './App';
++   import './tailwind.css';
+ 
+    const appElement = (<App />);
+ 
+    // In a browser environment, render instead of exporting
+    if (typeof window !== 'undefined') {
+```
+
+Now you can start using Tailwind’s utility classes to style your content.
+Here is the example.
+
+```bash
+const MainPanel = kind({
+    name: 'MainPanel',
+ 
+    render: (props) => (
+        <Panel {...props}>
+            <p className="text-3xl font-bold underline">
+                Edit src/views/MainPanel.js and save to reload.
+            </p>
+        </Panel>
+    )
+});
+```
+
+More information can be found [here](https://tailwindcss.com/docs) to learn about tailwindcss.
+
 ## Isomorphic Support & Prerendering
 By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wide variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
 
