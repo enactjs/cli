@@ -2,6 +2,7 @@
 
 ### pack, serve
 
+* Removed `tailwindcss` module for opt-in support and added documentation.
 * Updated webpack config to support `sass-loader` for opt-in support of SASS/SCSS files.
 
 ## 5.0.0-alpha.5 (May 31, 2022)
