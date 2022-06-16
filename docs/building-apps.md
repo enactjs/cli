@@ -138,8 +138,7 @@ To use Tailwindcss, install Tailwindcss globally:
 npm install -g tailwindcss
 ```
 
-Note: If you receive an error when building the app that says `Cannot find module 'tailwindcss'`, try to set `NODE_PATH` to point global
-node_modules directory like below.
+Note: If you receive an error when building the app that says `Cannot find module 'tailwindcss'`, try to set `NODE_PATH` to point global node_modules directory like below.
 
 ```bash
 export NODE_PATH=/path/to/your/global/node_modules
