@@ -2258,7 +2258,7 @@
     },
     "node_modules/@enact/dev-utils": {
       "version": "5.0.0-alpha.3",
-      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#e3388af2683403c6849e65da3bc5d5bccf958149",
+      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#042cc9d7cd74fd638ad0d89563c6a753cefe65af",
       "license": "Apache-2.0",
       "dependencies": {
         "browserslist": "^4.20.2",
@@ -3095,9 +3095,9 @@
       "dev": true
     },
     "node_modules/@types/node": {
-      "version": "17.0.43",
-      "resolved": "https://registry.npmjs.org/@types/node/-/node-17.0.43.tgz",
-      "integrity": "sha512-jnUpgw8fL9kP2iszfIDyBQtw5Mf4/XSqy0Loc1J9pI14ejL83XcCEvSf50Gs/4ET0I9VCCDoOfufQysj0S66xA=="
+      "version": "18.0.0",
+      "resolved": "https://registry.npmjs.org/@types/node/-/node-18.0.0.tgz",
+      "integrity": "sha512-cHlGmko4gWLVI27cGJntjs/Sj8th9aYwplmZFwmmgYQQvL5NUsgVJG7OddLvNfLqYS31KFN0s3qlaD9qCaxACA=="
     },
     "node_modules/@types/parse-json": {
       "version": "4.0.0",
@@ -4540,9 +4540,9 @@
       }
     },
     "node_modules/caniuse-lite": {
-      "version": "1.0.30001352",
-      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001352.tgz",
-      "integrity": "sha512-GUgH8w6YergqPQDGWhJGt8GDRnY0L/iJVQcU3eJ46GYf52R8tk0Wxp0PymuFVZboJYXGiCqwozAYZNRjVj6IcA==",
+      "version": "1.0.30001354",
+      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001354.tgz",
+      "integrity": "sha512-mImKeCkyGDAHNywYFA4bqnLAzTUvVkqPvhY4DV47X+Gl2c5Z8c3KNETnXp14GQt11LvxE8AwjzGxJ+rsikiOzg==",
       "funding": [
         {
           "type": "opencollective",
@@ -5895,9 +5895,9 @@
       "integrity": "sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow=="
     },
     "node_modules/electron-to-chromium": {
-      "version": "1.4.155",
-      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.155.tgz",
-      "integrity": "sha512-niPzKBSYPG06gxLKO0c2kEmgdRMTtIbNrBlvD31Ld8Q57b/K0218U4j8u/OOt25XE1eFOn47FcmQVdx9R1qqxA=="
+      "version": "1.4.157",
+      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.157.tgz",
+      "integrity": "sha512-gteFnXPKsDAdm1U5vVuyrLnKOaR/x/SY+HjUQoHypLUYWJt4RaWU3PaiTBEkRDJh8/Zd8KC/EFjV+uPaHsjKFA=="
     },
     "node_modules/elliptic": {
       "version": "6.5.4",
@@ -18633,9 +18633,9 @@
       }
     },
     "node_modules/mini-css-extract-plugin": {
-      "version": "2.6.0",
-      "resolved": "https://registry.npmjs.org/mini-css-extract-plugin/-/mini-css-extract-plugin-2.6.0.tgz",
-      "integrity": "sha512-ndG8nxCEnAemsg4FSgS+yNyHKgkTB4nPKqCOgh65j3/30qqC5RaSQQXMm++Y6sb6E1zRSxPkztj9fqxhS1Eo6w==",
+      "version": "2.6.1",
+      "resolved": "https://registry.npmjs.org/mini-css-extract-plugin/-/mini-css-extract-plugin-2.6.1.tgz",
+      "integrity": "sha512-wd+SD57/K6DiV7jIR34P+s3uckTRuQvx0tKPcvjFlrEylk6P4mQ2KSWk1hblj1Kxaqok7LogKOieygXqBczNlg==",
       "dependencies": {
         "schema-utils": "^4.0.0"
       },
@@ -25105,7 +25105,7 @@
       "requires": {}
     },
     "@enact/dev-utils": {
-      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#e3388af2683403c6849e65da3bc5d5bccf958149",
+      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#042cc9d7cd74fd638ad0d89563c6a753cefe65af",
       "from": "@enact/dev-utils@enactjs/dev-utils#feature/WRO-5782",
       "requires": {
         "browserslist": "^4.20.2",
@@ -25753,9 +25753,9 @@
       "dev": true
     },
     "@types/node": {
-      "version": "17.0.43",
-      "resolved": "https://registry.npmjs.org/@types/node/-/node-17.0.43.tgz",
-      "integrity": "sha512-jnUpgw8fL9kP2iszfIDyBQtw5Mf4/XSqy0Loc1J9pI14ejL83XcCEvSf50Gs/4ET0I9VCCDoOfufQysj0S66xA=="
+      "version": "18.0.0",
+      "resolved": "https://registry.npmjs.org/@types/node/-/node-18.0.0.tgz",
+      "integrity": "sha512-cHlGmko4gWLVI27cGJntjs/Sj8th9aYwplmZFwmmgYQQvL5NUsgVJG7OddLvNfLqYS31KFN0s3qlaD9qCaxACA=="
     },
     "@types/parse-json": {
       "version": "4.0.0",
@@ -26840,9 +26840,9 @@
       }
     },
     "caniuse-lite": {
-      "version": "1.0.30001352",
-      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001352.tgz",
-      "integrity": "sha512-GUgH8w6YergqPQDGWhJGt8GDRnY0L/iJVQcU3eJ46GYf52R8tk0Wxp0PymuFVZboJYXGiCqwozAYZNRjVj6IcA=="
+      "version": "1.0.30001354",
+      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001354.tgz",
+      "integrity": "sha512-mImKeCkyGDAHNywYFA4bqnLAzTUvVkqPvhY4DV47X+Gl2c5Z8c3KNETnXp14GQt11LvxE8AwjzGxJ+rsikiOzg=="
     },
     "case-sensitive-paths-webpack-plugin": {
       "version": "2.4.0",
@@ -27844,9 +27844,9 @@
       "integrity": "sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow=="
     },
     "electron-to-chromium": {
-      "version": "1.4.155",
-      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.155.tgz",
-      "integrity": "sha512-niPzKBSYPG06gxLKO0c2kEmgdRMTtIbNrBlvD31Ld8Q57b/K0218U4j8u/OOt25XE1eFOn47FcmQVdx9R1qqxA=="
+      "version": "1.4.157",
+      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.157.tgz",
+      "integrity": "sha512-gteFnXPKsDAdm1U5vVuyrLnKOaR/x/SY+HjUQoHypLUYWJt4RaWU3PaiTBEkRDJh8/Zd8KC/EFjV+uPaHsjKFA=="
     },
     "elliptic": {
       "version": "6.5.4",
@@ -36912,9 +36912,9 @@
       "integrity": "sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg=="
     },
     "mini-css-extract-plugin": {
-      "version": "2.6.0",
-      "resolved": "https://registry.npmjs.org/mini-css-extract-plugin/-/mini-css-extract-plugin-2.6.0.tgz",
-      "integrity": "sha512-ndG8nxCEnAemsg4FSgS+yNyHKgkTB4nPKqCOgh65j3/30qqC5RaSQQXMm++Y6sb6E1zRSxPkztj9fqxhS1Eo6w==",
+      "version": "2.6.1",
+      "resolved": "https://registry.npmjs.org/mini-css-extract-plugin/-/mini-css-extract-plugin-2.6.1.tgz",
+      "integrity": "sha512-wd+SD57/K6DiV7jIR34P+s3uckTRuQvx0tKPcvjFlrEylk6P4mQ2KSWk1hblj1Kxaqok7LogKOieygXqBczNlg==",
       "requires": {
         "schema-utils": "^4.0.0"
       },
