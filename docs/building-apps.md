@@ -126,11 +126,10 @@ Now you can rename `src/App.css` to `src/App.scss` or `src/App.sass` and for usi
 
 More information can be found [here](https://sass-lang.com/guide) to learn about Sass.
 
-## Tailwindcss Support
+## Tailwind CSS Support
 
 Tailwind CSS works by scanning all of your HTML files, JavaScript components, and any other templates for class names, generating the corresponding styles and then writing them to a static CSS file.
-
-It's fast, flexible, and reliable — with zero-runtime.
+Enact CLI supports to use Tailwind CSS as an optional feature since Enact CLI 5.0.0.
 
 To use Tailwindcss, install Tailwindcss globally:
 
@@ -138,13 +137,9 @@ To use Tailwindcss, install Tailwindcss globally:
 npm install -g tailwindcss
 ```
 
-Note: If you receive an error when building the app that says `Cannot find module 'tailwindcss'`, try to set `NODE_PATH` to point global node_modules directory like below.
+Note: If you receive an error when building the app that says `Cannot find module 'tailwindcss'`, try to set `NODE_PATH` to point global node_modules directory.
 
-```bash
-export NODE_PATH=/path/to/your/global/node_modules
-```
-
-And then run the init command to generate both tailwind.config.js and postcss.config.js:
+And then run the init command to generate both tailwind.config.js and postcss.config.js in your app:
 
 ```bash
 npx tailwindcss init -p
