@@ -246,7 +246,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			level: 'none'
 		},
 		ignoreWarnings: [
-			// We ignore 'Cannot find module' warnings from SnapshotPlugin
+			// We ignore 'Module not found' warnings from SnapshotPlugin
 			{
 				module: /SnapshotPlugin/,
 				message: /Module not found/
