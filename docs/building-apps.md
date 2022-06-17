@@ -139,10 +139,10 @@ npm install -g tailwindcss
 
 Note: If you receive an error when building the app that says `Cannot find module 'tailwindcss'`, try to set `NODE_PATH` to point global node_modules directory.
 
-And then run the init command to generate both tailwind.config.js and postcss.config.js in your app:
+And then run the init command to generate tailwind.config.js in your app:
 
 ```bash
-npx tailwindcss init -p
+npx tailwindcss init
 ```
 
 Add the paths to all of your template files in your tailwind.config.js file.
