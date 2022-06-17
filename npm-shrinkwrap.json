@@ -2258,7 +2258,7 @@
     },
     "node_modules/@enact/dev-utils": {
       "version": "5.0.0-alpha.3",
-      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#dc4ee4cb9add2c92ebc8531da7d91b687c5f52e2",
+      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#ad04915d3ae14450216766f234ac37023114c8e2",
       "license": "Apache-2.0",
       "dependencies": {
         "browserslist": "^4.20.2",
@@ -3115,9 +3115,9 @@
       "integrity": "sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w=="
     },
     "node_modules/@types/react": {
-      "version": "18.0.12",
-      "resolved": "https://registry.npmjs.org/@types/react/-/react-18.0.12.tgz",
-      "integrity": "sha512-duF1OTASSBQtcigUvhuiTB1Ya3OvSy+xORCiEf20H0P0lzx+/KeVsA99U5UjLXSbyo1DRJDlLKqTeM1ngosqtg==",
+      "version": "18.0.14",
+      "resolved": "https://registry.npmjs.org/@types/react/-/react-18.0.14.tgz",
+      "integrity": "sha512-x4gGuASSiWmo0xjDLpm5mPb52syZHJx02VKbqUKdLmKtAwIh63XClGsiTI1K6DO5q7ox4xAsQrU+Gl3+gGXF9Q==",
       "dependencies": {
         "@types/prop-types": "*",
         "@types/scheduler": "*",
@@ -5895,9 +5895,9 @@
       "integrity": "sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow=="
     },
     "node_modules/electron-to-chromium": {
-      "version": "1.4.158",
-      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.158.tgz",
-      "integrity": "sha512-gppO3/+Y6sP432HtvwvuU8S+YYYLH4PmAYvQwqUtt9HDOmEsBwQfLnK9T8+1NIKwAS1BEygIjTaATC4H5EzvxQ=="
+      "version": "1.4.160",
+      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.160.tgz",
+      "integrity": "sha512-O1Z12YfyeX2LXYO7MdHIPazGXzLzQnr1ADW55U2ARQsJBPgfpJz3u+g3Mo2l1wSyfOCdiGqaX9qtV4XKZ0HNRA=="
     },
     "node_modules/elliptic": {
       "version": "6.5.4",
@@ -25105,7 +25105,7 @@
       "requires": {}
     },
     "@enact/dev-utils": {
-      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#dc4ee4cb9add2c92ebc8531da7d91b687c5f52e2",
+      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#ad04915d3ae14450216766f234ac37023114c8e2",
       "from": "@enact/dev-utils@enactjs/dev-utils#feature/WRO-5782",
       "requires": {
         "browserslist": "^4.20.2",
@@ -25773,9 +25773,9 @@
       "integrity": "sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w=="
     },
     "@types/react": {
-      "version": "18.0.12",
-      "resolved": "https://registry.npmjs.org/@types/react/-/react-18.0.12.tgz",
-      "integrity": "sha512-duF1OTASSBQtcigUvhuiTB1Ya3OvSy+xORCiEf20H0P0lzx+/KeVsA99U5UjLXSbyo1DRJDlLKqTeM1ngosqtg==",
+      "version": "18.0.14",
+      "resolved": "https://registry.npmjs.org/@types/react/-/react-18.0.14.tgz",
+      "integrity": "sha512-x4gGuASSiWmo0xjDLpm5mPb52syZHJx02VKbqUKdLmKtAwIh63XClGsiTI1K6DO5q7ox4xAsQrU+Gl3+gGXF9Q==",
       "requires": {
         "@types/prop-types": "*",
         "@types/scheduler": "*",
@@ -27844,9 +27844,9 @@
       "integrity": "sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow=="
     },
     "electron-to-chromium": {
-      "version": "1.4.158",
-      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.158.tgz",
-      "integrity": "sha512-gppO3/+Y6sP432HtvwvuU8S+YYYLH4PmAYvQwqUtt9HDOmEsBwQfLnK9T8+1NIKwAS1BEygIjTaATC4H5EzvxQ=="
+      "version": "1.4.160",
+      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.160.tgz",
+      "integrity": "sha512-O1Z12YfyeX2LXYO7MdHIPazGXzLzQnr1ADW55U2ARQsJBPgfpJz3u+g3Mo2l1wSyfOCdiGqaX9qtV4XKZ0HNRA=="
     },
     "elliptic": {
       "version": "6.5.4",
