@@ -147,7 +147,7 @@ npx tailwindcss init -p
 
 Add the paths to all of your template files in your tailwind.config.js file.
 
-```bash
+```js
 module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
@@ -161,7 +161,7 @@ module.exports = {
 
 Create `src/tailwind.css` file and add the @tailwind directives for each of Tailwind’s layers to your file.
 
-```bash
+```css
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -169,21 +169,21 @@ Create `src/tailwind.css` file and add the @tailwind directives for each of Tail
 
 Import `src/tailwind.css` into your `src/index.js` file.
 
-```bash
-    import {render} from 'react-dom';
-    import App from './App';
-    import './tailwind.css';
- 
-    const appElement = (<App />);
- 
-    // In a browser environment, render instead of exporting
-    if (typeof window !== 'undefined') {
+```js
+import {render} from 'react-dom';
+import App from './App';
+import './tailwind.css';
+
+const appElement = (<App />);
+
+// In a browser environment, render instead of exporting
+if (typeof window !== 'undefined') {
 ```
 
 Now you can start using Tailwind’s utility classes to style your content.
 Here is the example.
 
-```bash
+```js
 const MainPanel = kind({
     name: 'MainPanel',
  
