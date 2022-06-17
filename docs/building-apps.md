@@ -172,7 +172,7 @@ Import `src/tailwind.css` into your `src/index.js` file.
 ```bash
     import {render} from 'react-dom';
     import App from './App';
-+   import './tailwind.css';
+    import './tailwind.css';
  
     const appElement = (<App />);
  
