@@ -3,6 +3,7 @@
 ### pack, serve
 
 * Added `ENACT_PACK_ISOMORPHIC` as a global variable to use `hydrateRoot` instead of `createRoot` from app when isomorphic build.
+* Added `ignoreWarning` config to ignore warnings from SnapshotPlugin.
 * Updated webpack config to support `sass-loader` for opt-in support of SASS/SCSS files.
 
 ## 5.0.0-alpha.5 (May 31, 2022)
