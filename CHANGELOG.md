@@ -2,6 +2,7 @@
 
 ### pack, serve
 
+* Added `ignoreWarning` config to ignore warnings from SnapshotPlugin.
 * Updated webpack config to support `sass-loader` for opt-in support of SASS/SCSS files.
 
 ## 5.0.0-alpha.5 (May 31, 2022)

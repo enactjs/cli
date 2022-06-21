@@ -245,6 +245,13 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 		infrastructureLogging: {
 			level: 'none'
 		},
+		ignoreWarnings: [
+			// We ignore 'Module not found' warnings from SnapshotPlugin
+			{
+				module: /SnapshotPlugin/,
+				message: /Module not found/
+			}
+		],
 		resolve: {
 			// These are the reasonable defaults supported by the React/ES6 ecosystem.
 			extensions: ['.js', '.mjs', '.jsx', '.ts', '.tsx', '.json'].filter(
