@@ -41,7 +41,7 @@ const createEnvironmentHash = require('./createEnvironmentHash');
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
-module.exports = function (env, isomorphic, ilibAdditionalResourcesPath) {
+module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath) {
 	process.chdir(app.context);
 
 	// Load applicable .env files into environment variables.
