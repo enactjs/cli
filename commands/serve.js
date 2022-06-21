@@ -304,8 +304,8 @@ function api(opts) {
 	const config = hotDevServer(configFactory('development'), fastRefresh);
 
 	// Tools like Cloud9 rely on this.
-	const host = process.env.HOST || opts.host || config.devServer.host || '0.0.0.0';
-	const port = parseInt(process.env.PORT || opts.port || config.devServer.port || 8080);
+	const host = process.env.HOST || opts.host || '0.0.0.0';
+	const port = parseInt(process.env.PORT || opts.port || 8080);
 
 	// Start serving
 	if (['node', 'async-node', 'webworker'].includes(app.environment)) {

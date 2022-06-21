@@ -403,12 +403,6 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 				}
 			].filter(Boolean)
 		},
-		// Specific webpack-dev-server options.
-		devServer: {
-			// Broadcast http server on the localhost, port 8080.
-			host: '0.0.0.0',
-			port: 8080
-		},
 		// Target app to build for a specific environment (default 'browserslist')
 		target: app.environment,
 		// Optional configuration for polyfilling NodeJS built-ins.
