@@ -19,7 +19,7 @@
         "@babel/preset-react": "^7.16.7",
         "@babel/preset-typescript": "^7.16.7",
         "@babel/runtime": "^7.16.7",
-        "@enact/dev-utils": "enactjs/dev-utils#feature/WRO-5782",
+        "@enact/dev-utils": "^5.0.0-alpha.3",
         "@enact/template-sandstone": "^1.5.0-alpha.3",
         "@pmmmwh/react-refresh-webpack-plugin": "^0.5.4",
         "@testing-library/jest-dom": "^5.14.1",
@@ -190,6 +190,7 @@
       "version": "7.18.2",
       "resolved": "https://registry.npmjs.org/@babel/eslint-parser/-/eslint-parser-7.18.2.tgz",
       "integrity": "sha512-oFQYkE8SuH14+uR51JVAmdqwKYXGRjEXx7s+WiagVjqQ+HPE+nnwyF2qlVG8evUsUHmPcA+6YXMEDbIhEyQc5A==",
+      "peer": true,
       "dependencies": {
         "eslint-scope": "^5.1.1",
         "eslint-visitor-keys": "^2.1.0",
@@ -207,6 +208,7 @@
       "version": "6.3.0",
       "resolved": "https://registry.npmjs.org/semver/-/semver-6.3.0.tgz",
       "integrity": "sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==",
+      "peer": true,
       "bin": {
         "semver": "bin/semver.js"
       }
@@ -3249,6 +3251,7 @@
       "version": "5.28.0",
       "resolved": "https://registry.npmjs.org/@typescript-eslint/parser/-/parser-5.28.0.tgz",
       "integrity": "sha512-ekqoNRNK1lAcKhZESN/PdpVsWbP9jtiNqzFWkp/yAUdZvJalw2heCYuqRmM5eUJSIYEkgq5sGOjq+ZqsLMjtRA==",
+      "peer": true,
       "dependencies": {
         "@typescript-eslint/scope-manager": "5.28.0",
         "@typescript-eslint/types": "5.28.0",
@@ -23802,6 +23805,7 @@
       "version": "7.18.2",
       "resolved": "https://registry.npmjs.org/@babel/eslint-parser/-/eslint-parser-7.18.2.tgz",
       "integrity": "sha512-oFQYkE8SuH14+uR51JVAmdqwKYXGRjEXx7s+WiagVjqQ+HPE+nnwyF2qlVG8evUsUHmPcA+6YXMEDbIhEyQc5A==",
+      "peer": true,
       "requires": {
         "eslint-scope": "^5.1.1",
         "eslint-visitor-keys": "^2.1.0",
@@ -23811,7 +23815,8 @@
         "semver": {
           "version": "6.3.0",
           "resolved": "https://registry.npmjs.org/semver/-/semver-6.3.0.tgz",
-          "integrity": "sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw=="
+          "integrity": "sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==",
+          "peer": true
         }
       }
     },
@@ -25156,7 +25161,7 @@
     },
     "@enact/dev-utils": {
       "version": "git+ssh://git@github.com/enactjs/dev-utils.git#ad04915d3ae14450216766f234ac37023114c8e2",
-      "from": "@enact/dev-utils@enactjs/dev-utils#feature/WRO-5782",
+      "from": "@enact/dev-utils@^5.0.0-alpha.3",
       "requires": {
         "browserslist": "^4.20.2",
         "chalk": "^4.1.2",
@@ -25932,6 +25937,7 @@
       "version": "5.28.0",
       "resolved": "https://registry.npmjs.org/@typescript-eslint/parser/-/parser-5.28.0.tgz",
       "integrity": "sha512-ekqoNRNK1lAcKhZESN/PdpVsWbP9jtiNqzFWkp/yAUdZvJalw2heCYuqRmM5eUJSIYEkgq5sGOjq+ZqsLMjtRA==",
+      "peer": true,
       "requires": {
         "@typescript-eslint/scope-manager": "5.28.0",
         "@typescript-eslint/types": "5.28.0",

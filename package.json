@@ -49,7 +49,7 @@
     "@babel/preset-react": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
     "@babel/runtime": "^7.16.7",
-    "@enact/dev-utils": "enactjs/dev-utils#feature/WRO-5782",
+    "@enact/dev-utils": "^5.0.0-alpha.3",
     "@enact/template-sandstone": "^1.5.0-alpha.3",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.4",
     "@testing-library/jest-dom": "^5.14.1",
