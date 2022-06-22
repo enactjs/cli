@@ -34,6 +34,7 @@ npm pack-p -- --isomorphic
 If you are using React18, you need to call `hydrateRoot` instead of `createRoot` to hydrate prerendered HTML.
 Enact CLI provides a global variable `ENACT_PACK_ISOMORPHIC` to selectively call those two APIs in your app's `index.js`.
 If you build with isomorphic option, `ENACT_PACK_ISOMORPHIC` will be `true`, otherwise `false`.
+For more detailed information, please refer to the [react 18 migration guide](https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html#updates-to-client-rendering-apis).
 
 Whithin your **src/index.js** file, add a conditional statement to render or hydrate your app:
 ```js
