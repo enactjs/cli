@@ -2,6 +2,7 @@
 
 ### pack, serve
 
+* Fixed `core-js` version to `3.22.8` for compatibility.
 * Added `ignoreWarning` config to ignore warnings from SnapshotPlugin.
 * Updated webpack config to support `sass-loader` for opt-in support of SASS/SCSS files.
 
