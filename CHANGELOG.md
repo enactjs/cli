@@ -2,7 +2,7 @@
 
 ### pack, serve
 
-* Fixed `enact serve` fails with multiple ports by removing unnecessary `devServer` from webpack config.
+* Fixed `enact serve` fails with multiple ports by overriding resolvePort as devServer port.
 * Added `ignoreWarning` config to ignore warnings from SnapshotPlugin.
 * Updated webpack config to support `sass-loader` for opt-in support of SASS/SCSS files.
 
