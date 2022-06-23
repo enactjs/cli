@@ -2,7 +2,7 @@
 
 ### serve
 
-* Fixed `enact serve` fails with multiple ports by overriding resolvePort as devServer port.
+* Fixed `enact serve` fails with multiple ports.
 
 ### pack
 
