@@ -1,8 +1,11 @@
 ## unreleased
 
-### pack, serve
+### serve
 
 * Fixed `enact serve` fails with multiple ports by overriding resolvePort as devServer port.
+
+### pack
+
 * Fixed `core-js` version to `3.22.8` for compatibility.
 * Added `ENACT_PACK_ISOMORPHIC` as a global variable to use `hydrateRoot` instead of `createRoot` from app when isomorphic build.
 * Added `ignoreWarning` config to ignore warnings from SnapshotPlugin.
