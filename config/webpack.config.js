@@ -186,11 +186,11 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 	};
 
 	return {
-		// Webpack noise constrained to errors and warnings
-		stats: 'errors-warnings',
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
 		bail: true,
+		// Webpack noise constrained to errors and warnings
+		stats: 'errors-warnings',
 		// Use source maps during development builds or when specified by GENERATE_SOURCEMAP
 		devtool: shouldUseSourceMap && (isEnvProduction ? 'source-map' : 'cheap-module-source-map'),
 		// These are the "entry points" to our application.
