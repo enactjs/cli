@@ -41,7 +41,7 @@ const createEnvironmentHash = require('./createEnvironmentHash');
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
-module.exports = function (env, ilibAdditionalResourcesPath) {
+module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath) {
 	process.chdir(app.context);
 
 	// Load applicable .env files into environment variables.
@@ -100,22 +100,18 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			process.env.INLINE_STYLES ? require.resolve('style-loader') : MiniCssExtractPlugin.loader,
 			{
 				loader: require.resolve('css-loader'),
-				options: Object.assign(
-					{importLoaders: preProcessor ? 2 : 1, sourceMap: shouldUseSourceMap},
-					cssLoaderOptions,
-					{
-						url: {
-							filter: url => {
-								// Don't handle absolute path urls
-								if (url.startsWith('/')) {
-									return false;
-								}
-
-								return true;
+				options: Object.assign({sourceMap: shouldUseSourceMap}, cssLoaderOptions, {
+					url: {
+						filter: url => {
+							// Don't handle absolute path urls
+							if (url.startsWith('/')) {
+								return false;
 							}
+
+							return true;
 						}
 					}
-				)
+				})
 			},
 			{
 				// Options for PostCSS as we reference these options twice
@@ -128,7 +124,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						// https://github.com/facebook/create-react-app/issues/2677
 						ident: 'postcss',
 						plugins: [
-							useTailwind && require('tailwindcss'),
+							useTailwind && 'tailwindcss',
 							// Fix and adjust for known flexbox issues
 							// See https://github.com/philipwalton/flexbugs
 							'postcss-flexbugs-fixes',
@@ -176,6 +172,14 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			}
 		});
 
+	const getScssStyleLoaders = cssLoaderOptions =>
+		getStyleLoaders(cssLoaderOptions, {
+			loader: require.resolve('sass-loader'),
+			options: {
+				sourceMap: shouldUseSourceMap
+			}
+		});
+
 	const getAdditionalModulePaths = paths => {
 		if (!paths) return [];
 		return Array.isArray(paths) ? paths : [paths];
@@ -185,6 +189,8 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
 		bail: true,
+		// Webpack noise constrained to errors and warnings
+		stats: 'errors-warnings',
 		// Use source maps during development builds or when specified by GENERATE_SOURCEMAP
 		devtool: shouldUseSourceMap && (isEnvProduction ? 'source-map' : 'cheap-module-source-map'),
 		// These are the "entry points" to our application.
@@ -241,6 +247,13 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 		infrastructureLogging: {
 			level: 'none'
 		},
+		ignoreWarnings: [
+			// We ignore 'Module not found' warnings from SnapshotPlugin
+			{
+				module: /SnapshotPlugin/,
+				message: /Module not found/
+			}
+		],
 		resolve: {
 			// These are the reasonable defaults supported by the React/ES6 ecosystem.
 			extensions: ['.js', '.mjs', '.jsx', '.ts', '.tsx', '.json'].filter(
@@ -305,6 +318,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						{
 							test: /\.module\.css$/,
 							use: getStyleLoaders({
+								importLoaders: 1,
 								modules: {
 									getLocalIdent,
 									mode: 'local'
@@ -316,6 +330,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 							// The `forceCSSModules` Enact build option can be set true to universally apply
 							// modular CSS support.
 							use: getStyleLoaders({
+								importLoaders: 1,
 								modules: {
 									...(app.forceCSSModules ? {getLocalIdent} : {}),
 									mode: 'icss'
@@ -330,6 +345,7 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						{
 							test: /\.module\.less$/,
 							use: getLessStyleLoaders({
+								importLoaders: 2,
 								modules: {
 									getLocalIdent,
 									mode: 'local'
@@ -339,12 +355,36 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 						{
 							test: /\.less$/,
 							use: getLessStyleLoaders({
+								importLoaders: 2,
 								modules: {
 									...(app.forceCSSModules ? {getLocalIdent} : {}),
 									mode: 'icss'
 								}
 							}),
 							sideEffects: true
+						},
+						// Opt-in support for CSS Modules, but using SASS
+						// using the extension .module.scss or .module.sass
+						{
+							test: /\.module\.(scss|sass)$/,
+							use: getScssStyleLoaders({
+								importLoaders: 3,
+								modules: {
+									getLocalIdent,
+									mode: 'local'
+								}
+							})
+						},
+						// Opt-in support for SASS (using .scss or .sass extensions)
+						{
+							test: /\.(scss|sass)$/,
+							use: getScssStyleLoaders({
+								importLoaders: 3,
+								modules: {
+									...(app.forceCSSModules ? {getLocalIdent} : {}),
+									mode: 'icss'
+								}
+							})
 						},
 						// "file" loader handles on all files not caught by the above loaders.
 						// When you `import` an asset, you get its output filename and the file
@@ -364,12 +404,6 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 					]
 				}
 			].filter(Boolean)
-		},
-		// Specific webpack-dev-server options.
-		devServer: {
-			// Broadcast http server on the localhost, port 8080.
-			host: '0.0.0.0',
-			port: 8080
 		},
 		// Target app to build for a specific environment (default 'browserslist')
 		target: app.environment,
@@ -450,7 +484,10 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			// Otherwise React will be compiled in the very slow development mode.
 			new DefinePlugin({
 				'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
-				'process.env.PUBLIC_URL': JSON.stringify(publicPath)
+				'process.env.PUBLIC_URL': JSON.stringify(publicPath),
+				// Define ENACT_PACK_ISOMORPHIC global variable to determine to use
+				// `hydrateRoot` for isomorphic build and `createRoot` for non-isomorphic build by app.
+				ENACT_PACK_ISOMORPHIC: isomorphic
 			}),
 			// Inject prefixed environment variables within code, when used
 			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^(REACT_APP|WDS_SOCKET)/.test(key))),

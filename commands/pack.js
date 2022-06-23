@@ -250,7 +250,11 @@ function api(opts = {}) {
 
 	// Do this as the first thing so that any code reading it knows the right env.
 	const configFactory = require('../config/webpack.config');
-	const config = configFactory(opts.production ? 'production' : 'development', opts['ilib-additional-path']);
+	const config = configFactory(
+		opts.production ? 'production' : 'development',
+		opts.isomorphic,
+		opts['ilib-additional-path']
+	);
 
 	// Set any entry path override
 	if (opts.entry) helper.replaceMain(config, path.resolve(opts.entry));
