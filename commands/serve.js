@@ -134,35 +134,52 @@ function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
 			'Access-Control-Allow-Methods': '*',
 			'Access-Control-Allow-Headers': '*'
 		},
-		static: {
-			// By default WebpackDevServer serves physical files from current directory
-			// in addition to all the virtual build products that it serves from memory.
-			// This is confusing because those files won’t automatically be available in
-			// production build folder unless we copy them. However, copying the whole
-			// project directory is dangerous because we may expose sensitive files.
-			// Instead, we establish a convention that only files in `public` directory
-			// get served. Our build script will copy `public` into the `build` folder.
-			// In `index.html`, you can get URL of `public` folder with %PUBLIC_URL%:
-			// <link rel="icon" href="%PUBLIC_URL%/favicon.ico">
-			// In JavaScript code, you can access it with `process.env.PUBLIC_URL`.
-			// Note that we only recommend to use `public` folder as an escape hatch
-			// for files like `favicon.ico`, `manifest.json`, and libraries that are
-			// for some reason broken when imported through webpack. If you just want to
-			// use an image, put it in `src` and `import` it from JavaScript instead.
-			directory: [path.resolve(app.context, 'public'), path.resolve(app.context, '__mocks__')],
-			publicPath: publicPath,
-			// By default files from `contentBase` will not trigger a page reload.
-			watch: {
-				// Reportedly, this avoids CPU overload on some systems.
-				// https://github.com/facebook/create-react-app/issues/293
-				// src/node_modules is not ignored to support absolute imports
-				// https://github.com/facebook/create-react-app/issues/1065
-				ignored: [
-					ignoredFiles(path.resolve(app.context, 'src')),
-					'/node_modules[\\/](?!@enact[\\/](?!.*node_modules))/'
-				]
+		static: [
+			{
+				// By default WebpackDevServer serves physical files from current directory
+				// in addition to all the virtual build products that it serves from memory.
+				// This is confusing because those files won’t automatically be available in
+				// production build folder unless we copy them. However, copying the whole
+				// project directory is dangerous because we may expose sensitive files.
+				// Instead, we establish a convention that only files in `public` directory
+				// get served. Our build script will copy `public` into the `build` folder.
+				// In `index.html`, you can get URL of `public` folder with %PUBLIC_URL%:
+				// <link rel="icon" href="%PUBLIC_URL%/favicon.ico">
+				// In JavaScript code, you can access it with `process.env.PUBLIC_URL`.
+				// Note that we only recommend to use `public` folder as an escape hatch
+				// for files like `favicon.ico`, `manifest.json`, and libraries that are
+				// for some reason broken when imported through webpack. If you just want to
+				// use an image, put it in `src` and `import` it from JavaScript instead.
+				directory: path.resolve(app.context, 'public'),
+				publicPath,
+				// By default files from `contentBase` will not trigger a page reload.
+				watch: {
+					// Reportedly, this avoids CPU overload on some systems.
+					// https://github.com/facebook/create-react-app/issues/293
+					// src/node_modules is not ignored to support absolute imports
+					// https://github.com/facebook/create-react-app/issues/1065
+					ignored: [
+						ignoredFiles(path.resolve(app.context, 'src')),
+						'/node_modules[\\/](?!@enact[\\/](?!.*node_modules))/'
+					]
+				}
+			},
+			{
+				directory: path.resolve(app.context, '__mocks__'),
+				publicPath,
+				// By default files from `contentBase` will not trigger a page reload.
+				watch: {
+					// Reportedly, this avoids CPU overload on some systems.
+					// https://github.com/facebook/create-react-app/issues/293
+					// src/node_modules is not ignored to support absolute imports
+					// https://github.com/facebook/create-react-app/issues/1065
+					ignored: [
+						ignoredFiles(path.resolve(app.context, 'src')),
+						'/node_modules[\\/](?!@enact[\\/](?!.*node_modules))/'
+					]
+				}
 			}
-		},
+		],
 		client: {
 			webSocketURL: {
 				// Enable custom sockjs pathname for websocket connection to hot reloading server.
