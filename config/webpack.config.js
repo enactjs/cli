@@ -189,6 +189,8 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
 		bail: true,
+		// Webpack noise constrained to errors and warnings
+		stats: 'errors-warnings',
 		// Use source maps during development builds or when specified by GENERATE_SOURCEMAP
 		devtool: shouldUseSourceMap && (isEnvProduction ? 'source-map' : 'cheap-module-source-map'),
 		// These are the "entry points" to our application.
@@ -402,12 +404,6 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 					]
 				}
 			].filter(Boolean)
-		},
-		// Specific webpack-dev-server options.
-		devServer: {
-			// Broadcast http server on the localhost, port 8080.
-			host: '0.0.0.0',
-			port: 8080
 		},
 		// Target app to build for a specific environment (default 'browserslist')
 		target: app.environment,
