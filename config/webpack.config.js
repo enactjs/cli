@@ -41,7 +41,7 @@ const createEnvironmentHash = require('./createEnvironmentHash');
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
-module.exports = function (env, ilibAdditionalResourcesPath) {
+module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath) {
 	process.chdir(app.context);
 
 	// Load applicable .env files into environment variables.
@@ -482,7 +482,10 @@ module.exports = function (env, ilibAdditionalResourcesPath) {
 			// Otherwise React will be compiled in the very slow development mode.
 			new DefinePlugin({
 				'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
-				'process.env.PUBLIC_URL': JSON.stringify(publicPath)
+				'process.env.PUBLIC_URL': JSON.stringify(publicPath),
+				// Define ENACT_PACK_ISOMORPHIC global variable to determine to use
+				// `hydrateRoot` for isomorphic build and `createRoot` for non-isomorphic build by app.
+				ENACT_PACK_ISOMORPHIC: isomorphic
 			}),
 			// Inject prefixed environment variables within code, when used
 			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^(REACT_APP|WDS_SOCKET)/.test(key))),

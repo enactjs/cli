@@ -31,6 +31,32 @@ npm pack -- --isomorphic
 npm pack-p -- --isomorphic
 ```
 
+If you are using React18, you need to call `hydrateRoot` instead of `createRoot` to hydrate prerendered HTML.  
+Enact CLI provides a global variable `ENACT_PACK_ISOMORPHIC` to selectively call those two APIs in your app's `index.js`.
+If you build with isomorphic option, `ENACT_PACK_ISOMORPHIC` will be `true`, otherwise `false`.  
+For more detailed information, please refer to the [React 18 migration guide](https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html#updates-to-client-rendering-apis).
+
+Whithin your **src/index.js** file, add a conditional statement to render or hydrate your app:
+```js
+/* global ENACT_PACK_ISOMORPHIC */
+import {createRoot, hydrateRoot} from 'react-dom/client';
+
+import App from './App';
+
+const appElement = (<App />);
+
+// In a browser environment, render the app to the document.
+if (typeof window !== 'undefined') {
+	if (ENACT_PACK_ISOMORPHIC) {
+		hydrateRoot(document.getElementById('root'), appElement);
+	} else {
+		createRoot(document.getElementById('root')).render(appElement);
+	}
+}
+
+export default appElement;
+```
+
 ### When to Build Isomorphically
 By default, the Enact CLI will not use isomorphic code layout, and it should not be considered part of the regular development workflow. It is advisable to only build in isomorphic format when you want to test isomorphic features or in production mode builds.
 
