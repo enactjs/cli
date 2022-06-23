@@ -1,4 +1,4 @@
-## unreleased
+## 5.0.0-rc.1 (Jun 23, 2022)
 
 ### serve
 

@@ -1,6 +1,6 @@
 {
   "name": "@enact/cli",
-  "version": "5.0.0-alpha.5",
+  "version": "5.0.0-rc.1",
   "description": "Full-featured build environment tool for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
@@ -49,8 +49,8 @@
     "@babel/preset-react": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
     "@babel/runtime": "^7.16.7",
-    "@enact/dev-utils": "^5.0.0-alpha.3",
-    "@enact/template-sandstone": "^1.5.0-alpha.3",
+    "@enact/dev-utils": "^5.0.0-rc.1",
+    "@enact/template-sandstone": "^1.5.0-rc.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.4",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.3.0",
