@@ -2,7 +2,7 @@
 
 ### serve
 
-* Fixed `enact serve` fails with multiple ports.
+* Fixed `enact serve` fails to open another port when the default port is busy.
 
 ### pack
 
