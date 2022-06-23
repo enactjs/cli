@@ -186,6 +186,8 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 	};
 
 	return {
+		// Webpack noise constrained to errors and warnings
+		stats: 'errors-warnings',
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
 		bail: true,
