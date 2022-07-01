@@ -1,4 +1,20 @@
-## unreleased
+## 5.0.0-rc.1 (Jun 23, 2022)
+
+### serve
+
+* Fixed `enact serve` fails to open another port when the default port is busy.
+
+### pack
+
+* Fixed `core-js` version to `3.22.8` for compatibility.
+* Added `ENACT_PACK_ISOMORPHIC` as a global variable to use `hydrateRoot` instead of `createRoot` from app when isomorphic build.
+* Added `ignoreWarning` config to ignore warnings from SnapshotPlugin.
+* Updated webpack config to support `sass-loader` for opt-in support of SASS/SCSS files.
+
+## 5.0.0-alpha.5 (May 31, 2022)
+
+* Updated the `lockfileVersion` of npm-shrinkwrap file to v2.
+* Updated to the latest `eslint-config-enact`, `eslint-plugin-enact`, and `@enact/dev-utils` dependency releases.
 
 ### create, template
 
@@ -7,6 +23,10 @@
 ### lint
 
 * Updated Enact ESLint config to `4.1.0` including replacing deprecated modules and updated lint rules.
+
+### test
+
+* Replaced `@testing-library/react-hooks` to `@testing-library/react` for React 18 support.
 
 ## 5.0.0-alpha.4 (April 28, 2022)
 

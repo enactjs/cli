@@ -78,18 +78,17 @@ module.exports = {
 	},
 	transform: {
 		'^.+\\.(js|jsx|ts|tsx)$': require.resolve('./babelTransform'),
-		'^.+\\.(css|less)$': require.resolve('./cssTransform.js'),
-		'^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|less|json)$)': require.resolve('./fileTransform')
+		'^.+\\.(css|less|sass|scss)$': require.resolve('./cssTransform.js'),
+		'^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|less|sass|scss|json)$)': require.resolve('./fileTransform')
 	},
 	transformIgnorePatterns: [
 		'[/\\\\]node_modules[/\\\\](?!@enact).+\\.(js|jsx|mjs|cjs|ts|tsx)$',
-		'^.+\\.module\\.(css|less)$'
+		'^.+\\.module\\.(css|less|sass|scss)$'
 	],
 	moduleNameMapper: {
-		'^.+\\.module\\.(css|less)$': require.resolve('identity-obj-proxy'),
+		'^.+\\.module\\.(css|less|sass|scss)$': require.resolve('identity-obj-proxy'),
 		'^@testing-library/jest-dom$': require.resolve('@testing-library/jest-dom'),
 		'^@testing-library/react$': require.resolve('@testing-library/react'),
-		'^@testing-library/react-hooks$': require.resolve('@testing-library/react-hooks'),
 		'^@testing-library/user-event$': require.resolve('@testing-library/user-event'),
 		'^react$': require.resolve('react'),
 		// Backward compatibility for new iLib location with old Enact
