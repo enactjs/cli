@@ -1,6 +1,6 @@
 ## unreleased
 
-* Updated to the latest `webpack` and `webpack-dev-server` dependency, and changed other dependencies that updated minor version.
+* Updated dependencies.
 
 ## 5.0.0-rc.1 (Jun 23, 2022)
 
