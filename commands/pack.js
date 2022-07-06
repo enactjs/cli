@@ -147,7 +147,7 @@ function copyPublicFolder(output) {
 // Print a detailed summary of build files.
 function printFileSizes(stats, output) {
 	const assets = stats
-		.toJson({assets: true})
+		.toJson({all: false, assets: true, cachedAssets: true})
 		.assets.filter(asset => /^(?!.*chunk).*\.(js|css|bin)$/.test(asset.name))
 		.map(asset => {
 			const size = fs.statSync(path.join(output, asset.name)).size;
