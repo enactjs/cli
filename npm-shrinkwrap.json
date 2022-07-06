@@ -2261,7 +2261,7 @@
     },
     "node_modules/@enact/dev-utils": {
       "version": "5.0.0-rc.1",
-      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#29cb4f327cee029faad812e1a0dbec1fd66173f9",
+      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#55531928fafaa1c61fbb29c29870856265db6768",
       "license": "Apache-2.0",
       "dependencies": {
         "browserslist": "^4.20.2",
@@ -3144,9 +3144,9 @@
       "dev": true
     },
     "node_modules/@types/node": {
-      "version": "18.0.2",
-      "resolved": "https://registry.npmjs.org/@types/node/-/node-18.0.2.tgz",
-      "integrity": "sha512-b947SdS4GH+g2W33wf5FzUu1KLj5FcSIiNWbU1ZyMvt/X7w48ZsVcsQoirIgE/Oq03WT5Qbn/dkY0hePi4ZXcQ=="
+      "version": "18.0.3",
+      "resolved": "https://registry.npmjs.org/@types/node/-/node-18.0.3.tgz",
+      "integrity": "sha512-HzNRZtp4eepNitP+BD6k2L6DROIDG4Q0fm4x+dwfsr6LGmROENnok75VGw40628xf+iR24WeMFcHuuBDUAzzsQ=="
     },
     "node_modules/@types/parse-json": {
       "version": "4.0.0",
@@ -25263,7 +25263,7 @@
       "requires": {}
     },
     "@enact/dev-utils": {
-      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#29cb4f327cee029faad812e1a0dbec1fd66173f9",
+      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#55531928fafaa1c61fbb29c29870856265db6768",
       "from": "@enact/dev-utils@enactjs/dev-utils#feature/WRO-748",
       "requires": {
         "browserslist": "^4.20.2",
@@ -25947,9 +25947,9 @@
       "dev": true
     },
     "@types/node": {
-      "version": "18.0.2",
-      "resolved": "https://registry.npmjs.org/@types/node/-/node-18.0.2.tgz",
-      "integrity": "sha512-b947SdS4GH+g2W33wf5FzUu1KLj5FcSIiNWbU1ZyMvt/X7w48ZsVcsQoirIgE/Oq03WT5Qbn/dkY0hePi4ZXcQ=="
+      "version": "18.0.3",
+      "resolved": "https://registry.npmjs.org/@types/node/-/node-18.0.3.tgz",
+      "integrity": "sha512-HzNRZtp4eepNitP+BD6k2L6DROIDG4Q0fm4x+dwfsr6LGmROENnok75VGw40628xf+iR24WeMFcHuuBDUAzzsQ=="
     },
     "@types/parse-json": {
       "version": "4.0.0",
