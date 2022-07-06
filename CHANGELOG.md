@@ -2,7 +2,7 @@
 
 ### pack
 
-* Fixed a `printFileSizes` issue that print build files without the snapshot binary.
+* Fixed `snapshot_blob.bin` file is not listed on the build results.
 
 ## 5.0.0-rc.1 (Jun 23, 2022)
 
