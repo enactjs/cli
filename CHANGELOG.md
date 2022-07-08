@@ -1,5 +1,7 @@
 ## unreleased
 
+* Updated dependencies.
+
 ### pack
 
 * Fixed build failure when `.env` file exists.
