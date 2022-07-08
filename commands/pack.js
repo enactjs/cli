@@ -19,7 +19,7 @@ const minimist = require('minimist');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const printBuildError = require('react-dev-utils/printBuildError');
 const stripAnsi = require('strip-ansi');
-const {ProgressPlugin, webpack} = require('webpack');
+const webpack = require('webpack');
 const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
 
 function displayHelp() {
@@ -147,7 +147,7 @@ function copyPublicFolder(output) {
 // Print a detailed summary of build files.
 function printFileSizes(stats, output) {
 	const assets = stats
-		.toJson({all: false, assets: true})
+		.toJson({all: false, assets: true, cachedAssets: true})
 		.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
 		.map(asset => {
 			const size = fs.statSync(path.join(output, asset.name)).size;
@@ -261,8 +261,6 @@ function api(opts = {}) {
 
 	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);
-
-	if (opts.verbose) opts.ProgressPlugin = ProgressPlugin;
 
 	mixins.apply(config, opts);
 
