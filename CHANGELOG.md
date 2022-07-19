@@ -1,3 +1,12 @@
+## 5.0.0 (July 19, 2022)
+
+* Updated dependencies.
+
+### pack
+
+* Fixed build failure when `.env` file exists.
+* Fixed `snapshot_blob.bin` file is not listed on the build results.
+
 ## 5.0.0-rc.1 (Jun 23, 2022)
 
 ### serve

@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
-const expand = require('dotenv-expand');
+const {expand} = require('dotenv-expand');
 
 // Loads all required .env files in correct order, for a given mode.
 // See https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
