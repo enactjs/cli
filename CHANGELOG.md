@@ -1,4 +1,4 @@
-## unreleased
+## 5.0.0 (July 19, 2022)
 
 * Updated dependencies.
 
