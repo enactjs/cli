@@ -102,6 +102,13 @@ It's easiest to begin from the start with TypeScript by using the `typescript` t
 npm install --save typescript @types/react @types/react-dom @types/jest
 ```
 
+Note: If you receive an error when building the app that says `Cannot find module 'typescript'`, try to set `NODE_PATH` to point global
+node_modules directory like below.
+
+```bash
+export NODE_PATH=/path/to/your/global/node_modules
+```
+
 Optionally, [ESLint](https://eslint.org) can be installed globally or locally and configured within a project to enable linting support within the `enact lint` command.
 
 ## Sass Support
