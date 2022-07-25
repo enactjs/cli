@@ -102,13 +102,6 @@ It's easiest to begin from the start with TypeScript by using the `typescript` t
 npm install --save typescript @types/react @types/react-dom @types/jest
 ```
 
-Note: If you receive an error when building the app that says `Cannot find module 'typescript'`, try to set `NODE_PATH` to point global
-node_modules directory like below.
-
-```bash
-export NODE_PATH=/path/to/your/global/node_modules
-```
-
 Optionally, [ESLint](https://eslint.org) can be installed globally or locally and configured within a project to enable linting support within the `enact lint` command.
 
 ## Sass Support
@@ -120,13 +113,6 @@ To use Sass, install Sass globally:
 
 ```bash
 npm install -g sass
-```
-
-Note: If you receive an error when building the app that says `Cannot find module 'sass'`, try to set `NODE_PATH` to point global
-node_modules directory like below.
-
-```bash
-export NODE_PATH=/path/to/your/global/node_modules
 ```
 
 Now you can rename `src/App.css` to `src/App.scss` or `src/App.sass` and for using CSS modules, `src/App.module.scss` or `src/App.module.sass`. And update `src/App.js` to import `src/App.scss`. Enact CLI will compile these files properly through webpack for you.
@@ -143,8 +129,6 @@ To use Tailwindcss, install Tailwindcss globally:
 ```bash
 npm install -g tailwindcss
 ```
-
-Note: If you receive an error when building the app that says `Cannot find module 'tailwindcss'`, try to set `NODE_PATH` to point global node_modules directory.
 
 And then run the init command to generate tailwind.config.js in your app:
 
@@ -203,6 +187,14 @@ const MainPanel = kind({
 ```
 
 More information can be found [here](https://tailwindcss.com/docs) to learn about tailwindcss.
+
+### Troubleshoot: Cannot find module
+Note: If you receive an error when building the app that says `Cannot find module` after installing the module globally,
+try to set `NODE_PATH` to point global node_modules directory like below.
+
+```bash
+export NODE_PATH=/path/to/your/global/node_modules
+```
 
 ## Isomorphic Support & Prerendering
 By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wide variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
