@@ -188,8 +188,8 @@ const MainPanel = kind({
 
 More information can be found [here](https://tailwindcss.com/docs) to learn about tailwindcss.
 
-### Troubleshoot: Cannot find module
-Note: If you receive an error when building the app that says `Cannot find module` after installing the module globally,
+### Troubleshooting
+If you receive an error when building the app that says `Cannot find module: 'typescript/sass/tailwindcss'` after installing the modules above(e.g. `typescript`, `sass`, or `tailwindcss`) globally,
 try to set `NODE_PATH` to point global node_modules directory like below.
 
 ```bash
