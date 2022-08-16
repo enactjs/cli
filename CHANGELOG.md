@@ -2,7 +2,7 @@
 
 ### pack
 
-* Fixed `forceCSSModules` flag is not enforce modular CSS.
+* Fixed Enact project setting `forceCSSModules` to enforce modular CSS.
 
 ## 5.0.0 (July 19, 2022)
 
