@@ -92,7 +92,6 @@ For example:
 }
 ```
 
-
 ## Displaying Lint Output in the Editor
 
 Some editors, including Sublime Text, Atom, and Visual Studio Code, provide plugins for ESLint.
@@ -104,6 +103,21 @@ You would need to install an ESLint plugin for your editor first.
 Ever since ESLint 6, global installs of ESLint configs are no longer supported.
 To work around this new limitation, while still supporting in-editor linting, we've created a new [eslint-config-enact-proxy](https://github.com/enactjs/eslint-config-enact-proxy) package.
 The [eslint-config-enact-proxy](https://github.com/enactjs/eslint-config-enact-proxy) acts like a small proxy config, redirecting ESLint to use a globally-installed Enact ESLint config.
+In order for in-editor linting, `eslint-config-enact-proxy` should be installed locally on a project:
+
+```sh
+npm install --save-dev eslint-config-enact-proxy
+```
+
+And you should modify `package.json` or `.eslintrc` in the project's root, change the following lines:
+
+```json
+{
+  "extends": "enact-proxy"
+}
+```
+>**NOTE**: For strict mode, use `"extends": "enact-proxy/strict"`.
+
 In order for in-editor linting to work with our updated ESLint config, you'll need to upgrade to ESLint 7 or later. This can be installed globally by running:
 
 ```sh
