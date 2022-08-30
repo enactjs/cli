@@ -1,3 +1,9 @@
+## 4.1.8 (August 30, 2022)
+
+### pack
+
+* `PrerenderPlugin`: Updated locale preset with the latest language list.
+
 ## 4.1.7 (February 18, 2022)
 
 ### pack
