@@ -1,7 +1,8 @@
-## unreleased
+## 5.0.1 (August 30, 2022)
 
 ### pack
 
+* Updated @enact/dev-utils fixing isomorphic build with the latest language list.
 * Fixed Enact project setting `forceCSSModules` to enforce modular CSS.
 
 ## 5.0.0 (July 19, 2022)
