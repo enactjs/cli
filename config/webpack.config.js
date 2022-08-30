@@ -320,8 +320,7 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 							use: getStyleLoaders({
 								importLoaders: 1,
 								modules: {
-									getLocalIdent,
-									mode: 'local'
+									getLocalIdent
 								}
 							})
 						},
@@ -332,8 +331,7 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 							use: getStyleLoaders({
 								importLoaders: 1,
 								modules: {
-									...(app.forceCSSModules ? {getLocalIdent} : {}),
-									mode: 'icss'
+									...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
 								}
 							}),
 							// Don't consider CSS imports dead code even if the
@@ -347,8 +345,7 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 							use: getLessStyleLoaders({
 								importLoaders: 2,
 								modules: {
-									getLocalIdent,
-									mode: 'local'
+									getLocalIdent
 								}
 							})
 						},
@@ -357,8 +354,7 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 							use: getLessStyleLoaders({
 								importLoaders: 2,
 								modules: {
-									...(app.forceCSSModules ? {getLocalIdent} : {}),
-									mode: 'icss'
+									...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
 								}
 							}),
 							sideEffects: true
@@ -370,8 +366,7 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 							use: getScssStyleLoaders({
 								importLoaders: 3,
 								modules: {
-									getLocalIdent,
-									mode: 'local'
+									getLocalIdent
 								}
 							})
 						},
@@ -381,8 +376,7 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 							use: getScssStyleLoaders({
 								importLoaders: 3,
 								modules: {
-									...(app.forceCSSModules ? {getLocalIdent} : {}),
-									mode: 'icss'
+									...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
 								}
 							})
 						},

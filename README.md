@@ -92,7 +92,6 @@ For example:
 }
 ```
 
-
 ## Displaying Lint Output in the Editor
 
 Some editors, including Sublime Text, Atom, and Visual Studio Code, provide plugins for ESLint.
@@ -104,6 +103,21 @@ You would need to install an ESLint plugin for your editor first.
 Ever since ESLint 6, global installs of ESLint configs are no longer supported.
 To work around this new limitation, while still supporting in-editor linting, we've created a new [eslint-config-enact-proxy](https://github.com/enactjs/eslint-config-enact-proxy) package.
 The [eslint-config-enact-proxy](https://github.com/enactjs/eslint-config-enact-proxy) acts like a small proxy config, redirecting ESLint to use a globally-installed Enact ESLint config.
+`eslint-config-enact-proxy` needs to be installed locally on a project to enable in-editor linting:
+
+```sh
+npm install --save-dev eslint-config-enact-proxy
+```
+
+Also, you need to modify `eslintConfig` property in `package.json`:
+
+```json
+  "eslintConfig": {
+    "extends": "enact-proxy"
+  },
+```
+>**NOTE**: For strict mode, use `"extends": "enact-proxy/strict"`.
+
 In order for in-editor linting to work with our updated ESLint config, you'll need to upgrade to ESLint 7 or later. This can be installed globally by running:
 
 ```sh
@@ -113,7 +127,7 @@ npm install -g eslint
 Then, you will need to uninstall any previous globally-installed Enact linting package (everything but eslint itself):
 
 ```sh
-npm remove -g eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-babel @babel/eslint-parser eslint-plugin-jest eslint-plugin-enact eslint-config-enact
+npm uninstall -g eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-babel @babel/eslint-parser eslint-plugin-jest eslint-plugin-enact eslint-config-enact
 ```
 
 ## Copyright and License Information
