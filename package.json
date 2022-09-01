@@ -5,6 +5,7 @@
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
   "repository": "https://github.com/enactjs/cli",
+  "homepage": "https://enactjs.com",
   "license": "Apache-2.0",
   "bin": {
     "enact": "./bin/enact.js"
