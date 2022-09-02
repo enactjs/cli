@@ -1,3 +1,9 @@
+## unreleased
+
+### serve
+
+* Updated devServerConfig to replace deprecated `onBeforeSetupMiddleware` and `onAfterSetupMiddleware` with `setupMiddlewares`.
+
 ## 5.0.1 (August 30, 2022)
 
 ### pack
