@@ -225,7 +225,9 @@ function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
 				// Keep `evalSourceMapMiddleware`
 				// middlewares before `redirectServedPath` otherwise will not have any effect
 				// This lets us fetch source contents from webpack for the error overlay
-				evalSourceMapMiddleware(devServer),
+				evalSourceMapMiddleware(devServer)
+			);
+			middlewares.push(
 				// Redirect to `PUBLIC_URL` or `homepage`/`enact.publicUrl` from `package.json`
 				// if url not match
 				redirectServedPathMiddleware(publicPath)
