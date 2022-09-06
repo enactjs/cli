@@ -221,17 +221,20 @@ function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
 			if (fs.existsSync(proxySetup)) {
 				require(proxySetup)(devServer.app);
 			}
+
 			middlewares.unshift(
 				// Keep `evalSourceMapMiddleware`
 				// middlewares before `redirectServedPath` otherwise will not have any effect
 				// This lets us fetch source contents from webpack for the error overlay
 				evalSourceMapMiddleware(devServer)
 			);
+
 			middlewares.push(
 				// Redirect to `PUBLIC_URL` or `homepage`/`enact.publicUrl` from `package.json`
 				// if url not match
 				redirectServedPathMiddleware(publicPath)
 			);
+
 			return middlewares;
 		}
 	};
