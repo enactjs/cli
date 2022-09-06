@@ -2,7 +2,7 @@
 
 ### serve
 
-* Updated devServerConfig to replace deprecated `onBeforeSetupMiddleware` and `onAfterSetupMiddleware` with `setupMiddlewares`.
+* Updated devServerConfig to replace deprecated API.
 
 ## 5.0.1 (August 30, 2022)
 
