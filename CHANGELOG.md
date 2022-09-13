@@ -1,3 +1,9 @@
+## unreleased
+
+### serve
+
+* Fixed deprecation warning regarding middleware.
+
 ## 5.0.1 (August 30, 2022)
 
 ### pack

@@ -211,22 +211,31 @@ function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
 		},
 		// `proxy` is run between `before` and `after` `webpack-dev-server` hooks
 		proxy,
-		onBeforeSetupMiddleware(devServer) {
-			// Keep `evalSourceMapMiddleware`
-			// middlewares before `redirectServedPath` otherwise will not have any effect
-			// This lets us fetch source contents from webpack for the error overlay
-			devServer.app.use(evalSourceMapMiddleware(devServer));
+		setupMiddlewares(middlewares, devServer) {
+			if (!devServer) {
+				throw new Error('webpack-dev-server is not defined');
+			}
 
 			// Optionally register app-side proxy middleware if it exists
 			const proxySetup = path.join(process.cwd(), 'src', 'setupProxy.js');
 			if (fs.existsSync(proxySetup)) {
 				require(proxySetup)(devServer.app);
 			}
-		},
-		onAfterSetupMiddleware(devServer) {
-			// Redirect to `PUBLIC_URL` or `homepage`/`enact.publicUrl` from `package.json`
-			// if url not match
-			devServer.app.use(redirectServedPathMiddleware(publicPath));
+
+			middlewares.unshift(
+				// Keep `evalSourceMapMiddleware`
+				// middlewares before `redirectServedPath` otherwise will not have any effect
+				// This lets us fetch source contents from webpack for the error overlay
+				evalSourceMapMiddleware(devServer)
+			);
+
+			middlewares.push(
+				// Redirect to `PUBLIC_URL` or `homepage`/`enact.publicUrl` from `package.json`
+				// if url not match
+				redirectServedPathMiddleware(publicPath)
+			);
+
+			return middlewares;
 		}
 	};
 }
