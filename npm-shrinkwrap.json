@@ -1,12 +1,12 @@
 {
   "name": "@enact/cli",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "lockfileVersion": 2,
   "requires": true,
   "packages": {
     "": {
       "name": "@enact/cli",
-      "version": "5.0.1",
+      "version": "5.0.2",
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/core": "7.18.9",
