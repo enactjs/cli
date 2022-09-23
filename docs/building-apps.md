@@ -22,6 +22,7 @@ order: 4
             "all" - All locales that iLib supports
     -s, --snapshot    Generate V8 snapshot blob
                       (requires V8_MKSNAPSHOT set)
+    -c, --custom-skin Build with a custom skin
     --stats           Output bundle analysis file
 
 ```
@@ -195,6 +196,10 @@ try to set `NODE_PATH` to point global node_modules directory like below.
 ```bash
 export NODE_PATH=/path/to/your/global/node_modules
 ```
+
+## Custom Skin Support
+
+Enact supports custom skin features to let you easily override the colors of components. All you need to do is build your app with `--custom-skin` option and add a JSON file named `custom_skin.css` which includes a preset of colors, under `customizations` folder in the build result.
 
 ## Isomorphic Support & Prerendering
 By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wide variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
