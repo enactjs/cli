@@ -199,7 +199,7 @@ export NODE_PATH=/path/to/your/global/node_modules
 
 ## Custom Skin Support
 
-Enact supports custom skin features to let you easily override the colors of components. All you need to do is build your app with `--custom-skin` option and add a JSON file named `custom_skin.css` which includes a preset of colors, under the `customizations` folder in the build result like below.
+Sandstone supports custom skin features to let you easily override the colors of components. All you need to do is build your app with `--custom-skin` option and add a JSON file named `custom_skin.css` which includes a preset of colors, under the `customizations` folder in the build result like below.
 
 ```none
 my-app/
