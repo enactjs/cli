@@ -22,6 +22,7 @@ order: 4
             "all" - All locales that iLib supports
     -s, --snapshot    Generate V8 snapshot blob
                       (requires V8_MKSNAPSHOT set)
+    -c, --custom-skin Build with a custom skin
     --stats           Output bundle analysis file
 
 ```
@@ -194,6 +195,27 @@ try to set `NODE_PATH` to point global node_modules directory like below.
 
 ```bash
 export NODE_PATH=/path/to/your/global/node_modules
+```
+
+## Custom Skin Support
+
+Sandstone supports custom skin features to let you easily override the colors of components. All you need to do is build your app with `--custom-skin` option and add a JSON file named `custom_skin.css` which includes a preset of colors, under the `customizations` folder in the build result like below.
+
+```none
+my-app/
+  README.md
+  .gitignore
+  package.json
+  dist/
+    customizations/
+      custom_skin.css
+    main.css
+    main.js
+    ...
+  node_modules/
+  src/
+  resources/
+  webos-meta/
 ```
 
 ## Isomorphic Support & Prerendering

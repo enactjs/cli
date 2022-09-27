@@ -46,6 +46,7 @@ function displayHelp() {
 	console.log('    -s, --snapshot    Generate V8 snapshot blob');
 	console.log('                      (requires V8_MKSNAPSHOT set)');
 	console.log('    -m, --meta        JSON to override package.json enact metadata');
+	console.log('    -c, --custom-skin Build with a custom skin');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    --verbose         Verbose log build details');
 	console.log('    -v, --version     Display version information');
@@ -59,7 +60,6 @@ function displayHelp() {
 			--externals           	Specify a local directory path to the standalone external framework
 			--externals-public    	Remote public path to the external framework for use injecting into HTML
 			--externals-polyfill  	Flag whether to use external polyfill (or include in framework build)
-			--custom-skin         	To use a custom skin for build
 			--ilib-additional-path	Specify iLib additional resources path
 	*/
 	process.exit(0);
@@ -301,6 +301,7 @@ function cli(args) {
 			l: 'locales',
 			s: 'snapshot',
 			m: 'meta',
+			c: 'custom-skin',
 			w: 'watch',
 			h: 'help'
 		}
