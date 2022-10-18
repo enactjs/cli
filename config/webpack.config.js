@@ -301,7 +301,7 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 							exclude: /node_modules.(?!@enact)/,
 							loader: require.resolve('babel-loader'),
 							options: {
-								configFile: path.join(__dirname, 'babel.config.js'),
+								presets: ['babel-preset-enact-app'],
 								babelrc: false,
 								// This is a feature of `babel-loader` for webpack (not Babel itself).
 								// It enables caching results in ./node_modules/.cache/babel-loader/
