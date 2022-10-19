@@ -13,7 +13,7 @@ const path = require('path');
 const babelJest = require('babel-jest').default;
 
 module.exports = babelJest.createTransformer({
-	presets: [require.resolve('babel-preset-enact-app')],
+	extends: path.join(__dirname, '..', 'babel.config.js'),
 	plugins: [
 		require.resolve('@babel/plugin-transform-modules-commonjs'),
 		require.resolve('babel-plugin-dynamic-import-node')
