@@ -45,7 +45,7 @@
   "dependencies": {
     "@babel/core": "7.18.9",
     "@babel/eslint-plugin": "7.17.7",
-    "@enact/dev-utils": "5.0.2",
+    "@enact/dev-utils": "github:enactjs/dev-utils#feature/WRO-697",
     "@enact/template-sandstone": "1.5.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.7",
     "@testing-library/jest-dom": "5.16.4",
