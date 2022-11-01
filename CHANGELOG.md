@@ -1,5 +1,7 @@
 ## unreleased
 
+* Unpinned versions of dependencies.
+
 ### pack
 
 * Added `--custom-skin` option to build with custom skin for sandstone apps.
