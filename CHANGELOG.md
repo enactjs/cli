@@ -1,4 +1,4 @@
-## 5.1.0 (November 2, 2022)
+## 5.1.0 (November 4, 2022)
 
 * Unpinned versions of dependencies.
 
