@@ -1,8 +1,13 @@
 ## unreleased
 
+* Updated `babel.config.js` to use `babel-preset-enact` that supporting own enact app config.
+
+## 5.1.0 (November 4, 2022)
+
+* Unpinned versions of dependencies.
+
 ### pack
 
-* Updated `babel.config.js` to use `babel-preset-enact-app` that supporting own enact app config.
 * Added `--custom-skin` option to build with custom skin for sandstone apps.
 
 ## 5.0.2 (September 16, 2022)
