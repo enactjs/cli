@@ -33,7 +33,7 @@
         "eslint": "^8.20.0",
         "eslint-config-enact": "github:enactjs/eslint-config-enact#feature/WRO-697",
         "eslint-plugin-enact": "^1.0.1",
-        "eslint-plugin-jest": "^26.6.0",
+        "eslint-plugin-jest": "^26.9.0",
         "eslint-plugin-jsx-a11y": "^6.6.0",
         "eslint-plugin-react": "^7.30.1",
         "eslint-plugin-react-hooks": "^4.6.0",
@@ -2312,7 +2312,7 @@
     },
     "node_modules/@enact/dev-utils": {
       "version": "5.1.0",
-      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#889a3db306b932c0d8ea34c54ba12b39a31e6edc",
+      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#f03d4c1f2fa339a4d06cb3ff8b647e42dac4b319",
       "license": "Apache-2.0",
       "dependencies": {
         "browserslist": "^4.21.1",
@@ -6460,7 +6460,7 @@
     },
     "node_modules/eslint-config-enact": {
       "version": "4.1.2",
-      "resolved": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#683230db0e09580ca30ac3b7b79ba2eddfca1efc",
+      "resolved": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#72802f23fdd45ebd5a99aae962129b6f549dcc2e",
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/core": "^7.20.5",
@@ -6472,7 +6472,7 @@
         "babel-preset-enact": "github:enactjs/babel-preset-enact#feature/WRO-697",
         "eslint": "^8.28.0",
         "eslint-plugin-enact": "^1.0.1",
-        "eslint-plugin-jest": "^27.1.6",
+        "eslint-plugin-jest": "^26.9.0",
         "eslint-plugin-jsx-a11y": "^6.6.1",
         "eslint-plugin-react": "^7.31.11",
         "eslint-plugin-react-hooks": "^4.6.0",
@@ -6481,29 +6481,6 @@
       },
       "peerDependencies": {
         "eslint": "^8.25.0"
-      }
-    },
-    "node_modules/eslint-config-enact/node_modules/eslint-plugin-jest": {
-      "version": "27.2.0",
-      "resolved": "https://registry.npmjs.org/eslint-plugin-jest/-/eslint-plugin-jest-27.2.0.tgz",
-      "integrity": "sha512-KGIYtelk4rIhKocxRKUEeX+kJ0ZCab/CiSgS8BMcKD7AY7YxXhlg/d51oF5jq2rOrtuJEDYWRwXD95l6l2vtrA==",
-      "dependencies": {
-        "@typescript-eslint/utils": "^5.10.0"
-      },
-      "engines": {
-        "node": "^14.15.0 || ^16.10.0 || >=18.0.0"
-      },
-      "peerDependencies": {
-        "@typescript-eslint/eslint-plugin": "^5.0.0",
-        "eslint": "^7.0.0 || ^8.0.0"
-      },
-      "peerDependenciesMeta": {
-        "@typescript-eslint/eslint-plugin": {
-          "optional": true
-        },
-        "jest": {
-          "optional": true
-        }
       }
     },
     "node_modules/eslint-config-prettier": {
@@ -19163,7 +19140,7 @@
       "requires": {}
     },
     "@enact/dev-utils": {
-      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#889a3db306b932c0d8ea34c54ba12b39a31e6edc",
+      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#f03d4c1f2fa339a4d06cb3ff8b647e42dac4b319",
       "from": "@enact/dev-utils@github:enactjs/dev-utils#feature/WRO-697",
       "requires": {
         "browserslist": "^4.21.1",
@@ -22390,7 +22367,7 @@
       }
     },
     "eslint-config-enact": {
-      "version": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#683230db0e09580ca30ac3b7b79ba2eddfca1efc",
+      "version": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#72802f23fdd45ebd5a99aae962129b6f549dcc2e",
       "from": "eslint-config-enact@github:enactjs/eslint-config-enact#feature/WRO-697",
       "requires": {
         "@babel/core": "^7.20.5",
@@ -22402,22 +22379,12 @@
         "babel-preset-enact": "github:enactjs/babel-preset-enact#feature/WRO-697",
         "eslint": "^8.28.0",
         "eslint-plugin-enact": "^1.0.1",
-        "eslint-plugin-jest": "^27.1.6",
+        "eslint-plugin-jest": "^26.9.0",
         "eslint-plugin-jsx-a11y": "^6.6.1",
         "eslint-plugin-react": "^7.31.11",
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-plugin-testing-library": "^5.9.1",
         "react": "^18.2.0"
-      },
-      "dependencies": {
-        "eslint-plugin-jest": {
-          "version": "27.2.0",
-          "resolved": "https://registry.npmjs.org/eslint-plugin-jest/-/eslint-plugin-jest-27.2.0.tgz",
-          "integrity": "sha512-KGIYtelk4rIhKocxRKUEeX+kJ0ZCab/CiSgS8BMcKD7AY7YxXhlg/d51oF5jq2rOrtuJEDYWRwXD95l6l2vtrA==",
-          "requires": {
-            "@typescript-eslint/utils": "^5.10.0"
-          }
-        }
       }
     },
     "eslint-config-prettier": {
