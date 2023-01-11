@@ -11,7 +11,7 @@
       "dependencies": {
         "@babel/core": "^7.18.9",
         "@babel/eslint-plugin": "^7.17.7",
-        "@enact/dev-utils": "github:enactjs/dev-utils#feature/WRO-697",
+        "@enact/dev-utils": "github:enactjs/dev-utils#feature/WRO-697_test",
         "@enact/template-sandstone": "^1.5.1",
         "@pmmmwh/react-refresh-webpack-plugin": "^0.5.7",
         "@testing-library/jest-dom": "^5.16.4",
@@ -30,14 +30,7 @@
         "css-minimizer-webpack-plugin": "^3.4.1",
         "dotenv": "^16.0.1",
         "dotenv-expand": "^8.0.3",
-        "eslint": "^8.20.0",
         "eslint-config-enact": "github:enactjs/eslint-config-enact#feature/WRO-697",
-        "eslint-plugin-enact": "^1.0.1",
-        "eslint-plugin-jest": "^26.9.0",
-        "eslint-plugin-jsx-a11y": "^6.6.0",
-        "eslint-plugin-react": "^7.30.1",
-        "eslint-plugin-react-hooks": "^4.6.0",
-        "eslint-plugin-testing-library": "^5.5.1",
         "eslint-webpack-plugin": "^3.2.0",
         "expose-loader": "^3.1.0",
         "file-loader": "^6.2.0",
@@ -2312,7 +2305,7 @@
     },
     "node_modules/@enact/dev-utils": {
       "version": "5.1.0",
-      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#f03d4c1f2fa339a4d06cb3ff8b647e42dac4b319",
+      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#fb99bd2e8a28029213e9d2a2b18ea722067bb584",
       "license": "Apache-2.0",
       "dependencies": {
         "browserslist": "^4.21.1",
@@ -19140,8 +19133,8 @@
       "requires": {}
     },
     "@enact/dev-utils": {
-      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#f03d4c1f2fa339a4d06cb3ff8b647e42dac4b319",
-      "from": "@enact/dev-utils@github:enactjs/dev-utils#feature/WRO-697",
+      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#fb99bd2e8a28029213e9d2a2b18ea722067bb584",
+      "from": "@enact/dev-utils@github:enactjs/dev-utils#feature/WRO-697_test",
       "requires": {
         "browserslist": "^4.21.1",
         "chalk": "^4.1.2",
