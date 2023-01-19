@@ -44,7 +44,6 @@
   ],
   "dependencies": {
     "@babel/core": "^7.20.12",
-    "@babel/eslint-plugin": "^7.19.1",
     "@babel/plugin-proposal-decorators": "^7.20.7",
     "@babel/plugin-proposal-export-default-from": "^7.18.10",
     "@babel/plugin-transform-react-inline-elements": "^7.18.6",
@@ -53,7 +52,7 @@
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.18.6",
     "@babel/runtime": "^7.20.7",
-    "@enact/dev-utils": "^5.1.0",
+    "@enact/dev-utils": "github:enactjs/dev-utils#feature/WRP-4410_2",
     "@enact/template-sandstone": "^1.5.2",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
     "@testing-library/jest-dom": "^5.16.5",
