@@ -2309,7 +2309,7 @@
     },
     "node_modules/@enact/dev-utils": {
       "version": "5.1.0",
-      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#e34f7967caf9aaf79921d46249d297264aee6b93",
+      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#99d9e0dba5805b5ccd34ea785efcd93800428d21",
       "license": "Apache-2.0",
       "dependencies": {
         "browserslist": "^4.21.4",
@@ -4477,7 +4477,7 @@
     },
     "node_modules/babel-preset-enact": {
       "version": "0.1.0",
-      "resolved": "git+ssh://git@github.com/enactjs/babel-preset-enact.git#ae166c6707c76fb7c59099780b495c3197cf90c4",
+      "resolved": "git+ssh://git@github.com/enactjs/babel-preset-enact.git#b47d61341513b4c2fe753aa4a98451dc565ef3c3",
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/plugin-proposal-decorators": "^7.20.13",
@@ -6484,7 +6484,7 @@
     },
     "node_modules/eslint-config-enact": {
       "version": "4.1.2",
-      "resolved": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#d857467f5a8816480e093a0812742a8674d5eeaa",
+      "resolved": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#d8fd3f5cf1123d1f8246592f5e644244c6f89a36",
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/core": "^7.20.5",
@@ -19215,7 +19215,7 @@
       "requires": {}
     },
     "@enact/dev-utils": {
-      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#e34f7967caf9aaf79921d46249d297264aee6b93",
+      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#99d9e0dba5805b5ccd34ea785efcd93800428d21",
       "from": "@enact/dev-utils@github:enactjs/dev-utils#feature/WRO-697",
       "requires": {
         "browserslist": "^4.21.4",
@@ -20903,7 +20903,7 @@
       }
     },
     "babel-preset-enact": {
-      "version": "git+ssh://git@github.com/enactjs/babel-preset-enact.git#ae166c6707c76fb7c59099780b495c3197cf90c4",
+      "version": "git+ssh://git@github.com/enactjs/babel-preset-enact.git#b47d61341513b4c2fe753aa4a98451dc565ef3c3",
       "from": "babel-preset-enact@github:enactjs/babel-preset-enact#feature/WRO-697",
       "requires": {
         "@babel/plugin-proposal-decorators": "^7.20.13",
@@ -22466,7 +22466,7 @@
       }
     },
     "eslint-config-enact": {
-      "version": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#d857467f5a8816480e093a0812742a8674d5eeaa",
+      "version": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#d8fd3f5cf1123d1f8246592f5e644244c6f89a36",
       "from": "eslint-config-enact@github:enactjs/eslint-config-enact#feature/WRO-697",
       "requires": {
         "@babel/core": "^7.20.5",
