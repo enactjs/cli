@@ -103,6 +103,7 @@ function api({cliInfo = false, dev = false} = {}) {
 				console.log(chalk.yellow.bold('==Enact Components=='));
 				[
 					'@enact/dev-utils',
+					'babel-preset-enact',
 					'eslint-config-enact',
 					'eslint-plugin-enact',
 					'postcss-resolution-independence'
