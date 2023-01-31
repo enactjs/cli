@@ -43,6 +43,7 @@
     "upupdowndownleftrightleftrightbastart"
   ],
   "dependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.20.11",
     "@enact/dev-utils": "github:enactjs/dev-utils#feature/WRO-697",
     "@enact/template-sandstone": "^1.5.2",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
@@ -52,6 +53,7 @@
     "@typescript-eslint/eslint-plugin": "^5.48.2",
     "babel-jest": "^27.5.1",
     "babel-loader": "^8.2.5",
+    "babel-plugin-dynamic-import-node": "^2.3.3",
     "babel-plugin-transform-rename-import": "^2.3.0",
     "babel-preset-enact": "^0.1.0",
     "case-sensitive-paths-webpack-plugin": "^2.4.0",
