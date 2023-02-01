@@ -43,6 +43,7 @@
     "upupdowndownleftrightleftrightbastart"
   ],
   "dependencies": {
+    "@babel/eslint-plugin": "^7.19.1",
     "@babel/plugin-transform-modules-commonjs": "^7.20.11",
     "@enact/dev-utils": "github:enactjs/dev-utils#feature/WRO-697",
     "@enact/template-sandstone": "^1.5.2",
