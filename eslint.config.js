@@ -1,7 +1,6 @@
 const enactPlugin = require('eslint-plugin-enact');
 const importPlugin = require('eslint-plugin-import');
 const prettierPlugin = require('eslint-plugin-prettier');
-const prettierRecommendedPlugin = require('eslint-plugin-prettier/recommended');
 const globals = require('globals');
 
 module.exports = [
@@ -22,8 +21,7 @@ module.exports = [
 		plugins: {
 			enactPlugin,
 			importPlugin,
-			prettierPlugin,
-			prettierRecommendedPlugin
+			prettierPlugin
 		},
 		rules: {
 		  'import/no-unresolved': ['error', {commonjs: true, caseSensitive: true}],
