@@ -216,7 +216,7 @@ function configurePackage(bare) {
 	app.eslintConfig = eslintConfig;
 	app.eslintIgnore = app.eslintIgnore || [];
 	app.eslintIgnore = app.eslintIgnore.concat(eslintIgnore.filter(l => !app.eslintIgnore.includes(l)));
-	backupOld(['.eslintignore', '.eslint.config.js', '.eslintrc.yaml', '.eslintrc.yml', '.eslintrc.json', '.eslintrc']);
+	backupOld(['.eslintignore', '.eslint.js', '.eslintrc.yaml', '.eslintrc.yml', '.eslintrc.json', '.eslintrc']);
 
 	// Sort the package.json output
 	['dependencies', 'devDependencies'].forEach(obj => {
