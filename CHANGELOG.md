@@ -1,3 +1,12 @@
+## 5.1.1 (February 10, 2023)
+
+* Fixed `eslint-plugin-react` version to `7.31.11` temporarily.
+* Updated dependencies.
+
+### pack
+
+* Updated `babel.config.js` to use `babel-preset-enact` module that holds the babel config for Enact.
+
 ## 5.1.0 (November 4, 2022)
 
 * Unpinned versions of dependencies.
