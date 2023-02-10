@@ -1,4 +1,7 @@
-## unreleased
+## 5.1.1 (February 10, 2023)
+
+* Fixed `eslint-plugin-react` version to `7.31.11` temporarily.
+* Updated dependencies.
 
 ### pack
 
