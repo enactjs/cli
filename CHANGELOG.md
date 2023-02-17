@@ -1,3 +1,10 @@
+## unrelease
+
+### pack
+
+* Updated Babel support:
+  * Added `plugin-proposal-export-namespace-from`, `plugin-proposal-numeric-separator`, `plugin-syntax-dynamic-import`, `plugin-proposal-optional-chaining`, and `plugin-proposal-nullish-coalescing-operator`
+
 ## 5.1.1 (February 10, 2023)
 
 * Fixed `eslint-plugin-react` version to `7.31.11` temporarily.
