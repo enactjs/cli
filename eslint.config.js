@@ -1,10 +1,11 @@
 const enactPlugin = require('eslint-plugin-enact');
 const importPlugin = require('eslint-plugin-import');
 const prettierPlugin = require('eslint-plugin-prettier');
+const prettierRecommended = require('eslint-plugin-prettier/configs/recommended');
 
 module.exports = [
 	{
-		files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+		...prettierRecommended,
 		languageOptions: {
 			ecmaVersion: 'latest',
 			sourceType: 'module',
