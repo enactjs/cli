@@ -2,8 +2,7 @@
 
 ### pack
 
-* Updated Babel support:
-  * Added `plugin-proposal-export-namespace-from`, `plugin-proposal-numeric-separator`, `plugin-syntax-dynamic-import`, `plugin-proposal-optional-chaining`, and `plugin-proposal-nullish-coalescing-operator`
+* Updated `babel-preset-enact` to `0.1.1` to fix isomorphic build failures on Node 12.
 
 ## 5.1.1 (February 10, 2023)
 
