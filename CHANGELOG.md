@@ -6,7 +6,7 @@
 
 ### test
 
-* Added `@testing-library/dom` version to 8.x to fix unit test failures temporarily.
+* Added `@testing-library/dom` 8.x to fix unit test failures temporarily.
 
 ## 5.1.1 (February 10, 2023)
 
