@@ -1,9 +1,12 @@
-## 5.1.2 (February 17, 2023)
+## 5.1.2 (February 20, 2023)
 
 ### pack
 
-* Fixed `@testing-library/dom` version to `8.20.0` temporarily.
 * Updated `babel-preset-enact` to `0.1.1` to fix isomorphic build failures on Node 12.
+
+### test
+
+* Fixed `@testing-library/dom` version to `8.20.0` temporarily.
 
 ## 5.1.1 (February 10, 2023)
 
