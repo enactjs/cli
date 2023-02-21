@@ -1,3 +1,8 @@
+## unreleased
+
+* Upgraded `eslint-plugin-react` version to `7.32.2`.
+* Replaced `.eslintrc.js` with new configuration file `eslint.config.js`.
+
 ## 5.1.0 (November 4, 2022)
 
 * Unpinned versions of dependencies.
