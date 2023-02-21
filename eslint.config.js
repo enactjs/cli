@@ -1,11 +1,9 @@
 const enactPlugin = require('eslint-plugin-enact');
 const importPlugin = require('eslint-plugin-import');
 const prettierPlugin = require('eslint-plugin-prettier');
-const prettierRecommended = require('eslint-plugin-prettier/configs/recommended');
 
 module.exports = [
 	{
-		...prettierRecommended,
 		languageOptions: {
 			ecmaVersion: 'latest',
 			sourceType: 'module',
@@ -17,17 +15,17 @@ module.exports = [
 		},
 		plugins: {
 			enactPlugin,
-			importPlugin,
+			import: importPlugin,
 			prettierPlugin
 		},
 		rules: {
-			'importPlugin/no-unresolved': ['error', {commonjs: true, caseSensitive: true}],
-			'importPlugin/named': 'error',
-			'importPlugin/first': 'warn',
-			'importPlugin/no-duplicates': 'error',
-			'importPlugin/extensions': ['warn', 'always', {js: 'never', json: 'always'}],
-			'importPlugin/newline-after-import': 'warn',
-			'importPlugin/order': [
+			'import/no-unresolved': ['error', {commonjs: true, caseSensitive: true}],
+			'import/named': 'error',
+			'import/first': 'warn',
+			'import/no-duplicates': 'error',
+			'import/extensions': ['warn', 'always', {js: 'never', json: 'always'}],
+			'import/newline-after-import': 'warn',
+			'import/order': [
 				'warn',
 				{
 					'newlines-between': 'never',
