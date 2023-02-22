@@ -17,8 +17,8 @@ module.exports = [
 		plugins: {
 			enactPlugin,
 			import: importPlugin,
-			prettier: prettierRecommended,
-			prettierPlugin
+			prettierPlugin,
+			prettierRecommended
 		},
 		rules: {
 			'import/no-unresolved': ['error', {commonjs: true, caseSensitive: true}],
@@ -34,9 +34,9 @@ module.exports = [
 					groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index']
 				}
 			],
-			"prettier/prettier/prettier": "error",
-			"prettier/arrow-body-style": "off",
-			"prettier/prefer-arrow-callback": "off"
+			"prettierRecommended/prettier/prettier": "error",
+			"prettierRecommended/arrow-body-style": "off",
+			"prettierRecommended/prefer-arrow-callback": "off"
 		}
 	}
 ];
