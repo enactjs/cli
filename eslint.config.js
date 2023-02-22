@@ -1,4 +1,4 @@
-const enactPlugin = require('eslint-plugin-enact');
+const enactConfig = require('eslint-config-enact');
 const importPlugin = require('eslint-plugin-import');
 const prettierPlugin = require('eslint-plugin-prettier');
 const prettierRecommended = require('eslint-config-prettier');
@@ -15,7 +15,7 @@ module.exports = [
 			}
 		},
 		plugins: {
-			enactPlugin,
+			enactConfig,
 			import: importPlugin,
 			prettierPlugin,
 			prettierRecommended
