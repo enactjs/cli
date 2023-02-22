@@ -34,7 +34,7 @@ module.exports = [
 					groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index']
 				}
 			],
-			"prettierRecommended/prettier/prettier": "error",
+			"prettierPlugin/prettier": "error",
 			"prettierRecommended/arrow-body-style": "off",
 			"prettierRecommended/prefer-arrow-callback": "off"
 		}
