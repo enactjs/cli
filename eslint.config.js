@@ -10,8 +10,8 @@ module.exports = [
 			sourceType: 'module',
 			parserOptions: {
 				ecmaFeatures: {
-					jsx: true,
-				},
+					jsx: true
+				}
 			}
 		},
 		plugins: {
@@ -34,9 +34,9 @@ module.exports = [
 					groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index']
 				}
 			],
-			"prettierPlugin/prettier": "error",
-			"prettierRecommended/arrow-body-style": "off",
-			"prettierRecommended/prefer-arrow-callback": "off"
+			'prettierPlugin/prettier': 'error',
+			'prettierRecommended/arrow-body-style': 'off',
+			'prettierRecommended/prefer-arrow-callback': 'off'
 		}
 	}
 ];
