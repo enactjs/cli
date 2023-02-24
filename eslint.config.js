@@ -1,7 +1,7 @@
 const enactConfig = require('eslint-config-enact');
 const importPlugin = require('eslint-plugin-import');
+const prettierConfig = require('eslint-config-prettier');
 const prettierPlugin = require('eslint-plugin-prettier');
-const prettierRecommended = require('eslint-config-prettier');
 
 module.exports = [
 	{
@@ -17,8 +17,8 @@ module.exports = [
 		plugins: {
 			enactConfig,
 			import: importPlugin,
-			prettierPlugin,
-			prettierRecommended
+			prettierConfig,
+			prettierPlugin
 		},
 		rules: {
 			'import/no-unresolved': ['error', {commonjs: true, caseSensitive: true}],
@@ -35,8 +35,8 @@ module.exports = [
 				}
 			],
 			'prettierPlugin/prettier': 'error',
-			'prettierRecommended/arrow-body-style': 'off',
-			'prettierRecommended/prefer-arrow-callback': 'off'
+			'prettierConfig/arrow-body-style': 'off',
+			'prettierConfig/prefer-arrow-callback': 'off'
 		}
 	}
 ];
