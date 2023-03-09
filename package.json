@@ -44,7 +44,7 @@
   ],
   "dependencies": {
     "@babel/eslint-plugin": "^7.19.1",
-    "@babel/plugin-transform-modules-commonjs": "^7.20.11",
+    "@babel/plugin-transform-modules-commonjs": "^7.21.2",
     "@enact/dev-utils": "^5.1.1",
     "@enact/template-sandstone": "^1.5.2",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
@@ -52,7 +52,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@typescript-eslint/eslint-plugin": "^5.48.2",
+    "@typescript-eslint/eslint-plugin": "^5.54.1",
     "babel-jest": "^27.5.1",
     "babel-loader": "^8.2.5",
     "babel-plugin-dynamic-import-node": "^2.3.3",
@@ -66,14 +66,14 @@
     "css-minimizer-webpack-plugin": "^3.4.1",
     "dotenv": "^16.0.3",
     "dotenv-expand": "^8.0.3",
-    "eslint": "^8.32.0",
+    "eslint": "^8.35.0",
     "eslint-config-enact": "^4.1.3",
     "eslint-plugin-enact": "^1.0.1",
     "eslint-plugin-jest": "^26.6.0",
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "7.31.11",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-testing-library": "^5.9.1",
+    "eslint-plugin-testing-library": "^5.10.2",
     "eslint-webpack-plugin": "^3.2.0",
     "expose-loader": "^3.1.0",
     "file-loader": "^6.2.0",
@@ -89,8 +89,8 @@
     "less-loader": "^8.1.1",
     "less-plugin-npm-import": "^2.1.0",
     "license-checker": "^25.0.1",
-    "mini-css-extract-plugin": "^2.7.2",
-    "minimist": "^1.2.7",
+    "mini-css-extract-plugin": "^2.7.3",
+    "minimist": "^1.2.8",
     "node-polyfill-webpack-plugin": "^1.1.4",
     "postcss": "^8.4.21",
     "postcss-flexbugs-fixes": "^5.0.2",
@@ -114,10 +114,10 @@
     "strip-ansi": "^6.0.1",
     "style-loader": "^3.3.1",
     "tar": "^6.1.13",
-    "terser-webpack-plugin": "^5.3.6",
+    "terser-webpack-plugin": "^5.3.7",
     "v8-compile-cache": "^2.3.0",
     "validate-npm-package-name": "^3.0.0",
-    "webpack": "^5.75.0",
+    "webpack": "^5.76.0",
     "webpack-dev-server": "^4.11.1"
   },
   "optionalDependencies": {
@@ -132,9 +132,9 @@
     }
   },
   "devDependencies": {
-    "eslint-config-prettier": "^8.6.0",
+    "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^4.2.1",
-    "prettier": "^2.8.3"
+    "prettier": "^2.8.4"
   }
 }
