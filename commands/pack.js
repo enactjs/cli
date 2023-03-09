@@ -254,7 +254,7 @@ function api(opts = {}) {
 	const config = configFactory(
 		opts.production ? 'production' : 'development',
 		opts.isomorphic,
-		opts['no-animation'],
+		!opts.animation,
 		opts['ilib-additional-path']
 	);
 
@@ -290,13 +290,13 @@ function cli(args) {
 			'production',
 			'isomorphic',
 			'snapshot',
-			'no-animation',
+			'animation',
 			'verbose',
 			'watch',
 			'help'
 		],
 		string: ['externals', 'externals-public', 'locales', 'entry', 'ilib-additional-path', 'output', 'meta'],
-		default: {minify: true},
+		default: {minify: true, animation: true},
 		alias: {
 			o: 'output',
 			p: 'production',
