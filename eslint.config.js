@@ -4,6 +4,8 @@ const prettierConfig = require('eslint-config-prettier');
 const prettierPlugin = require('eslint-plugin-prettier');
 
 module.exports = [
+	enactConfig,
+	prettierConfig,
 	{
 		languageOptions: {
 			ecmaVersion: 'latest',
@@ -15,9 +17,7 @@ module.exports = [
 			}
 		},
 		plugins: {
-			enactConfig,
 			import: importPlugin,
-			prettierConfig,
 			prettierPlugin
 		},
 		rules: {
