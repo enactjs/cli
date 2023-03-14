@@ -98,7 +98,7 @@
     "postcss-loader": "^6.2.1",
     "postcss-normalize": "^10.0.1",
     "postcss-preset-env": "^7.8.3",
-    "postcss-resolution-independence": "^1.1.0",
+    "postcss-resolution-independence": "github:enactjs/postcss-resolution-independence#feature/WRP-7019",
     "postcss-safe-parser": "^6.0.0",
     "prompts": "^2.4.2",
     "react": "^18.2.0",

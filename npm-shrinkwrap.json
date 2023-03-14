@@ -64,7 +64,7 @@
         "postcss-loader": "^6.2.1",
         "postcss-normalize": "^10.0.1",
         "postcss-preset-env": "^7.8.3",
-        "postcss-resolution-independence": "^1.1.0",
+        "postcss-resolution-independence": "github:enactjs/postcss-resolution-independence#feature/WRP-7019",
         "postcss-safe-parser": "^6.0.0",
         "prompts": "^2.4.2",
         "react": "^18.2.0",
@@ -14879,8 +14879,8 @@
     },
     "node_modules/postcss-resolution-independence": {
       "version": "1.1.0",
-      "resolved": "https://registry.npmjs.org/postcss-resolution-independence/-/postcss-resolution-independence-1.1.0.tgz",
-      "integrity": "sha512-r+46qOHC9N962nKynGjPL/XYM/uMgZmyIljjbQ/KPkNVMERKTbTDeLraOo1eO8qpdetHGHjuTLY7PIot9IkJ3Q==",
+      "resolved": "git+ssh://git@github.com/enactjs/postcss-resolution-independence.git#19b187719e01958df8c8d36ba6a61b9bc42cac7a",
+      "license": "Apache-2.0",
       "dependencies": {
         "postcss-values-parser": "^6.0.2"
       },
@@ -28420,9 +28420,8 @@
       "requires": {}
     },
     "postcss-resolution-independence": {
-      "version": "1.1.0",
-      "resolved": "https://registry.npmjs.org/postcss-resolution-independence/-/postcss-resolution-independence-1.1.0.tgz",
-      "integrity": "sha512-r+46qOHC9N962nKynGjPL/XYM/uMgZmyIljjbQ/KPkNVMERKTbTDeLraOo1eO8qpdetHGHjuTLY7PIot9IkJ3Q==",
+      "version": "git+ssh://git@github.com/enactjs/postcss-resolution-independence.git#19b187719e01958df8c8d36ba6a61b9bc42cac7a",
+      "from": "postcss-resolution-independence@github:enactjs/postcss-resolution-independence#feature/WRP-7019",
       "requires": {
         "postcss-values-parser": "^6.0.2"
       }
