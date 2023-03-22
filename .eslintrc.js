@@ -3,6 +3,13 @@ module.exports = {
 		node: true
 	},
 	extends: ['enact', 'plugin:prettier/recommended', 'prettier'],
+	parserOptions: {
+		ecmaFeatures: {
+			jsx: true
+		},
+		ecmaVersion: 'latest',
+		sourceType: 'module'
+	},
 	plugins: ['import'],
 	rules: {
 		'import/no-unresolved': ['error', {commonjs: true, caseSensitive: true}],
