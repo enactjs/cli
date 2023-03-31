@@ -1,3 +1,11 @@
+## Unreleased
+
+Removed `v8-compile-cache` dependency to fix problems related to ESM modules.
+
+### test
+
+* Updated `jest-watch-typeahead` to `2.2.2`.
+
 ## 5.1.2 (February 21, 2023)
 
 ### pack
