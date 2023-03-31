@@ -1,6 +1,7 @@
-## Unreleased
+## unreleased
 
-Removed `v8-compile-cache` dependency to fix problems related to ESM modules.
+* Upgraded `eslint-plugin-react` version to `^7.32.2`.
+* Removed `v8-compile-cache` dependency to fix problems related to ESM modules.
 
 ### test
 
