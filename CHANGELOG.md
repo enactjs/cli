@@ -1,11 +1,10 @@
 ## unreleased
 
 * Upgraded `eslint-plugin-react` version to `^7.32.2`.
-* Removed `v8-compile-cache` dependency to fix problems related to ES modules.
 
 ### test
 
-* Updated `jest-watch-typeahead` to `2.2.2`.
+* Fixed `--watch` option is not working by removing `v8-compile-cache` module.
 
 ## 5.1.2 (February 21, 2023)
 
