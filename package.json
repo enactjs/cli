@@ -68,7 +68,7 @@
     "dotenv-expand": "^8.0.3",
     "eslint": "^8.35.0",
     "eslint-config-enact": "github:enactjs/eslint-config-enact#release/4.1.4",
-    "eslint-plugin-enact": "github:enactjs/eslint-plugin-enact#release/1.0.2",
+    "eslint-plugin-enact": "^1.0.2",
     "eslint-plugin-jest": "^26.6.0",
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "^7.32.2",
