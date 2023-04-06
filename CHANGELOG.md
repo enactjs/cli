@@ -4,7 +4,7 @@
 
 ### test
 
-* Fixed `--watch` option is not working by removing `v8-compile-cache` module.
+* Fixed `--watch` option is not working with the latest `jest-watch-typeahead` module.
 
 ## 5.1.2 (February 21, 2023)
 
