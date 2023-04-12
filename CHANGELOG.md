@@ -1,3 +1,8 @@
+## unreleased
+
+* Removed `@testing-library/dom` dependency.
+* Updated `@testing-library/react` version to `^14.0.0`.
+
 ## 5.1.3 (April 11, 2023)
 
 * Updated `eslint-plugin-react` version to `^7.32.2`.
