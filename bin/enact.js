@@ -30,13 +30,13 @@ if (process.platform === 'win32' && process.title === 'Windows PowerShell ISE') 
 // Handle tasks/arguments
 if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 	// Enact-CLI ascii art title
-	const title = `
-    ┌─┐┌┐┌┌─┐┌─┐┌┬┐  ┌─┐┬  ┬    ▐██▄▄    ▄▄██▌
-    │  ││││ ││   │   │  │  │    ▐██▀██████▀▀
-    ├┤ │││├─┤│   │ ──│  │  │    ▐██▄▄ ▀▀ ▄▄
-    │  ││││ ││   │   │  │  │    ▐██▀██████▀
-    └─┘┘└┘┴ ┴└─┘ ┴   └─┘┴─┘┴    ▐██▄▄ ▀▀ ▄▄██▌
-    ────────────────────────      ▀▀██████▀▀
+	const title = `                                               
+    ┌─┐┌┐┌┌─┐┌─┐┌┬┐  ┌─┐┬  ┬    ▐██▄▄    ▄▄██▌ 
+    │  ││││ ││   │   │  │  │    ▐██▀██████▀▀   
+    ├┤ │││├─┤│   │ ──│  │  │    ▐██▄▄ ▀▀ ▄▄    
+    │  ││││ ││   │   │  │  │    ▐██▀██████▀    
+    └─┘┘└┘┴ ┴└─┘ ┴   └─┘┴─┘┴    ▐██▄▄ ▀▀ ▄▄██▌ 
+    ────────────────────────      ▀▀██████▀▀   
                                       ▀▀       `;
 	// Add colour to the logo
 	const colourTitle = title
