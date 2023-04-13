@@ -2,7 +2,7 @@
 
 ### test
 
-* Fixed `--watch` option is not working with the latest `jest-watch-typeahead` module.
+* Fixed `--watch` option is not working with the newest `jest-watch-typeahead` modules.
 
 ## 5.1.3 (April 11, 2023)
 
