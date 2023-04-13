@@ -54,13 +54,14 @@ function displayHelp() {
 	console.log();
 	/*
 		Private Options:
-			--entry              	 Specify an override entrypoint
+			--entry              	Specify an override entrypoint
 			--no-minify           	Will skip minification during production build
 			--framework           	Builds the @enact/*, react, and react-dom into an external framework
 			--externals           	Specify a local directory path to the standalone external framework
 			--externals-public    	Remote public path to the external framework for use injecting into HTML
 			--externals-polyfill  	Flag whether to use external polyfill (or include in framework build)
 			--ilib-additional-path	Specify iLib additional resources path
+			--no-animation          Build without effects such as animation and shadow
 	*/
 	process.exit(0);
 }
@@ -253,6 +254,7 @@ function api(opts = {}) {
 	const config = configFactory(
 		opts.production ? 'production' : 'development',
 		opts.isomorphic,
+		!opts.animation,
 		opts['ilib-additional-path']
 	);
 
@@ -288,12 +290,13 @@ function cli(args) {
 			'production',
 			'isomorphic',
 			'snapshot',
+			'animation',
 			'verbose',
 			'watch',
 			'help'
 		],
 		string: ['externals', 'externals-public', 'locales', 'entry', 'ilib-additional-path', 'output', 'meta'],
-		default: {minify: true},
+		default: {minify: true, animation: true},
 		alias: {
 			o: 'output',
 			p: 'production',
