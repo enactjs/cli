@@ -45,7 +45,7 @@
   "dependencies": {
     "@babel/eslint-plugin": "^7.19.1",
     "@babel/plugin-transform-modules-commonjs": "^7.21.2",
-    "@enact/dev-utils": "^5.1.2",
+    "@enact/dev-utils": "enactjs/dev-utils#feature/WRP-11567",
     "@enact/template-sandstone": "^1.5.2",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
     "@testing-library/dom": "^8.20.0",
