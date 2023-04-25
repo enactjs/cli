@@ -141,7 +141,8 @@ module.exports = function (env, isomorphic = false, noAnimation = false, ilibAdd
 										remove: false
 									},
 									stage: 3,
-									features: {'custom-properties': false}
+									features: {'custom-properties': false},
+									enableClientSidePolyfills: true
 								}
 							],
 							// Adds PostCSS Normalize to standardize browser quirks based on

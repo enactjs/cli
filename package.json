@@ -97,7 +97,7 @@
     "postcss-global-import": "^1.0.6",
     "postcss-loader": "^7.2.4",
     "postcss-normalize": "^10.0.1",
-    "postcss-preset-env": "^7.8.3",
+    "postcss-preset-env": "^8.3.2",
     "postcss-resolution-independence": "^1.1.0",
     "postcss-safe-parser": "^6.0.0",
     "prompts": "^2.4.2",
