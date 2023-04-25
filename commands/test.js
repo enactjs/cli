@@ -49,7 +49,8 @@ function resolveJestDefaultEnvironment(name) {
 	const jestDir = path.dirname(resolve.sync('jest', {basedir: __dirname}));
 	const jestCLIDir = path.dirname(resolve.sync('jest-cli', {basedir: jestDir}));
 	const jestConfigDir = path.dirname(resolve.sync('jest-config', {basedir: jestCLIDir}));
-	return resolve.sync(name, {basedir: jestConfigDir});
+	const {TestEnvironment} = resolve.sync(name, {basedir: jestConfigDir});
+	return TestEnvironment;
 }
 
 function testEnvironment(args) {
@@ -83,7 +84,7 @@ function assignOverrides(config) {
 		'coverageReporters',
 		'coverageThreshold',
 		'displayName',
-		'extraGlobals',
+		'sandboxInjectedGlobals',
 		'globalSetup',
 		'globalTeardown',
 		'moduleNameMapper',
