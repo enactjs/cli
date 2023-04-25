@@ -1,3 +1,7 @@
+## unreleased
+
+* Set client `client.overlay.runtimeErrors` to `false` in webpack devServer configuration to avoid showing errors at window resize.
+
 ## 5.1.3 (April 11, 2023)
 
 * Updated `eslint-plugin-react` version to `^7.32.2`.
