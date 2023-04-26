@@ -1,6 +1,8 @@
 ## unreleased
 
-* Set client `client.overlay.runtimeErrors` to `false` in webpack devServer configuration to avoid showing errors at window resize.
+### serve
+
+* Fixed to disable overlay for runtime errors.
 
 ## 5.1.3 (April 11, 2023)
 
