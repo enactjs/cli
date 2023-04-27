@@ -2,6 +2,7 @@
 
 ### test
 
+* Updated all dependencies to the latest including less-loader 11, postcss-loader 7, postcss-preset-env 8, jest 29, and typescript 5.
 * Fixed `--watch` option is not working with the latest `jest-watch-typeahead` module.
 
 ## 5.1.3 (April 11, 2023)
