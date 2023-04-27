@@ -1,7 +1,14 @@
 ## unreleased
 
+### serve
+
+* Fixed to disable overlay for runtime errors.
+
+### test
+
 * Removed `@testing-library/dom` dependency.
 * Updated `@testing-library/react` version to `^14.0.0`.
+* Fixed `--watch` option is not working with the latest `jest-watch-typeahead` module.
 
 ## 5.1.3 (April 11, 2023)
 

@@ -32,7 +32,6 @@ const internal = [
 	'less-plugin-npm-import',
 	'semver',
 	'tar',
-	'v8-compile-cache',
 	'validate-npm-package-name'
 ];
 const enhanced = ['chalk', 'cross-spawn', 'filesize', 'fs-extra', 'minimist', 'strip-ansi'];
