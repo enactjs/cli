@@ -4,6 +4,10 @@
 
 * Fixed to disable overlay for runtime errors.
 
+### test
+
+* Fixed `--watch` option is not working with the latest `jest-watch-typeahead` module.
+
 ## 5.1.3 (April 11, 2023)
 
 * Updated `eslint-plugin-react` version to `^7.32.2`.

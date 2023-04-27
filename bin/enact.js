@@ -2,8 +2,6 @@
 
 'use strict';
 
-require('v8-compile-cache');
-
 const chalk = require('chalk');
 const semver = require('semver');
 const pkg = require('../package.json');
