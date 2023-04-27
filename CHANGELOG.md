@@ -1,5 +1,9 @@
 ## unreleased
 
+### serve
+
+* Fixed to disable overlay for runtime errors.
+
 ### test
 
 * Fixed `--watch` option is not working with the latest `jest-watch-typeahead` module.

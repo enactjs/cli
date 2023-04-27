@@ -191,7 +191,8 @@ function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
 			},
 			overlay: {
 				errors: true,
-				warnings: false
+				warnings: false,
+				runtimeErrors: false
 			}
 		},
 		devMiddleware: {
