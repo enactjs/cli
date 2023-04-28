@@ -1,6 +1,7 @@
 ## unreleased
 
 * Updated all dependencies to the latest including Jest 29 and Typescript 5.
+* Updated node requirement to `^14.17.0 || ^16.13.0 || >=18.0.0`
 
 ### serve
 
