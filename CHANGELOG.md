@@ -1,6 +1,6 @@
 ## unreleased
 
-* Updated all dependencies to the latest including less-loader 11, postcss-loader 7, postcss-preset-env 8, jest 29, and typescript 5.
+* Updated all dependencies to the latest including Jest 29 and Typescript 5.
 
 ### serve
 
