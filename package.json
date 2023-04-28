@@ -116,7 +116,7 @@
     "tar": "^6.1.13",
     "terser-webpack-plugin": "^5.3.7",
     "validate-npm-package-name": "^5.0.0",
-    "webpack": "^5.80.0",
+    "webpack": "^5.81.0",
     "webpack-dev-server": "^4.13.3"
   },
   "optionalDependencies": {
