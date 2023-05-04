@@ -41,7 +41,7 @@ const createEnvironmentHash = require('./createEnvironmentHash');
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
-module.exports = function (env, isomorphic = false, noAnimation = false, ilibAdditionalResourcesPath) {
+module.exports = function (env, isomorphic = false, noAnimation = false, contenthash = false, ilibAdditionalResourcesPath) {
 	process.chdir(app.context);
 
 	// Load applicable .env files into environment variables.
@@ -208,9 +208,9 @@ module.exports = function (env, isomorphic = false, noAnimation = false, ilibAdd
 			// Generated JS file names (with nested folders).
 			// There will be one main bundle, and one file per asynchronous chunk.
 			// We don't currently advertise code splitting but Webpack supports it.
-			filename: '[name].[contenthash].js',
+			filename: '[name].js',
 			// There are also additional JS chunk files if you use code splitting.
-			chunkFilename: 'chunk.[name].[contenthash].js',
+			chunkFilename: contenthash ? 'chunk.[name].[contenthash].js' : 'chunk.[name].js',
 			assetModuleFilename: '[path][name][ext]',
 			// Add /* filename */ comments to generated require()s in the output.
 			pathinfo: !isEnvProduction,
@@ -492,7 +492,7 @@ module.exports = function (env, isomorphic = false, noAnimation = false, ilibAdd
 			!process.env.INLINE_STYLES &&
 				new MiniCssExtractPlugin({
 					filename: '[name].css',
-					chunkFilename: 'chunk.[name].css'
+					chunkFilename: contenthash ? 'chunk.[name].[contenthash].css' : 'chunk.[name].css'
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
 			new NodePolyfillPlugin(),

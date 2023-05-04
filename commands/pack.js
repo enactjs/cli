@@ -62,6 +62,7 @@ function displayHelp() {
 			--externals-polyfill  	Flag whether to use external polyfill (or include in framework build)
 			--ilib-additional-path	Specify iLib additional resources path
 			--no-animation          Build without effects such as animation and shadow
+			--add-contenthash       Add the hash of the chunk, including only elements of this content type
 	*/
 	process.exit(0);
 }
@@ -255,6 +256,7 @@ function api(opts = {}) {
 		opts.production ? 'production' : 'development',
 		opts.isomorphic,
 		!opts.animation,
+		opts['add-contenthash'],
 		opts['ilib-additional-path']
 	);
 
@@ -291,6 +293,7 @@ function cli(args) {
 			'isomorphic',
 			'snapshot',
 			'animation',
+			'add-contenthash',
 			'verbose',
 			'watch',
 			'help'
