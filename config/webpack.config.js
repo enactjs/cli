@@ -214,7 +214,7 @@ module.exports = function (
 			// Generated JS file names (with nested folders).
 			// There will be one main bundle, and one file per asynchronous chunk.
 			// We don't currently advertise code splitting but Webpack supports it.
-			filename: '[name].js',
+			filename: contenthash ? '[name].[contenthash].js' : '[name].js',
 			// There are also additional JS chunk files if you use code splitting.
 			chunkFilename: contenthash ? 'chunk.[name].[contenthash].js' : 'chunk.[name].js',
 			assetModuleFilename: '[path][name][ext]',
@@ -497,7 +497,7 @@ module.exports = function (
 			// Note: this won't work without MiniCssExtractPlugin.loader in `loaders`.
 			!process.env.INLINE_STYLES &&
 				new MiniCssExtractPlugin({
-					filename: '[name].css',
+					filename: contenthash ? '[name].[contenthash].css' : '[name].css',
 					chunkFilename: contenthash ? 'chunk.[name].[contenthash].css' : 'chunk.[name].css'
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
