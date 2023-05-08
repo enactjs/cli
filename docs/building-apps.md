@@ -221,7 +221,7 @@ my-app/
 
 ## [contenthash] Injection
 
-For supporting [`Caching`](https://webpack.kr/guides/caching), Enact CLI supports content hash features. You can use the [`contenthash`](https://webpack.js.org/configuration/output/#template-strings) substitutions setting to define the names of your output files.
+For supporting [`Caching`](https://webpack.kr/guides/caching), Enact CLI supports adding the hash of the chunk. You can use the [`contenthash`](https://webpack.js.org/configuration/output/#template-strings) substitutions setting to define the names of your output files.
 
 The `contenthash` substitution will add a unique hash based on the content of an asset.
 ```none
