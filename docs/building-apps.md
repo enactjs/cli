@@ -23,6 +23,7 @@ order: 4
     -s, --snapshot    Generate V8 snapshot blob
                       (requires V8_MKSNAPSHOT set)
     -c, --custom-skin Build with a custom skin
+    --content-hash    Add the hash of the chunk
     --stats           Output bundle analysis file
 
 ```
@@ -176,7 +177,7 @@ Here is the example.
 ```js
 const MainPanel = kind({
     name: 'MainPanel',
- 
+
     render: (props) => (
         <Panel {...props}>
             <p className="text-3xl font-bold underline">
@@ -217,6 +218,25 @@ my-app/
   resources/
   webos-meta/
 ```
+
+## [contenthash] Injection
+
+For supporting [`Caching`](https://webpack.kr/guides/caching), Enact CLI supports content hash features. You can use the [`contenthash`](https://webpack.js.org/configuration/output/#template-strings) substitutions setting to define the names of your output files.
+
+The `contenthash` substitution will add a unique hash based on the content of an asset.
+```none
+                       Asset       Size  Chunks                    Chunk Names
+main.7e2c49a622975ebd9b7e.js     544 kB       0  [emitted]  [big]  main
+                  index.html  197 bytes          [emitted]
+```
+
+When the asset's content changes, `contenthash` will change as well.
+```none
+                       Asset       Size  Chunks                    Chunk Names
+main.205199ab45963f6a62ec.js     544 kB       0  [emitted]  [big]  main
+                  index.html  197 bytes          [emitted]
+```
+
 
 ## Isomorphic Support & Prerendering
 By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wide variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).

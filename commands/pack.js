@@ -47,6 +47,7 @@ function displayHelp() {
 	console.log('                      (requires V8_MKSNAPSHOT set)');
 	console.log('    -m, --meta        JSON to override package.json enact metadata');
 	console.log('    -c, --custom-skin Build with a custom skin');
+	console.log('    --content-hash    Add the hash of the chunk');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    --verbose         Verbose log build details');
 	console.log('    -v, --version     Display version information');
@@ -62,7 +63,6 @@ function displayHelp() {
 			--externals-polyfill  	Flag whether to use external polyfill (or include in framework build)
 			--ilib-additional-path	Specify iLib additional resources path
 			--no-animation          Build without effects such as animation and shadow
-			--content-hash       Add the hash of the chunk, including only elements of this content type
 	*/
 	process.exit(0);
 }
