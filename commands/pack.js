@@ -13,7 +13,7 @@
 // @remove-on-eject-end
 const path = require('path');
 const chalk = require('chalk');
-const filesize = require('filesize');
+const {filesize} = require('filesize');
 const fs = require('fs-extra');
 const minimist = require('minimist');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
