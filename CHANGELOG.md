@@ -1,10 +1,11 @@
 ## unreleased
 
+* Updated all dependencies to the latest including Jest 29 and Typescript 5.
+* Updated the minimum version of Node to `14.17.0` and dropped the support for Node 12 and 17.
+
 ### pack
 
 * Added `--content-hash` option to support app caching.
-* Updated all dependencies to the latest including Jest 29 and Typescript 5.
-* Updated the minimum version of Node to `14.17.0` and dropped the support for Node 12 and 17.
 
 ### serve
 
