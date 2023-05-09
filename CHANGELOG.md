@@ -1,5 +1,9 @@
 ## unreleased
 
+### pack
+
+* Added `--content-hash` option to support app caching.
+
 ### serve
 
 * Fixed to disable overlay for runtime errors.
