@@ -8,11 +8,11 @@ order: 4
     enact pack [options]
 
   Options
-    -p, --production  Build in production mode
-    -i, --isomorphic  Use isomorphic code layout
-                      (includes prerendering)
-    -w, --watch       Rebuild on file changes
-    -l, --locales     Locales for isomorphic mode; one of:
+    -p, --production     Build in production mode
+    -i, --isomorphic     Use isomorphic code layout
+                         (includes prerendering)
+    -w, --watch          Rebuild on file changes
+    -l, --locales        Locales for isomorphic mode; one of:
             <comma-separated-values> Locale list
             <JSON-filepath> - Read locales from JSON file
             "none" - Disable locale-specific handling
@@ -20,11 +20,11 @@ order: 4
             "tv" - Locales supported on webOS TV
             "signage" - Locales supported on webOS signage
             "all" - All locales that iLib supports
-    -s, --snapshot    Generate V8 snapshot blob
-                      (requires V8_MKSNAPSHOT set)
-    -c, --custom-skin Build with a custom skin
-    --content-hash    Add the hash of the chunk
-    --stats           Output bundle analysis file
+    -s, --snapshot       Generate V8 snapshot blob
+                         (requires V8_MKSNAPSHOT set)
+    -c, --custom-skin    Build with a custom skin
+    -ch, --content-hash  Add the hash of the chunk
+    --stats              Output bundle analysis file
 
 ```
 Run within an Enact project's source code, the `enact pack` command (aliased as `npm run pack` or `npm run pack-p` for production) will process and bundle the js, css, and asset files into the `./dist` directory. An **index.html** file will be dynamically generated.
@@ -219,9 +219,9 @@ my-app/
   webos-meta/
 ```
 
-## [contenthash] Injection
+## Caching Support
 
-For supporting [`Caching`](https://webpack.kr/guides/caching), Enact CLI supports adding the hash of the chunk. You can use the [`contenthash`](https://webpack.js.org/configuration/output/#template-strings) substitutions setting to define the names of your output files.
+For supporting [`Caching`](https://webpack.js.org/guides/caching/), Enact CLI provide `--content-hash` option to add the a unique hash called [`contenthash`](https://webpack.js.org/configuration/output/#template-strings) substitution.
 
 The `contenthash` substitution will add a unique hash based on the content of an asset.
 ```none
