@@ -8,7 +8,7 @@ order: 4
     enact pack [options]
 
   Options
-    --content-hash    Add a unique hash to output files based on the content of an asset
+    --content-hash    Add a unique hash to output file names based on the content of an asset
     -p, --production  Build in production mode
     -i, --isomorphic  Use isomorphic code layout
                       (includes prerendering)
