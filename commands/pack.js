@@ -31,7 +31,7 @@ function displayHelp() {
 	console.log();
 	console.log('  Options');
 	console.log('    -o, --output      Specify an output directory');
-	console.log('    --content-hash    Add a unique hash to output files based on the content of an asset');
+	console.log('    --content-hash    Add a unique hash to output file names based on the content of an asset');
 	console.log('    -w, --watch       Rebuild on file changes');
 	console.log('    -p, --production  Build in production mode');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
