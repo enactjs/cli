@@ -5,7 +5,7 @@
 
 ### pack
 
-* Added `--content-hash` option to support app caching.
+* Added `--content-hash` option to add a unique hash to output file names to support better caching.
 
 ### serve
 

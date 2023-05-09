@@ -219,18 +219,19 @@ my-app/
   webos-meta/
 ```
 
-## Caching Support
+## Caching
 
-For supporting [`Caching`](https://webpack.js.org/guides/caching/), Enact CLI provide `--content-hash` option to add the a unique hash called [`contenthash`](https://webpack.js.org/configuration/output/#template-strings) substitution.
+For supporting better [`Caching`](https://webpack.js.org/guides/caching/), Enact CLI provides `--content-hash` option to add a unique hash to each output file name based on the content of an asset.
 
-The `contenthash` substitution will add a unique hash based on the content of an asset.
+Building With this option should produce the following output:
+
 ```none
                        Asset       Size  Chunks                    Chunk Names
 main.7e2c49a622975ebd9b7e.js     544 kB       0  [emitted]  [big]  main
                   index.html  197 bytes          [emitted]
 ```
 
-When the asset's content changes, `contenthash` will change as well.
+When the content changes, the output file name will change as well.
 ```none
                        Asset       Size  Chunks                    Chunk Names
 main.205199ab45963f6a62ec.js     544 kB       0  [emitted]  [big]  main
