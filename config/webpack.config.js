@@ -217,7 +217,7 @@ module.exports = function (
 			filename: contenthash ? '[name].[contenthash].js' : '[name].js',
 			// There are also additional JS chunk files if you use code splitting.
 			chunkFilename: contenthash ? 'chunk.[name].[contenthash].js' : 'chunk.[name].js',
-			assetModuleFilename: '[path][name][ext]',
+			assetModuleFilename: contenthash ? '[path][name][contenthash][ext]' : '[path][name][ext]',
 			// Add /* filename */ comments to generated require()s in the output.
 			pathinfo: !isEnvProduction,
 			publicPath,
