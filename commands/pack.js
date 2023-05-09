@@ -30,13 +30,13 @@ function displayHelp() {
 	console.log(`    ${e} [options]`);
 	console.log();
 	console.log('  Options');
-	console.log('    -o, --output         Specify an output directory');
-	console.log('    -ch, --content-hash  Add a unique hash to output files based on the content of an asset');
-	console.log('    -w, --watch          Rebuild on file changes');
-	console.log('    -p, --production     Build in production mode');
-	console.log('    -i, --isomorphic     Use isomorphic code layout');
-	console.log('                         (includes prerendering)');
-	console.log('    -l, --locales        Locales for isomorphic mode; one of:');
+	console.log('    -o, --output      Specify an output directory');
+	console.log('    --content-hash    Add a unique hash to output files based on the content of an asset');
+	console.log('    -w, --watch       Rebuild on file changes');
+	console.log('    -p, --production  Build in production mode');
+	console.log('    -i, --isomorphic  Use isomorphic code layout');
+	console.log('                      (includes prerendering)');
+	console.log('    -l, --locales     Locales for isomorphic mode; one of:');
 	console.log('            <commana-separated-values> Locale list');
 	console.log('            <JSON-filepath> - Read locales from JSON file');
 	console.log('            "none" - Disable locale-specific handling');
@@ -44,14 +44,14 @@ function displayHelp() {
 	console.log('            "tv" - Locales supported on webOS TV');
 	console.log('            "signage" - Locales supported on webOS signage');
 	console.log('            "all" - All locales that iLib supports');
-	console.log('    -s, --snapshot       Generate V8 snapshot blob');
-	console.log('                         (requires V8_MKSNAPSHOT set)');
-	console.log('    -m, --meta           JSON to override package.json enact metadata');
-	console.log('    -c, --custom-skin    Build with a custom skin');
-	console.log('    --stats              Output bundle analysis file');
-	console.log('    --verbose            Verbose log build details');
-	console.log('    -v, --version        Display version information');
-	console.log('    -h, --help           Display help information');
+	console.log('    -s, --snapshot    Generate V8 snapshot blob');
+	console.log('                      (requires V8_MKSNAPSHOT set)');
+	console.log('    -m, --meta        JSON to override package.json enact metadata');
+	console.log('    -c, --custom-skin Build with a custom skin');
+	console.log('    --stats           Output bundle analysis file');
+	console.log('    --verbose         Verbose log build details');
+	console.log('    -v, --version     Display version information');
+	console.log('    -h, --help        Display help information');
 	console.log();
 	/*
 		Private Options:
@@ -307,7 +307,6 @@ function cli(args) {
 			l: 'locales',
 			s: 'snapshot',
 			m: 'meta',
-			ch: 'content-hash',
 			c: 'custom-skin',
 			w: 'watch',
 			h: 'help'
