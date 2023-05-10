@@ -31,6 +31,7 @@ function displayHelp() {
 	console.log();
 	console.log('  Options');
 	console.log('    -o, --output      Specify an output directory');
+	console.log('    --content-hash    Add a unique hash to output file names based on the content of an asset');
 	console.log('    -w, --watch       Rebuild on file changes');
 	console.log('    -p, --production  Build in production mode');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
@@ -253,6 +254,7 @@ function api(opts = {}) {
 	const configFactory = require('../config/webpack.config');
 	const config = configFactory(
 		opts.production ? 'production' : 'development',
+		opts['content-hash'],
 		opts.isomorphic,
 		!opts.animation,
 		opts['ilib-additional-path']
@@ -282,6 +284,7 @@ function api(opts = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: [
+			'content-hash',
 			'custom-skin',
 			'minify',
 			'framework',
