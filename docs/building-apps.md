@@ -236,7 +236,7 @@ When the content changes, the output file name will change as well.
         199.85 kB       dist/main.2088c66150ab73b27793.css
 ```
 
-> **NOTE** The filename `main.*.js` will be changed after bundling, without changes. This is because webpack includes certain boilerplate, specifically the runtime and manifest, in the entry chunk.
+> **NOTE** The filename `main.*.js` will be changed after another building, even without making any changes. This is because webpack includes certain boilerplate, specifically the runtime and manifest, in the entry chunk.
 
 ## Isomorphic Support & Prerendering
 By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wide variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
