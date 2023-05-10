@@ -221,7 +221,7 @@ my-app/
 
 ## Caching
 
-For supporting better [`Caching`](https://webpack.js.org/guides/caching/), Enact CLI provides `--content-hash` option to add a unique hash to each output file name based on the content of an asset.
+For supporting better [`caching`](https://webpack.js.org/guides/caching/), Enact CLI provides `--content-hash` option to add a unique hash to each output file name based on the content of an asset.
 
 Building With this option should produce the following output:
 
