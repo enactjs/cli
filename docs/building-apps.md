@@ -8,6 +8,7 @@ order: 4
     enact pack [options]
 
   Options
+    --content-hash    Add a unique hash to output file names based on the content of an asset
     -p, --production  Build in production mode
     -i, --isomorphic  Use isomorphic code layout
                       (includes prerendering)
@@ -176,7 +177,7 @@ Here is the example.
 ```js
 const MainPanel = kind({
     name: 'MainPanel',
- 
+
     render: (props) => (
         <Panel {...props}>
             <p className="text-3xl font-bold underline">
@@ -217,6 +218,25 @@ my-app/
   resources/
   webos-meta/
 ```
+
+## Caching
+
+For supporting better [`caching`](https://webpack.js.org/guides/caching/), Enact CLI provides `--content-hash` option to add a unique hash to each output file name based on the content of an asset.
+
+Building With this option should produce the following output:
+
+```none
+        1.11 MB         dist/main.1983e557b9a705c83e72.js
+        199.85 kB       dist/main.2088c66150ab73b27793.css
+```
+
+When the content changes, the output file name will change as well.
+```none
+        1.11 MB         dist/main.7544f55b64439c8d0f0e.js
+        199.85 kB       dist/main.2088c66150ab73b27793.css
+```
+
+> **NOTE** The filename `main.*.js` will be changed after another building, even without making any changes. This is because webpack includes certain boilerplate, specifically the runtime and manifest, in the entry chunk.
 
 ## Isomorphic Support & Prerendering
 By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wide variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
