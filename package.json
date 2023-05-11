@@ -59,7 +59,7 @@
     "babel-preset-enact": "github:enactjs/babel-preset-enact#feature/WRP-622",
     "case-sensitive-paths-webpack-plugin": "^2.4.0",
     "chalk": "^4.1.2",
-    "core-js": "3.24.1",
+    "core-js": "^3.30.2",
     "cross-spawn": "^7.0.3",
     "css-loader": "^6.7.3",
     "css-minimizer-webpack-plugin": "^5.0.0",
