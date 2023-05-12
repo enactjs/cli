@@ -56,7 +56,7 @@
     "babel-loader": "^9.1.2",
     "babel-plugin-dynamic-import-node": "^2.3.3",
     "babel-plugin-transform-rename-import": "^2.3.0",
-    "babel-preset-enact": "^0.1.1",
+    "babel-preset-enact": "github:enactjs/babel-preset-enact#feature/WRP-622",
     "case-sensitive-paths-webpack-plugin": "^2.4.0",
     "chalk": "^4.1.2",
     "core-js": "3.22.8",
