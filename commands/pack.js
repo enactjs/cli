@@ -13,7 +13,7 @@
 // @remove-on-eject-end
 const path = require('path');
 const chalk = require('chalk');
-const filesize = require('filesize');
+const {filesize} = require('filesize');
 const fs = require('fs-extra');
 const minimist = require('minimist');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
@@ -31,6 +31,7 @@ function displayHelp() {
 	console.log();
 	console.log('  Options');
 	console.log('    -o, --output      Specify an output directory');
+	console.log('    --content-hash    Add a unique hash to output file names based on the content of an asset');
 	console.log('    -w, --watch       Rebuild on file changes');
 	console.log('    -p, --production  Build in production mode');
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
@@ -54,13 +55,14 @@ function displayHelp() {
 	console.log();
 	/*
 		Private Options:
-			--entry              	 Specify an override entrypoint
+			--entry              	Specify an override entrypoint
 			--no-minify           	Will skip minification during production build
 			--framework           	Builds the @enact/*, react, and react-dom into an external framework
 			--externals           	Specify a local directory path to the standalone external framework
 			--externals-public    	Remote public path to the external framework for use injecting into HTML
 			--externals-polyfill  	Flag whether to use external polyfill (or include in framework build)
 			--ilib-additional-path	Specify iLib additional resources path
+			--no-animation          Build without effects such as animation and shadow
 	*/
 	process.exit(0);
 }
@@ -252,7 +254,9 @@ function api(opts = {}) {
 	const configFactory = require('../config/webpack.config');
 	const config = configFactory(
 		opts.production ? 'production' : 'development',
+		opts['content-hash'],
 		opts.isomorphic,
+		!opts.animation,
 		opts['ilib-additional-path']
 	);
 
@@ -280,6 +284,7 @@ function api(opts = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: [
+			'content-hash',
 			'custom-skin',
 			'minify',
 			'framework',
@@ -288,12 +293,13 @@ function cli(args) {
 			'production',
 			'isomorphic',
 			'snapshot',
+			'animation',
 			'verbose',
 			'watch',
 			'help'
 		],
 		string: ['externals', 'externals-public', 'locales', 'entry', 'ilib-additional-path', 'output', 'meta'],
-		default: {minify: true},
+		default: {minify: true, animation: true},
 		alias: {
 			o: 'output',
 			p: 'production',
