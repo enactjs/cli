@@ -1,4 +1,4 @@
-## unreleased
+## 6.0.0 (May 19, 2023)
 
 * Updated all dependencies to the latest including Jest 29 and Typescript 5.
 * Updated the minimum version of Node to `14.17.0` and dropped the support for Node 12 and 17.
