@@ -1,6 +1,9 @@
-# @enact/cli [![Travis](https://img.shields.io/travis/enactjs/cli/master.svg?style=flat-square)](https://travis-ci.org/enactjs/cli) [![NPM](https://img.shields.io/npm/v/@enact/cli.svg?style=flat-square)](https://www.npmjs.com/package/@enact/cli)
+# @enact/cli [![Travis](https://img.shields.io/travis/com/enactjs/cli/master?style=flat-square)](https://app.travis-ci.com/github/enactjs/cli) [![NPM](https://img.shields.io/npm/v/@enact/cli.svg?style=flat-square)](https://www.npmjs.com/package/@enact/cli)
 
 > A standalone toolkit for rapid Enact app development.
+
+## Documentation
+* [Enact CLI Development Tool](https://enactjs.com/docs/developer-tools/cli/)
 
 ## Installation
 
@@ -9,7 +12,7 @@ All that's needed to install @enact/cli is to use npm to install it globally. Fo
 npm install -g @enact/cli
 ```
 
->Note: Node 10 LTS or greater required.
+>Note: Node 16 or greater required.
 
 ## Creating a new App
 
@@ -94,7 +97,7 @@ For example:
 
 ## Displaying Lint Output in the Editor
 
-Some editors, including Sublime Text, Atom, and Visual Studio Code, provide plugins for ESLint.
+Some editors, including Visual Studio Code, Sublime Text, and Atom provide plugins for ESLint.
 
 They are not required for linting. You should see the linter output right in your terminal. However, if you prefer the lint results to appear right in your editor, there are some extra steps you can do.
 
