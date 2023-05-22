@@ -1,4 +1,4 @@
-# @enact/cli [![Travis](https://img.shields.io/travis/com/enactjs/cli?style=flat-square)](https://app.travis-ci.com/github/enactjs/cli) [![NPM](https://img.shields.io/npm/v/@enact/cli.svg?style=flat-square)](https://www.npmjs.com/package/@enact/cli)
+# @enact/cli [![Travis](https://img.shields.io/travis/com/enactjs/cli/master?style=flat-square)](https://app.travis-ci.com/github/enactjs/cli) [![NPM](https://img.shields.io/npm/v/@enact/cli.svg?style=flat-square)](https://www.npmjs.com/package/@enact/cli)
 
 > A standalone toolkit for rapid Enact app development.
 
