@@ -68,7 +68,8 @@ The @enact/cli tool will check the project's **package.json** looking for an opt
 * `alias` _[object]_ - String mapping of webpack alias paths to use when building.
 * `theme` _[object]_ - A simplified string name to extrapolate `fontGenerator`, `ri`, and `screenTypes` preset values from. For example, `"sandstone"`.
 * `fontGenerator` _[string]_ - Filepath to a CommonJS fontGenerator module which will build locale-specific font CSS to inject into the HTML. By default, will use any preset for a specified theme or fallback to sandstone.
-* `ri` _[object]_ - Resolution independence options to be forwarded to the [LESS plugin](https://github.com/enactjs/less-plugin-resolution-independence). By default, will use any preset for a specified theme or fallback to sandstone.
+* `ri` _[object]_ - Resolution independence options to be forwarded to the [postcss-resolution-independence](https://github.com/enactjs/postcss-resolution-independence). By default, will use any preset for a specified theme or fallback to sandstone.
+	* `baseSize` _[number]_ - The root font-size to use when converting the value of the base unit to a resolution-independent unit. For example, when `baseSize` is set to 24, 48px in the LESS file will be converted to 2rem.
 * `screenTypes` _[array|string]_ - Array of 1 or more screentype definitions to be used with prerender HTML initialization. Can alternatively reference a json filepath to read for screentype definitions.  By default, will use any preset for a specified theme or fallback to sandstone.
 * `nodeBuiltins` _[object]_ - Configuration settings for polyfilling NodeJS built-ins. See `node` [webpack option](https://webpack.js.org/configuration/node/).
 * `resolveFallback` _[object]_ - Configuration settings for redirecting module requests when normal resolving fails. See `resolve.fallback` [webpack option](https://webpack.js.org/configuration/resolve/#resolvefallback).
