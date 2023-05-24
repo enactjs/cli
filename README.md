@@ -2,9 +2,6 @@
 
 > A standalone toolkit for rapid Enact app development.
 
-## Documentation
-* [Enact CLI Development Tool](https://enactjs.com/docs/developer-tools/cli/)
-
 ## Installation
 
 All that's needed to install @enact/cli is to use npm to install it globally. For Linux `sudo` may be required.
@@ -133,6 +130,9 @@ Then, you will need to uninstall any previous globally-installed Enact linting p
 ```sh
 npm uninstall -g eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-babel @babel/eslint-parser eslint-plugin-jest eslint-plugin-enact eslint-config-enact
 ```
+
+## Documentation
+* [Enact CLI Development Tool](https://enactjs.com/docs/developer-tools/cli/)
 
 ## Copyright and License Information
 
