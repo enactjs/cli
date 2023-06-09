@@ -13,7 +13,7 @@
 // @remove-on-eject-end
 const path = require('path');
 const {execSync} = require('child_process');
-const {optionParser: app, packageRoot} = require('@enact/dev-utils');
+const {packageRoot} = require('@enact/dev-utils');
 const chalk = require('chalk');
 const jest = require('jest');
 const resolve = require('resolve');
@@ -171,7 +171,6 @@ function api(args = []) {
 }
 
 function cli(args) {
-	process.chdir(app.context);
 	api(args).catch(() => {
 		process.exit(1);
 	});
