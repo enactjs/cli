@@ -1,4 +1,4 @@
-# @enact/cli [![Travis](https://img.shields.io/travis/enactjs/cli/master.svg?style=flat-square)](https://travis-ci.org/enactjs/cli) [![NPM](https://img.shields.io/npm/v/@enact/cli.svg?style=flat-square)](https://www.npmjs.com/package/@enact/cli)
+# @enact/cli [![Travis](https://img.shields.io/travis/com/enactjs/cli/master?style=flat-square)](https://app.travis-ci.com/github/enactjs/cli) [![NPM](https://img.shields.io/npm/v/@enact/cli.svg?style=flat-square)](https://www.npmjs.com/package/@enact/cli)
 
 > A standalone toolkit for rapid Enact app development.
 
@@ -9,7 +9,7 @@ All that's needed to install @enact/cli is to use npm to install it globally. Fo
 npm install -g @enact/cli
 ```
 
->Note: Node 10 LTS or greater required.
+>Note: Node 16 or greater required.
 
 ## Creating a new App
 
@@ -65,7 +65,8 @@ The @enact/cli tool will check the project's **package.json** looking for an opt
 * `alias` _[object]_ - String mapping of webpack alias paths to use when building.
 * `theme` _[object]_ - A simplified string name to extrapolate `fontGenerator`, `ri`, and `screenTypes` preset values from. For example, `"sandstone"`.
 * `fontGenerator` _[string]_ - Filepath to a CommonJS fontGenerator module which will build locale-specific font CSS to inject into the HTML. By default, will use any preset for a specified theme or fallback to sandstone.
-* `ri` _[object]_ - Resolution independence options to be forwarded to the [LESS plugin](https://github.com/enactjs/less-plugin-resolution-independence). By default, will use any preset for a specified theme or fallback to sandstone.
+* `ri` _[object]_ - Resolution independence options to be forwarded to the [postcss-resolution-independence](https://github.com/enactjs/postcss-resolution-independence). By default, will use any preset for a specified theme or fallback to sandstone.
+	* `baseSize` _[number]_ - The root font-size to use when converting the value of the base unit to a resolution-independent unit. For example, when `baseSize` is set to 24, 48px in the LESS file will be converted to 2rem.
 * `screenTypes` _[array|string]_ - Array of 1 or more screentype definitions to be used with prerender HTML initialization. Can alternatively reference a json filepath to read for screentype definitions.  By default, will use any preset for a specified theme or fallback to sandstone.
 * `nodeBuiltins` _[object]_ - Configuration settings for polyfilling NodeJS built-ins. See `node` [webpack option](https://webpack.js.org/configuration/node/).
 * `resolveFallback` _[object]_ - Configuration settings for redirecting module requests when normal resolving fails. See `resolve.fallback` [webpack option](https://webpack.js.org/configuration/resolve/#resolvefallback).
@@ -94,7 +95,7 @@ For example:
 
 ## Displaying Lint Output in the Editor
 
-Some editors, including Sublime Text, Atom, and Visual Studio Code, provide plugins for ESLint.
+Some editors, including Visual Studio Code, Sublime Text, and Atom provide plugins for ESLint.
 
 They are not required for linting. You should see the linter output right in your terminal. However, if you prefer the lint results to appear right in your editor, there are some extra steps you can do.
 
@@ -129,6 +130,9 @@ Then, you will need to uninstall any previous globally-installed Enact linting p
 ```sh
 npm uninstall -g eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-babel @babel/eslint-parser eslint-plugin-jest eslint-plugin-enact eslint-config-enact
 ```
+
+## Documentation
+* [Enact CLI Development Tool](https://enactjs.com/docs/developer-tools/cli/)
 
 ## Copyright and License Information
 

@@ -1,3 +1,27 @@
+## 6.0.0 (May 19, 2023)
+
+* Updated all dependencies to the latest including Jest 29 and Typescript 5.
+* Updated the minimum version of Node to `14.17.0` and dropped the support for Node 12 and 17.
+
+### pack
+
+* Added `--content-hash` option to add a unique hash to output file names to support better caching.
+
+### serve
+
+* Fixed to disable overlay for runtime errors.
+
+### test
+
+* Removed `@testing-library/dom` dependency.
+* Updated `@testing-library/react` version to `^14.0.0`.
+* Fixed `--watch` option is not working with the latest `jest-watch-typeahead` module.
+
+## 5.1.3 (April 11, 2023)
+
+* Updated `eslint-plugin-react` version to `^7.32.2`.
+* Updated dependencies.
+
 ## 5.1.2 (February 21, 2023)
 
 ### pack

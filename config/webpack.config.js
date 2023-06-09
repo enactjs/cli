@@ -41,7 +41,13 @@ const createEnvironmentHash = require('./createEnvironmentHash');
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
-module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath) {
+module.exports = function (
+	env,
+	contentHash = false,
+	isomorphic = false,
+	noAnimation = false,
+	ilibAdditionalResourcesPath
+) {
 	process.chdir(app.context);
 
 	// Load applicable .env files into environment variables.
@@ -208,10 +214,10 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 			// Generated JS file names (with nested folders).
 			// There will be one main bundle, and one file per asynchronous chunk.
 			// We don't currently advertise code splitting but Webpack supports it.
-			filename: '[name].js',
+			filename: contentHash ? '[name].[contenthash].js' : '[name].js',
 			// There are also additional JS chunk files if you use code splitting.
-			chunkFilename: 'chunk.[name].js',
-			assetModuleFilename: '[path][name][ext]',
+			chunkFilename: contentHash ? 'chunk.[name].[contenthash].js' : 'chunk.[name].js',
+			assetModuleFilename: contentHash ? '[path][name][contenthash][ext]' : '[path][name][ext]',
 			// Add /* filename */ comments to generated require()s in the output.
 			pathinfo: !isEnvProduction,
 			publicPath,
@@ -481,15 +487,18 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 				'process.env.PUBLIC_URL': JSON.stringify(publicPath),
 				// Define ENACT_PACK_ISOMORPHIC global variable to determine to use
 				// `hydrateRoot` for isomorphic build and `createRoot` for non-isomorphic build by app.
-				ENACT_PACK_ISOMORPHIC: isomorphic
+				ENACT_PACK_ISOMORPHIC: isomorphic,
+				// Define ENACT_PACK_NO_ANIMATION global variable to determine
+				// whether to build including effects such as animation or shadow or not.
+				ENACT_PACK_NO_ANIMATION: noAnimation
 			}),
 			// Inject prefixed environment variables within code, when used
 			new EnvironmentPlugin(Object.keys(process.env).filter(key => /^(REACT_APP|WDS_SOCKET)/.test(key))),
 			// Note: this won't work without MiniCssExtractPlugin.loader in `loaders`.
 			!process.env.INLINE_STYLES &&
 				new MiniCssExtractPlugin({
-					filename: '[name].css',
-					chunkFilename: 'chunk.[name].css'
+					filename: contentHash ? '[name].[contenthash].css' : '[name].css',
+					chunkFilename: contentHash ? 'chunk.[name].[contenthash].css' : 'chunk.[name].css'
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
 			new NodePolyfillPlugin(),
