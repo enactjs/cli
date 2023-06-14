@@ -43,7 +43,6 @@
     "upupdowndownleftrightleftrightbastart"
   ],
   "dependencies": {
-    "@babel/eslint-plugin": "^7.19.1",
     "@babel/plugin-transform-modules-commonjs": "^7.21.2",
     "@enact/dev-utils": "^6.0.0",
     "@enact/template-sandstone": "^1.5.3",
@@ -51,12 +50,10 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
-    "@typescript-eslint/eslint-plugin": "^5.59.2",
     "babel-jest": "^29.5.0",
     "babel-loader": "^9.1.2",
     "babel-plugin-dynamic-import-node": "^2.3.3",
     "babel-plugin-transform-rename-import": "^2.3.0",
-    "babel-preset-enact": "^0.1.2",
     "case-sensitive-paths-webpack-plugin": "^2.4.0",
     "chalk": "^4.1.2",
     "core-js": "3.22.8",
@@ -65,14 +62,7 @@
     "css-minimizer-webpack-plugin": "^5.0.0",
     "dotenv": "^16.0.3",
     "dotenv-expand": "^10.0.0",
-    "eslint": "^8.39.0",
     "eslint-config-enact": "^4.1.5",
-    "eslint-plugin-enact": "^1.0.3",
-    "eslint-plugin-jest": "^27.2.1",
-    "eslint-plugin-jsx-a11y": "^6.7.1",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-testing-library": "^5.10.3",
     "eslint-webpack-plugin": "^4.0.1",
     "expose-loader": "^4.1.0",
     "file-loader": "^6.2.0",
@@ -123,6 +113,16 @@
     "fsevents": "^2.3.2"
   },
   "peerDependencies": {
+    "@babel/eslint-plugin": "*",
+    "@typescript-eslint/eslint-plugin": "*",
+    "babel-preset-enact": "*",
+    "eslint": "*",
+    "eslint-plugin-enact": "*",
+    "eslint-plugin-jest": "*",
+    "eslint-plugin-jsx-a11y": "*",
+    "eslint-plugin-react": "*",
+    "eslint-plugin-react-hooks": "*",
+    "eslint-plugin-testing-library": "*",
     "typescript": "^3.2.1 || ^4 || ^5"
   },
   "peerDependenciesMeta": {
