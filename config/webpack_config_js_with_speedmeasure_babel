@@ -22,11 +22,13 @@ const ForkTsCheckerWebpackPlugin =
 		: require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const resolve = require('resolve');
+const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {
 	optionParser: app,
@@ -35,9 +37,9 @@ const {
 	ILibPlugin,
 	WebOSMetaPlugin
 } = require('@enact/dev-utils');
-const createEnvironmentHash = require('./createEnvironmentHash');
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
-const { EsbuildPlugin } = require('esbuild-loader');
+const createEnvironmentHash = require('./createEnvironmentHash');
+
 const smp = new SpeedMeasurePlugin();
 
 // This is the production and development configuration.
@@ -303,7 +305,7 @@ module.exports = function (
 					// back to the "file" loader at the end of the loader list.
 					oneOf: [
 						// Process JS with Babel.
-						/* {
+						{
 							test: /\.(js|mjs|jsx|ts|tsx)$/,
 							exclude: /node_modules.(?!@enact)/,
 							loader: require.resolve('babel-loader'),
@@ -316,16 +318,6 @@ module.exports = function (
 								cacheDirectory: !isEnvProduction,
 								cacheCompression: false,
 								compact: isEnvProduction
-							}
-						}, */
-						// Process JS with Babel.
-						{
-							test: /\.(js|mjs|jsx|ts|tsx)$/,
-							exclude: /node_modules.(?!@enact)/,
-							loader: require.resolve('esbuild-loader'),
-							options: {
-								loader: 'jsx',
-								target: 'es2015'
 							}
 						},
 						// Style-based rules support both LESS and CSS format, with *.module.* extension format
@@ -425,10 +417,46 @@ module.exports = function (
 			minimize: isEnvProduction,
 			// These are only used in production mode
 			minimizer: [
-				new EsbuildPlugin({
-					target: 'es2015',
-					css: true
-				})
+				new TerserPlugin({
+					terserOptions: {
+						parse: {
+							// we want uglify-js to parse ecma 8 code. However, we don't want it
+							// to apply any minfication steps that turns valid ecma 5 code
+							// into invalid ecma 5 code. This is why the 'compress' and 'output'
+							// sections only apply transformations that are ecma 5 safe
+							// https://github.com/facebook/create-react-app/pull/4234
+							ecma: 8
+						},
+						compress: {
+							ecma: 5,
+							warnings: false,
+							// Disabled because of an issue with Uglify breaking seemingly valid code:
+							// https://github.com/facebook/create-react-app/issues/2376
+							// Pending further investigation:
+							// https://github.com/mishoo/UglifyJS2/issues/2011
+							comparisons: false,
+							// Disabled because of an issue with Terser breaking valid code:
+							// https://github.com/facebook/create-react-app/issues/5250
+							// Pending futher investigation:
+							// https://github.com/terser-js/terser/issues/120
+							inline: 2
+						},
+						mangle: {
+							safari10: true
+						},
+						output: {
+							ecma: 5,
+							comments: false,
+							// Turned on because emoji and regex is not minified properly using default
+							// https://github.com/facebook/create-react-app/issues/2488
+							ascii_only: true
+						}
+					},
+					// Use multi-process parallel running to improve the build speed
+					// Default number of concurrent runs: os.cpus().length - 1
+					parallel: true
+				}),
+				new CssMinimizerPlugin()
 			]
 		},
 		plugins: [
@@ -558,7 +586,6 @@ module.exports = function (
 			})
 		].filter(Boolean)
 	};
-
 	const configWithTimeMeasures = smp.wrap(config);
 	configWithTimeMeasures.plugins.push(new MiniCssExtractPlugin({}));
 
