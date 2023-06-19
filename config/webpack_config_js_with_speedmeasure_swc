@@ -319,7 +319,14 @@ module.exports = function (
 										"react":{
 											"runtime": "automatic"
 										}
-									}
+									},
+									"minify": {
+										"compress": true, // equivalent to {}
+										"mangle": {
+											safari10: true
+										}
+									},
+
 								}
 							}
 						},
@@ -420,7 +427,7 @@ module.exports = function (
 			minimize: isEnvProduction,
 			// These are only used in production mode
 			minimizer: [
-				new TerserPlugin({
+				/* new TerserPlugin({
 					terserOptions: {
 						parse: {
 							// we want uglify-js to parse ecma 8 code. However, we don't want it
@@ -458,7 +465,7 @@ module.exports = function (
 					// Use multi-process parallel running to improve the build speed
 					// Default number of concurrent runs: os.cpus().length - 1
 					parallel: true
-				}),
+				}), */
 				new CssMinimizerPlugin()
 			]
 		},
