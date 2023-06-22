@@ -64,7 +64,7 @@
     "dotenv": "^16.0.3",
     "dotenv-expand": "^10.0.0",
     "eslint": "^8.39.0",
-    "eslint-config-enact": "github:enactjs/eslint-config-enact#feature/WRP-6904",
+    "eslint-config-enact": "github:enactjs/eslint-config-enact#feature/unify-eslint-modules",
     "eslint-webpack-plugin": "^4.0.1",
     "expose-loader": "^4.1.0",
     "file-loader": "^6.2.0",
