@@ -1,4 +1,4 @@
-## 6.0.1 (July 3, 2023)
+## 6.0.1 (July 4, 2023)
 
 * Updated dependencies.
 
