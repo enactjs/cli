@@ -1,3 +1,7 @@
+## 6.0.1 (July 4, 2023)
+
+* Updated dependencies.
+
 ## 6.0.0 (May 19, 2023)
 
 * Updated all dependencies to the latest including Jest 29 and Typescript 5.
