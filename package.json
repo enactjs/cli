@@ -111,7 +111,7 @@
     "sass-loader": "^13.2.2",
     "semver": "^7.5.0",
     "source-map-loader": "^4.0.1",
-    "strip-ansi": "^6.0.1",
+    "strip-ansi": "^7.1.0",
     "style-loader": "^3.3.2",
     "tar": "^6.1.13",
     "terser-webpack-plugin": "^5.3.7",

@@ -18,7 +18,6 @@ const fs = require('fs-extra');
 const minimist = require('minimist');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const printBuildError = require('react-dev-utils/printBuildError');
-const stripAnsi = require('strip-ansi');
 const webpack = require('webpack');
 const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
 
@@ -148,31 +147,33 @@ function copyPublicFolder(output) {
 
 // Print a detailed summary of build files.
 function printFileSizes(stats, output) {
-	const assets = stats
-		.toJson({all: false, assets: true, cachedAssets: true})
-		.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
-		.map(asset => {
-			const size = fs.statSync(path.join(output, asset.name)).size;
-			return {
-				folder: path.relative(app.context, path.join(output, path.dirname(asset.name))),
-				name: path.basename(asset.name),
-				size: size,
-				sizeLabel: filesize(size)
-			};
+	import('strip-ansi').then(({default: stripAnsi}) => {
+		const assets = stats
+			.toJson({all: false, assets: true, cachedAssets: true})
+			.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
+			.map(asset => {
+				const size = fs.statSync(path.join(output, asset.name)).size;
+				return {
+					folder: path.relative(app.context, path.join(output, path.dirname(asset.name))),
+					name: path.basename(asset.name),
+					size: size,
+					sizeLabel: filesize(size)
+				};
+			});
+		assets.sort((a, b) => b.size - a.size);
+		const longestSizeLabelLength = Math.max.apply(
+			null,
+			assets.map(a => stripAnsi(a.sizeLabel).length)
+		);
+		assets.forEach(asset => {
+			let sizeLabel = asset.sizeLabel;
+			const sizeLength = stripAnsi(sizeLabel).length;
+			if (sizeLength < longestSizeLabelLength) {
+				const rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
+				sizeLabel += rightPadding;
+			}
+			console.log('	' + sizeLabel + '	' + chalk.dim(asset.folder + path.sep) + chalk.cyan(asset.name));
 		});
-	assets.sort((a, b) => b.size - a.size);
-	const longestSizeLabelLength = Math.max.apply(
-		null,
-		assets.map(a => stripAnsi(a.sizeLabel).length)
-	);
-	assets.forEach(asset => {
-		let sizeLabel = asset.sizeLabel;
-		const sizeLength = stripAnsi(sizeLabel).length;
-		if (sizeLength < longestSizeLabelLength) {
-			const rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
-			sizeLabel += rightPadding;
-		}
-		console.log('	' + sizeLabel + '	' + chalk.dim(asset.folder + path.sep) + chalk.cyan(asset.name));
 	});
 }
 
