@@ -1421,7 +1421,7 @@
     },
     "node_modules/@enact/dev-utils": {
       "version": "6.0.0",
-      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#7ded7457633f8ea9f380037be46cdf357aa700b3",
+      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#8277ffb3ee13e350790d617956c0a27085ca8d13",
       "license": "Apache-2.0",
       "dependencies": {
         "browserslist": "^4.21.5",
@@ -33739,7 +33739,7 @@
       "requires": {}
     },
     "@enact/dev-utils": {
-      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#7ded7457633f8ea9f380037be46cdf357aa700b3",
+      "version": "git+ssh://git@github.com/enactjs/dev-utils.git#8277ffb3ee13e350790d617956c0a27085ca8d13",
       "from": "@enact/dev-utils@enactjs/dev-utils#feature/WRP-14327",
       "requires": {
         "browserslist": "^4.21.5",
