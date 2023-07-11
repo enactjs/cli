@@ -21,6 +21,7 @@ const webpack = require('webpack');
 const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
 
 let chalk;
+let stripAnsi;
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -148,33 +149,31 @@ function copyPublicFolder(output) {
 
 // Print a detailed summary of build files.
 function printFileSizes(stats, output) {
-	import('strip-ansi').then(({default: stripAnsi}) => {
-		const assets = stats
-			.toJson({all: false, assets: true, cachedAssets: true})
-			.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
-			.map(asset => {
-				const size = fs.statSync(path.join(output, asset.name)).size;
-				return {
-					folder: path.relative(app.context, path.join(output, path.dirname(asset.name))),
-					name: path.basename(asset.name),
-					size: size,
-					sizeLabel: filesize(size)
-				};
-			});
-		assets.sort((a, b) => b.size - a.size);
-		const longestSizeLabelLength = Math.max.apply(
-			null,
-			assets.map(a => stripAnsi(a.sizeLabel).length)
-		);
-		assets.forEach(asset => {
-			let sizeLabel = asset.sizeLabel;
-			const sizeLength = stripAnsi(sizeLabel).length;
-			if (sizeLength < longestSizeLabelLength) {
-				const rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
-				sizeLabel += rightPadding;
-			}
-			console.log('	' + sizeLabel + '	' + chalk.dim(asset.folder + path.sep) + chalk.cyan(asset.name));
+	const assets = stats
+		.toJson({all: false, assets: true, cachedAssets: true})
+		.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
+		.map(asset => {
+			const size = fs.statSync(path.join(output, asset.name)).size;
+			return {
+				folder: path.relative(app.context, path.join(output, path.dirname(asset.name))),
+				name: path.basename(asset.name),
+				size: size,
+				sizeLabel: filesize(size)
+			};
 		});
+	assets.sort((a, b) => b.size - a.size);
+	const longestSizeLabelLength = Math.max.apply(
+		null,
+		assets.map(a => stripAnsi(a.sizeLabel).length)
+	);
+	assets.forEach(asset => {
+		let sizeLabel = asset.sizeLabel;
+		const sizeLength = stripAnsi(sizeLabel).length;
+		if (sizeLength < longestSizeLabelLength) {
+			const rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
+			sizeLabel += rightPadding;
+		}
+		console.log('	' + sizeLabel + '	' + chalk.dim(asset.folder + path.sep) + chalk.cyan(asset.name));
 	});
 }
 
@@ -319,9 +318,12 @@ function cli(args) {
 	process.chdir(app.context);
 	import('chalk').then(({default: _chalk}) => {
 		chalk = _chalk;
-		api(opts).catch(err => {
-			printErrorDetails(err, () => {
-				process.exit(1);
+		import('strip-ansi').then(({default: _stripAnsi}) => {
+			stripAnsi = _stripAnsi;
+			api(opts).catch(err => {
+				printErrorDetails(err, () => {
+					process.exit(1);
+				});
 			});
 		});
 	});
