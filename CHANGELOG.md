@@ -1,3 +1,7 @@
+## unreleased
+
+* Updated `chalk` and `strip-ansi` to the latest.
+
 ## 6.0.1 (July 4, 2023)
 
 * Updated dependencies.
