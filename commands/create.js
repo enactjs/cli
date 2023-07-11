@@ -11,11 +11,12 @@
  */
 const os = require('os');
 const path = require('path');
-const chalk = require('chalk');
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
 const minimist = require('minimist');
 const validatePackageName = require('validate-npm-package-name');
+
+let chalk;
 
 const ENACT_DEV_NPM = '@enact/cli';
 const INCLUDED = path.dirname(require.resolve('@enact/template-sandstone'));
@@ -283,9 +284,12 @@ function cli(args) {
 	opts.directory = path.resolve(typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
 	opts.name = path.basename(opts.directory).replace(/ /g, '-').toLowerCase();
 
-	api(opts).catch(err => {
-		console.error(chalk.red('ERROR: ') + err.message);
-		process.exit(1);
+	import('chalk').then(({default: _chalk}) => {
+		chalk = _chalk;
+		api(opts).catch(err => {
+			console.error(chalk.red('ERROR: ') + err.message);
+			process.exit(1);
+		});
 	});
 }
 
