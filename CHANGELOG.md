@@ -1,6 +1,7 @@
 ## unreleased
 
-* Updated `chalk` and `strip-ansi` to the latest.
+* Updated `chalk` version to `^5.3.0`.
+* Updated `find-cache-dir` version to `^7.1.0`.
 
 ## 6.0.1 (July 4, 2023)
 
