@@ -12,15 +12,16 @@
  */
 // @remove-on-eject-end
 const path = require('path');
-const chalk = require('chalk');
 const {filesize} = require('filesize');
 const fs = require('fs-extra');
 const minimist = require('minimist');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const printBuildError = require('react-dev-utils/printBuildError');
-const stripAnsi = require('strip-ansi');
 const webpack = require('webpack');
 const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
+
+let chalk;
+let stripAnsi;
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -315,9 +316,15 @@ function cli(args) {
 	if (opts.help) displayHelp();
 
 	process.chdir(app.context);
-	api(opts).catch(err => {
-		printErrorDetails(err, () => {
-			process.exit(1);
+	import('chalk').then(({default: _chalk}) => {
+		chalk = _chalk;
+		import('strip-ansi').then(({default: _stripAnsi}) => {
+			stripAnsi = _stripAnsi;
+			api(opts).catch(err => {
+				printErrorDetails(err, () => {
+					process.exit(1);
+				});
+			});
 		});
 	});
 }

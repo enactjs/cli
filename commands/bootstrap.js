@@ -1,11 +1,12 @@
 // @remove-file-on-eject
 const path = require('path');
-const chalk = require('chalk');
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
 const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils').packageRoot;
 const doLink = require('./link').api;
+
+let chalk;
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -175,9 +176,12 @@ function cli(args) {
 
 	if (opts._[0] && fs.statSync(opts._[0]).isDirectory()) opts.cwd = opts._[0];
 
-	api(opts).catch(err => {
-		console.error(chalk.red('ERROR: ') + err.message);
-		process.exit(1);
+	import('chalk').then(({default: _chalk}) => {
+		chalk = _chalk;
+		api(opts).catch(err => {
+			console.error(chalk.red('ERROR: ') + err.message);
+			process.exit(1);
+		});
 	});
 }
 
