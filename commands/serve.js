@@ -13,7 +13,6 @@
 // @remove-on-eject-end
 const fs = require('fs');
 const path = require('path');
-const chalk = require('chalk');
 const minimist = require('minimist');
 const clearConsole = require('react-dev-utils/clearConsole');
 const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
@@ -26,6 +25,8 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const {optionParser: app} = require('@enact/dev-utils');
+
+let chalk;
 
 // Any unhandled promise rejections should be treated like errors.
 process.on('unhandledRejection', err => {
@@ -355,10 +356,13 @@ function cli(args) {
 
 	process.chdir(app.context);
 
-	api(opts).catch(err => {
-		//console.error(chalk.red('ERROR: ') + (err.message || err));
-		console.log(err);
-		process.exit(1);
+	import('chalk').then(({default: _chalk}) => {
+		chalk = _chalk;
+		api(opts).catch(err => {
+			//console.error(chalk.red('ERROR: ') + (err.message || err));
+			console.log(err);
+			process.exit(1);
+		});
 	});
 }
 

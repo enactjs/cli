@@ -1,8 +1,9 @@
 /* eslint-env node, es6 */
 const path = require('path');
-const chalk = require('chalk');
 const checker = require('license-checker');
 const minimist = require('minimist');
+
+let chalk;
 
 // The following modules reside in `@enact/cli` but end up in production builds of apps
 const pkgPathResolve = m => path.dirname(require.resolve(m + '/package.json'));
@@ -53,12 +54,15 @@ function cli(args) {
 	});
 	if (opts.help) displayHelp();
 
-	api({modules: opts._})
-		.then(licenses => console.log(JSON.stringify(licenses, null, 2)))
-		.catch(err => {
-			console.error(chalk.red('ERROR: ') + err.message);
-			process.exit(1);
-		});
+	import('chalk').then(({default: _chalk}) => {
+		chalk = _chalk;
+		api({modules: opts._})
+			.then(licenses => console.log(JSON.stringify(licenses, null, 2)))
+			.catch(err => {
+				console.error(chalk.red('ERROR: ') + err.message);
+				process.exit(1);
+			});
+	});
 }
 
 module.exports = {api, cli};

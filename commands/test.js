@@ -14,9 +14,10 @@
 const path = require('path');
 const {execSync} = require('child_process');
 const {packageRoot} = require('@enact/dev-utils');
-const chalk = require('chalk');
 const jest = require('jest');
 const resolve = require('resolve');
+
+let chalk;
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
@@ -171,8 +172,11 @@ function api(args = []) {
 }
 
 function cli(args) {
-	api(args).catch(() => {
-		process.exit(1);
+	import('chalk').then(({default: _chalk}) => {
+		chalk = _chalk;
+		api(args).catch(() => {
+			process.exit(1);
+		});
 	});
 }
 
