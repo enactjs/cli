@@ -1,18 +1,19 @@
 const enact = require('eslint-config-enact');
-const prettier = require('eslint-config-prettier');
 const importPlugin = require('eslint-plugin-import');
+const prettier = require('eslint-config-prettier');
+const prettierPlugin = require('eslint-plugin-prettier');
 
 module.exports = [
 	enact,
 	prettier,
 	{
 		languageOptions: {
+			ecmaVersion: 'latest',
+			sourceType: 'module',
 			parserOptions: {
 				ecmaFeatures: {
 					jsx: true
-				},
-				ecmaVersion: 'latest',
-				sourceType: 'module'
+				}
 			}
 		}
 	},
@@ -38,7 +39,7 @@ module.exports = [
 	},
 	{
 		plugins: {
-			prettier
+			prettier: prettierPlugin
 		},
 		rules: {
 			"prettier/prettier": "error",
