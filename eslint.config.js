@@ -4,7 +4,7 @@ const prettier = require('eslint-config-prettier');
 const prettierPlugin = require('eslint-plugin-prettier');
 
 module.exports = [
-	enact,
+	...enact,
 	prettier,
 	{
 		languageOptions: {
@@ -42,9 +42,9 @@ module.exports = [
 			prettier: prettierPlugin
 		},
 		rules: {
-			"prettier/prettier": "error",
-			"arrow-body-style": "off",
-			"prefer-arrow-callback": "off"
+			'prettier/prettier': 'error',
+			'arrow-body-style': 'off',
+			'prefer-arrow-callback': 'off'
 		}
 	}
 ];
