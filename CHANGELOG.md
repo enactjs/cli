@@ -1,4 +1,4 @@
-## unreleased
+## 6.0.3 (October 5, 2023)
 
 * Updated `prettier` version to `^3.0.1` and `eslint-plugin-prettier` version to `^5.0.0`.
 
