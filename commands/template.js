@@ -290,19 +290,19 @@ function api({action, target, name} = {}) {
 }
 
 function cli(args) {
-	const opts = minimist(args, {
-		boolean: ['help'],
-		alias: {h: 'help'}
-	});
-	if (opts.help) displayHelp();
-
-	const action = opts._[0];
-	const target = opts._[1] || process.cwd();
-	const name = ['install', 'link'].includes(action) ? opts._[2] : opts._[1];
-	if (!action) displayHelp();
-
 	import('chalk').then(({default: _chalk}) => {
 		chalk = _chalk;
+		const opts = minimist(args, {
+			boolean: ['help'],
+			alias: {h: 'help'}
+		});
+		if (opts.help) displayHelp();
+
+		const action = opts._[0];
+		const target = opts._[1] || process.cwd();
+		const name = ['install', 'link'].includes(action) ? opts._[2] : opts._[1];
+		if (!action) displayHelp();
+
 		api({action, name, target}).catch(err => {
 			console.error('Template action failed.');
 			console.error();
