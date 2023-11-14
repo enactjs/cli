@@ -88,7 +88,7 @@ module.exports = function (
 	const shouldUseSourceMap = GENERATE_SOURCEMAP !== 'false';
 
 	const getLocalIdent =
-		process.env.SIMPLE_CSS_IDENT !== 'false' ? getSimpleCSSModuleLocalIdent : getCSSModuleLocalIdent;
+		process.env.SIMPLE_CSS_IDENT === 'true' ? getSimpleCSSModuleLocalIdent : getCSSModuleLocalIdent;
 
 	// common function to get style loaders
 	const getStyleLoaders = (cssLoaderOptions = {}, preProcessor) => {
