@@ -1,5 +1,9 @@
 ## unreleased
 
+### pack
+
+* Fixed webpack config to to generate unique class names in module css.
+
 ### test
 
 * Fixed `--help` throws errors.
