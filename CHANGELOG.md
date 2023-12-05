@@ -1,5 +1,9 @@
 ## unreleased
 
+### pack
+
+* Removed `getCSSModuleLocalIdent` to fix unexpected behaviors in css-loader.
+
 ### test
 
 * Fixed `--help` throws errors.
