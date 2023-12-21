@@ -1,4 +1,4 @@
-## unreleased
+## 6.0.4 (December 21, 2023)
 
 ### test
 
