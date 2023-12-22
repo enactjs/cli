@@ -1,6 +1,6 @@
-## unreleased
+## 6.0.4 (December 22, 2023)
 
-### test
+### template
 
 * Fixed `--help` throws errors.
 
