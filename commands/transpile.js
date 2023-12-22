@@ -1,13 +1,14 @@
 // @remove-file-on-eject
 const path = require('path');
 const babel = require('@babel/core');
-const chalk = require('chalk');
 const fs = require('fs-extra');
 const less = require('less');
 const LessPluginResolve = require('less-plugin-npm-import');
 const minimist = require('minimist');
 const LessPluginRi = require('resolution-independence');
 const {optionParser: app} = require('@enact/dev-utils');
+
+let chalk;
 
 const blacklist = ['node_modules', 'build', 'dist', 'docs', '.git', '.gitignore', 'samples', 'tests'];
 const babelConfig = path.join(__dirname, '..', 'config', 'babel.config.js');
@@ -103,8 +104,11 @@ function cli(args) {
 	process.chdir(app.context);
 	console.log('Transpiling via Babel to ' + path.resolve(opts.output));
 
-	api({source: '.', output: opts.output, commonjs: opts.commonjs, ignore}).catch(err => {
-		console.error(chalk.red('ERROR: ') + err.message);
+	import('chalk').then(({default: _chalk}) => {
+		chalk = _chalk;
+		api({source: '.', output: opts.output, commonjs: opts.commonjs, ignore}).catch(err => {
+			console.error(chalk.red('ERROR: ') + err.message);
+		});
 	});
 }
 

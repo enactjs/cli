@@ -1,3 +1,22 @@
+## 6.0.4 (December 22, 2023)
+
+### template
+
+* Fixed `--help` throws errors.
+
+## 6.0.3 (October 5, 2023)
+
+* Updated `prettier` version to `^3.0.1` and `eslint-plugin-prettier` version to `^5.0.0`.
+
+## 6.0.2 (July 26, 2023)
+
+* Updated `chalk` version to `^5.3.0`.
+* Updated `find-cache-dir` version to `^7.1.0`.
+
+## 6.0.1 (July 4, 2023)
+
+* Updated dependencies.
+
 ## 6.0.0 (May 19, 2023)
 
 * Updated all dependencies to the latest including Jest 29 and Typescript 5.

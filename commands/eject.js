@@ -12,12 +12,13 @@
 const cp = require('child_process');
 const os = require('os');
 const path = require('path');
-const chalk = require('chalk');
 const fs = require('fs-extra');
 const prompts = require('prompts');
 const minimist = require('minimist');
 const {packageRoot} = require('@enact/dev-utils');
 const spawn = require('cross-spawn');
+
+let chalk;
 
 const assets = [
 	{src: path.join(__dirname, '..', 'config'), dest: 'config'},
@@ -303,9 +304,12 @@ function cli(args) {
 
 	process.chdir(packageRoot().path);
 
-	api({bare: opts.bare}).catch(err => {
-		console.error(chalk.red('ERROR: ') + err.message);
-		process.exit(1);
+	import('chalk').then(({default: _chalk}) => {
+		chalk = _chalk;
+		api({bare: opts.bare}).catch(err => {
+			console.error(chalk.red('ERROR: ') + err.message);
+			process.exit(1);
+		});
 	});
 }
 

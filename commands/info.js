@@ -1,10 +1,11 @@
 /* eslint-env node, es6 */
 const path = require('path');
 const fs = require('fs');
-const chalk = require('chalk');
 const spawn = require('cross-spawn');
 const minimist = require('minimist');
 const resolveSync = require('resolve').sync;
+
+let chalk;
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -120,10 +121,12 @@ function api({cliInfo = false, dev = false} = {}) {
 			} else {
 				const app = require('@enact/dev-utils').optionParser;
 				const meta = require(path.join(app.context, 'package.json'));
-				const bl = require(resolveSync('browserslist', {
-					basedir: path.dirname(require.resolve('@enact/dev-utils/package.json')),
-					preserveSymlinks: false
-				}));
+				const bl = require(
+					resolveSync('browserslist', {
+						basedir: path.dirname(require.resolve('@enact/dev-utils/package.json')),
+						preserveSymlinks: false
+					})
+				);
 				app.setEnactTargetsAsDefault();
 				console.log(chalk.yellow.bold('==Project Info=='));
 				console.log(`Name: ${app.name}`);
@@ -167,9 +170,12 @@ function cli(args) {
 	});
 	if (opts.help) displayHelp();
 
-	api({cliInfo: opts.cli, dev: opts.dev}).catch(err => {
-		console.error(chalk.red('ERROR: ') + 'Failed to display info.\n' + err.message);
-		process.exit(1);
+	import('chalk').then(({default: _chalk}) => {
+		chalk = _chalk;
+		api({cliInfo: opts.cli, dev: opts.dev}).catch(err => {
+			console.error(chalk.red('ERROR: ') + 'Failed to display info.\n' + err.message);
+			process.exit(1);
+		});
 	});
 }
 

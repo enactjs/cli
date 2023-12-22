@@ -2,12 +2,13 @@
 const os = require('os');
 const path = require('path');
 const url = require('url');
-const chalk = require('chalk');
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
 const minimist = require('minimist');
 const prompts = require('prompts');
 const tar = require('tar');
+
+let chalk;
 
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 const INCLUDED = path.dirname(require.resolve('@enact/template-sandstone'));
@@ -289,22 +290,25 @@ function api({action, target, name} = {}) {
 }
 
 function cli(args) {
-	const opts = minimist(args, {
-		boolean: ['help'],
-		alias: {h: 'help'}
-	});
-	if (opts.help) displayHelp();
+	import('chalk').then(({default: _chalk}) => {
+		chalk = _chalk;
+		const opts = minimist(args, {
+			boolean: ['help'],
+			alias: {h: 'help'}
+		});
+		if (opts.help) displayHelp();
 
-	const action = opts._[0];
-	const target = opts._[1] || process.cwd();
-	const name = ['install', 'link'].includes(action) ? opts._[2] : opts._[1];
-	if (!action) displayHelp();
+		const action = opts._[0];
+		const target = opts._[1] || process.cwd();
+		const name = ['install', 'link'].includes(action) ? opts._[2] : opts._[1];
+		if (!action) displayHelp();
 
-	api({action, name, target}).catch(err => {
-		console.error('Template action failed.');
-		console.error();
-		console.error(chalk.red('ERROR: ') + err.message);
-		process.exit(1);
+		api({action, name, target}).catch(err => {
+			console.error('Template action failed.');
+			console.error();
+			console.error(chalk.red('ERROR: ') + err.message);
+			process.exit(1);
+		});
 	});
 }
 
