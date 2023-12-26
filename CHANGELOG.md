@@ -1,3 +1,7 @@
+## unreleased
+
+* Removed eslint related modules.
+
 ## 6.0.4 (December 22, 2023)
 
 ### template
