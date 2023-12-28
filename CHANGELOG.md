@@ -4,7 +4,9 @@
 
 * Removed `getCSSModuleLocalIdent` to fix unexpected behaviors in css-loader.
 
-### test
+## 6.0.4 (December 22, 2023)
+
+### template
 
 * Fixed `--help` throws errors.
 
