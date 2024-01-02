@@ -3,6 +3,7 @@
 ### pack
 
 * Removed `getCSSModuleLocalIdent` to fix unexpected behaviors in css-loader.
+* Fixed webpack config to generate unique class names in module css.
 
 ## 6.0.4 (December 22, 2023)
 
