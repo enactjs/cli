@@ -1,5 +1,7 @@
 ## unreleased
 
+* Removed eslint related modules.
+
 ### pack
 
 * Fixed webpack config to generate unique class names in module css.
