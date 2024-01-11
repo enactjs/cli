@@ -46,6 +46,7 @@ module.exports = function (
 	contentHash = false,
 	isomorphic = false,
 	noAnimation = false,
+	framework = false,
 	ilibAdditionalResourcesPath
 ) {
 	process.chdir(app.context);
@@ -569,7 +570,11 @@ module.exports = function (
 				resolvePluginsRelativeTo: __dirname,
 				// @remove-on-eject-begin
 				baseConfig: {
-					extends: [require.resolve('eslint-config-enact')],
+					extends: [
+						framework
+							? require.resolve('eslint-config-enact/strict.js')
+							: require.resolve('eslint-config-enact/index.js')
+					],
 					rules: {
 						...(!hasJsxRuntime && {
 							'react/jsx-uses-react': 'warn',

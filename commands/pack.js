@@ -258,6 +258,7 @@ function api(opts = {}) {
 		opts['content-hash'],
 		opts.isomorphic,
 		!opts.animation,
+		opts.framework,
 		opts['ilib-additional-path']
 	);
 
