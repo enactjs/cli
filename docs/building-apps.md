@@ -8,13 +8,14 @@ order: 4
     enact pack [options]
 
   Options
+    -o, --output      Specify an output directory
     --content-hash    Add a unique hash to output file names based on the content of an asset
+    -w, --watch       Rebuild on file changes
     -p, --production  Build in production mode
     -i, --isomorphic  Use isomorphic code layout
                       (includes prerendering)
-    -w, --watch       Rebuild on file changes
     -l, --locales     Locales for isomorphic mode; one of:
-            <comma-separated-values> Locale list
+            <commana-separated-values> Locale list
             <JSON-filepath> - Read locales from JSON file
             "none" - Disable locale-specific handling
             "used" - Detect locales used within ./resources/
@@ -23,8 +24,12 @@ order: 4
             "all" - All locales that iLib supports
     -s, --snapshot    Generate V8 snapshot blob
                       (requires V8_MKSNAPSHOT set)
+    -m, --meta        JSON to override package.json enact metadata
     -c, --custom-skin Build with a custom skin
     --stats           Output bundle analysis file
+    --verbose         Verbose log build details
+    -v, --version     Display version information
+    -h, --help        Display help information
 
 ```
 Run within an Enact project's source code, the `enact pack` command (aliased as `npm run pack` or `npm run pack-p` for production) will process and bundle the js, css, and asset files into the `./dist` directory. An **index.html** file will be dynamically generated.
