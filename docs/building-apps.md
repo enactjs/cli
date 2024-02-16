@@ -15,7 +15,7 @@ order: 4
     -i, --isomorphic  Use isomorphic code layout
                       (includes prerendering)
     -l, --locales     Locales for isomorphic mode; one of:
-            <commana-separated-values> Locale list
+            <comma-separated-values> Locale list
             <JSON-filepath> - Read locales from JSON file
             "none" - Disable locale-specific handling
             "used" - Detect locales used within ./resources/
