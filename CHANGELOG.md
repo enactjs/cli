@@ -1,3 +1,13 @@
+## 6.1.0 (February 21, 2024)
+
+* Removed `getCSSModuleLocalIdent` to fix unexpected behaviors in css-loader.
+* Removed eslint related modules.
+
+### pack
+
+* Fixed `--framework` option to use strict lint rules.
+* Fixed webpack config to generate unique class names in module css.
+
 ## 6.0.4 (December 22, 2023)
 
 ### template
