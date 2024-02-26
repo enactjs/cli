@@ -15,8 +15,8 @@ order: 4
     -i, --isomorphic  Use isomorphic code layout
                       (includes prerendering)
     -l, --locales     Locales for isomorphic mode; one of:
-            <comma-separated-values> Locale list
-            <JSON-filepath> - Read locales from JSON file
+            \<comma-separated-values\> Locale list
+            \<JSON-filepath\> - Read locales from JSON file
             "none" - Disable locale-specific handling
             "used" - Detect locales used within ./resources/
             "tv" - Locales supported on webOS TV
