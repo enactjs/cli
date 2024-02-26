@@ -21,7 +21,7 @@ Enact CLI uses [http-proxy-middleware](https://github.com/chimurai/http-proxy-mi
 This feature can be configured in the project's **package.json** within the `enact` object's `proxy` property.
 
 For example:
-```js
+```json
 {
 	...
 	"enact": {
