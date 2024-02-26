@@ -258,3 +258,19 @@ The Bundle analysis file option uses the popular [webpack-bundle-analyzer](https
 ## Override metadata
 The @enact/cli tool will check the project’s package.json looking for an optional `enact` object for a few [customization options](https://enactjs.com/docs/developer-tools/cli/starting-a-new-app/#enact-project-settings).
 For supporting additional options, Enact CLI provides `--meta` option to add a JSON to override package.json enact metadata.
+
+For example:
+```bash
+enact pack --meta='{"title":"myapp"}'
+```
+
+This example is the same as package.json below.
+```js
+{
+	...
+	"enact": {
+		"title": "myapp"
+	}
+	...
+}
+```
