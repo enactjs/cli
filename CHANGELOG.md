@@ -1,3 +1,7 @@
+## 6.1.1 (February 27, 2024)
+
+* Updated dependencies.
+
 ## 6.1.0 (February 21, 2024)
 
 * Removed `getCSSModuleLocalIdent` to fix unexpected behaviors in css-loader.
