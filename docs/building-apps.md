@@ -8,11 +8,12 @@ order: 4
     enact pack [options]
 
   Options
+    -o, --output      Specify an output directory
     --content-hash    Add a unique hash to output file names based on the content of an asset
+    -w, --watch       Rebuild on file changes
     -p, --production  Build in production mode
     -i, --isomorphic  Use isomorphic code layout
                       (includes prerendering)
-    -w, --watch       Rebuild on file changes
     -l, --locales     Locales for isomorphic mode; one of:
             <comma-separated-values> Locale list
             <JSON-filepath> - Read locales from JSON file
@@ -23,14 +24,18 @@ order: 4
             "all" - All locales that iLib supports
     -s, --snapshot    Generate V8 snapshot blob
                       (requires V8_MKSNAPSHOT set)
+    -m, --meta        JSON to override package.json enact metadata
     -c, --custom-skin Build with a custom skin
     --stats           Output bundle analysis file
+    --verbose         Verbose log build details
+    -v, --version     Display version information
+    -h, --help        Display help information
 
 ```
 Run within an Enact project's source code, the `enact pack` command (aliased as `npm run pack` or `npm run pack-p` for production) will process and bundle the js, css, and asset files into the `./dist` directory. An **index.html** file will be dynamically generated.
 
 ## Production Mode
-By default, projects will build in development mode. When you're code is ready for deployment you can build in production mode. Production mode will minify the source code and remove dead code, along with numerous other minor code optimization strategies.
+By default, projects will build in development mode. When your code is ready for deployment you can build in production mode. Production mode will minify the source code and remove dead code, along with numerous other minor code optimization strategies.
 
 ## Browser Support & Polyfills
 The Enact CLI is designed to be compatible with a wide array of browsers and devices. [Browserslist standard](https://github.com/browserslist/browserslist) is used to handle targeting, with Enact's defaults being:
@@ -249,3 +254,25 @@ Similar to the [`enact serve`](./serving-apps.md) command, the watcher will buil
 
 ## Stats Analysis
 The Bundle analysis file option uses the popular [webpack-bundle-analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer) to create a visual representation of the project build to **stats.html**, showing the full module hierarchy arranged by output size. This can be very useful in determining where bloat is coming from or finding dependencies that may have been included by mistake.
+
+## Override Metadata
+The @enact/cli tool inspects the `enact` object in the project's package.json for [customization options](./starting-a-new-app.md#enact-project-settings). 
+You can use the `--meta` flag to input a JSON string that overrides the `enact` metadata in package.json.
+
+Here's an example of how to use the `--meta` flag:
+
+```bash
+enact pack --meta='{"title":"myapp"}'
+```
+
+This command has the same effect as adding the following to your package.json:
+
+```json
+{
+	...
+	"enact": {
+		"title": "myapp"
+	}
+	...
+}
+```
