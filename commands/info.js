@@ -121,12 +121,10 @@ function api({cliInfo = false, dev = false} = {}) {
 			} else {
 				const app = require('@enact/dev-utils').optionParser;
 				const meta = require(path.join(app.context, 'package.json'));
-				const bl = require(
-					resolveSync('browserslist', {
-						basedir: path.dirname(require.resolve('@enact/dev-utils/package.json')),
-						preserveSymlinks: false
-					})
-				);
+				const bl = require(resolveSync('browserslist', {
+					basedir: path.dirname(require.resolve('@enact/dev-utils/package.json')),
+					preserveSymlinks: false
+				}));
 				app.setEnactTargetsAsDefault();
 				console.log(chalk.yellow.bold('==Project Info=='));
 				console.log(`Name: ${app.name}`);

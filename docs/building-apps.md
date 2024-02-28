@@ -3,7 +3,7 @@ title: Building Apps
 order: 4
 ---
 ## Packaging Source Code
-```bash
+```none
   Usage
     enact pack [options]
 
@@ -255,16 +255,18 @@ Similar to the [`enact serve`](./serving-apps.md) command, the watcher will buil
 ## Stats Analysis
 The Bundle analysis file option uses the popular [webpack-bundle-analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer) to create a visual representation of the project build to **stats.html**, showing the full module hierarchy arranged by output size. This can be very useful in determining where bloat is coming from or finding dependencies that may have been included by mistake.
 
-## Override metadata
-The @enact/cli tool will check the project’s package.json looking for an optional `enact` object for a few [customization options](https://enactjs.com/docs/developer-tools/cli/starting-a-new-app/#enact-project-settings).
-For supporting additional options, Enact CLI provides `--meta` option to add a JSON to override package.json enact metadata.
+## Override Metadata
+The @enact/cli tool inspects the `enact` object in the project's package.json for [customization options](./starting-a-new-app.md#enact-project-settings). 
+You can use the `--meta` flag to input a JSON string that overrides the `enact` metadata in package.json.
 
-For example:
+Here's an example of how to use the `--meta` flag:
+
 ```bash
 enact pack --meta='{"title":"myapp"}'
 ```
 
-This example is the same as package.json below.
+This command has the same effect as adding the following to your package.json:
+
 ```json
 {
 	...
