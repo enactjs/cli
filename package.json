@@ -1,6 +1,6 @@
 {
   "name": "@enact/cli",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "description": "Full-featured build environment tool for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
@@ -64,7 +64,7 @@
     "dotenv": "^16.3.1",
     "dotenv-expand": "^10.0.0",
     "eslint": "^8.56.0",
-    "eslint-config-enact": "^4.2.0",
+    "eslint-config-enact": "^4.2.1",
     "eslint-webpack-plugin": "^4.0.1",
     "expose-loader": "^4.1.0",
     "file-loader": "^6.2.0",
