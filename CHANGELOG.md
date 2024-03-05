@@ -1,4 +1,4 @@
-## 6.1.1 (February 27, 2024)
+## 6.1.1 (March 5, 2024)
 
 * Updated dependencies.
 
