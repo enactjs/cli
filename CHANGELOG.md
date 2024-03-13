@@ -1,3 +1,7 @@
+## 6.1.2 (March 13, 2024)
+
+* Updated docs to cover the latest commands of `enact pack`.
+
 ## 6.1.1 (March 5, 2024)
 
 * Updated dependencies.
