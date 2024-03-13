@@ -38,7 +38,7 @@ function displayHelp() {
 	console.log('    -i, --isomorphic  Use isomorphic code layout');
 	console.log('                      (includes prerendering)');
 	console.log('    -l, --locales     Locales for isomorphic mode; one of:');
-	console.log('            <commana-separated-values> Locale list');
+	console.log('            <comma-separated-values> Locale list');
 	console.log('            <JSON-filepath> - Read locales from JSON file');
 	console.log('            "none" - Disable locale-specific handling');
 	console.log('            "used" - Detect locales used within ./resources/');
