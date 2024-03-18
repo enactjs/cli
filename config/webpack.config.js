@@ -23,7 +23,6 @@ const ForkTsCheckerWebpackPlugin =
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
-const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
@@ -32,7 +31,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {
 	optionParser: app,
-	cssModuleIdent: getSimpleCSSModuleLocalIdent,
+	cssModuleIdent: getLocalIdent,
 	GracefulFsPlugin,
 	ILibPlugin,
 	WebOSMetaPlugin
@@ -87,9 +86,6 @@ module.exports = function (
 	// on or off by setting the GENERATE_SOURCEMAP environment variable.
 	const GENERATE_SOURCEMAP = process.env.GENERATE_SOURCEMAP || (isEnvProduction ? 'false' : 'true');
 	const shouldUseSourceMap = GENERATE_SOURCEMAP !== 'false';
-
-	const getLocalIdent =
-		process.env.SIMPLE_CSS_IDENT === 'true' ? getSimpleCSSModuleLocalIdent : getCSSModuleLocalIdent;
 
 	// common function to get style loaders
 	const getStyleLoaders = (cssLoaderOptions = {}, preProcessor) => {

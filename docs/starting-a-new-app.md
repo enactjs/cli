@@ -38,7 +38,7 @@ The @enact/cli tool will check the project's **package.json** looking for an opt
 * `proxy` _[string]_ - Proxy target during project `serve` to be used within the [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware).
 
 For example:
-```js
+```json
 {
 	...
 	"enact": {
