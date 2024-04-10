@@ -1,6 +1,24 @@
-## unreleased
+## 6.1.2 (March 13, 2024)
 
-### test
+* Updated docs to cover the latest commands of `enact pack`.
+
+## 6.1.1 (March 5, 2024)
+
+* Updated dependencies.
+
+## 6.1.0 (February 21, 2024)
+
+* Removed `getCSSModuleLocalIdent` to fix unexpected behaviors in css-loader.
+* Removed eslint related modules.
+
+### pack
+
+* Fixed `--framework` option to use strict lint rules.
+* Fixed webpack config to generate unique class names in module css.
+
+## 6.0.4 (December 22, 2023)
+
+### template
 
 * Fixed `--help` throws errors.
 
