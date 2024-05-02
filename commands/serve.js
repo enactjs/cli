@@ -95,13 +95,18 @@ function hotDevServer(config, fastRefresh) {
 }
 
 function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
-	let https = false;
+	let server = {
+		type: 'http'
+	};
 	const {SSL_CRT_FILE, SSL_KEY_FILE} = process.env;
 	if (protocol === 'https' && [SSL_CRT_FILE, SSL_KEY_FILE].every(f => f && fs.existsSync(f))) {
-		https = {
-			cert: fs.readFileSync(SSL_CRT_FILE),
-			key: fs.readFileSync(SSL_KEY_FILE)
-		};
+		server = {
+			type: 'https',
+			options: {
+				cert: fs.readFileSync(SSL_CRT_FILE),
+				key: fs.readFileSync(SSL_KEY_FILE)
+			}
+		}
 	}
 	const disableFirewall = !proxy || process.env.DANGEROUSLY_DISABLE_HOST_CHECK === 'true';
 
@@ -126,7 +131,7 @@ function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
 		// want to allow setting the allowedHosts manually for more complex setups
 		allowedHosts: disableFirewall ? 'all' : [allowedHost],
 		// Enable HTTPS if the HTTPS environment variable is set to 'true'
-		https,
+		server,
 		host,
 		port,
 		// Allow cross-origin HTTP requests
@@ -292,20 +297,26 @@ function serve(config, host, port, open) {
 			if (open) {
 				openBrowser(urls.localUrlForBrowser);
 			}
+
+			devServer.stopCallback(() => {
+				process.exit();
+			});
 		});
 
 		['SIGINT', 'SIGTERM'].forEach(sig => {
 			process.on(sig, () => {
-				devServer.close();
-				process.exit();
+				devServer.stopCallback(() => {
+					process.exit();
+				});
 			});
 		});
 
 		if (process.env.CI !== 'true') {
 			// Gracefully exit when stdin ends
 			process.stdin.on('end', () => {
-				devServer.close();
-				process.exit();
+				devServer.stopCallback(() => {
+					process.exit();
+				});
 			});
 		}
 	});
