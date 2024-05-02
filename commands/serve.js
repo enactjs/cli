@@ -106,7 +106,7 @@ function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
 				cert: fs.readFileSync(SSL_CRT_FILE),
 				key: fs.readFileSync(SSL_KEY_FILE)
 			}
-		}
+		};
 	}
 	const disableFirewall = !proxy || process.env.DANGEROUSLY_DISABLE_HOST_CHECK === 'true';
 
