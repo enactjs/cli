@@ -297,26 +297,20 @@ function serve(config, host, port, open) {
 			if (open) {
 				openBrowser(urls.localUrlForBrowser);
 			}
-
-			devServer.stopCallback(() => {
-				process.exit();
-			});
 		});
 
 		['SIGINT', 'SIGTERM'].forEach(sig => {
 			process.on(sig, () => {
-				devServer.stopCallback(() => {
-					process.exit();
-				});
+				devServer.close();
+				process.exit();
 			});
 		});
 
 		if (process.env.CI !== 'true') {
 			// Gracefully exit when stdin ends
 			process.stdin.on('end', () => {
-				devServer.stopCallback(() => {
-					process.exit();
-				});
+				devServer.close();
+				process.exit();
 			});
 		}
 	});
