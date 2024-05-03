@@ -301,7 +301,7 @@ function serve(config, host, port, open) {
 
 		['SIGINT', 'SIGTERM'].forEach(sig => {
 			process.on(sig, () => {
-				devServer.close();
+				devServer.stopCallback(() => {});
 				process.exit();
 			});
 		});
@@ -309,7 +309,7 @@ function serve(config, host, port, open) {
 		if (process.env.CI !== 'true') {
 			// Gracefully exit when stdin ends
 			process.stdin.on('end', () => {
-				devServer.close();
+				devServer.stopCallback(() => {});
 				process.exit();
 			});
 		}
