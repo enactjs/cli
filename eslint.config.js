@@ -15,10 +15,8 @@ module.exports = [
 			globals: {
 				...globals.node
 			},
-			parserOptions: {
-				ecmaFeatures: {
-					jsx: true
-				}
+			ecmaFeatures: {
+				jsx: true
 			}
 		},
 		plugins: {
