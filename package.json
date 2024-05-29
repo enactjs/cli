@@ -1,6 +1,6 @@
 {
   "name": "@enact/cli",
-  "version": "6.1.2",
+  "version": "6.1.2-react19_",
   "description": "Full-featured build environment tool for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
@@ -44,7 +44,7 @@
   ],
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.24.1",
-    "@enact/dev-utils": "github:enactjs/dev-utils#feature/WRQ-21653",
+    "@enact/dev-utils": "github:enactjs/dev-utils#feature/react_19",
     "@enact/template-sandstone": "^2.8.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
     "@testing-library/jest-dom": "^6.4.2",
@@ -64,7 +64,7 @@
     "dotenv": "^16.4.5",
     "dotenv-expand": "^10.0.0",
     "eslint": "^8.57.0",
-    "eslint-config-enact": "github:enactjs/eslint-config-enact#feature/WRQ-21653",
+    "eslint-config-enact": "github:enactjs/eslint-config-enact#feature/react_19",
     "eslint-webpack-plugin": "^4.1.0",
     "expose-loader": "^4.1.0",
     "file-loader": "^6.2.0",
