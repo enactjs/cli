@@ -5,7 +5,7 @@ node_js:
 sudo: false
 install:
     - npm config set prefer-offline false
-    - npm install
+    - npm install --force
 
 script:
     - npm run lint -- --report-unused-disable-directives --max-warnings 0
