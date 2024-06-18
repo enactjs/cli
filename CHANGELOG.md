@@ -1,3 +1,7 @@
+## unreleased
+
+* Switched `--no-animation` as a public option.
+
 ## 6.1.2 (March 13, 2024)
 
 * Updated docs to cover the latest commands of `enact pack`.
