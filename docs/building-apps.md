@@ -26,6 +26,7 @@ order: 4
                       (requires V8_MKSNAPSHOT set)
     -m, --meta        JSON to override package.json enact metadata
     -c, --custom-skin Build with a custom skin
+    --no-animation    Build without effects such as animation and shadow
     --stats           Output bundle analysis file
     --verbose         Verbose log build details
     -v, --version     Display version information
@@ -223,6 +224,11 @@ my-app/
   resources/
   webos-meta/
 ```
+
+## Turn off animations
+
+For low-performant devices, Enact CLI provides `--no-animation` option to remove animations and graphical effects such as shadow.
+Animation will be turned off with this build options, without modifying the app code.
 
 ## Caching
 
