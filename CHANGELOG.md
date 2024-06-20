@@ -1,3 +1,7 @@
+## unreleased
+
+* Updated `css-loader` to `^7.1.2` and changed `css-loader` options to restore 6.x behavior.
+
 ## 6.1.2 (March 13, 2024)
 
 * Updated docs to cover the latest commands of `enact pack`.
