@@ -2,7 +2,7 @@
 
 ### pack
 
-* Added `--no-animation` option to build without effects such as animation and shadow for low performant devices.
+* Added `--no-animation` option to build without effects such as animation and shadow.
 
 ## 6.1.2 (March 13, 2024)
 
