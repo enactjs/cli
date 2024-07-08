@@ -225,10 +225,9 @@ my-app/
   webos-meta/
 ```
 
-## Turn off animations
+## Build without Effects
 
-For low-performant devices, Enact CLI provides `--no-animation` option to remove animations and graphical effects such as shadow.
-Animation will be turned off with this build options, without modifying the app code.
+To accommodate devices with lower performance, the Enact CLI offers the `--no-animation` option. This option disables animations and graphical effects, including shadows. When activated, it sets the `ENACT_PACK_NO_ANIMATION` environment variable. This variable allows UI libraries like Sandstone to conditionally disable effects. Additionally, you can leverage this variable in your application to achieve the same outcome. Thus, you can develop an app devoid of these effects and do so without modifying your codebase.
 
 ## Caching
 
