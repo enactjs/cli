@@ -1,3 +1,9 @@
+## unreleased
+
+### pack
+
+* Added `--no-animation` option to build without effects such as animation and shadow.
+
 ## 6.1.2 (March 13, 2024)
 
 * Updated docs to cover the latest commands of `enact pack`.
