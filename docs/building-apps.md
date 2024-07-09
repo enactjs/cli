@@ -26,6 +26,7 @@ order: 4
                       (requires V8_MKSNAPSHOT set)
     -m, --meta        JSON to override package.json enact metadata
     -c, --custom-skin Build with a custom skin
+    --no-animation    Build without effects such as animation and shadow
     --stats           Output bundle analysis file
     --verbose         Verbose log build details
     -v, --version     Display version information
@@ -223,6 +224,10 @@ my-app/
   resources/
   webos-meta/
 ```
+
+## Build without Effects
+
+To accommodate devices with lower performance, the Enact CLI offers the `--no-animation` option. This option disables animations and graphical effects, including shadows. When activated, it sets the `ENACT_PACK_NO_ANIMATION` environment variable. This variable allows UI libraries like Sandstone to conditionally disable effects. Additionally, you can leverage this variable in your application to achieve the same outcome. Thus, you can develop an app devoid of these effects and do so without modifying your codebase.
 
 ## Caching
 
