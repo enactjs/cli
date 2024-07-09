@@ -1,6 +1,6 @@
 ## unreleased
 
-* Updated `css-loader` to `^7.1.2` and changed `css-loader` options to restore 6.x behavior.
+* Updated `css-loader` to 7.x and changed `css-loader` options to restore 6.x behavior.
 * Updated the minimum version of Node to `^18.12.0`.
 
 ### pack
