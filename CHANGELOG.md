@@ -1,3 +1,7 @@
+## unreleased
+
+* Fixed `@testing-library/dom` version to `^9.3.4` to fix travis failures.
+
 ## 6.1.2 (March 13, 2024)
 
 * Updated docs to cover the latest commands of `enact pack`.
