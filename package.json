@@ -87,7 +87,7 @@
     "postcss": "^8.4.39",
     "postcss-flexbugs-fixes": "^5.0.2",
     "postcss-global-import": "^1.0.6",
-    "postcss-loader": "^8.1.1",
+    "postcss-loader": "^7.3.4",
     "postcss-normalize": "^10.0.1",
     "postcss-preset-env": "^9.5.15",
     "postcss-resolution-independence": "^1.1.5",
@@ -109,6 +109,9 @@
     "validate-npm-package-name": "^5.0.1",
     "webpack": "^5.92.1",
     "webpack-dev-server": "^4.15.1"
+  },
+  "overrides": {
+    "@testing-library/dom": "^9.3.4"
   },
   "optionalDependencies": {
     "fsevents": "^2.3.3"
