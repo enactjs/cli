@@ -1,4 +1,4 @@
-## unreleased
+## 7.0.0-alpha.1 (July 24, 2024)
 
 * Updated `css-loader` to 7.x and changed `css-loader` options to restore 6.x behavior.
 * Updated the minimum version of Node to `18.12.0`.
