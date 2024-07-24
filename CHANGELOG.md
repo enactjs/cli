@@ -1,20 +1,12 @@
 ## 7.0.0-alpha.1 (July 24, 2024)
 
 * Updated the minimum version of Node to `18.12.0`.
-* Updated dependencies.
+* Updated all dependencies to the latest including `webpack-dev-server` version 5 and `@testing-library/react` version 15.
 
 ### pack
 
 * Updated `css-loader` to 7.x and changed `css-loader` options to restore 6.x behavior.
 * Added `--no-animation` option to build without effects such as animation and shadow.
-
-## serve
-
-* Updated `webpack-dev-server` version to `^5.0.4`.
-
-## test
-
-* Updated `@testing-library/react` version to `^15.0.7`.
 
 ## 6.1.2 (March 13, 2024)
 
