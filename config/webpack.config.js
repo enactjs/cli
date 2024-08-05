@@ -448,7 +448,17 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 					parallel: true
 				}),
 				new CssMinimizerPlugin()
-			]
+			],
+			splitChunks: {
+				cacheGroups: {
+					styles: {
+						name: 'styles',
+						type: 'css/mini-extract',
+						chunks: 'all',
+						enforce: true
+					}
+				}
+			}
 		},
 		plugins: [
 			// Generates an `index.html` file with the js and css tags injected.
@@ -489,7 +499,8 @@ module.exports = function (env, isomorphic = false, ilibAdditionalResourcesPath)
 			!process.env.INLINE_STYLES &&
 				new MiniCssExtractPlugin({
 					filename: '[name].css',
-					chunkFilename: 'chunk.[name].css'
+					chunkFilename: 'chunk.[name].css',
+					ignoreOrder: true
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
 			new NodePolyfillPlugin(),
