@@ -236,10 +236,10 @@ function copyTemplate(template, output, overwrite) {
 }
 
 function npmInstall(directory, verbose, ...rest) {
-	const args = [verbose ? '--verbose' : '--silent', 'install', ...rest];
+	const args = ['--loglevel', verbose ? 'verbose' : 'error', 'install', ...rest];
 
 	return new Promise((resolve, reject) => {
-		const proc = Bun.spawn(['bun', ...args], {stdin: 'inherit', stdout: 'inherit', cwd: directory});
+		const proc = spawn('npm', args, {stdio: 'inherit', cwd: directory});
 		proc.on('close', code => {
 			if (code !== 0) {
 				reject(new Error('npm install failed.'));
