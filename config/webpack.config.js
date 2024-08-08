@@ -99,11 +99,22 @@ module.exports = function (
 		// from them won't be in the main CSS file.
 		// When INLINE_STYLES env var is set, instead of MiniCssExtractPlugin, uses
 		// `style` loader to dynamically inline CSS in style tags at runtime.
+		const mergedCssLoaderOptions = {
+			...cssLoaderOptions,
+			modules: {
+				...cssLoaderOptions.modules,
+				// Options to restore 6.x behavior:
+				// https://github.com/webpack-contrib/css-loader/blob/master/CHANGELOG.md#700-2024-04-04
+				namedExport: false,
+				exportLocalsConvention: 'as-is'
+			}
+		};
+
 		const loaders = [
 			process.env.INLINE_STYLES ? require.resolve('style-loader') : MiniCssExtractPlugin.loader,
 			{
 				loader: require.resolve('css-loader'),
-				options: Object.assign({sourceMap: shouldUseSourceMap}, cssLoaderOptions, {
+				options: Object.assign({sourceMap: shouldUseSourceMap}, mergedCssLoaderOptions, {
 					url: {
 						filter: url => {
 							// Don't handle absolute path urls
