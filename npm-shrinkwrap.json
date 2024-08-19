@@ -49,7 +49,7 @@
         "license-checker": "^25.0.1",
         "mini-css-extract-plugin": "^2.9.0",
         "minimist": "^1.2.8",
-        "node-polyfill-webpack-plugin": "^4.0.0",
+        "node-polyfill-webpack-plugin": "^3.0.0",
         "postcss": "^8.4.39",
         "postcss-flexbugs-fixes": "^5.0.2",
         "postcss-global-import": "^1.0.6",
@@ -28971,11 +28971,11 @@
       }
     },
     "node_modules/domain-browser": {
-      "version": "5.7.0",
-      "resolved": "https://registry.npmjs.org/domain-browser/-/domain-browser-5.7.0.tgz",
-      "integrity": "sha512-edTFu0M/7wO1pXY6GDxVNVW086uqwWYIHP98txhcPyV995X21JIH2DtYp33sQJOupYoXKe9RwTw2Ya2vWaquTQ==",
+      "version": "4.23.0",
+      "resolved": "https://registry.npmjs.org/domain-browser/-/domain-browser-4.23.0.tgz",
+      "integrity": "sha512-ArzcM/II1wCCujdCNyQjXrAFwS4mrLh4C7DZWlaI8mdh7h3BfKdNd3bKXITfl2PT9FtfQqaGvhi1vPRQPimjGA==",
       "engines": {
-        "node": ">=4"
+        "node": ">=10"
       },
       "funding": {
         "url": "https://bevry.me/fund"
@@ -46186,9 +46186,9 @@
       "integrity": "sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw=="
     },
     "node_modules/node-polyfill-webpack-plugin": {
-      "version": "4.0.0",
-      "resolved": "https://registry.npmjs.org/node-polyfill-webpack-plugin/-/node-polyfill-webpack-plugin-4.0.0.tgz",
-      "integrity": "sha512-WLk77vLpbcpmTekRj6s6vYxk30XoyaY5MDZ4+9g8OaKoG3Ij+TjOqhpQjVUlfDZBPBgpNATDltaQkzuXSnnkwg==",
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/node-polyfill-webpack-plugin/-/node-polyfill-webpack-plugin-3.0.0.tgz",
+      "integrity": "sha512-QpG496dDBiaelQZu9wDcVvpLbtk7h9Ctz693RaUMZBgl8DUoFToO90ZTLKq57gP7rwKqYtGbMBXkcEgLSag2jQ==",
       "dependencies": {
         "assert": "^2.1.0",
         "browserify-zlib": "^0.2.0",
@@ -46196,21 +46196,21 @@
         "console-browserify": "^1.2.0",
         "constants-browserify": "^1.0.0",
         "crypto-browserify": "^3.12.0",
-        "domain-browser": "^5.7.0",
+        "domain-browser": "^4.22.0",
         "events": "^3.3.0",
         "https-browserify": "^1.0.0",
         "os-browserify": "^0.3.0",
         "path-browserify": "^1.0.1",
         "process": "^0.11.10",
-        "punycode": "^2.3.1",
+        "punycode": "^2.3.0",
         "querystring-es3": "^0.2.1",
-        "readable-stream": "^4.5.2",
+        "readable-stream": "^4.4.2",
         "stream-browserify": "^3.0.0",
         "stream-http": "^3.2.0",
         "string_decoder": "^1.3.0",
         "timers-browserify": "^2.0.12",
         "tty-browserify": "^0.0.1",
-        "type-fest": "^4.18.2",
+        "type-fest": "^4.4.0",
         "url": "^0.11.3",
         "util": "^0.12.5",
         "vm-browserify": "^1.1.2"
@@ -72093,9 +72093,9 @@
       }
     },
     "domain-browser": {
-      "version": "5.7.0",
-      "resolved": "https://registry.npmjs.org/domain-browser/-/domain-browser-5.7.0.tgz",
-      "integrity": "sha512-edTFu0M/7wO1pXY6GDxVNVW086uqwWYIHP98txhcPyV995X21JIH2DtYp33sQJOupYoXKe9RwTw2Ya2vWaquTQ=="
+      "version": "4.23.0",
+      "resolved": "https://registry.npmjs.org/domain-browser/-/domain-browser-4.23.0.tgz",
+      "integrity": "sha512-ArzcM/II1wCCujdCNyQjXrAFwS4mrLh4C7DZWlaI8mdh7h3BfKdNd3bKXITfl2PT9FtfQqaGvhi1vPRQPimjGA=="
     },
     "domelementtype": {
       "version": "2.3.0",
@@ -84112,9 +84112,9 @@
       "integrity": "sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw=="
     },
     "node-polyfill-webpack-plugin": {
-      "version": "4.0.0",
-      "resolved": "https://registry.npmjs.org/node-polyfill-webpack-plugin/-/node-polyfill-webpack-plugin-4.0.0.tgz",
-      "integrity": "sha512-WLk77vLpbcpmTekRj6s6vYxk30XoyaY5MDZ4+9g8OaKoG3Ij+TjOqhpQjVUlfDZBPBgpNATDltaQkzuXSnnkwg==",
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/node-polyfill-webpack-plugin/-/node-polyfill-webpack-plugin-3.0.0.tgz",
+      "integrity": "sha512-QpG496dDBiaelQZu9wDcVvpLbtk7h9Ctz693RaUMZBgl8DUoFToO90ZTLKq57gP7rwKqYtGbMBXkcEgLSag2jQ==",
       "requires": {
         "assert": "^2.1.0",
         "browserify-zlib": "^0.2.0",
@@ -84122,21 +84122,21 @@
         "console-browserify": "^1.2.0",
         "constants-browserify": "^1.0.0",
         "crypto-browserify": "^3.12.0",
-        "domain-browser": "^5.7.0",
+        "domain-browser": "^4.22.0",
         "events": "^3.3.0",
         "https-browserify": "^1.0.0",
         "os-browserify": "^0.3.0",
         "path-browserify": "^1.0.1",
         "process": "^0.11.10",
-        "punycode": "^2.3.1",
+        "punycode": "^2.3.0",
         "querystring-es3": "^0.2.1",
-        "readable-stream": "^4.5.2",
+        "readable-stream": "^4.4.2",
         "stream-browserify": "^3.0.0",
         "stream-http": "^3.2.0",
         "string_decoder": "^1.3.0",
         "timers-browserify": "^2.0.12",
         "tty-browserify": "^0.0.1",
-        "type-fest": "^4.18.2",
+        "type-fest": "^4.4.0",
         "url": "^0.11.3",
         "util": "^0.12.5",
         "vm-browserify": "^1.1.2"
