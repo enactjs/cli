@@ -155,7 +155,7 @@ module.exports = function (
 										remove: false
 									},
 									stage: 3,
-									features: {'custom-properties': false}
+									features: {'custom-properties': false, 'nesting-rules': ['auto', {edition: '2021'}]}
 								}
 							],
 							// Adds PostCSS Normalize to standardize browser quirks based on
