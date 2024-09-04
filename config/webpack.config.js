@@ -25,7 +25,6 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
@@ -493,6 +492,7 @@ module.exports = function (
 			new DefinePlugin({
 				'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
 				'process.env.PUBLIC_URL': JSON.stringify(publicPath),
+				'process.env': JSON.stringify(process.env),
 				// Define ENACT_PACK_ISOMORPHIC global variable to determine to use
 				// `hydrateRoot` for isomorphic build and `createRoot` for non-isomorphic build by app.
 				ENACT_PACK_ISOMORPHIC: isomorphic,
@@ -508,8 +508,6 @@ module.exports = function (
 					filename: contentHash ? '[name].[contenthash].css' : '[name].css',
 					chunkFilename: contentHash ? 'chunk.[name].[contenthash].css' : 'chunk.[name].css'
 				}),
-			// Webpack5 removed node polyfills but we need this to run screenshot tests
-			new NodePolyfillPlugin(),
 			// Provide meaningful information when modules are not found
 			new ModuleNotFoundPlugin(app.context),
 			// Ensure correct casing in module filepathes
