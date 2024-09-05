@@ -289,7 +289,8 @@ module.exports = function (
 			fallback: {
 				...app.resolveFallback,
 				crypto: require.resolve('crypto-browserify'),
-				buffer: require.resolve('buffer/')
+				buffer: require.resolve('buffer/'),
+				events: require.resolve('events/')
 			}
 		},
 		// @remove-on-eject-begin
