@@ -291,7 +291,8 @@ module.exports = function (
 				crypto: require.resolve('crypto-browserify'),
 				buffer: require.resolve('buffer/'),
 				events: require.resolve('events/'),
-				stream: require.resolve('stream-browserify')
+				stream: require.resolve('stream-browserify'),
+				vm: require.resolve('vm-browserify')
 			}
 		},
 		// @remove-on-eject-begin

@@ -76,6 +76,7 @@
         "tar": "^7.0.1",
         "terser-webpack-plugin": "^5.3.10",
         "validate-npm-package-name": "^5.0.1",
+        "vm-browserify": "^1.1.2",
         "webpack": "^5.93.0",
         "webpack-dev-server": "^5.0.4"
       },
@@ -50429,6 +50430,11 @@
         "node": ">= 0.8"
       }
     },
+    "node_modules/vm-browserify": {
+      "version": "1.1.2",
+      "resolved": "https://registry.npmjs.org/vm-browserify/-/vm-browserify-1.1.2.tgz",
+      "integrity": "sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ=="
+    },
     "node_modules/w3c-xmlserializer": {
       "version": "4.0.0",
       "resolved": "https://registry.npmjs.org/w3c-xmlserializer/-/w3c-xmlserializer-4.0.0.tgz",
@@ -86466,6 +86472,11 @@
       "version": "1.1.2",
       "resolved": "https://registry.npmjs.org/vary/-/vary-1.1.2.tgz",
       "integrity": "sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg=="
+    },
+    "vm-browserify": {
+      "version": "1.1.2",
+      "resolved": "https://registry.npmjs.org/vm-browserify/-/vm-browserify-1.1.2.tgz",
+      "integrity": "sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ=="
     },
     "w3c-xmlserializer": {
       "version": "4.0.0",

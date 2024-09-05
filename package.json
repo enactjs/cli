@@ -110,6 +110,7 @@
     "tar": "^7.0.1",
     "terser-webpack-plugin": "^5.3.10",
     "validate-npm-package-name": "^5.0.1",
+    "vm-browserify": "^1.1.2",
     "webpack": "^5.93.0",
     "webpack-dev-server": "^5.0.4"
   },
