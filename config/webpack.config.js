@@ -288,7 +288,8 @@ module.exports = function (
 			// Optional configuration for redirecting module requests.
 			fallback: {
 				...app.resolveFallback,
-				crypto: require.resolve('crypto-browserify')
+				crypto: require.resolve('crypto-browserify'),
+				buffer: require.resolve('buffer/')
 			}
 		},
 		// @remove-on-eject-begin
