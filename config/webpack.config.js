@@ -500,7 +500,6 @@ module.exports = function (
 			new DefinePlugin({
 				'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
 				'process.env.PUBLIC_URL': JSON.stringify(publicPath),
-				'process.env': JSON.stringify(process.env),
 				// Define ENACT_PACK_ISOMORPHIC global variable to determine to use
 				// `hydrateRoot` for isomorphic build and `createRoot` for non-isomorphic build by app.
 				ENACT_PACK_ISOMORPHIC: isomorphic,
