@@ -88,7 +88,7 @@
     "postcss-flexbugs-fixes": "^5.0.2",
     "postcss-global-import": "^1.0.6",
     "postcss-loader": "^8.1.1",
-    "postcss-normalize": "^10.0.1",
+    "postcss-normalize": "^13.0.0",
     "postcss-preset-env": "^10.0.0",
     "postcss-resolution-independence": "^1.1.6",
     "prompts": "^2.4.2",
