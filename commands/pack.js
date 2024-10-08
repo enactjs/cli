@@ -58,7 +58,7 @@ function displayHelp() {
 		Private Options:
 			--entry              	Specify an override entrypoint
 			--no-minify           	Will skip minification during production build
-			--no-split-css			Will not split CSS into separate files
+			--no-split-css        	Will not split CSS into separate files
 			--framework           	Builds the @enact/*, react, and react-dom into an external framework
 			--externals           	Specify a local directory path to the standalone external framework
 			--externals-public    	Remote public path to the external framework for use injecting into HTML
