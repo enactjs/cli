@@ -45,6 +45,7 @@ module.exports = function (
 	contentHash = false,
 	isomorphic = false,
 	noAnimation = false,
+	noSplitCSS = false,
 	framework = false,
 	ilibAdditionalResourcesPath
 ) {
@@ -462,7 +463,17 @@ module.exports = function (
 					parallel: true
 				}),
 				new CssMinimizerPlugin()
-			]
+			],
+			splitChunks: noSplitCSS && {
+				cacheGroups: {
+					styles: {
+						name: 'main',
+						type: 'css/mini-extract',
+						chunks: 'all',
+						enforce: true
+					}
+				}
+			}
 		},
 		plugins: [
 			// Generates an `index.html` file with the js and css tags injected.
@@ -506,7 +517,8 @@ module.exports = function (
 			!process.env.INLINE_STYLES &&
 				new MiniCssExtractPlugin({
 					filename: contentHash ? '[name].[contenthash].css' : '[name].css',
-					chunkFilename: contentHash ? 'chunk.[name].[contenthash].css' : 'chunk.[name].css'
+					chunkFilename: contentHash ? 'chunk.[name].[contenthash].css' : 'chunk.[name].css',
+					ignoreOrder: noSplitCSS
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
 			new NodePolyfillPlugin(),
