@@ -305,7 +305,16 @@ function cli(args) {
 			'watch',
 			'help'
 		],
-		string: ['additional-entry', 'externals', 'externals-public', 'locales', 'entry', 'ilib-additional-path', 'output', 'meta'],
+		string: [
+			'additional-entry',
+			'externals',
+			'externals-public',
+			'locales',
+			'entry',
+			'ilib-additional-path',
+			'output',
+			'meta'
+		],
 		default: {minify: true, 'split-css': true, animation: true},
 		alias: {
 			o: 'output',
