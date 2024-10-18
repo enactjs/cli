@@ -47,7 +47,8 @@ module.exports = function (
 	noAnimation = false,
 	noSplitCSS = false,
 	framework = false,
-	ilibAdditionalResourcesPath
+	ilibAdditionalResourcesPath,
+	additionalEntries
 ) {
 	process.chdir(app.context);
 
@@ -216,7 +217,7 @@ module.exports = function (
 				// This is your app's code
 				app.context
 			],
-			...(app.additionalEntries ? app.additionalEntries : {})
+			...(additionalEntries ? JSON.parse(additionalEntries) : app.additionalEntries ? app.additionalEntries : {})
 		},
 		output: {
 			// The build output directory.
@@ -466,7 +467,7 @@ module.exports = function (
 				new CssMinimizerPlugin()
 			],
 			splitChunks: {
-				...(app.additionalEntries && {chunks: 'all'}),
+				...((additionalEntries || app.additionalEntries) && {chunks: 'all'}),
 				...(noSplitCSS && {
 					cacheGroups: {
 						styles: {
@@ -522,7 +523,7 @@ module.exports = function (
 				new MiniCssExtractPlugin({
 					filename: contentHash ? '[name].[contenthash].css' : '[name].css',
 					chunkFilename: contentHash ? 'chunk.[name].[contenthash].css' : 'chunk.[name].css',
-					ignoreOrder: app.additionalEntries ? true : noSplitCSS
+					ignoreOrder: (additionalEntries || app.additionalEntries) ? true : noSplitCSS
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
 			new NodePolyfillPlugin(),
