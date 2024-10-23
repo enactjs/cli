@@ -31,6 +31,7 @@ function isInGitRepository() {
 		execSync('git rev-parse --is-inside-work-tree', {stdio: 'ignore'});
 		return true;
 	} catch (e) {
+		console.log(e);
 		return false;
 	}
 }
@@ -40,6 +41,7 @@ function isInMercurialRepository() {
 		execSync('hg --cwd . root', {stdio: 'ignore'});
 		return true;
 	} catch (e) {
+		console.log(e);
 		return false;
 	}
 }
@@ -62,12 +64,14 @@ function testEnvironment(args) {
 	try {
 		resolvedEnv = resolveJestDefaultEnvironment(`jest-environment-${env}`);
 	} catch (e) {
+		console.log(e);
 		// ignore
 	}
 	if (!resolvedEnv) {
 		try {
 			resolvedEnv = resolveJestDefaultEnvironment(env);
 		} catch (e) {
+			console.log(e);
 			// ignore
 		}
 	}

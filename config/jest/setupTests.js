@@ -1,6 +1,7 @@
 /* eslint-env jest */
 const fs = require('fs');
 const path = require('path');
+const jest = require('jest');
 const {packageRoot} = require('@enact/dev-utils');
 
 const filters = [
@@ -23,12 +24,12 @@ const filterExp = new RegExp('(' + filters.join('|') + ')');
 
 // Configure proptype & react error checking on the console.
 
-beforeEach(() => {
+jest.beforeEach(() => {
 	jest.spyOn(console, 'warn');
 	jest.spyOn(console, 'error');
 });
 
-afterEach(() => {
+jest.afterEach(() => {
 	const actual = (console.warn.mock ? console.warn.mock.calls : [])
 		.concat(console.error.mock ? console.error.mock.calls : [])
 		.filter(([m]) => filterExp.test(m));
@@ -41,7 +42,7 @@ afterEach(() => {
 		console.error.mockRestore();
 	}
 
-	expect(actual).toHaveLength(expected);
+	jest.expect(actual).toHaveLength(expected);
 });
 
 // Set initial resolution to VGA, similar to PhantomJS.
@@ -64,6 +65,7 @@ class ILibXHR extends XHR {
 					this.fileText = fs.readFileSync(file, {encoding: 'utf8'});
 					this.fileStatus = 200;
 				} catch (e) {
+					console.log(e);
 					this.fileText = '';
 					this.fileStatus = 404;
 				}
@@ -87,7 +89,7 @@ class ILibXHR extends XHR {
 }
 global.XMLHttpRequest = ILibXHR;
 
-beforeEach(() => {
+jest.beforeEach(() => {
 	global.Element.prototype.animate = jest.fn().mockImplementation(() => {
 		const animation = {
 			onfinish: null,

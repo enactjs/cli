@@ -38,6 +38,7 @@ function logVersion(pkg, rel = __dirname) {
 		}
 	} catch (e) {
 		console.log(pkg + ': ' + chalk.red('<unknown>'));
+		console.log(e);
 	}
 }
 
@@ -47,6 +48,7 @@ function gitInfo(dir) {
 			const result = spawn.sync('git', args, {encoding: 'utf8', cwd: dir, env: process.env});
 			if (!result.error && result.status === 0) return result.stdout.trim();
 		} catch (e) {
+			console.log(e);
 			// do nothing
 		}
 	};
@@ -74,6 +76,7 @@ function globalModules() {
 			return path.resolve(result.stdout, 'lib/node_modules');
 		}
 	} catch (e) {
+		console.log(e);
 		return require('global-modules');
 	}
 }

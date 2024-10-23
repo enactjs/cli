@@ -67,6 +67,7 @@ module.exports = function (
 			require.resolve('react/jsx-runtime');
 			return true;
 		} catch (e) {
+			console.log(e);
 			return false;
 		}
 	})();

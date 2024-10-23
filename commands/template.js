@@ -67,6 +67,7 @@ function initTemplateArea() {
 				try {
 					fs.realpathSync(d);
 				} catch (e) {
+					console.log(e);
 					fs.removeSync(d);
 				}
 			});

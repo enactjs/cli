@@ -107,6 +107,7 @@ function checkGitStatus() {
 		status = stdout.toString().trim();
 	} catch (e) {
 		status = '';
+		console.log(e);
 	}
 	if (status) {
 		throw new Error(
