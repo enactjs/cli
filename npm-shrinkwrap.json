@@ -12,6 +12,7 @@
         "@babel/plugin-transform-modules-commonjs": "^7.24.8",
         "@enact/dev-utils": "^7.0.0-alpha.1",
         "@enact/template-sandstone": "^3.0.0-alpha.1",
+        "@eslint/eslintrc": "^3.1.0",
         "@eslint/js": "^9.13.0",
         "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
         "@testing-library/jest-dom": "^6.5.0",
@@ -82,6 +83,7 @@
         "enact": "bin/enact.js"
       },
       "devDependencies": {
+        "@eslint/compat": "^1.2.1",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-import": "^2.31.0",
         "eslint-plugin-prettier": "^5.2.1",
@@ -19983,6 +19985,24 @@
       "integrity": "sha512-m4DVN9ZqskZoLU5GlWZadwDnYo3vAEydiUayB9widCl9ffWx2IvPnp6n3on5rJmziJSw9Bv+Z3ChDVdMwXCY8Q==",
       "engines": {
         "node": "^12.0.0 || ^14.0.0 || >=16.0.0"
+      }
+    },
+    "node_modules/@eslint/compat": {
+      "version": "1.2.1",
+      "resolved": "https://registry.npmjs.org/@eslint/compat/-/compat-1.2.1.tgz",
+      "integrity": "sha512-JbHG2TWuCeNzh87fXo+/46Z1LEo9DBA9T188d0fZgGxAD+cNyS6sx9fdiyxjGPBMyQVRlCutTByZ6a5+YMkF7g==",
+      "dev": true,
+      "license": "Apache-2.0",
+      "engines": {
+        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
+      },
+      "peerDependencies": {
+        "eslint": "^9.10.0"
+      },
+      "peerDependenciesMeta": {
+        "eslint": {
+          "optional": true
+        }
       }
     },
     "node_modules/@eslint/config-array": {
@@ -65566,6 +65586,13 @@
       "version": "4.11.1",
       "resolved": "https://registry.npmjs.org/@eslint-community/regexpp/-/regexpp-4.11.1.tgz",
       "integrity": "sha512-m4DVN9ZqskZoLU5GlWZadwDnYo3vAEydiUayB9widCl9ffWx2IvPnp6n3on5rJmziJSw9Bv+Z3ChDVdMwXCY8Q=="
+    },
+    "@eslint/compat": {
+      "version": "1.2.1",
+      "resolved": "https://registry.npmjs.org/@eslint/compat/-/compat-1.2.1.tgz",
+      "integrity": "sha512-JbHG2TWuCeNzh87fXo+/46Z1LEo9DBA9T188d0fZgGxAD+cNyS6sx9fdiyxjGPBMyQVRlCutTByZ6a5+YMkF7g==",
+      "dev": true,
+      "requires": {}
     },
     "@eslint/config-array": {
       "version": "0.18.0",
