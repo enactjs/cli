@@ -324,7 +324,7 @@ module.exports = function (
 							use: getStyleLoaders({
 								importLoaders: 1,
 								modules: {
-									getLocalIdent
+									//getLocalIdent
 								}
 							})
 						},
@@ -335,7 +335,7 @@ module.exports = function (
 							use: getStyleLoaders({
 								importLoaders: 1,
 								modules: {
-									...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
+									//...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
 								}
 							}),
 							// Don't consider CSS imports dead code even if the
@@ -349,7 +349,7 @@ module.exports = function (
 							use: getLessStyleLoaders({
 								importLoaders: 2,
 								modules: {
-									getLocalIdent
+									//getLocalIdent
 								}
 							})
 						},
@@ -358,7 +358,7 @@ module.exports = function (
 							use: getLessStyleLoaders({
 								importLoaders: 2,
 								modules: {
-									...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
+									//...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
 								}
 							}),
 							sideEffects: true
@@ -370,7 +370,7 @@ module.exports = function (
 							use: getScssStyleLoaders({
 								importLoaders: 3,
 								modules: {
-									getLocalIdent
+									//getLocalIdent
 								}
 							})
 						},
@@ -380,7 +380,7 @@ module.exports = function (
 							use: getScssStyleLoaders({
 								importLoaders: 3,
 								modules: {
-									...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
+									//...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
 								}
 							})
 						},
