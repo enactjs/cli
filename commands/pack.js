@@ -57,7 +57,6 @@ function displayHelp() {
 	console.log();
 	/*
 		Private Options:
-			--additional-entry      Split JS/CSS bundles into additional entry files
 			--entry              	Specify an override entrypoint
 			--no-minify           	Will skip minification during production build
 			--no-split-css        	Will not split CSS into separate files
@@ -262,12 +261,17 @@ function api(opts = {}) {
 		!opts.animation,
 		!opts['split-css'],
 		opts.framework,
-		opts['ilib-additional-path'],
-		opts['additional-entry']
+		opts['ilib-additional-path']
 	);
 
 	// Set any entry path override
-	if (opts.entry) helper.replaceMain(config, path.resolve(opts.entry));
+	if (opts.entry) {
+		try {
+			helper.replaceMain(config, JSON.parse(opts.entry));
+		} catch (e) {
+			helper.replaceMain(config, path.resolve(opts.entry));
+		}
+	}
 
 	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);
@@ -305,16 +309,7 @@ function cli(args) {
 			'watch',
 			'help'
 		],
-		string: [
-			'additional-entry',
-			'externals',
-			'externals-public',
-			'locales',
-			'entry',
-			'ilib-additional-path',
-			'output',
-			'meta'
-		],
+		string: ['externals', 'externals-public', 'locales', 'entry', 'ilib-additional-path', 'output', 'meta'],
 		default: {minify: true, 'split-css': true, animation: true},
 		alias: {
 			o: 'output',
