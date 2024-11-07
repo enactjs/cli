@@ -49,6 +49,7 @@ function displayHelp() {
 	console.log('                      (requires V8_MKSNAPSHOT set)');
 	console.log('    -m, --meta        JSON to override package.json enact metadata');
 	console.log('    -c, --custom-skin Build with a custom skin');
+	console.log('    --no-animation    Build without effects such as animation and shadow');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    --verbose         Verbose log build details');
 	console.log('    -v, --version     Display version information');
@@ -64,7 +65,6 @@ function displayHelp() {
 			--externals-public    	Remote public path to the external framework for use injecting into HTML
 			--externals-polyfill  	Flag whether to use external polyfill (or include in framework build)
 			--ilib-additional-path	Specify iLib additional resources path
-			--no-animation          Build without effects such as animation and shadow
 	*/
 	process.exit(0);
 }
@@ -265,7 +265,13 @@ function api(opts = {}) {
 	);
 
 	// Set any entry path override
-	if (opts.entry) helper.replaceMain(config, path.resolve(opts.entry));
+	if (opts.entry) {
+		try {
+			helper.replaceMain(config, JSON.parse(opts.entry));
+		} catch (e) {
+			helper.replaceMain(config, path.resolve(opts.entry));
+		}
+	}
 
 	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);
