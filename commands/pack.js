@@ -265,13 +265,7 @@ function api(opts = {}) {
 	);
 
 	// Set any entry path override
-	if (opts.entry) {
-		try {
-			helper.replaceMain(config, JSON.parse(opts.entry));
-		} catch (e) {
-			helper.replaceMain(config, path.resolve(opts.entry));
-		}
-	}
+	if (opts.entry) helper.replaceMain(config, opts.entry);
 
 	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);

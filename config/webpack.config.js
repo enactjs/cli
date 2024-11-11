@@ -200,6 +200,11 @@ module.exports = function (
 		return Array.isArray(paths) ? paths : [paths];
 	};
 
+	const mainEntry = app?.entry?.main || app.context
+	if (app?.entry?.main !== undefined) {
+		delete app.entry.main;
+	}
+
 	return {
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
@@ -214,7 +219,7 @@ module.exports = function (
 				// Include any polyfills needed for the target browsers.
 				require.resolve('./polyfills'),
 				// This is your app's code
-				app.context
+				mainEntry
 			],
 			...(app.entry ? app.entry : {})
 		},
@@ -522,7 +527,7 @@ module.exports = function (
 				new MiniCssExtractPlugin({
 					filename: contentHash ? '[name].[contenthash].css' : '[name].css',
 					chunkFilename: contentHash ? 'chunk.[name].[contenthash].css' : 'chunk.[name].css',
-					ignoreOrder: app.entry || noSplitCSS
+					ignoreOrder: app.entry ? true : noSplitCSS
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
 			new NodePolyfillPlugin(),
