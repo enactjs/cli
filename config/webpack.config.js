@@ -200,7 +200,7 @@ module.exports = function (
 		return Array.isArray(paths) ? paths : [paths];
 	};
 
-	const mainEntry = app?.entry?.main || app.context
+	const mainEntry = app?.entry?.main || app.context;
 	if (app?.entry?.main !== undefined) {
 		delete app.entry.main;
 	}
