@@ -200,11 +200,6 @@ module.exports = function (
 		return Array.isArray(paths) ? paths : [paths];
 	};
 
-	const mainEntry = app?.entry?.main || app.context;
-	if (app?.entry?.main !== undefined) {
-		delete app.entry.main;
-	}
-
 	return {
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
@@ -219,9 +214,8 @@ module.exports = function (
 				// Include any polyfills needed for the target browsers.
 				require.resolve('./polyfills'),
 				// This is your app's code
-				mainEntry
-			],
-			...(app.entry ? app.entry : {})
+				app.context
+			]
 		},
 		output: {
 			// The build output directory.
@@ -470,18 +464,15 @@ module.exports = function (
 				}),
 				new CssMinimizerPlugin()
 			],
-			splitChunks: {
-				...(app.entry && {chunks: 'all'}),
-				...(noSplitCSS && {
-					cacheGroups: {
-						styles: {
-							name: 'main',
-							type: 'css/mini-extract',
-							chunks: 'all',
-							enforce: true
-						}
+			splitChunks: noSplitCSS && {
+				cacheGroups: {
+					styles: {
+						name: 'main',
+						type: 'css/mini-extract',
+						chunks: 'all',
+						enforce: true
 					}
-				})
+				}
 			}
 		},
 		plugins: [
@@ -527,7 +518,7 @@ module.exports = function (
 				new MiniCssExtractPlugin({
 					filename: contentHash ? '[name].[contenthash].css' : '[name].css',
 					chunkFilename: contentHash ? 'chunk.[name].[contenthash].css' : 'chunk.[name].css',
-					ignoreOrder: app.entry ? true : noSplitCSS
+					ignoreOrder: noSplitCSS
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
 			new NodePolyfillPlugin(),
