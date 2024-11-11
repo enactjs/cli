@@ -522,7 +522,7 @@ module.exports = function (
 				new MiniCssExtractPlugin({
 					filename: contentHash ? '[name].[contenthash].css' : '[name].css',
 					chunkFilename: contentHash ? 'chunk.[name].[contenthash].css' : 'chunk.[name].css',
-					ignoreOrder: app.entry ? true : noSplitCSS
+					ignoreOrder: app.entry || noSplitCSS
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
 			new NodePolyfillPlugin(),
