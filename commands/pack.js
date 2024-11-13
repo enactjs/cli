@@ -265,7 +265,7 @@ function api(opts = {}) {
 	);
 
 	// Set any entry path override
-	if (opts.entry) helper.replaceMain(config, path.resolve(opts.entry));
+	if (opts.entry || app.entry) helper.replaceEntry(config, opts.entry || app.entry);
 
 	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);
