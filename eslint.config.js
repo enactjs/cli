@@ -1,4 +1,4 @@
-// const enactConfig = require('eslint-config-enact');
+const enactConfig = require('eslint-config-enact');
 const prettierConfig = require('eslint-config-prettier');
 const importPlugin = require('eslint-plugin-import');
 const prettierPlugin = require('eslint-plugin-prettier');
@@ -52,10 +52,9 @@ module.exports = [
 			...prettierPlugin.configs.recommended.rules,
 			...prettierConfig.rules
 		}
+	},
+	{
+		...enactConfig,
+		files: ['*/.js', '*/.jsx', '*/.ts', '*/.tsx']
 	}
-	// },
-	// {
-	// 	...enactConfig,
-	// 	files: ['*/.js', '*/.jsx', '*/.ts', '*/.tsx']
-	// }
 ];
