@@ -5,6 +5,7 @@ const prettierPlugin = require('eslint-plugin-prettier');
 const globals = require('globals');
 
 module.exports = [
+	...enactConfig,
 	{
 		files: ['*/.js', '*/.jsx', '*/.ts', '*/.tsx'],
 		languageOptions: {
@@ -52,9 +53,5 @@ module.exports = [
 			...prettierPlugin.configs.recommended.rules,
 			...prettierConfig.rules
 		}
-	},
-	{
-		...enactConfig,
-		files: ['*/.js', '*/.jsx', '*/.ts', '*/.tsx']
 	}
 ];
