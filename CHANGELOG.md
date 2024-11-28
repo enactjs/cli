@@ -1,3 +1,9 @@
+## unreleased
+
+### lint
+
+* Updated Enact ESLint config to `9.1.5` including updating eslint related modules and temporary setting ESLINT_USE_FLAT_CONFIG env variable.
+
 ## 7.0.0-alpha.1 (July 24, 2024)
 
 * Updated the minimum version of Node to `18.12.0`.
