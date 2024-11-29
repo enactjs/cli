@@ -20,8 +20,8 @@
     "access": "public"
   },
   "scripts": {
-    "lint": "eslint .",
-    "fix": "eslint . --fix"
+    "lint": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint .",
+    "fix": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint . --fix"
   },
   "prettier": {
     "printWidth": 120,
@@ -44,7 +44,7 @@
   ],
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.24.8",
-    "@enact/dev-utils": "^7.0.0-alpha.1",
+    "@enact/dev-utils": "enactjs/dev-utils#feature/eslint9",
     "@enact/template-sandstone": "^3.0.0-alpha.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
     "@testing-library/jest-dom": "^6.5.0",
@@ -63,8 +63,8 @@
     "css-minimizer-webpack-plugin": "^6.0.0",
     "dotenv": "^16.4.5",
     "dotenv-expand": "^11.0.6",
-    "eslint": "^8.57.0",
-    "eslint-config-enact": "^5.0.0-alpha.1",
+    "eslint": "^9.15.0",
+    "eslint-config-enact": "enactjs/eslint-config-enact#feature/eslint9",
     "eslint-webpack-plugin": "^4.2.0",
     "expose-loader": "^5.0.0",
     "file-loader": "^6.2.0",
@@ -107,7 +107,7 @@
     "tar": "^7.4.3",
     "terser-webpack-plugin": "^5.3.10",
     "validate-npm-package-name": "^5.0.1",
-    "webpack": "^5.94.0",
+    "webpack": "^5.96.1",
     "webpack-dev-server": "^5.1.0"
   },
   "optionalDependencies": {
@@ -122,9 +122,10 @@
     }
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.1",
-    "prettier": "^3.3.3"
+    "prettier": "^3.4.1"
   }
 }
