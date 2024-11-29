@@ -2,7 +2,7 @@
 
 ### lint
 
-* Updated Enact ESLint config to `9.1.5` including updating eslint related modules and temporary setting ESLINT_USE_FLAT_CONFIG env variable.
+* Updated Enact ESLint config to `9.1.5` including eslint related modules and set temporary ESLINT_USE_FLAT_CONFIG env variable.
 
 ## 7.0.0-alpha.1 (July 24, 2024)
 
