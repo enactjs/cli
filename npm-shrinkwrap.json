@@ -134,9 +134,9 @@
       }
     },
     "node_modules/@babel/compat-data": {
-      "version": "7.26.2",
-      "resolved": "https://registry.npmjs.org/@babel/compat-data/-/compat-data-7.26.2.tgz",
-      "integrity": "sha512-Z0WgzSEa+aUcdiJuCIqgujCshpMWgUpgOxXotrYPSA53hA3qopNaqcJpyr0hVb1FeWdnqFA35/fUtXgBK8srQg==",
+      "version": "7.26.3",
+      "resolved": "https://registry.npmjs.org/@babel/compat-data/-/compat-data-7.26.3.tgz",
+      "integrity": "sha512-nHIxvKPniQXpmQLb0vhY3VaFb3S0YrTAwpOWJZh1wn3oJPjJk9Asva204PsBdmAE8vpzfHudT8DB0scYvy9q0g==",
       "license": "MIT",
       "engines": {
         "node": ">=6.9.0"
@@ -234,13 +234,13 @@
       }
     },
     "node_modules/@babel/generator": {
-      "version": "7.26.2",
-      "resolved": "https://registry.npmjs.org/@babel/generator/-/generator-7.26.2.tgz",
-      "integrity": "sha512-zevQbhbau95nkoxSq3f/DC/SC+EEOUZd3DYqfSkMhY2/wfSeaHV1Ew4vk8e+x8lja31IbyuUa2uQ3JONqKbysw==",
+      "version": "7.26.3",
+      "resolved": "https://registry.npmjs.org/@babel/generator/-/generator-7.26.3.tgz",
+      "integrity": "sha512-6FF/urZvD0sTeO7k6/B15pMLC4CHUv1426lzr3N01aHJTl046uCAh9LXW/fzeXXjPNCJ6iABW5XaWOsIZB93aQ==",
       "license": "MIT",
       "dependencies": {
-        "@babel/parser": "^7.26.2",
-        "@babel/types": "^7.26.0",
+        "@babel/parser": "^7.26.3",
+        "@babel/types": "^7.26.3",
         "@jridgewell/gen-mapping": "^0.3.5",
         "@jridgewell/trace-mapping": "^0.3.25",
         "jsesc": "^3.0.2"
@@ -255,19 +255,6 @@
       "integrity": "sha512-gv7320KBUFJz1RnylIg5WWYPRXKZ884AGkYpgpWW02TH66Dl+HaC1t1CKd0z3R4b6hdYEcmrNZHUmfCP+1u3/g==",
       "license": "MIT",
       "dependencies": {
-        "@babel/types": "^7.25.9"
-      },
-      "engines": {
-        "node": ">=6.9.0"
-      }
-    },
-    "node_modules/@babel/helper-builder-binary-assignment-operator-visitor": {
-      "version": "7.25.9",
-      "resolved": "https://registry.npmjs.org/@babel/helper-builder-binary-assignment-operator-visitor/-/helper-builder-binary-assignment-operator-visitor-7.25.9.tgz",
-      "integrity": "sha512-C47lC7LIDCnz0h4vai/tpNOI95tCd5ZT3iBt/DBH5lXKHZsyNQv18yf1wIIg2ntiQNgmAvA+DgZ82iW8Qdym8g==",
-      "license": "MIT",
-      "dependencies": {
-        "@babel/traverse": "^7.25.9",
         "@babel/types": "^7.25.9"
       },
       "engines": {
@@ -343,13 +330,13 @@
       }
     },
     "node_modules/@babel/helper-create-regexp-features-plugin": {
-      "version": "7.25.9",
-      "resolved": "https://registry.npmjs.org/@babel/helper-create-regexp-features-plugin/-/helper-create-regexp-features-plugin-7.25.9.tgz",
-      "integrity": "sha512-ORPNZ3h6ZRkOyAa/SaHU+XsLZr0UQzRwuDQ0cczIA17nAzZ+85G5cVkOJIj7QavLZGSe8QXUmNFxSZzjcZF9bw==",
+      "version": "7.26.3",
+      "resolved": "https://registry.npmjs.org/@babel/helper-create-regexp-features-plugin/-/helper-create-regexp-features-plugin-7.26.3.tgz",
+      "integrity": "sha512-G7ZRb40uUgdKOQqPLjfD12ZmGA54PzqDFUv2BKImnC9QIfGhIHKvVML0oN8IUiDq4iRqpq74ABpvOaerfWdong==",
       "license": "MIT",
       "dependencies": {
         "@babel/helper-annotate-as-pure": "^7.25.9",
-        "regexpu-core": "^6.1.1",
+        "regexpu-core": "^6.2.0",
         "semver": "^6.3.1"
       },
       "engines": {
@@ -482,19 +469,6 @@
         "@babel/core": "^7.0.0"
       }
     },
-    "node_modules/@babel/helper-simple-access": {
-      "version": "7.25.9",
-      "resolved": "https://registry.npmjs.org/@babel/helper-simple-access/-/helper-simple-access-7.25.9.tgz",
-      "integrity": "sha512-c6WHXuiaRsJTyHYLJV75t9IqsmTbItYfdj99PnzYGQZkYKvan5/2jKJ7gu31J3/BJ/A18grImSPModuyG/Eo0Q==",
-      "license": "MIT",
-      "dependencies": {
-        "@babel/traverse": "^7.25.9",
-        "@babel/types": "^7.25.9"
-      },
-      "engines": {
-        "node": ">=6.9.0"
-      }
-    },
     "node_modules/@babel/helper-skip-transparent-expression-wrappers": {
       "version": "7.25.9",
       "resolved": "https://registry.npmjs.org/@babel/helper-skip-transparent-expression-wrappers/-/helper-skip-transparent-expression-wrappers-7.25.9.tgz",
@@ -563,12 +537,12 @@
       }
     },
     "node_modules/@babel/parser": {
-      "version": "7.26.2",
-      "resolved": "https://registry.npmjs.org/@babel/parser/-/parser-7.26.2.tgz",
-      "integrity": "sha512-DWMCZH9WA4Maitz2q21SRKHo9QXZxkDsbNZoVD62gusNtNBBqDg9i7uOhASfTfIGNzW+O+r7+jAlM8dwphcJKQ==",
+      "version": "7.26.3",
+      "resolved": "https://registry.npmjs.org/@babel/parser/-/parser-7.26.3.tgz",
+      "integrity": "sha512-WJ/CvmY8Mea8iDXo6a7RK2wbmJITT5fN3BEkRuFlxVyNx8jOKIIhmC4fSkTcPcf8JyavbBwIe6OpiCOBXt/IcA==",
       "license": "MIT",
       "dependencies": {
-        "@babel/types": "^7.26.0"
+        "@babel/types": "^7.26.3"
       },
       "bin": {
         "parser": "bin/babel-parser.js"
@@ -761,18 +735,6 @@
       },
       "engines": {
         "node": ">=6.9.0"
-      },
-      "peerDependencies": {
-        "@babel/core": "^7.0.0-0"
-      }
-    },
-    "node_modules/@babel/plugin-syntax-dynamic-import": {
-      "version": "7.8.3",
-      "resolved": "https://registry.npmjs.org/@babel/plugin-syntax-dynamic-import/-/plugin-syntax-dynamic-import-7.8.3.tgz",
-      "integrity": "sha512-5gdGbFon+PszYzqs83S3E5mpi7/y/8M9eC90MRTZfduQOYW76ig6SOSPNe41IG5LoP3FGBn2N0RjVDSQiS94kQ==",
-      "license": "MIT",
-      "dependencies": {
-        "@babel/helper-plugin-utils": "^7.8.0"
       },
       "peerDependencies": {
         "@babel/core": "^7.0.0-0"
@@ -1205,12 +1167,11 @@
       }
     },
     "node_modules/@babel/plugin-transform-exponentiation-operator": {
-      "version": "7.25.9",
-      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-exponentiation-operator/-/plugin-transform-exponentiation-operator-7.25.9.tgz",
-      "integrity": "sha512-KRhdhlVk2nObA5AYa7QMgTMTVJdfHprfpAk4DjZVtllqRg9qarilstTKEhpVjyt+Npi8ThRyiV8176Am3CodPA==",
+      "version": "7.26.3",
+      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-exponentiation-operator/-/plugin-transform-exponentiation-operator-7.26.3.tgz",
+      "integrity": "sha512-7CAHcQ58z2chuXPWblnn1K6rLDnDWieghSOEmqQsrBenH0P9InCUtOJYD89pvngljmZlJcz3fcmgYsXFNGa1ZQ==",
       "license": "MIT",
       "dependencies": {
-        "@babel/helper-builder-binary-assignment-operator-visitor": "^7.25.9",
         "@babel/helper-plugin-utils": "^7.25.9"
       },
       "engines": {
@@ -1345,14 +1306,13 @@
       }
     },
     "node_modules/@babel/plugin-transform-modules-commonjs": {
-      "version": "7.25.9",
-      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-modules-commonjs/-/plugin-transform-modules-commonjs-7.25.9.tgz",
-      "integrity": "sha512-dwh2Ol1jWwL2MgkCzUSOvfmKElqQcuswAZypBSUsScMXvgdT8Ekq5YA6TtqpTVWH+4903NmboMuH1o9i8Rxlyg==",
+      "version": "7.26.3",
+      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-modules-commonjs/-/plugin-transform-modules-commonjs-7.26.3.tgz",
+      "integrity": "sha512-MgR55l4q9KddUDITEzEFYn5ZsGDXMSsU9E+kh7fjRXTIC3RHqfCo8RPRbyReYJh44HQ/yomFkqbOFohXvDCiIQ==",
       "license": "MIT",
       "dependencies": {
-        "@babel/helper-module-transforms": "^7.25.9",
-        "@babel/helper-plugin-utils": "^7.25.9",
-        "@babel/helper-simple-access": "^7.25.9"
+        "@babel/helper-module-transforms": "^7.26.0",
+        "@babel/helper-plugin-utils": "^7.25.9"
       },
       "engines": {
         "node": ">=6.9.0"
@@ -1817,9 +1777,9 @@
       }
     },
     "node_modules/@babel/plugin-transform-typescript": {
-      "version": "7.25.9",
-      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-typescript/-/plugin-transform-typescript-7.25.9.tgz",
-      "integrity": "sha512-7PbZQZP50tzv2KGGnhh82GSyMB01yKY9scIjf1a+GfZCtInOWqUH5+1EBU4t9fyR5Oykkkc9vFTs4OHrhHXljQ==",
+      "version": "7.26.3",
+      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-typescript/-/plugin-transform-typescript-7.26.3.tgz",
+      "integrity": "sha512-6+5hpdr6mETwSKjmJUdYw0EIkATiQhnELWlE3kJFBwSg/BGIVwVaVbX+gOXBCdc7Ln1RXZxyWGecIXhUfnl7oA==",
       "license": "MIT",
       "dependencies": {
         "@babel/helper-annotate-as-pure": "^7.25.9",
@@ -2005,9 +1965,9 @@
       }
     },
     "node_modules/@babel/preset-react": {
-      "version": "7.25.9",
-      "resolved": "https://registry.npmjs.org/@babel/preset-react/-/preset-react-7.25.9.tgz",
-      "integrity": "sha512-D3to0uSPiWE7rBrdIICCd0tJSIGpLaaGptna2+w7Pft5xMqLpA1sz99DK5TZ1TjGbdQ/VI1eCSZ06dv3lT4JOw==",
+      "version": "7.26.3",
+      "resolved": "https://registry.npmjs.org/@babel/preset-react/-/preset-react-7.26.3.tgz",
+      "integrity": "sha512-Nl03d6T9ky516DGK2YMxrTqvnpUW63TnJMOMonj+Zae0JiPC5BC9xPMSL6L8fiSpA5vP88qfygavVQvnLp+6Cw==",
       "license": "MIT",
       "dependencies": {
         "@babel/helper-plugin-utils": "^7.25.9",
@@ -2070,16 +2030,16 @@
       }
     },
     "node_modules/@babel/traverse": {
-      "version": "7.25.9",
-      "resolved": "https://registry.npmjs.org/@babel/traverse/-/traverse-7.25.9.tgz",
-      "integrity": "sha512-ZCuvfwOwlz/bawvAuvcj8rrithP2/N55Tzz342AkTvq4qaWbGfmCk/tKhNaV2cthijKrPAA8SRJV5WWe7IBMJw==",
+      "version": "7.26.3",
+      "resolved": "https://registry.npmjs.org/@babel/traverse/-/traverse-7.26.3.tgz",
+      "integrity": "sha512-yTmc8J+Sj8yLzwr4PD5Xb/WF3bOYu2C2OoSZPzbuqRm4n98XirsbzaX+GloeO376UnSYIYJ4NCanwV5/ugZkwA==",
       "license": "MIT",
       "dependencies": {
-        "@babel/code-frame": "^7.25.9",
-        "@babel/generator": "^7.25.9",
-        "@babel/parser": "^7.25.9",
+        "@babel/code-frame": "^7.26.2",
+        "@babel/generator": "^7.26.3",
+        "@babel/parser": "^7.26.3",
         "@babel/template": "^7.25.9",
-        "@babel/types": "^7.25.9",
+        "@babel/types": "^7.26.3",
         "debug": "^4.3.1",
         "globals": "^11.1.0"
       },
@@ -2088,9 +2048,9 @@
       }
     },
     "node_modules/@babel/types": {
-      "version": "7.26.0",
-      "resolved": "https://registry.npmjs.org/@babel/types/-/types-7.26.0.tgz",
-      "integrity": "sha512-Z/yiTPj+lDVnF7lWeKCIJzaIkI0vYO87dMpZ4bg4TDrFe4XXLFWL1TbXU27gBP3QccxV9mZICCrnjnYlJjXHOA==",
+      "version": "7.26.3",
+      "resolved": "https://registry.npmjs.org/@babel/types/-/types-7.26.3.tgz",
+      "integrity": "sha512-vN5p+1kl59GVKMvTHt55NzzmYVxprfJD+ql7U9NFIfKCBkYE55LYtS+WtPlaYOyzydrKI8Nezd+aZextrd+FMA==",
       "license": "MIT",
       "dependencies": {
         "@babel/helper-string-parser": "^7.25.9",
@@ -4672,9 +4632,9 @@
       "license": "MIT"
     },
     "node_modules/@types/react": {
-      "version": "18.3.12",
-      "resolved": "https://registry.npmjs.org/@types/react/-/react-18.3.12.tgz",
-      "integrity": "sha512-D2wOSq/d6Agt28q7rSI3jhU7G6aiuzljDGZ2hTZHIkrTLUI+AF3WMeKkEZ9nN2fkBAlcktT6vcZjDFiIhMYEQw==",
+      "version": "18.3.13",
+      "resolved": "https://registry.npmjs.org/@types/react/-/react-18.3.13.tgz",
+      "integrity": "sha512-ii/gswMmOievxAJed4PAHT949bpYjPKXvXo1v6cRB/kqc2ZR4n+SgyCyvyc5Fec5ez8VnUumI1Vk7j6fRyRogg==",
       "license": "MIT",
       "dependencies": {
         "@types/prop-types": "*",
@@ -5957,13 +5917,12 @@
     },
     "node_modules/babel-preset-enact": {
       "version": "0.1.8",
-      "resolved": "git+ssh://git@github.com/enactjs/babel-preset-enact.git#a9ed43873156682e09e2ca6bc5f4f79f953a6ba7",
+      "resolved": "git+ssh://git@github.com/enactjs/babel-preset-enact.git#8d478fc66add2f13fb581be7631e550e63c26070",
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/core": "^7.25.2",
         "@babel/plugin-proposal-decorators": "^7.24.7",
         "@babel/plugin-proposal-export-default-from": "^7.24.7",
-        "@babel/plugin-syntax-dynamic-import": "^7.8.3",
         "@babel/plugin-transform-react-inline-elements": "^7.24.7",
         "@babel/plugin-transform-runtime": "^7.25.4",
         "@babel/preset-env": "^7.25.4",
@@ -8453,7 +8412,7 @@
     },
     "node_modules/eslint-config-enact": {
       "version": "5.0.0-alpha.1",
-      "resolved": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#ce4cc601fd557c787bf8e375909a6af58515db9d",
+      "resolved": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#0441cd646a912754c3f37e085d40d3ce28e06644",
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/eslint-parser": "^7.25.1",
@@ -10230,13 +10189,10 @@
       }
     },
     "node_modules/gopd": {
-      "version": "1.1.0",
-      "resolved": "https://registry.npmjs.org/gopd/-/gopd-1.1.0.tgz",
-      "integrity": "sha512-FQoVQnqcdk4hVM4JN1eromaun4iuS34oStkdlLENLdpULsuQcTyXj8w7ayhuUfPwEYZ1ZOooOTT6fdA9Vmx/RA==",
+      "version": "1.2.0",
+      "resolved": "https://registry.npmjs.org/gopd/-/gopd-1.2.0.tgz",
+      "integrity": "sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==",
       "license": "MIT",
-      "dependencies": {
-        "get-intrinsic": "^1.2.4"
-      },
       "engines": {
         "node": ">= 0.4"
       },
