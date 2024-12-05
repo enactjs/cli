@@ -59,6 +59,7 @@ function displayHelp() {
 			--entry              	Specify an override entrypoint
 			--no-minify           	Will skip minification during production build
 			--no-split-css        	Will not split CSS into separate files
+			--hash-classnames      	Will hash classnames in CSS
 			--framework           	Builds the @enact/*, react, and react-dom into an external framework
 			--externals           	Specify a local directory path to the standalone external framework
 			--externals-public    	Remote public path to the external framework for use injecting into HTML
@@ -260,6 +261,7 @@ function api(opts = {}) {
 		opts.isomorphic,
 		!opts.animation,
 		!opts['split-css'],
+		opts['hash-classnames'],
 		opts.framework,
 		opts['ilib-additional-path']
 	);
@@ -299,6 +301,7 @@ function cli(args) {
 			'isomorphic',
 			'snapshot',
 			'animation',
+			'hash-classnames',
 			'verbose',
 			'watch',
 			'help'
