@@ -1,3 +1,9 @@
+## 7.0.0-alpha.3 (December 12, 2024)
+
+### pack
+
+* Updated npm-shrinkwrap.json to fix errors in `--production` option.
+
 ## 7.0.0-alpha.2 (December 6, 2024)
 
 * Updated dependencies.
