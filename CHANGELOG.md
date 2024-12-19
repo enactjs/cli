@@ -4,6 +4,16 @@
 
 * Changed classnames to be hashed when production build.
 
+## 7.0.0-alpha.3 (December 12, 2024)
+
+### pack
+
+* Updated npm-shrinkwrap.json to fix errors in `--production` option.
+
+## 7.0.0-alpha.2 (December 6, 2024)
+
+* Updated dependencies.
+
 ## 7.0.0-alpha.1 (July 24, 2024)
 
 * Updated the minimum version of Node to `18.12.0`.
