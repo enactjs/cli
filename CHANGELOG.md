@@ -1,3 +1,9 @@
+## unreleased
+
+### pack
+
+* Changed classnames to be hashed when production build.
+
 ## 7.0.0-alpha.3 (December 12, 2024)
 
 ### pack
