@@ -4,6 +4,10 @@
 
 * Updated Enact ESLint config to `9.1.5` including eslint related modules and set temporary ESLINT_USE_FLAT_CONFIG env variable.
 
+### pack
+
+* Changed classnames to be hashed when production build.
+
 ## 7.0.0-alpha.3 (December 12, 2024)
 
 ### pack
