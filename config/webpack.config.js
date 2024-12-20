@@ -12,6 +12,7 @@
  */
 // @remove-on-eject-end
 
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const fs = require('fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
@@ -500,6 +501,7 @@ module.exports = function (
 					minifyURLs: true
 				}
 			}),
+			new BundleAnalyzerPlugin(),
 			// Make NODE_ENV environment variable available to the JS code, for example:
 			// if (process.env.NODE_ENV === 'production') { ... }.
 			// It is absolutely essential that NODE_ENV was set to production here.
