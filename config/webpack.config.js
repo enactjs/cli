@@ -45,6 +45,7 @@ module.exports = function (
 	contentHash = false,
 	isomorphic = false,
 	noAnimation = false,
+	noSplitCSS = false,
 	framework = false,
 	ilibAdditionalResourcesPath
 ) {
@@ -334,7 +335,7 @@ module.exports = function (
 							use: getStyleLoaders({
 								importLoaders: 1,
 								modules: {
-									getLocalIdent
+									...(isEnvProduction ? {} : {getLocalIdent})
 								}
 							})
 						},
@@ -345,7 +346,8 @@ module.exports = function (
 							use: getStyleLoaders({
 								importLoaders: 1,
 								modules: {
-									...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
+									...(app.forceCSSModules ? {} : {mode: 'icss'}),
+									...(!app.forceCSSModules && isEnvProduction ? {} : {getLocalIdent})
 								}
 							}),
 							// Don't consider CSS imports dead code even if the
@@ -359,7 +361,7 @@ module.exports = function (
 							use: getLessStyleLoaders({
 								importLoaders: 2,
 								modules: {
-									getLocalIdent
+									...(isEnvProduction ? {} : {getLocalIdent})
 								}
 							})
 						},
@@ -368,7 +370,8 @@ module.exports = function (
 							use: getLessStyleLoaders({
 								importLoaders: 2,
 								modules: {
-									...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
+									...(app.forceCSSModules ? {} : {mode: 'icss'}),
+									...(!app.forceCSSModules && isEnvProduction ? {} : {getLocalIdent})
 								}
 							}),
 							sideEffects: true
@@ -380,7 +383,7 @@ module.exports = function (
 							use: getScssStyleLoaders({
 								importLoaders: 3,
 								modules: {
-									getLocalIdent
+									...(isEnvProduction ? {} : {getLocalIdent})
 								}
 							})
 						},
@@ -390,7 +393,8 @@ module.exports = function (
 							use: getScssStyleLoaders({
 								importLoaders: 3,
 								modules: {
-									...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
+									...(app.forceCSSModules ? {} : {mode: 'icss'}),
+									...(!app.forceCSSModules && isEnvProduction ? {} : {getLocalIdent})
 								}
 							})
 						},
@@ -462,7 +466,17 @@ module.exports = function (
 					parallel: true
 				}),
 				new CssMinimizerPlugin()
-			]
+			],
+			splitChunks: noSplitCSS && {
+				cacheGroups: {
+					styles: {
+						name: 'main',
+						type: 'css/mini-extract',
+						chunks: 'all',
+						enforce: true
+					}
+				}
+			}
 		},
 		plugins: [
 			// Generates an `index.html` file with the js and css tags injected.
@@ -506,7 +520,8 @@ module.exports = function (
 			!process.env.INLINE_STYLES &&
 				new MiniCssExtractPlugin({
 					filename: contentHash ? '[name].[contenthash].css' : '[name].css',
-					chunkFilename: contentHash ? 'chunk.[name].[contenthash].css' : 'chunk.[name].css'
+					chunkFilename: contentHash ? 'chunk.[name].[contenthash].css' : 'chunk.[name].css',
+					ignoreOrder: noSplitCSS
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
 			new NodePolyfillPlugin({

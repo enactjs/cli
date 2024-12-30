@@ -59,6 +59,7 @@ function displayHelp() {
 		Private Options:
 			--entry              	Specify an override entrypoint
 			--no-minify           	Will skip minification during production build
+			--no-split-css        	Will not split CSS into separate files
 			--framework           	Builds the @enact/*, react, and react-dom into an external framework
 			--externals           	Specify a local directory path to the standalone external framework
 			--externals-public    	Remote public path to the external framework for use injecting into HTML
@@ -258,12 +259,13 @@ function api(opts = {}) {
 		opts['content-hash'],
 		opts.isomorphic,
 		!opts.animation,
+		!opts['split-css'],
 		opts.framework,
 		opts['ilib-additional-path']
 	);
 
 	// Set any entry path override
-	if (opts.entry) helper.replaceMain(config, path.resolve(opts.entry));
+	if (opts.entry || app.entry) helper.replaceEntry(config, opts.entry || app.entry);
 
 	// Set any output path override
 	if (opts.output) config.output.path = path.resolve(opts.output);
@@ -289,6 +291,7 @@ function cli(args) {
 			'content-hash',
 			'custom-skin',
 			'minify',
+			'split-css',
 			'framework',
 			'externals-corejs',
 			'stats',
@@ -301,7 +304,7 @@ function cli(args) {
 			'help'
 		],
 		string: ['externals', 'externals-public', 'locales', 'entry', 'ilib-additional-path', 'output', 'meta'],
-		default: {minify: true, animation: true},
+		default: {minify: true, 'split-css': true, animation: true},
 		alias: {
 			o: 'output',
 			p: 'production',
