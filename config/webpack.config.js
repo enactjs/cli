@@ -525,7 +525,7 @@ module.exports = function (
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
 			new NodePolyfillPlugin({
-				additionalAliases: ['process']
+				additionalAliases: ['console', 'domain', 'process', 'stream']
 			}),
 			// Provide meaningful information when modules are not found
 			new ModuleNotFoundPlugin(app.context),
