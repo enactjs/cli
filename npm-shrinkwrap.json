@@ -24580,7 +24580,7 @@
     },
     "node_modules/babel-preset-enact": {
       "version": "0.1.8",
-      "resolved": "git+ssh://git@github.com/enactjs/babel-preset-enact.git#c62657413e7d259d125df902f56977aef162c0ca",
+      "resolved": "git+ssh://git@github.com/enactjs/babel-preset-enact.git#17a7bc99c9c1b822912e4b65ef1b880f3e30860e",
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/core": "^7.26.0",
@@ -26900,13 +26900,13 @@
     },
     "node_modules/eslint-config-enact": {
       "version": "5.0.0-alpha.2",
-      "resolved": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#81b92060bc057ee195c4d038a57d856f9fe1541a",
+      "resolved": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#b4342789be62bf5709539e01b852d09efea5f73e",
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/eslint-parser": "^7.25.9",
         "@babel/eslint-plugin": "^7.25.9",
         "@rushstack/eslint-patch": "^1.10.4",
-        "@stylistic/eslint-plugin-js": "^2.10.1",
+        "@stylistic/eslint-plugin-js": "^2.12.1",
         "@typescript-eslint/eslint-plugin": "^8.14.0",
         "@typescript-eslint/parser": "^8.14.0",
         "babel-preset-enact": "github:enactjs/babel-preset-enact#test/WRR-1007",
@@ -57233,7 +57233,7 @@
       }
     },
     "babel-preset-enact": {
-      "version": "git+ssh://git@github.com/enactjs/babel-preset-enact.git#c62657413e7d259d125df902f56977aef162c0ca",
+      "version": "git+ssh://git@github.com/enactjs/babel-preset-enact.git#17a7bc99c9c1b822912e4b65ef1b880f3e30860e",
       "from": "babel-preset-enact@github:enactjs/babel-preset-enact#test/WRR-1007",
       "requires": {
         "@babel/core": "^7.26.0",
@@ -58979,13 +58979,13 @@
       }
     },
     "eslint-config-enact": {
-      "version": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#81b92060bc057ee195c4d038a57d856f9fe1541a",
+      "version": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#b4342789be62bf5709539e01b852d09efea5f73e",
       "from": "eslint-config-enact@github:enactjs/eslint-config-enact#test/WRR-1007",
       "requires": {
         "@babel/eslint-parser": "^7.25.9",
         "@babel/eslint-plugin": "^7.25.9",
         "@rushstack/eslint-patch": "^1.10.4",
-        "@stylistic/eslint-plugin-js": "^2.10.1",
+        "@stylistic/eslint-plugin-js": "^2.12.1",
         "@typescript-eslint/eslint-plugin": "^8.14.0",
         "@typescript-eslint/parser": "^8.14.0",
         "babel-preset-enact": "github:enactjs/babel-preset-enact#test/WRR-1007",
