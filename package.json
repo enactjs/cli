@@ -83,7 +83,7 @@
     "license-checker": "^25.0.1",
     "mini-css-extract-plugin": "^2.9.2",
     "minimist": "^1.2.8",
-    "node-polyfill-webpack-plugin": "^4.1.0",
+    "node-polyfill-webpack-plugin": "4.0.0",
     "postcss": "^8.4.49",
     "postcss-flexbugs-fixes": "^5.0.2",
     "postcss-global-import": "^1.0.6",
