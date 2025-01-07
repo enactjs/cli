@@ -524,9 +524,7 @@ module.exports = function (
 					ignoreOrder: noSplitCSS
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
-			new NodePolyfillPlugin({
-				additionalAliases: ['console', 'domain', 'process', 'stream']
-			}),
+			new NodePolyfillPlugin(),
 			// Provide meaningful information when modules are not found
 			new ModuleNotFoundPlugin(app.context),
 			// Ensure correct casing in module filepathes
