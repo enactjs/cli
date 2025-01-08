@@ -190,6 +190,13 @@ module.exports = function (
 		return Array.isArray(paths) ? paths : [paths];
 	};
 
+	const aliasPreact = {
+		react: 'preact/compat',
+		'react-dom/test-utils': 'preact/test-utils',
+		'react-dom': 'preact/compat', // Must be below test-utils
+		'react/jsx-runtime': 'preact/jsx-runtime'
+	};
+
 	return {
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
@@ -275,8 +282,8 @@ module.exports = function (
 			// Backward compatibility for apps using new ilib references with old Enact
 			// and old apps referencing old iLib location with new Enact
 			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
-				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias)
-				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias),
+				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias, aliasPreact)
+				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias, aliasPreact),
 			// Optional configuration for redirecting module requests.
 			fallback: app.resolveFallback
 		},
