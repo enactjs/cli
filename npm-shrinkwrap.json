@@ -30,7 +30,7 @@
         "dotenv": "^16.4.5",
         "dotenv-expand": "^11.0.6",
         "eslint": "^8.57.0",
-        "eslint-config-enact": "github:enactjs/eslint-config-enact#feature/react19",
+        "eslint-config-enact": "github:enactjs/eslint-config-enact#test/react19",
         "eslint-webpack-plugin": "^4.2.0",
         "expose-loader": "^5.0.0",
         "file-loader": "^6.2.0",
@@ -5987,9 +5987,9 @@
       }
     },
     "node_modules/caniuse-lite": {
-      "version": "1.0.30001690",
-      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001690.tgz",
-      "integrity": "sha512-5ExiE3qQN6oF8Clf8ifIDcMRCRE/dMGcETG/XGMD8/XiXm6HXQgQTh1yZYLXXpSOsEUlJm1Xr7kGULZTuGtP/w==",
+      "version": "1.0.30001692",
+      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001692.tgz",
+      "integrity": "sha512-A95VKan0kdtrsnMubMKxEKUKImOPSuCpYgxSQBo036P5YYgVIcOYJEgt/txJWqObiRQeISNCfef9nvlQ0vbV7A==",
       "funding": [
         {
           "type": "opencollective",
@@ -7844,7 +7844,7 @@
     },
     "node_modules/eslint-config-enact": {
       "version": "5.0.0-alpha.2",
-      "resolved": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#12e0d21e1d0d21a415ef6435c66bc536907f50a2",
+      "resolved": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#f36a88065d1a1d17c5136a435ee318a164f082e7",
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/eslint-parser": "^7.25.9",
@@ -7853,8 +7853,8 @@
         "@stylistic/eslint-plugin-js": "^2.10.1",
         "@typescript-eslint/eslint-plugin": "^8.14.0",
         "@typescript-eslint/parser": "^8.14.0",
-        "babel-preset-enact": "^0.1.8",
-        "eslint": "^8.57.1",
+        "babel-preset-enact": "github:enactjs/babel-preset-enact#feature/react19",
+        "eslint": "^8.57.0",
         "eslint-plugin-enact": "^2.0.0-alpha.1",
         "eslint-plugin-jest": "^28.9.0",
         "eslint-plugin-jsx-a11y": "^6.10.2",
@@ -15942,9 +15942,9 @@
       }
     },
     "node_modules/node-polyfill-webpack-plugin/node_modules/type-fest": {
-      "version": "4.31.0",
-      "resolved": "https://registry.npmjs.org/type-fest/-/type-fest-4.31.0.tgz",
-      "integrity": "sha512-yCxltHW07Nkhv/1F6wWBr8kz+5BGMfP+RbRSYFnegVb0qV/UMT0G0ElBloPVerqn4M2ZV80Ir1FtCcYv1cT6vQ==",
+      "version": "4.32.0",
+      "resolved": "https://registry.npmjs.org/type-fest/-/type-fest-4.32.0.tgz",
+      "integrity": "sha512-rfgpoi08xagF3JSdtJlCwMq9DGNDE0IMh3Mkpc1wUypg9vPi786AiqeBBKcqvIkq42azsBM85N490fyZjeUftw==",
       "engines": {
         "node": ">=16"
       },
@@ -25525,9 +25525,9 @@
       }
     },
     "caniuse-lite": {
-      "version": "1.0.30001690",
-      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001690.tgz",
-      "integrity": "sha512-5ExiE3qQN6oF8Clf8ifIDcMRCRE/dMGcETG/XGMD8/XiXm6HXQgQTh1yZYLXXpSOsEUlJm1Xr7kGULZTuGtP/w=="
+      "version": "1.0.30001692",
+      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001692.tgz",
+      "integrity": "sha512-A95VKan0kdtrsnMubMKxEKUKImOPSuCpYgxSQBo036P5YYgVIcOYJEgt/txJWqObiRQeISNCfef9nvlQ0vbV7A=="
     },
     "case-sensitive-paths-webpack-plugin": {
       "version": "2.4.0",
@@ -26915,8 +26915,8 @@
       }
     },
     "eslint-config-enact": {
-      "version": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#12e0d21e1d0d21a415ef6435c66bc536907f50a2",
-      "from": "eslint-config-enact@github:enactjs/eslint-config-enact#feature/react19",
+      "version": "git+ssh://git@github.com/enactjs/eslint-config-enact.git#f36a88065d1a1d17c5136a435ee318a164f082e7",
+      "from": "eslint-config-enact@github:enactjs/eslint-config-enact#test/react19",
       "requires": {
         "@babel/eslint-parser": "^7.25.9",
         "@babel/eslint-plugin": "^7.25.9",
@@ -26924,8 +26924,8 @@
         "@stylistic/eslint-plugin-js": "^2.10.1",
         "@typescript-eslint/eslint-plugin": "^8.14.0",
         "@typescript-eslint/parser": "^8.14.0",
-        "babel-preset-enact": "^0.1.8",
-        "eslint": "^8.57.1",
+        "babel-preset-enact": "github:enactjs/babel-preset-enact#feature/react19",
+        "eslint": "^8.57.0",
         "eslint-plugin-enact": "^2.0.0-alpha.1",
         "eslint-plugin-jest": "^28.9.0",
         "eslint-plugin-jsx-a11y": "^6.10.2",
@@ -32372,9 +32372,9 @@
       },
       "dependencies": {
         "type-fest": {
-          "version": "4.31.0",
-          "resolved": "https://registry.npmjs.org/type-fest/-/type-fest-4.31.0.tgz",
-          "integrity": "sha512-yCxltHW07Nkhv/1F6wWBr8kz+5BGMfP+RbRSYFnegVb0qV/UMT0G0ElBloPVerqn4M2ZV80Ir1FtCcYv1cT6vQ=="
+          "version": "4.32.0",
+          "resolved": "https://registry.npmjs.org/type-fest/-/type-fest-4.32.0.tgz",
+          "integrity": "sha512-rfgpoi08xagF3JSdtJlCwMq9DGNDE0IMh3Mkpc1wUypg9vPi786AiqeBBKcqvIkq42azsBM85N490fyZjeUftw=="
         }
       }
     },

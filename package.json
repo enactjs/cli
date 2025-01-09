@@ -64,7 +64,7 @@
     "dotenv": "^16.4.5",
     "dotenv-expand": "^11.0.6",
     "eslint": "^8.57.0",
-    "eslint-config-enact": "github:enactjs/eslint-config-enact#feature/react19",
+    "eslint-config-enact": "github:enactjs/eslint-config-enact#test/react19",
     "eslint-webpack-plugin": "^4.2.0",
     "expose-loader": "^5.0.0",
     "file-loader": "^6.2.0",
