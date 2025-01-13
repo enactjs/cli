@@ -1,5 +1,7 @@
 ## unreleased
 
+* Updated the minimum version of Node to `20.5.0`.
+
 ### lint
 
 * Updated Enact ESLint config to `9.1.5` including eslint related modules and set temporary ESLINT_USE_FLAT_CONFIG env variable.
