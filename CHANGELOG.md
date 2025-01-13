@@ -1,5 +1,7 @@
 ## unreleased
 
+* Updated the minimum version of Node to `20.5.0`.
+
 ### pack
 
 * Changed classnames to be hashed when production build.
