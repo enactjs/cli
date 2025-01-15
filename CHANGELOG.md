@@ -1,5 +1,6 @@
 ## unreleased
 
+* Updated all dependencies to the latest including React 19.
 * Updated the minimum version of Node to `20.5.0`.
 
 ### pack
