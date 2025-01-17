@@ -1,4 +1,4 @@
-## 7.0.0-alpha.4 (January 15, 2025)
+## 7.0.0-alpha.4 (January 17, 2025)
 
 * Updated all dependencies to the latest including React 19.
 * Updated the minimum version of Node to `20.5.0`.
