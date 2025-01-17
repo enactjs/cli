@@ -335,7 +335,7 @@ module.exports = function (
 							use: getStyleLoaders({
 								importLoaders: 1,
 								modules: {
-									getLocalIdent
+									...(isEnvProduction ? {} : {getLocalIdent})
 								}
 							})
 						},
@@ -346,7 +346,8 @@ module.exports = function (
 							use: getStyleLoaders({
 								importLoaders: 1,
 								modules: {
-									...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
+									...(app.forceCSSModules ? {} : {mode: 'icss'}),
+									...(!app.forceCSSModules && isEnvProduction ? {} : {getLocalIdent})
 								}
 							}),
 							// Don't consider CSS imports dead code even if the
@@ -360,7 +361,7 @@ module.exports = function (
 							use: getLessStyleLoaders({
 								importLoaders: 2,
 								modules: {
-									getLocalIdent
+									...(isEnvProduction ? {} : {getLocalIdent})
 								}
 							})
 						},
@@ -369,7 +370,8 @@ module.exports = function (
 							use: getLessStyleLoaders({
 								importLoaders: 2,
 								modules: {
-									...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
+									...(app.forceCSSModules ? {} : {mode: 'icss'}),
+									...(!app.forceCSSModules && isEnvProduction ? {} : {getLocalIdent})
 								}
 							}),
 							sideEffects: true
@@ -381,7 +383,7 @@ module.exports = function (
 							use: getScssStyleLoaders({
 								importLoaders: 3,
 								modules: {
-									getLocalIdent
+									...(isEnvProduction ? {} : {getLocalIdent})
 								}
 							})
 						},
@@ -391,7 +393,8 @@ module.exports = function (
 							use: getScssStyleLoaders({
 								importLoaders: 3,
 								modules: {
-									...(app.forceCSSModules ? {getLocalIdent} : {mode: 'icss'})
+									...(app.forceCSSModules ? {} : {mode: 'icss'}),
+									...(!app.forceCSSModules && isEnvProduction ? {} : {getLocalIdent})
 								}
 							})
 						},
@@ -521,7 +524,9 @@ module.exports = function (
 					ignoreOrder: noSplitCSS
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
-			new NodePolyfillPlugin(),
+			new NodePolyfillPlugin({
+				additionalAliases: ['console', 'domain', 'process', 'stream']
+			}),
 			// Provide meaningful information when modules are not found
 			new ModuleNotFoundPlugin(app.context),
 			// Ensure correct casing in module filepathes

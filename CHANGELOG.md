@@ -1,3 +1,12 @@
+## 7.0.0-alpha.4 (January 17, 2025)
+
+* Updated all dependencies to the latest including React 19.
+* Updated the minimum version of Node to `20.5.0`.
+
+### pack
+
+* Changed classnames to be hashed when production build.
+
 ## 7.0.0-alpha.3 (December 12, 2024)
 
 ### pack
