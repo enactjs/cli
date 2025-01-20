@@ -35,7 +35,7 @@ order: 9
     enact template list
     List all templates installed/linked
 ```
-An Enact Sandstone template is included within the Enact CLI as the default template. Additional templates can be downloaded or created as needed.
+An Enact Limestone template is included within the Enact CLI as the default template. Additional templates can be downloaded or created as needed.
 
 ## `install` vs `link`
 Due to the similar nature in these actions, it's worth some clarification. The `install` action pulls from a local or remote source, copying the template files to a user-storage location (`%APPDATA%\.enact` on Windows, `$HOME/.enact` on all other systems).  The `link` action, on the other hand, will create a symlink from a local source directory into the user-storage location.  No files are physically copied, only linked. As such, the local linked source directory should not be deleted and any changes made within it will be available the next time a template is used. It is generally only advisable to use the `link` action when actively developing templates.

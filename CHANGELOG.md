@@ -1,3 +1,9 @@
+## unreleased
+
+### create, template
+
+* Updated `@enact/template-limestone` dependency.
+
 ## 7.0.0-alpha.4 (January 17, 2025)
 
 * Updated all dependencies to the latest including React 19.

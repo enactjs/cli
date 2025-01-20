@@ -19,7 +19,7 @@ const validatePackageName = require('validate-npm-package-name');
 let chalk;
 
 const ENACT_DEV_NPM = '@enact/cli';
-const INCLUDED = path.dirname(require.resolve('@enact/template-sandstone'));
+const INCLUDED = path.dirname(require.resolve('@enact/template-limestone'));
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 
 const defaultGenerator = {
@@ -171,7 +171,7 @@ function resolveTemplateGenerator(template) {
 	return new Promise((resolve, reject) => {
 		let templatePath = path.join(TEMPLATE_DIR, template);
 		if (!fs.existsSync(templatePath)) {
-			if (['default', 'sandstone'].includes(template)) {
+			if (['default', 'limestone'].includes(template)) {
 				templatePath = path.join(INCLUDED, 'template');
 			} else {
 				reject(new Error(`Template ${chalk.bold(template)} not found.`));
