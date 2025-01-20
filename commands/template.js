@@ -11,7 +11,7 @@ const tar = require('tar');
 let chalk;
 
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
-const INCLUDED = path.dirname(require.resolve('@enact/template-sandstone'));
+const INCLUDED = path.dirname(require.resolve('@enact/template-limestone'));
 const DEFAULT_LINK = path.join(TEMPLATE_DIR, 'default');
 
 function displayHelp() {
@@ -71,9 +71,9 @@ function initTemplateArea() {
 				}
 			});
 	}
-	const init = doLink(path.join(INCLUDED, 'template'), 'sandstone');
-	const sandstoneLink = path.join(TEMPLATE_DIR, 'sandstone');
-	return init.then(() => !fs.existsSync(DEFAULT_LINK) && doLink(sandstoneLink, 'default'));
+	const init = doLink(path.join(INCLUDED, 'template'), 'limestone');
+	const limestoneLink = path.join(TEMPLATE_DIR, 'limestone');
+	return init.then(() => !fs.existsSync(DEFAULT_LINK) && doLink(limestoneLink, 'default'));
 }
 
 function doInstall(target, name) {
