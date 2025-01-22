@@ -11,7 +11,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 // @remove-on-eject-end
-const {existsSync, statSync} = require('node:fs');
+const {existsSync, mkdirSync, readdirSync, statSync} = require('node:fs');
+const {rm} = require('node:fs/promises');
 const path = require('path');
 const {filesize} = require('filesize');
 const fs = require('fs-extra');
@@ -273,9 +274,13 @@ function api(opts = {}) {
 
 	mixins.apply(config, opts);
 
-	// Remove all content but keep the directory so that
-	// if you're in it, you don't end up in Trash
-	return fs.emptyDir(config.output.path).then(() => {
+	// Create directory if it does not exist
+	if (!existsSync(config.output.path)){
+		mkdirSync(config.output.path);
+	}
+
+	// Remove all content in the directory
+	return rm(config.output.path, { recursive: true }).then(() => {
 		// Start the webpack build
 		if (opts.watch) {
 			// This will run infinitely until killed, even through errors
