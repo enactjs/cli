@@ -189,7 +189,7 @@ function doLink(target, name = normalizeName(path.basename(path.resolve(target))
 	process.chdir(TEMPLATE_DIR);
 	return fs
 		.remove(name)
-		.then(() => symlink(directory, name, () => 'junction'))
+		.then(() => fs.symlink(directory, name, 'junction'))
 		.then(() => {
 			process.chdir(prevCWD);
 			return {target, name};

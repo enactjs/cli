@@ -61,7 +61,6 @@ function api({cwd = process.cwd(), loglevel = 'error', verbose = false} = {}) {
 			const missing = [];
 			for (let i = 0; i < enact.length; i++) {
 				if (existsSync(path.join(globalDir, '@enact', enact[i]))) {
-					console.log('Test');
 					linkArgs.push('@enact/' + enact[i]);
 				} else {
 					missing.push('@enact/' + enact[i]);
