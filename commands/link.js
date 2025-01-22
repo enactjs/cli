@@ -1,7 +1,7 @@
 // @remove-file-on-eject
 const path = require('path');
+const {existsSync} = require('node:fs');
 const spawn = require('cross-spawn');
-const fs = require('fs-extra');
 const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils').packageRoot;
 
@@ -60,7 +60,8 @@ function api({cwd = process.cwd(), loglevel = 'error', verbose = false} = {}) {
 		return new Promise((resolve, reject) => {
 			const missing = [];
 			for (let i = 0; i < enact.length; i++) {
-				if (fs.existsSync(path.join(globalDir, '@enact', enact[i]))) {
+				if (existsSync(path.join(globalDir, '@enact', enact[i]))) {
+					console.log('Test');
 					linkArgs.push('@enact/' + enact[i]);
 				} else {
 					missing.push('@enact/' + enact[i]);

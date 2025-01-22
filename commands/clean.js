@@ -1,6 +1,7 @@
 /* eslint-env node, es6 */
 const path = require('path');
-const fs = require('fs-extra');
+const {existsSync, readdirSync} = require('node:fs');
+const {rm} = require('node:fs/promises');
 const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils').packageRoot;
 
@@ -35,19 +36,18 @@ function displayHelp() {
 function api({paths = [], all = false} = {}) {
 	const known = [build, dist];
 	if (all) known.push(node_modules);
-	if (fs.existsSync(samples)) {
-		const sampleDirs = fs
-			.readdirSync(samples)
+	if (existsSync(samples)) {
+		const sampleDirs = readdirSync(samples)
 			.map(p => path.join(samples, p))
-			.filter(p => fs.existsSync(path.join(p, 'package.json')));
+			.filter(p => existsSync(path.join(p, 'package.json')));
 		sampleDirs.forEach(p => {
 			known.push(path.join(p, build), path.join(p, dist));
 			if (all) known.push(path.join(p, node_modules));
 		});
 	}
-	if (fs.existsSync(ssTests)) known.push(path.join(ssTests, dist));
-	if (fs.existsSync(uiTests)) known.push(path.join(uiTests, dist));
-	return Promise.all(paths.concat(known).map(d => fs.remove(d)));
+	if (existsSync(ssTests)) known.push(path.join(ssTests, dist));
+	if (existsSync(uiTests)) known.push(path.join(uiTests, dist));
+	return Promise.all(paths.concat(known).map(d => rm(d, {recursive: true, force: true})));
 }
 
 function cli(args) {
