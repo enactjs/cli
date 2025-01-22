@@ -11,11 +11,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 // @remove-on-eject-end
-const {existsSync, mkdirSync, readdirSync, statSync} = require('node:fs');
+const {cpSync, existsSync, mkdirSync, statSync} = require('node:fs');
 const {rm} = require('node:fs/promises');
 const path = require('path');
 const {filesize} = require('filesize');
-const fs = require('fs-extra');
 const minimist = require('minimist');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const printBuildError = require('react-dev-utils/printBuildError');
@@ -144,9 +143,7 @@ function details(err, stats, output) {
 function copyPublicFolder(output) {
 	const staticAssets = './public';
 	if (existsSync(staticAssets)) {
-		fs.copySync(staticAssets, output, {
-			dereference: true
-		});
+		cpSync(staticAssets, output, { recursive: true });
 	}
 }
 

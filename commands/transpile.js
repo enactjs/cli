@@ -1,8 +1,8 @@
 // @remove-file-on-eject
-const {readdir, readFileSync, writeFile, writeFileSync} = require('node:fs');
+const {existsSync, mkdirSync, readFileSync, writeFileSync} = require('node:fs');
+const {cp, readdir, writeFile} = require('node:fs/promises');
 const path = require('path');
 const babel = require('@babel/core');
-const fs = require('fs-extra');
 const less = require('less');
 const LessPluginResolve = require('less-plugin-npm-import');
 const minimist = require('minimist');
@@ -68,14 +68,20 @@ function api({source = '.', output = './build', commonjs = true, ignore} = {}) {
 		if (ignore && ignore.test && ignore.test(src)) {
 			return false;
 		} else if (/\.(js|js|ts|tsx)$/i.test(src)) {
-			return fs.ensureDir(path.dirname(dest)).then(() => transpile(src, dest, babelPlugins));
+			if (!existsSync(path.dirname(dest))) {
+				mkdirSync(path.dirname(dest));
+			}
+			return transpile(src, dest, babelPlugins);
 		} else if (/\.(less|css)$/i.test(src)) {
 			// LESS/CSS within a 'styles' directory will not be run through LESS compiler
 			if (/[\\/]+styles[\\/]+/i.test('./' + src)) {
 				// Any LESS/CSS within an 'internal' directory will not be copied
 				return !/[\\/]+styles[\\/]+(.*[\\/]+)*internal[\\/]+/i.test('./' + src);
 			} else {
-				return fs.ensureDir(path.dirname(dest)).then(() => lessc(src, dest));
+				if (!existsSync(path.dirname(dest))) {
+					mkdirSync(path.dirname(dest));
+				}
+				return lessc(src, dest);
 			}
 		} else {
 			return true;
@@ -86,7 +92,7 @@ function api({source = '.', output = './build', commonjs = true, ignore} = {}) {
 		paths = paths.filter(p => !blacklist.includes(p));
 		return Promise.all(
 			paths.map(item => {
-				return fs.copy(path.join(source, item), path.join(output, item), {filter, stopOnErr: true});
+				return cp(path.join(source, item), path.join(output, item), {filter, stopOnErr: true, recursive: true});
 			})
 		);
 	});
