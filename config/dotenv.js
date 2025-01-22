@@ -1,6 +1,6 @@
 /* eslint-env node, es6 */
 
-const fs = require('fs');
+const {existsSync} = require('node:fs');
 const path = require('path');
 const dotenv = require('dotenv');
 const {expand} = require('dotenv-expand');
@@ -21,7 +21,7 @@ module.exports = {
 			.filter(Boolean)
 			.map(env => path.join(context, env))
 			.forEach(env => {
-				if (fs.existsSync(env)) {
+				if (existsSync(env)) {
 					expand(dotenv.config({path: env, processEnv: {}}));
 				}
 			});

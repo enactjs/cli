@@ -1,5 +1,6 @@
 // @remove-file-on-eject
 const os = require('os');
+const {existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, symlink} = require('node:fs');
 const path = require('path');
 const url = require('url');
 const spawn = require('cross-spawn');
@@ -57,15 +58,15 @@ function displayHelp() {
 }
 
 function initTemplateArea() {
-	if (!fs.existsSync(TEMPLATE_DIR)) {
-		fs.mkdirSync(TEMPLATE_DIR);
+	if (!existsSync(TEMPLATE_DIR)) {
+		mkdirSync(TEMPLATE_DIR);
 	} else {
 		// Remove any dead/unreadable link
-		fs.readdirSync(TEMPLATE_DIR)
+		readdirSync(TEMPLATE_DIR)
 			.map(d => path.join(TEMPLATE_DIR, d))
 			.forEach(d => {
 				try {
-					fs.realpathSync(d);
+					realpathSync(d);
 				} catch (e) {
 					fs.removeSync(d);
 				}
@@ -73,7 +74,7 @@ function initTemplateArea() {
 	}
 	const init = doLink(path.join(INCLUDED, 'template'), 'sandstone');
 	const sandstoneLink = path.join(TEMPLATE_DIR, 'sandstone');
-	return init.then(() => !fs.existsSync(DEFAULT_LINK) && doLink(sandstoneLink, 'default'));
+	return init.then(() => !existsSync(DEFAULT_LINK) && doLink(sandstoneLink, 'default'));
 }
 
 function doInstall(target, name) {
@@ -86,7 +87,7 @@ function doInstall(target, name) {
 	let installation;
 	if (/(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|#[-\d\w._]+?)$/.test(target)) {
 		installation = installFromGit(target, name);
-	} else if (fs.existsSync(target)) {
+	} else if (existsSync(target)) {
 		installation = installFromLocal(target, name);
 	} else {
 		installation = installFromNPM(target, name);
@@ -95,7 +96,7 @@ function doInstall(target, name) {
 		// npm install if needed
 		return new Promise((resolve, reject) => {
 			const output = path.join(TEMPLATE_DIR, resolved);
-			if (fs.existsSync(path.join(output, 'template')) && fs.existsSync(path.join(output, 'package.json'))) {
+			if (existsSync(path.join(output, 'template')) && existsSync(path.join(output, 'package.json'))) {
 				const child = spawn('npm', ['--loglevel', 'error', 'install', '--production'], {
 					stdio: 'inherit',
 					cwd: output
@@ -160,7 +161,7 @@ function installFromNPM(target, name = normalizeName(path.basename(target).repla
 			if (code !== 0) {
 				reject(new Error('Invalid template target: ' + target));
 			} else {
-				const tarball = fs.readdirSync(tempDir).filter(f => f.endsWith('.tgz'))[0];
+				const tarball = readdirSync(tempDir).filter(f => f.endsWith('.tgz'))[0];
 				if (tarball) {
 					tar.x({file: path.join(tempDir, tarball), cwd: tempDir}, [], err => {
 						if (err) {
@@ -188,7 +189,7 @@ function doLink(target, name = normalizeName(path.basename(path.resolve(target))
 	process.chdir(TEMPLATE_DIR);
 	return fs
 		.remove(name)
-		.then(() => fs.symlink(directory, name, 'junction'))
+		.then(() => symlink(directory, name, 'junction'))
 		.then(() => {
 			process.chdir(prevCWD);
 			return {target, name};
@@ -201,8 +202,8 @@ function doLink(target, name = normalizeName(path.basename(path.resolve(target))
 
 function doRemove(name) {
 	const output = path.join(TEMPLATE_DIR, name);
-	const isDefault = fs.existsSync(DEFAULT_LINK) && fs.realpathSync(output) === fs.realpathSync(DEFAULT_LINK);
-	if (!fs.existsSync(output)) return Promise.reject(new Error(`Unable to remove. Template "${name}" not found.`));
+	const isDefault = existsSync(DEFAULT_LINK) && realpathSync(output) === realpathSync(DEFAULT_LINK);
+	if (!existsSync(output)) return Promise.reject(new Error(`Unable to remove. Template "${name}" not found.`));
 
 	return fs
 		.remove(output)
@@ -213,12 +214,12 @@ function doRemove(name) {
 }
 
 function doDefault(name) {
-	const all = fs.readdirSync(TEMPLATE_DIR).filter(t => t !== 'default');
+	const all = readdirSync(TEMPLATE_DIR).filter(t => t !== 'default');
 	let choice;
 	if (name && all.includes(name)) {
 		choice = Promise.resolve({template: name});
 	} else {
-		const i = all.find(t => fs.realpathSync(path.join(TEMPLATE_DIR, t)) === fs.realpathSync(DEFAULT_LINK));
+		const i = all.find(t => realpathSync(path.join(TEMPLATE_DIR, t)) === realpathSync(DEFAULT_LINK));
 		choice = prompts([
 			{
 				name: 'template',
@@ -233,17 +234,17 @@ function doDefault(name) {
 }
 
 function doList() {
-	const realDefault = fs.realpathSync(DEFAULT_LINK);
-	const all = fs.readdirSync(TEMPLATE_DIR).filter(t => t !== 'default');
+	const realDefault = realpathSync(DEFAULT_LINK);
+	const all = readdirSync(TEMPLATE_DIR).filter(t => t !== 'default');
 	console.log(chalk.bold('Available Templates'));
 	all.forEach(t => {
 		let item = '  ' + t;
 		const template = path.join(TEMPLATE_DIR, t);
-		const realTemplate = fs.realpathSync(template);
+		const realTemplate = realpathSync(template);
 		if (realTemplate === realDefault) {
 			item += chalk.green(' (default)');
 		}
-		if (fs.lstatSync(template).isSymbolicLink()) {
+		if (lstatSync(template).isSymbolicLink()) {
 			item += chalk.dim(' -> ' + realTemplate);
 		}
 		console.log(item);

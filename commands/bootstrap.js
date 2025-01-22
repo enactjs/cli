@@ -1,7 +1,7 @@
 // @remove-file-on-eject
 const path = require('path');
+const {existsSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync} = require('node:fs');
 const spawn = require('cross-spawn');
-const fs = require('fs-extra');
 const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils').packageRoot;
 const doLink = require('./link').api;
@@ -74,23 +74,22 @@ function api({
 			if (override) {
 				console.log('Overrides with local dependencies from', override);
 				// Collect list of all valid local package tgz archives found
-				const scoped = s => fs.readdirSync(path.join(override, s)).map(d => path.join(s, d));
-				const local = fs
-					.readdirSync(override)
+				const scoped = s => readdirSync(path.join(override, s)).map(d => path.join(s, d));
+				const local = readdirSync(override)
 					.reduce((a, curr) => a.concat(curr.startsWith('@') ? scoped(curr) : curr), [])
-					.filter(d => fs.existsSync(path.join(override, d, 'package.tgz')));
+					.filter(d => existsSync(path.join(override, d, 'package.tgz')));
 				if (path.isAbsolute(override)) override = path.relative(cwd, override);
 				['package.json', 'package-lock.json', 'npm-shrinkwrap.json']
 					.map(f => path.join(cwd, f))
-					.filter(f => fs.existsSync(f))
+					.filter(f => existsSync(f))
 					.forEach((f, i) => {
 						const lockfile = i > 0;
 						// Restore any detected backups
-						if (fs.existsSync(f + '.bak')) {
-							fs.unlinkSync(f);
-							fs.renameSync(f + '.bak', f);
+						if (existsSync(f + '.bak')) {
+							unlinkSync(f);
+							renameSync(f + '.bak', f);
 						}
-						const obj = JSON.parse(fs.readFileSync(f, {encoding: 'utf8'}));
+						const obj = JSON.parse(readFileSync(f, {encoding: 'utf8'}));
 						// Update dependency entry for local entries that exist
 						local
 							.filter(dep => obj.dependencies && obj.dependencies[dep])
@@ -109,8 +108,8 @@ function api({
 								}
 							});
 						// Backup existing and write the newly modified file
-						fs.renameSync(f, f + '.bak');
-						fs.writeFileSync(f, JSON.stringify(obj, null, '  '), {encoding: 'utf8'});
+						renameSync(f, f + '.bak');
+						writeFileSync(f, JSON.stringify(obj, null, '  '), {encoding: 'utf8'});
 					});
 			}
 		})
@@ -129,12 +128,11 @@ function api({
 				return npmExec(['run', 'bootstrap'], pkg.path, loglevel);
 			} else {
 				const samples = path.join(pkg.path, 'samples');
-				if (fs.existsSync(samples)) {
-					return fs
-						.readdirSync(samples)
+				if (existsSync(samples)) {
+					return readdirSync(samples)
 						.filter(p => (p === 'sampler' && sampler) || allsamples)
 						.map(p => path.join(samples, p))
-						.filter(p => fs.existsSync(path.join(p, 'package.json')))
+						.filter(p => existsSync(path.join(p, 'package.json')))
 						.reduce((result, p) => {
 							return result.then(() =>
 								api({
@@ -174,7 +172,7 @@ function cli(args) {
 	});
 	if (opts.help) displayHelp();
 
-	if (opts._[0] && fs.statSync(opts._[0]).isDirectory()) opts.cwd = opts._[0];
+	if (opts._[0] && statSync(opts._[0]).isDirectory()) opts.cwd = opts._[0];
 
 	import('chalk').then(({default: _chalk}) => {
 		chalk = _chalk;

@@ -1,5 +1,5 @@
 /* eslint-env jest */
-const fs = require('fs');
+const {readFileSync} = require('node:fs');
 const path = require('path');
 const {packageRoot} = require('@enact/dev-utils');
 
@@ -61,7 +61,7 @@ class ILibXHR extends XHR {
 			this.send = () => {
 				try {
 					const file = path.join(pkg.path, url.replace(/\//g, path.sep));
-					this.fileText = fs.readFileSync(file, {encoding: 'utf8'});
+					this.fileText = readFileSync(file, {encoding: 'utf8'});
 					this.fileStatus = 200;
 				} catch (e) {
 					this.fileText = '';

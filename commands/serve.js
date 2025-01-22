@@ -11,7 +11,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 // @remove-on-eject-end
-const fs = require('fs');
+const {existsSync, readFileSync} = require('node:fs');
 const path = require('path');
 const minimist = require('minimist');
 const clearConsole = require('react-dev-utils/clearConsole');
@@ -99,12 +99,12 @@ function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
 		type: 'http'
 	};
 	const {SSL_CRT_FILE, SSL_KEY_FILE} = process.env;
-	if (protocol === 'https' && [SSL_CRT_FILE, SSL_KEY_FILE].every(f => f && fs.existsSync(f))) {
+	if (protocol === 'https' && [SSL_CRT_FILE, SSL_KEY_FILE].every(f => f && existsSync(f))) {
 		server = {
 			type: 'https',
 			options: {
-				cert: fs.readFileSync(SSL_CRT_FILE),
-				key: fs.readFileSync(SSL_KEY_FILE)
+				cert: readFileSync(SSL_CRT_FILE),
+				key: readFileSync(SSL_KEY_FILE)
 			}
 		};
 	}
@@ -225,7 +225,7 @@ function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
 
 			// Optionally register app-side proxy middleware if it exists
 			const proxySetup = path.join(process.cwd(), 'src', 'setupProxy.js');
-			if (fs.existsSync(proxySetup)) {
+			if (existsSync(proxySetup)) {
 				require(proxySetup)(devServer.app);
 			}
 
@@ -265,7 +265,7 @@ function serve(config, host, port, open) {
 			config,
 			urls,
 			useYarn: false,
-			useTypeScript: fs.existsSync('tsconfig.json'),
+			useTypeScript: existsSync('tsconfig.json'),
 			webpack
 		});
 		// Hook into compiler to remove potentially confusing messages

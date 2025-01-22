@@ -9,6 +9,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+const {appendFileSync, existsSync, readdirSync, readFileSync, realpathSync} = require('node:fs');
 const os = require('os');
 const path = require('path');
 const spawn = require('cross-spawn');
@@ -90,7 +91,7 @@ const defaultGenerator = {
 
 		console.log();
 
-		if (!fs.readdirSync(directory).every(f => validFiles.includes(f))) {
+		if (!readdirSync(directory).every(f => validFiles.includes(f))) {
 			throw new Error(`The directory ${chalk.bold(name)} contains file(s) that could conflict. Aborting.`);
 		}
 	},
@@ -104,9 +105,9 @@ const defaultGenerator = {
 
 		// Update appinfo.json if it exists in the template
 		let appinfo = path.join(directory, 'appinfo.json');
-		if (!fs.existsSync(appinfo)) {
+		if (!existsSync(appinfo)) {
 			appinfo = path.join(directory, 'webos-meta', 'appinfo.json');
-			if (!fs.existsSync(appinfo)) {
+			if (!existsSync(appinfo)) {
 				appinfo = undefined;
 			}
 		}
@@ -170,16 +171,16 @@ function displayHelp() {
 function resolveTemplateGenerator(template) {
 	return new Promise((resolve, reject) => {
 		let templatePath = path.join(TEMPLATE_DIR, template);
-		if (!fs.existsSync(templatePath)) {
+		if (!existsSync(templatePath)) {
 			if (['default', 'sandstone'].includes(template)) {
 				templatePath = path.join(INCLUDED, 'template');
 			} else {
 				reject(new Error(`Template ${chalk.bold(template)} not found.`));
 			}
 		}
-		templatePath = fs.realpathSync(templatePath);
+		templatePath = realpathSync(templatePath);
 		const subDir = path.join(templatePath, 'template');
-		if (fs.existsSync(subDir)) {
+		if (existsSync(subDir)) {
 			try {
 				const generator = require(templatePath) || {};
 				Object.keys(defaultGenerator).forEach(k => {
@@ -204,10 +205,10 @@ function resolveTemplateGenerator(template) {
 function copyTemplate(template, output, overwrite) {
 	const outputReadme = path.join(output, 'README.md');
 	const outputGitIgnore = path.join(output, '.gitignore');
-	let templateGitIgnore = fs.readdirSync(template).filter(f => ['.gitignore', 'gitignore'].includes(f))[0];
+	let templateGitIgnore = readdirSync(template).filter(f => ['.gitignore', 'gitignore'].includes(f))[0];
 	templateGitIgnore = templateGitIgnore && path.join(template, templateGitIgnore);
 
-	if (fs.existsSync(outputReadme) && fs.existsSync(path.join(template, 'README.md'))) {
+	if (existsSync(outputReadme) && existsSync(path.join(template, 'README.md'))) {
 		console.log(chalk.yellow('Found an existing README.md file. Renaming to README.old.md to avoid overwriting.'));
 		console.log();
 		fs.moveSync(outputReadme, path.join(output, 'README.old.md'));
@@ -221,10 +222,10 @@ function copyTemplate(template, output, overwrite) {
 			// Handle gitignore after the fact to prevent npm from renaming it to .npmignore
 			// See: https://github.com/npm/npm/issues/1862
 			if (templateGitIgnore) {
-				if (fs.existsSync(outputGitIgnore)) {
+				if (existsSync(outputGitIgnore)) {
 					// Append if there's already a `.gitignore` file there
-					const data = fs.readFileSync(templateGitIgnore, {encoding: 'UTF8'});
-					fs.appendFileSync(outputGitIgnore, data, {encoding: 'UTF8'});
+					const data = readFileSync(templateGitIgnore, {encoding: 'UTF8'});
+					appendFileSync(outputGitIgnore, data, {encoding: 'UTF8'});
 				} else {
 					fs.copySync(templateGitIgnore, outputGitIgnore);
 				}

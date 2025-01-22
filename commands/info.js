@@ -1,6 +1,6 @@
 /* eslint-env node, es6 */
+const {existsSync, lstatSync, realpathSync} = require('node:fs');
 const path = require('path');
-const fs = require('fs');
 const spawn = require('cross-spawn');
 const minimist = require('minimist');
 const resolveSync = require('resolve').sync;
@@ -28,8 +28,8 @@ function logVersion(pkg, rel = __dirname) {
 		const jsonPath = resolveSync(pkg + '/package.json', {basedir: rel});
 		const meta = require(jsonPath);
 		const dir = path.dirname(jsonPath);
-		if (fs.lstatSync(dir).isSymbolicLink()) {
-			const realDir = fs.realpathSync(dir);
+		if (lstatSync(dir).isSymbolicLink()) {
+			const realDir = realpathSync(dir);
 			const git = gitInfo(realDir);
 			console.log(meta.name + ': ' + (git || meta.version));
 			console.log(chalk.cyan('\tSymlinked from'), realDir);
@@ -86,10 +86,10 @@ function api({cliInfo = false, dev = false} = {}) {
 				const gm = globalModules();
 				const gCLI = path.join(gm, '@enact', 'cli');
 				const isGlobal =
-					fs.existsSync(gCLI) &&
+					existsSync(gCLI) &&
 					path.dirname(require.resolve(path.join(gCLI, 'package.json'))) === path.dirname(__dirname);
 				console.log(chalk.yellow.bold('==Enact CLI Info=='));
-				if (isGlobal && fs.lstatSync(gCLI).isSymbolicLink()) {
+				if (isGlobal && lstatSync(gCLI).isSymbolicLink()) {
 					const ver = gitInfo(__dirname) || require('../package.json').version;
 					console.log(`Enact CLI: ${ver}`);
 					console.log(chalk.cyan('\tSymlinked from'), path.dirname(__dirname));

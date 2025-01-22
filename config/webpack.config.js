@@ -12,8 +12,7 @@
  */
 // @remove-on-eject-end
 
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const fs = require('fs');
+const {existsSync} = require('node:fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
@@ -73,10 +72,10 @@ module.exports = function (
 	})();
 
 	// Check if TypeScript is setup
-	const useTypeScript = fs.existsSync('tsconfig.json');
+	const useTypeScript = existsSync('tsconfig.json');
 
 	// Check if Tailwind config exists
-	const useTailwind = fs.existsSync(path.join(app.context, 'tailwind.config.js'));
+	const useTailwind = existsSync(path.join(app.context, 'tailwind.config.js'));
 
 	process.env.NODE_ENV = env || process.env.NODE_ENV;
 	const isEnvProduction = process.env.NODE_ENV === 'production';
@@ -285,7 +284,7 @@ module.exports = function (
 			symlinks: false,
 			// Backward compatibility for apps using new ilib references with old Enact
 			// and old apps referencing old iLib location with new Enact
-			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
+			alias: existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
 				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias)
 				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias),
 			// Optional configuration for redirecting module requests.
@@ -501,7 +500,6 @@ module.exports = function (
 					minifyURLs: true
 				}
 			}),
-			new BundleAnalyzerPlugin(),
 			// Make NODE_ENV environment variable available to the JS code, for example:
 			// if (process.env.NODE_ENV === 'production') { ... }.
 			// It is absolutely essential that NODE_ENV was set to production here.

@@ -1,4 +1,5 @@
 // @remove-file-on-eject
+const {readdir, readFileSync, writeFile, writeFileSync} = require('node:fs');
 const path = require('path');
 const babel = require('@babel/core');
 const fs = require('fs-extra');
@@ -42,18 +43,18 @@ function transpile(src, dest, plugins) {
 				resolve(result);
 			}
 		});
-	}).then(result => fs.writeFile(dest, result.code, {encoding: 'utf8'}));
+	}).then(result => writeFile(dest, result.code, {encoding: 'utf8'}));
 }
 
 function lessc(src, dest) {
 	return less
-		.render(fs.readFileSync(src, {encoding: 'utf8'}), {
+		.render(readFileSync(src, {encoding: 'utf8'}), {
 			rewriteUrls: 'local',
 			filename: src,
 			paths: [],
 			plugins: lessPlugins
 		})
-		.then(result => fs.writeFileSync(dest.replace(/\.less$/, '.css'), result.css, {encoding: 'utf8'}));
+		.then(result => writeFileSync(dest.replace(/\.less$/, '.css'), result.css, {encoding: 'utf8'}));
 }
 
 function api({source = '.', output = './build', commonjs = true, ignore} = {}) {
@@ -81,7 +82,7 @@ function api({source = '.', output = './build', commonjs = true, ignore} = {}) {
 		}
 	};
 
-	return fs.readdir(source).then(paths => {
+	return readdir(source).then(paths => {
 		paths = paths.filter(p => !blacklist.includes(p));
 		return Promise.all(
 			paths.map(item => {

@@ -10,9 +10,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 const cp = require('child_process');
+const {existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync} = require('node:fs');
 const os = require('os');
 const path = require('path');
-const fs = require('fs-extra');
 const prompts = require('prompts');
 const minimist = require('minimist');
 const {packageRoot} = require('@enact/dev-utils');
@@ -83,15 +83,14 @@ function validateEject() {
 			// Make shallow array of files paths
 			const files = assets.reduce((list, dir) => {
 				return list.concat(
-					fs
-						.readdirSync(dir.src)
+					readdirSync(dir.src)
 						// set full relative path
 						.map(file => ({
 							src: path.join(dir.src, file),
 							dest: path.join(dir.dest, file)
 						}))
 						// omit dirs from file list
-						.filter(file => fs.lstatSync(file.src).isFile())
+						.filter(file => lstatSync(file.src).isFile())
 				);
 			}, []);
 			files.forEach(verifyAbsent);
@@ -123,7 +122,7 @@ function checkGitStatus() {
 }
 
 function verifyAbsent({dest}) {
-	if (fs.existsSync(dest)) {
+	if (existsSync(dest)) {
 		throw new Error(
 			`"${dest}" already exists in your app folder. We cannot ` +
 				'continue as you would lose all the changes in that file or directory. ' +
@@ -134,7 +133,7 @@ function verifyAbsent({dest}) {
 }
 
 function copySanitizedFile({src, dest}) {
-	let data = fs.readFileSync(src, {encoding: 'utf8'});
+	let data = readFileSync(src, {encoding: 'utf8'});
 
 	// Skip flagged files
 	if (data.match(/\/\/ @remove-file-on-eject/)) {
@@ -150,14 +149,14 @@ function copySanitizedFile({src, dest}) {
 			.trim() + '\n';
 
 	console.log(`	Adding ${chalk.cyan(dest)} to the project`);
-	fs.writeFileSync(dest, data, {encoding: 'utf8'});
+	writeFileSync(dest, data, {encoding: 'utf8'});
 }
 
 function configurePackage(bare) {
 	const own = require('../package.json');
 	const app = require(path.resolve('package.json'));
 	const backup = JSON.stringify(app, null, 2) + os.EOL;
-	const availScripts = fs.existsSync('./scripts') ? fs.readdirSync('./scripts').map(f => f.replace(/\.js$/, '')) : [];
+	const availScripts = existsSync('./scripts') ? readdirSync('./scripts').map(f => f.replace(/\.js$/, '')) : [];
 	const enactCLI = new RegExp('enact (' + availScripts.join('|') + ')', 'g');
 	const eslintConfig = {extends: 'enact'};
 	const eslintIgnore = ['build/*', 'config/*', 'dist/*', 'node_modules/*', 'scripts/*'];
@@ -230,18 +229,18 @@ function configurePackage(bare) {
 			});
 	});
 
-	fs.writeFileSync('package.json', JSON.stringify(app, null, 2) + os.EOL, {encoding: 'utf8'});
+	writeFileSync('package.json', JSON.stringify(app, null, 2) + os.EOL, {encoding: 'utf8'});
 
-	if (conflicts.length > 0) fs.writeFileSync('package.old.json', backup, {encoding: 'utf8'});
+	if (conflicts.length > 0) writeFileSync('package.old.json', backup, {encoding: 'utf8'});
 
 	return conflicts;
 }
 
 function backupOld(files) {
-	files.filter(fs.existsSync).forEach(f => {
+	files.filter(existsSync).forEach(f => {
 		const backup = path.basename(f, path.extname(f)) + '.old' + path.extname(f);
 		console.log(`	Found existing ${chalk.cyan(f)}; backing up to ${chalk.cyan(backup)}`);
-		fs.renameSync(f, backup);
+		renameSync(f, backup);
 	});
 }
 
@@ -267,7 +266,7 @@ function api({bare = false} = {}) {
 			console.log('Ejecting...');
 			console.log();
 			console.log(chalk.cyan(`Copying files into ${process.cwd()}`));
-			assets.forEach(dir => !fs.existsSync(dir.dest) && fs.mkdirSync(dir.dest, {recursive: true}));
+			assets.forEach(dir => !existsSync(dir.dest) && mkdirSync(dir.dest, {recursive: true}));
 			files.forEach(copySanitizedFile);
 			console.log();
 			console.log(chalk.cyan('Configuring package.json'));

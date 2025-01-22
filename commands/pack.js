@@ -11,6 +11,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 // @remove-on-eject-end
+const {existsSync, statSync} = require('node:fs');
 const path = require('path');
 const {filesize} = require('filesize');
 const fs = require('fs-extra');
@@ -141,7 +142,7 @@ function details(err, stats, output) {
 
 function copyPublicFolder(output) {
 	const staticAssets = './public';
-	if (fs.existsSync(staticAssets)) {
+	if (existsSync(staticAssets)) {
 		fs.copySync(staticAssets, output, {
 			dereference: true
 		});
@@ -154,7 +155,7 @@ function printFileSizes(stats, output) {
 		.toJson({all: false, assets: true, cachedAssets: true})
 		.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
 		.map(asset => {
-			const size = fs.statSync(path.join(output, asset.name)).size;
+			const size = statSync(path.join(output, asset.name)).size;
 			return {
 				folder: path.relative(app.context, path.join(output, path.dirname(asset.name))),
 				name: path.basename(asset.name),
