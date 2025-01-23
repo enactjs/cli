@@ -1,5 +1,5 @@
 // @remove-file-on-eject
-const {existsSync, mkdirSync, readFileSync, writeFileSync} = require('node:fs');
+const {readFileSync, writeFileSync} = require('node:fs');
 const {cp, readdir, writeFile} = require('node:fs/promises');
 const path = require('path');
 const babel = require('@babel/core');
@@ -8,6 +8,8 @@ const LessPluginResolve = require('less-plugin-npm-import');
 const minimist = require('minimist');
 const LessPluginRi = require('resolution-independence');
 const {optionParser: app} = require('@enact/dev-utils');
+
+const {ensureDir} = require('../config/utils');
 
 let chalk;
 
@@ -35,6 +37,7 @@ function displayHelp() {
 }
 
 function transpile(src, dest, plugins) {
+	console.log("testfdsf")
 	return new Promise((resolve, reject) => {
 		babel.transformFile(src, {extends: babelConfig, plugins}, (err, result) => {
 			if (err) {
@@ -68,20 +71,14 @@ function api({source = '.', output = './build', commonjs = true, ignore} = {}) {
 		if (ignore && ignore.test && ignore.test(src)) {
 			return false;
 		} else if (/\.(js|js|ts|tsx)$/i.test(src)) {
-			if (!existsSync(path.dirname(dest))) {
-				mkdirSync(path.dirname(dest));
-			}
-			return transpile(src, dest, babelPlugins);
+			return ensureDir(path.dirname(dest)).then(() => transpile(src, dest, babelPlugins));
 		} else if (/\.(less|css)$/i.test(src)) {
 			// LESS/CSS within a 'styles' directory will not be run through LESS compiler
 			if (/[\\/]+styles[\\/]+/i.test('./' + src)) {
 				// Any LESS/CSS within an 'internal' directory will not be copied
 				return !/[\\/]+styles[\\/]+(.*[\\/]+)*internal[\\/]+/i.test('./' + src);
 			} else {
-				if (!existsSync(path.dirname(dest))) {
-					mkdirSync(path.dirname(dest));
-				}
-				return lessc(src, dest);
+				return ensureDir(path.dirname(dest)).then(() => lessc(src, dest));
 			}
 		} else {
 			return true;

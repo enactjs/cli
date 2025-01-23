@@ -9,6 +9,8 @@ const minimist = require('minimist');
 const prompts = require('prompts');
 const tar = require('tar');
 
+const {ensureDirSync} = require('../config/utils');
+
 let chalk;
 
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
@@ -141,7 +143,7 @@ function installFromGit(target, name = normalizeName(path.basename(url.parse(tar
 function installFromLocal(target, name = normalizeName(path.basename(target))) {
 	const output = path.join(TEMPLATE_DIR, name);
 	fs.removeSync(output);
-	fs.ensureDirSync(output);
+	ensureDirSync(output);
 	return fs
 		.copy(target, output)
 		.then(() => name)
@@ -154,7 +156,7 @@ function installFromLocal(target, name = normalizeName(path.basename(target))) {
 function installFromNPM(target, name = normalizeName(path.basename(target).replace(/@.*$/g, ''))) {
 	const tempDir = path.join(os.tmpdir(), 'enact');
 	fs.removeSync(tempDir);
-	fs.ensureDirSync(tempDir);
+	ensureDirSync(tempDir);
 	return new Promise((resolve, reject) => {
 		const child = spawn('npm', ['--loglevel', 'error', 'pack', target], {stdio: 'ignore', cwd: tempDir});
 		child.on('close', code => {

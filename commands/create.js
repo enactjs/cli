@@ -9,13 +9,15 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-const {appendFileSync, existsSync, readdirSync, readFileSync, realpathSync} = require('node:fs');
+const {appendFileSync, existsSync, readdirSync, readFileSync, realpathSync, writeFileSync} = require('node:fs');
 const os = require('os');
 const path = require('path');
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
 const minimist = require('minimist');
 const validatePackageName = require('validate-npm-package-name');
+
+const {ensureDir} = require('../config/utils');
 
 let chalk;
 
@@ -39,7 +41,7 @@ const defaultGenerator = {
 						.join('/n')
 			);
 		} else {
-			const meta = fs.readJsonSync(path.join(template, 'package.json'), {throws: false}) || {};
+			const meta = JSON.parse(readFileSync(path.join(template, 'package.json'), {throws: false})) || {};
 			const deps = Object.keys(meta.dependencies || {}).concat(Object.keys(meta.devDependencies || {}));
 			deps.sort();
 
@@ -99,9 +101,9 @@ const defaultGenerator = {
 		// Do stuff to setup the directory workspace after template is copied
 		// Update package.json name
 		const pkgJSON = path.join(directory, 'package.json');
-		const meta = fs.readJsonSync(pkgJSON, {encoding: 'UTF8', throws: false}) || {};
+		const meta = JSON.parse(readFileSync(pkgJSON, {encoding: 'UTF8', throws: false})) || {};
 		meta.name = name;
-		fs.writeJsonSync(pkgJSON, meta, {encoding: 'UTF8', spaces: '\t'});
+		writeFileSync(pkgJSON, JSON.stringify(meta), {encoding: 'UTF8', spaces: '\t'});
 
 		// Update appinfo.json if it exists in the template
 		let appinfo = path.join(directory, 'appinfo.json');
@@ -112,9 +114,10 @@ const defaultGenerator = {
 			}
 		}
 		if (appinfo) {
-			const aiMeta = fs.readJsonSync(appinfo, {encoding: 'UTF8', throws: false}) || {};
+			const aiMeta = JSON.parse(readFileSync(appinfo, {encoding: 'UTF8', throws: false})) || {};
+
 			aiMeta.id = meta.name;
-			fs.writeJsonSync(appinfo, aiMeta, {encoding: 'UTF8', spaces: '\t'});
+			writeFileSync(appinfo, JSON.stringify(aiMeta), {encoding: 'UTF8', spaces: '\t'});
 		}
 	},
 	complete: ({directory, name}) => {
@@ -256,7 +259,7 @@ function api(opts = {}) {
 		const params = Object.assign({}, opts, {opts, defaultGenerator, type: generator.type});
 
 		return new Promise(resolve => resolve(generator.validate && generator.validate(params)))
-			.then(() => fs.ensureDir(opts.directory))
+			.then(() => ensureDir(opts.directory))
 			.then(() => generator.prepare && generator.prepare(params))
 			.then(() => copyTemplate(templatePath, opts.directory, generator.overwrite))
 			.then(() => generator.setup && generator.setup(params))

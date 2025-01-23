@@ -143,7 +143,7 @@ function details(err, stats, output) {
 function copyPublicFolder(output) {
 	const staticAssets = './public';
 	if (existsSync(staticAssets)) {
-		cpSync(staticAssets, output, { recursive: true });
+		cpSync(staticAssets, output, {recursive: true});
 	}
 }
 
@@ -272,12 +272,12 @@ function api(opts = {}) {
 	mixins.apply(config, opts);
 
 	// Create directory if it does not exist
-	if (!existsSync(config.output.path)){
+	if (!existsSync(config.output.path)) {
 		mkdirSync(config.output.path);
 	}
 
 	// Remove all content in the directory
-	return rm(config.output.path, { recursive: true }).then(() => {
+	return rm(config.output.path, {recursive: true}).then(() => {
 		// Start the webpack build
 		if (opts.watch) {
 			// This will run infinitely until killed, even through errors
