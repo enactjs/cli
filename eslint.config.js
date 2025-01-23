@@ -4,7 +4,7 @@ const importPlugin = require('eslint-plugin-import');
 const prettierPlugin = require('eslint-plugin-prettier');
 const globals = require('globals');
 
-export default [
+module.exports = [
 	...enactConfig,
 	{
 		files: ['*/.js', '*/.jsx', '*/.ts', '*/.tsx'],

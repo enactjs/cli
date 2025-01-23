@@ -44,7 +44,7 @@
   ],
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.26.3",
-    "@enact/dev-utils": "enactjs/dev-utils#feature/eslint9",
+    "@enact/dev-utils": "^7.0.0-alpha.3",
     "@enact/template-sandstone": "^3.0.0-alpha.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
     "@testing-library/jest-dom": "^6.6.3",
@@ -64,7 +64,7 @@
     "dotenv": "^16.4.7",
     "dotenv-expand": "^12.0.1",
     "eslint": "^9.18.0",
-    "eslint-config-enact": "enactjs/eslint-config-enact#feature/eslint9",
+    "eslint-config-enact": "enactjs/eslint-config-enact#feature/WRR-12625",
     "eslint-webpack-plugin": "^4.2.0",
     "expose-loader": "^5.0.0",
     "file-loader": "^6.2.0",
