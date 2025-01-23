@@ -35,7 +35,7 @@ const internal = [
 	'tar',
 	'validate-npm-package-name'
 ];
-const enhanced = ['chalk', 'cross-spawn', 'filesize', 'fs-extra', 'minimist', 'strip-ansi'];
+const enhanced = ['chalk', 'cross-spawn', 'filesize', 'minimist', 'strip-ansi'];
 const content = ['@babel/runtime', 'core-js', 'react', 'react-dom'];
 const bareDeps = {'cpy-cli': '^3.1.1', rimraf: '^3.0.2'};
 const bareTasks = {
