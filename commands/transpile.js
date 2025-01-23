@@ -8,7 +8,6 @@ const LessPluginResolve = require('less-plugin-npm-import');
 const minimist = require('minimist');
 const LessPluginRi = require('resolution-independence');
 const {optionParser: app} = require('@enact/dev-utils');
-
 const {ensureDir} = require('../config/utils');
 
 let chalk;
@@ -37,7 +36,6 @@ function displayHelp() {
 }
 
 function transpile(src, dest, plugins) {
-	console.log("testfdsf")
 	return new Promise((resolve, reject) => {
 		babel.transformFile(src, {extends: babelConfig, plugins}, (err, result) => {
 			if (err) {

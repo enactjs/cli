@@ -9,14 +9,22 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-const {appendFileSync, cpSync, existsSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync} = require('node:fs');
+const {
+	appendFileSync,
+	cpSync,
+	existsSync,
+	readdirSync,
+	readFileSync,
+	realpathSync,
+	rmSync,
+	writeFileSync
+} = require('node:fs');
 const {cp} = require('node:fs/promises');
 const os = require('os');
 const path = require('path');
 const spawn = require('cross-spawn');
 const minimist = require('minimist');
 const validatePackageName = require('validate-npm-package-name');
-
 const {ensureDir, readJsonSync} = require('../config/utils');
 
 let chalk;

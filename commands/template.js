@@ -8,7 +8,6 @@ const spawn = require('cross-spawn');
 const minimist = require('minimist');
 const prompts = require('prompts');
 const tar = require('tar');
-
 const {ensureDirSync} = require('../config/utils');
 
 let chalk;
