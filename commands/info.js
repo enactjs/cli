@@ -5,7 +5,7 @@ const spawn = require('cross-spawn');
 const minimist = require('minimist');
 const resolveSync = require('resolve').sync;
 
-let chalk;
+let picocolors;
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -32,12 +32,12 @@ function logVersion(pkg, rel = __dirname) {
 			const realDir = realpathSync(dir);
 			const git = gitInfo(realDir);
 			console.log(meta.name + ': ' + (git || meta.version));
-			console.log(chalk.cyan('\tSymlinked from'), realDir);
+			console.log(picocolors.cyan('\tSymlinked from'), realDir);
 		} else {
 			console.log(meta.name + ': ' + meta.version);
 		}
 	} catch (e) {
-		console.log(pkg + ': ' + chalk.red('<unknown>'));
+		console.log(pkg + ': ' + picocolors.red('<unknown>'));
 	}
 }
 
@@ -52,11 +52,11 @@ function gitInfo(dir) {
 	};
 	const tag = git(['describe', '--tags', '--exact-match']);
 	if (tag) {
-		return chalk.green(`${tag} (git)`);
+		return picocolors.green(`${tag} (git)`);
 	} else {
 		const branch = git(['symbolic-ref', '-q', '--short', 'HEAD']) || 'HEAD';
 		const commit = git(['rev-parse', '--short', 'HEAD']);
-		if (commit) return chalk.green(`${branch} @ ${commit} (git)`);
+		if (commit) return picocolors.green(`${branch} @ ${commit} (git)`);
 	}
 }
 
@@ -88,11 +88,11 @@ function api({cliInfo = false, dev = false} = {}) {
 				const isGlobal =
 					existsSync(gCLI) &&
 					path.dirname(require.resolve(path.join(gCLI, 'package.json'))) === path.dirname(__dirname);
-				console.log(chalk.yellow.bold('==Enact CLI Info=='));
+				console.log(picocolors.yellow(picocolors.bold('==Enact CLI Info==')));
 				if (isGlobal && lstatSync(gCLI).isSymbolicLink()) {
 					const ver = gitInfo(__dirname) || require('../package.json').version;
 					console.log(`Enact CLI: ${ver}`);
-					console.log(chalk.cyan('\tSymlinked from'), path.dirname(__dirname));
+					console.log(picocolors.cyan('\tSymlinked from'), path.dirname(__dirname));
 				} else {
 					console.log(`@enact/cli: ${require('../package.json').version}`);
 				}
@@ -101,7 +101,7 @@ function api({cliInfo = false, dev = false} = {}) {
 				console.log();
 
 				// Display info on in-house components, likely to be linked in
-				console.log(chalk.yellow.bold('==Enact Components=='));
+				console.log(picocolors.yellow(picocolors.bold('==Enact Components==')));
 				[
 					'@enact/dev-utils',
 					'babel-preset-enact',
@@ -112,7 +112,7 @@ function api({cliInfo = false, dev = false} = {}) {
 				console.log();
 
 				// Display info on notable 3rd party components
-				console.log(chalk.yellow.bold('==Third Party Components=='));
+				console.log(picocolors.yellow(picocolors.bold('==Third Party Components==')));
 				console.log(`Babel: ${require('@babel/core/package.json').version}`);
 				console.log(`ESLint: ${require('eslint/package.json').version}`);
 				console.log(`Jest: ${require('jest/package.json').version}`);
@@ -128,7 +128,7 @@ function api({cliInfo = false, dev = false} = {}) {
 					})
 				);
 				app.setEnactTargetsAsDefault();
-				console.log(chalk.yellow.bold('==Project Info=='));
+				console.log(picocolors.yellow(picocolors.bold('==Project Info==')));
 				console.log(`Name: ${app.name}`);
 				console.log(`Version: ${gitInfo(app.context) || meta.version}`);
 				console.log(`Path: ${app.context}`);
@@ -142,7 +142,7 @@ function api({cliInfo = false, dev = false} = {}) {
 				console.log(`Browserslist: ${bl.loadConfig({path: app.context})}`);
 				console.log(`Environment: ${app.environment}`);
 				console.log();
-				console.log(chalk.yellow.bold('==Dependencies=='));
+				console.log(picocolors.yellow(picocolors.bold('==Dependencies==')));
 				if (meta.dependencies) {
 					Object.keys(meta.dependencies).forEach(dep => {
 						logVersion(dep, app.context);
@@ -150,7 +150,7 @@ function api({cliInfo = false, dev = false} = {}) {
 				}
 				if (dev && meta.devDependencies) {
 					console.log();
-					console.log(chalk.yellow.bold('==Dev Dependencies=='));
+					console.log(picocolors.yellow(picocolors.bold('==Dev Dependencies==')));
 					Object.keys(meta.devDependencies).forEach(dep => {
 						logVersion(dep, app.context);
 					});
@@ -170,10 +170,10 @@ function cli(args) {
 	});
 	if (opts.help) displayHelp();
 
-	import('chalk').then(({default: _chalk}) => {
-		chalk = _chalk;
+	import('picocolors').then(({default: _picocolors}) => {
+		picocolors = _picocolors;
 		api({cliInfo: opts.cli, dev: opts.dev}).catch(err => {
-			console.error(chalk.red('ERROR: ') + 'Failed to display info.\n' + err.message);
+			console.error(picocolors.red('ERROR: ') + 'Failed to display info.\n' + err.message);
 			process.exit(1);
 		});
 	});

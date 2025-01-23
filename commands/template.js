@@ -10,7 +10,7 @@ const prompts = require('prompts');
 const tar = require('tar');
 const {ensureDirSync} = require('../config/utils');
 
-let chalk;
+let picocolors;
 
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 const INCLUDED = path.dirname(require.resolve('@enact/template-sandstone'));
@@ -25,31 +25,31 @@ function displayHelp() {
 	console.log();
 	console.log('  Actions');
 	console.log(`    ${e} install [source] [name]`);
-	console.log(chalk.dim('    Install a template from a local or remote source'));
+	console.log(picocolors.dim('    Install a template from a local or remote source'));
 	console.log();
 	console.log('        source            Git URI, npm package or local directory');
 	console.log('                          (default: cwd)');
 	console.log('        name              Specific name for the template');
 	console.log();
 	console.log(`    ${e} link [directory] [name]`);
-	console.log(chalk.dim('    Symlink a directory into template management'));
+	console.log(picocolors.dim('    Symlink a directory into template management'));
 	console.log();
 	console.log('        directory         Local directory path to link');
 	console.log('                          (default: cwd)');
 	console.log('        name              Specific name for the template');
 	console.log();
 	console.log(`    ${e} remove <name>`);
-	console.log(chalk.dim('    Remove a template by name'));
+	console.log(picocolors.dim('    Remove a template by name'));
 	console.log();
 	console.log('        name              Name of template to remove');
 	console.log();
 	console.log(`    ${e} default [name]`);
-	console.log(chalk.dim('    Choose a default template for "enact create"'));
+	console.log(picocolors.dim('    Choose a default template for "enact create"'));
 	console.log();
 	console.log('        name              Specific template to set default');
 	console.log();
 	console.log(`    ${e} list`);
-	console.log(chalk.dim('    List all templates installed/linked'));
+	console.log(picocolors.dim('    List all templates installed/linked'));
 	console.log();
 	console.log('  Options');
 	console.log('    -v, --version     Display version information');
@@ -234,16 +234,16 @@ function doDefault(name) {
 function doList() {
 	const realDefault = realpathSync(DEFAULT_LINK);
 	const all = readdirSync(TEMPLATE_DIR).filter(t => t !== 'default');
-	console.log(chalk.bold('Available Templates'));
+	console.log(picocolors.bold('Available Templates'));
 	all.forEach(t => {
 		let item = '  ' + t;
 		const template = path.join(TEMPLATE_DIR, t);
 		const realTemplate = realpathSync(template);
 		if (realTemplate === realDefault) {
-			item += chalk.green(' (default)');
+			item += picocolors.green(' (default)');
 		}
 		if (lstatSync(template).isSymbolicLink()) {
-			item += chalk.dim(' -> ' + realTemplate);
+			item += picocolors.dim(' -> ' + realTemplate);
 		}
 		console.log(item);
 	});
@@ -289,8 +289,8 @@ function api({action, target, name} = {}) {
 }
 
 function cli(args) {
-	import('chalk').then(({default: _chalk}) => {
-		chalk = _chalk;
+	import('picocolors').then(({default: _picocolors}) => {
+		picocolors = _picocolors;
 		const opts = minimist(args, {
 			boolean: ['help'],
 			alias: {h: 'help'}
@@ -305,7 +305,7 @@ function cli(args) {
 		api({action, name, target}).catch(err => {
 			console.error('Template action failed.');
 			console.error();
-			console.error(chalk.red('ERROR: ') + err.message);
+			console.error(picocolors.red('ERROR: ') + err.message);
 			process.exit(1);
 		});
 	});

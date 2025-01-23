@@ -27,7 +27,7 @@ const minimist = require('minimist');
 const validatePackageName = require('validate-npm-package-name');
 const {ensureDir, readJsonSync} = require('../config/utils');
 
-let chalk;
+let picocolors;
 
 const ENACT_DEV_NPM = '@enact/cli';
 const INCLUDED = path.dirname(require.resolve('@enact/template-sandstone'));
@@ -42,7 +42,7 @@ const defaultGenerator = {
 
 		if (!validation.validForNewPackages) {
 			throw new Error(
-				`Cannot create a project called ${chalk.bold(name)} because of npm naming restrictions:\n` +
+				`Cannot create a project called ${picocolors.bold(name)} because of npm naming restrictions:\n` +
 					validation.errors
 						.concat(validation.warnings)
 						.map(r => '  * ' + r)
@@ -56,10 +56,10 @@ const defaultGenerator = {
 			if (deps.includes(name)) {
 				throw new Error(
 					'Cannot create a project called ' +
-						chalk.bold(name) +
+						picocolors.bold(name) +
 						' because a dependency with the same name exists.\n' +
 						'Due to the way npm works, the following names are not allowed:\n\n' +
-						chalk.cyan(deps.map(d => '\t' + d).join('\n')) +
+						picocolors.cyan(deps.map(d => '\t' + d).join('\n')) +
 						'\n\nPlease choose a different project name.'
 				);
 			}
@@ -102,7 +102,7 @@ const defaultGenerator = {
 		console.log();
 
 		if (!readdirSync(directory).every(f => validFiles.includes(f))) {
-			throw new Error(`The directory ${chalk.bold(name)} contains file(s) that could conflict. Aborting.`);
+			throw new Error(`The directory ${picocolors.bold(name)} contains file(s) that could conflict. Aborting.`);
 		}
 	},
 	setup: ({directory, name}) => {
@@ -134,25 +134,25 @@ const defaultGenerator = {
 		console.log('Success! Created ' + name + ' at ' + directory);
 		console.log();
 		console.log('Inside that directory, you can run several npm commands, including:');
-		console.log(chalk.cyan('	npm run serve'));
+		console.log(picocolors.cyan('	npm run serve'));
 		console.log('		Starts the development server.');
-		console.log(chalk.cyan('	npm run pack'));
+		console.log(picocolors.cyan('	npm run pack'));
 		console.log('		Bundles the app into static files in development mode.');
-		console.log(chalk.cyan('	npm run pack-p'));
+		console.log(picocolors.cyan('	npm run pack-p'));
 		console.log('		Bundles the app into static files in production mode.');
-		console.log(chalk.cyan('	npm run test'));
+		console.log(picocolors.cyan('	npm run test'));
 		console.log('		Starts the test runner.');
 		console.log();
 		// @TODO
-		// console.log(chalk.cyan('	npm run eject'));
+		// console.log(picocolors.cyan('	npm run eject'));
 		// console.log('		Removes this tool and copies build dependencies, configuration files');
 		// console.log('		and scripts into the app directory. If you do this, you can’t go back!');
 		// console.log();
 		console.log('We suggest that you begin by typing:');
 		if (path.resolve(process.cwd()) !== path.resolve(directory)) {
-			console.log(chalk.cyan('	cd ' + path.relative(process.cwd(), directory)));
+			console.log(picocolors.cyan('	cd ' + path.relative(process.cwd(), directory)));
 		}
-		console.log('	' + chalk.cyan('npm run serve'));
+		console.log('	' + picocolors.cyan('npm run serve'));
 		console.log();
 		console.log('Have fun!');
 	}
@@ -186,7 +186,7 @@ function resolveTemplateGenerator(template) {
 			if (['default', 'sandstone'].includes(template)) {
 				templatePath = path.join(INCLUDED, 'template');
 			} else {
-				reject(new Error(`Template ${chalk.bold(template)} not found.`));
+				reject(new Error(`Template ${picocolors.bold(template)} not found.`));
 			}
 		}
 		templatePath = realpathSync(templatePath);
@@ -204,7 +204,7 @@ function resolveTemplateGenerator(template) {
 				if (e.message === `Cannot find module '${templatePath}'`) {
 					resolve({generator: defaultGenerator, templatePath: subDir});
 				} else {
-					reject(new Error(`Failed to load ${chalk.bold(template)} template generator.\n${e}`));
+					reject(new Error(`Failed to load ${picocolors.bold(template)} template generator.\n${e}`));
 				}
 			}
 		} else {
@@ -220,7 +220,7 @@ function copyTemplate(template, output, overwrite) {
 	templateGitIgnore = templateGitIgnore && path.join(template, templateGitIgnore);
 
 	if (existsSync(outputReadme) && existsSync(path.join(template, 'README.md'))) {
-		console.log(chalk.yellow('Found an existing README.md file. Renaming to README.old.md to avoid overwriting.'));
+		console.log(picocolors.yellow('Found an existing README.md file. Renaming to README.old.md to avoid overwriting.'));
 		console.log();
 		cpSync(outputReadme, path.join(output, 'README.old.md'), {recursive: true});
 		rmSync(outputReadme, {recursive: true});
@@ -296,10 +296,10 @@ function cli(args) {
 	opts.directory = path.resolve(typeof opts._[0] !== 'undefined' ? opts._[0] + '' : process.cwd());
 	opts.name = path.basename(opts.directory).replace(/ /g, '-').toLowerCase();
 
-	import('chalk').then(({default: _chalk}) => {
-		chalk = _chalk;
+	import('picocolors').then(({default: _picocolors}) => {
+		picocolors = _picocolors;
 		api(opts).catch(err => {
-			console.error(chalk.red('ERROR: ') + err.message);
+			console.error(picocolors.red('ERROR: ') + err.message);
 			process.exit(1);
 		});
 	});

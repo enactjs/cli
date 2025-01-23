@@ -5,7 +5,7 @@ const {rm} = require('node:fs/promises');
 const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils').packageRoot;
 
-let chalk;
+let picocolors;
 
 const build = 'build';
 const dist = 'dist';
@@ -58,10 +58,10 @@ function cli(args) {
 	if (opts.help) displayHelp();
 
 	process.chdir(packageRoot().path);
-	import('chalk').then(({default: _chalk}) => {
-		chalk = _chalk;
+	import('picocolors').then(({default: _picocolors}) => {
+		picocolors = _picocolors;
 		api({paths: opts._, all: opts.all}).catch(err => {
-			console.error(chalk.red('ERROR: ') + 'Failed to clean project.\n' + err.message);
+			console.error(picocolors.red('ERROR: ') + 'Failed to clean project.\n' + err.message);
 			process.exit(1);
 		});
 	});

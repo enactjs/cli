@@ -13,10 +13,10 @@ if (
 		pkg.engines.node
 	)
 ) {
-	import('chalk').then(({default: chalk}) => {
+	import('picocolors').then(({default: picocolors}) => {
 		console.log(
-			chalk.red(`You are running Node ${process.version}, but @enact/cli requires Node ${pkg.engines.node}.\n`) +
-				chalk.bold.red('Please update your version of Node.')
+			picocolors.red(`You are running Node ${process.version}, but @enact/cli requires Node ${pkg.engines.node}.\n`) +
+			picocolors.bold(picocolors.red('Please update your version of Node.'))
 		);
 		process.exit(1);
 	});
@@ -30,7 +30,7 @@ if (process.platform === 'win32' && process.title === 'Windows PowerShell ISE') 
 
 // Handle tasks/arguments
 if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
-	import('chalk').then(({default: chalk}) => {
+	import('picocolors').then(({default: picocolors}) => {
 		// Enact-CLI ascii art title
 		const title = `                                               
     ┌─┐┌┐┌┌─┐┌─┐┌┬┐  ┌─┐┬  ┬    ▐██▄▄    ▄▄██▌ 
@@ -47,8 +47,8 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 				const half = (l.length - 31) / 2;
 				return (
 					l.substring(0, 31) +
-					chalk.bgBlueBright(
-						chalk.whiteBright(l.substring(31, 31 + half)) + chalk.white(l.substring(31 + half))
+					picocolors.bgBlueBright(
+						picocolors.whiteBright(l.substring(31, 31 + half)) + picocolors.white(l.substring(31 + half))
 					)
 				);
 			})
@@ -80,7 +80,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 			break;
 		}
 		default: {
-			import('chalk').then(({default: chalk}) => {
+			import('picocolors').then(({default: picocolors}) => {
 				console.log('  Usage');
 				console.log('    enact <command> [...]');
 				console.log();
@@ -98,7 +98,7 @@ if (process.argv.indexOf('-v') >= 0 || process.argv.indexOf('--version') >= 0) {
 				console.log('    clean             Clean build directory');
 				console.log('    eject             Eject to standalone app');
 				console.log();
-				console.log(`  Refer to each command's ${chalk.cyan('--help')} for more details.`);
+				console.log(`  Refer to each command's ${picocolors.cyan('--help')} for more details.`);
 				console.log();
 			});
 		}

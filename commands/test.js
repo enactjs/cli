@@ -17,7 +17,7 @@ const {packageRoot} = require('@enact/dev-utils');
 const jest = require('jest');
 const resolve = require('resolve');
 
-let chalk;
+let picocolors;
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
@@ -116,28 +116,28 @@ function assignOverrides(config) {
 
 			if (isOverridingSetupFile) {
 				console.error(
-					chalk.red(
+					picocolors.red(
 						'We detected ' +
-							chalk.bold('setupFilesAfterEnv') +
+							picocolors.bold('setupFilesAfterEnv') +
 							' in your package.json.\n\n' +
 							'Remove it from Jest configuration, and put the initialization code in ' +
-							chalk.bold('src/setupTests.js') +
+							picocolors.bold('src/setupTests.js') +
 							'.\nThis file will be loaded automatically.\n'
 					)
 				);
 			} else {
 				console.error(
-					chalk.red(
+					picocolors.red(
 						'\nOut of the box, Enact CLI only supports overriding ' +
 							'these Jest options:\n\n' +
-							supportedKeys.map(key => chalk.bold('	\u2022 ' + key)).join('\n') +
+							supportedKeys.map(key => picocolors.bold('	\u2022 ' + key)).join('\n') +
 							'.\n\n' +
 							'These options in your package.json Jest configuration ' +
 							'are not currently supported by Enact CLI:\n\n' +
-							unsupportedKeys.map(key => chalk.bold('	\u2022 ' + key)).join('\n') +
+							unsupportedKeys.map(key => picocolors.bold('	\u2022 ' + key)).join('\n') +
 							'\n\nIf you wish to override other Jest options, you need to ' +
 							'eject from the default setup. You can do so by running ' +
-							chalk.bold('npm run eject') +
+							picocolors.bold('npm run eject') +
 							' but remember that this is a one-way operation. ' +
 							'You may also file an issue with Enact CLI to discuss ' +
 							'supporting more options out of the box.\n'
@@ -172,8 +172,8 @@ function api(args = []) {
 }
 
 function cli(args) {
-	import('chalk').then(({default: _chalk}) => {
-		chalk = _chalk;
+	import('picocolors').then(({default: _picocolors}) => {
+		picocolors = _picocolors;
 		api(args).catch(() => {
 			process.exit(1);
 		});

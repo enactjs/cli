@@ -21,7 +21,7 @@ const printBuildError = require('react-dev-utils/printBuildError');
 const webpack = require('webpack');
 const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
 
-let chalk;
+let picocolors;
 let stripAnsi;
 
 function displayHelp() {
@@ -110,7 +110,7 @@ function details(err, stats, output) {
 		const filteredWarnings = messages.warnings.filter(w => !/Failed to parse source map/.test(w));
 		if (filteredWarnings.length) {
 			console.log(
-				chalk.yellow(
+				picocolors.yellow(
 					'\nTreating warnings as errors because process.env.CI = true. \n' +
 						'Most CI servers set it automatically.\n'
 				)
@@ -120,14 +120,14 @@ function details(err, stats, output) {
 	} else {
 		copyPublicFolder(output);
 		if (messages.warnings.length) {
-			console.log(chalk.yellow('Compiled with warnings:\n'));
+			console.log(picocolors.yellow('Compiled with warnings:\n'));
 			console.log(messages.warnings.join('\n\n') + '\n');
 		} else {
-			console.log(chalk.green('Compiled successfully.'));
+			console.log(picocolors.green('Compiled successfully.'));
 		}
 		if (process.env.NODE_ENV === 'development') {
 			console.log(
-				chalk.yellow(
+				picocolors.yellow(
 					'NOTICE: This build contains debugging functionality and may run' +
 						' slower than in production mode.'
 				)
@@ -173,7 +173,7 @@ function printFileSizes(stats, output) {
 			const rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
 			sizeLabel += rightPadding;
 		}
-		console.log('	' + sizeLabel + '	' + chalk.dim(asset.folder + path.sep) + chalk.cyan(asset.name));
+		console.log('	' + sizeLabel + '	' + picocolors.dim(asset.folder + path.sep) + picocolors.cyan(asset.name));
 	});
 }
 
@@ -181,14 +181,14 @@ function printErrorDetails(err, handler) {
 	console.log();
 	if (process.env.TSC_COMPILE_ON_ERROR === 'true') {
 		console.log(
-			chalk.yellow(
+			picocolors.yellow(
 				'Compiled with the following type errors (you may want to check ' +
 					'these before deploying your app):\n'
 			)
 		);
 		printBuildError(err);
 	} else {
-		console.log(chalk.red('Failed to compile.\n'));
+		console.log(picocolors.red('Failed to compile.\n'));
 		printBuildError(err);
 		if (handler) handler();
 	}
@@ -323,8 +323,8 @@ function cli(args) {
 	if (opts.help) displayHelp();
 
 	process.chdir(app.context);
-	import('chalk').then(({default: _chalk}) => {
-		chalk = _chalk;
+	import('picocolors').then(({default: _picocolors}) => {
+		picocolors = _picocolors;
 		import('strip-ansi').then(({default: _stripAnsi}) => {
 			stripAnsi = _stripAnsi;
 			api(opts).catch(err => {

@@ -26,7 +26,7 @@ const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const {optionParser: app} = require('@enact/dev-utils');
 
-let chalk;
+let picocolors;
 
 // Any unhandled promise rejections should be treated like errors.
 process.on('unhandledRejection', err => {
@@ -66,9 +66,9 @@ function displayHelp() {
 function hotDevServer(config, fastRefresh) {
 	// Keep webpack alive when there are any errors, so user can fix and rebuild.
 	config.bail = false;
-	// Ensure the CLI version of Chalk is used for webpackHotDevClient
+	// Ensure the CLI version of Picocolors is used for webpackHotDevClient
 	// since tslint includes an out-of-date local version.
-	config.resolve.alias.chalk = require.resolve('chalk');
+	config.resolve.alias.picolcolors = require.resolve('picocolors');
 	config.resolve.alias['ansi-styles'] = require.resolve('ansi-styles');
 
 	// Include an alternative client for WebpackDevServer. A client's job is to
@@ -293,7 +293,7 @@ function serve(config, host, port, open) {
 		devServer.startCallback(err => {
 			if (err) return console.log(err);
 			if (process.stdout.isTTY) clearConsole();
-			console.log(chalk.cyan('Starting the development server...\n'));
+			console.log(picocolors.cyan('Starting the development server...\n'));
 			if (open) {
 				openBrowser(urls.localUrlForBrowser);
 			}
@@ -361,10 +361,10 @@ function cli(args) {
 
 	process.chdir(app.context);
 
-	import('chalk').then(({default: _chalk}) => {
-		chalk = _chalk;
+	import('picocolors').then(({default: _picocolors}) => {
+		picocolors = _picocolors;
 		api(opts).catch(err => {
-			//console.error(chalk.red('ERROR: ') + (err.message || err));
+			//console.error(picocolors.red('ERROR: ') + (err.message || err));
 			console.log(err);
 			process.exit(1);
 		});

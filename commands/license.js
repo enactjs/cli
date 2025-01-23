@@ -3,7 +3,7 @@ const path = require('path');
 const checker = require('license-checker');
 const minimist = require('minimist');
 
-let chalk;
+let picocolors;
 
 // The following modules reside in `@enact/cli` but end up in production builds of apps
 const pkgPathResolve = m => path.dirname(require.resolve(m + '/package.json'));
@@ -54,12 +54,12 @@ function cli(args) {
 	});
 	if (opts.help) displayHelp();
 
-	import('chalk').then(({default: _chalk}) => {
-		chalk = _chalk;
+	import('picocolors').then(({default: _picocolors}) => {
+		picocolors = _picocolors;
 		api({modules: opts._})
 			.then(licenses => console.log(JSON.stringify(licenses, null, 2)))
 			.catch(err => {
-				console.error(chalk.red('ERROR: ') + err.message);
+				console.error(picocolors.red('ERROR: ') + err.message);
 				process.exit(1);
 			});
 	});

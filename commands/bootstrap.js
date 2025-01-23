@@ -6,7 +6,7 @@ const minimist = require('minimist');
 const packageRoot = require('@enact/dev-utils').packageRoot;
 const doLink = require('./link').api;
 
-let chalk;
+let picocolors;
 
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -174,10 +174,10 @@ function cli(args) {
 
 	if (opts._[0] && statSync(opts._[0]).isDirectory()) opts.cwd = opts._[0];
 
-	import('chalk').then(({default: _chalk}) => {
-		chalk = _chalk;
+	import('picocolors').then(({default: _picocolors}) => {
+		picocolors = _picocolors;
 		api(opts).catch(err => {
-			console.error(chalk.red('ERROR: ') + err.message);
+			console.error(picocolors.red('ERROR: ') + err.message);
 			process.exit(1);
 		});
 	});

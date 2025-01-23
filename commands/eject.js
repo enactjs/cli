@@ -18,7 +18,7 @@ const minimist = require('minimist');
 const {packageRoot} = require('@enact/dev-utils');
 const spawn = require('cross-spawn');
 
-let chalk;
+let picocolors;
 
 const assets = [
 	{src: path.join(__dirname, '..', 'config'), dest: 'config'},
@@ -35,7 +35,7 @@ const internal = [
 	'tar',
 	'validate-npm-package-name'
 ];
-const enhanced = ['chalk', 'cross-spawn', 'filesize', 'minimist', 'strip-ansi'];
+const enhanced = ['cross-spawn', 'filesize', 'minimist', 'picocolors', 'strip-ansi'];
 const content = ['@babel/runtime', 'core-js', 'react', 'react-dom'];
 const bareDeps = {'cpy-cli': '^3.1.1', rimraf: '^3.0.2'};
 const bareTasks = {
@@ -75,7 +75,7 @@ function validateEject() {
 		default: false
 	}).then(answer => {
 		if (!answer.shouldEject) {
-			console.log(chalk.cyan('Close one! Eject aborted.'));
+			console.log(picocolors.cyan('Close one! Eject aborted.'));
 			return {abort: true};
 		} else {
 			checkGitStatus();
@@ -109,14 +109,14 @@ function checkGitStatus() {
 	}
 	if (status) {
 		throw new Error(
-			chalk.red('This git repository has untracked files or uncommitted changes:') +
+			picocolors.red('This git repository has untracked files or uncommitted changes:') +
 				'\n\n' +
 				status
 					.split('\n')
 					.map(line => line.match(/ .*/g)[0].trim())
 					.join('\n') +
 				'\n\n' +
-				chalk.red('Remove untracked files, stash or commit any changes, and try again.')
+				picocolors.red('Remove untracked files, stash or commit any changes, and try again.')
 		);
 	}
 }
@@ -148,7 +148,7 @@ function copySanitizedFile({src, dest}) {
 			.replace(/[\t ]*-- @remove-on-eject-begin([\s\S]*?)-- @remove-on-eject-end\n?/gm, '')
 			.trim() + '\n';
 
-	console.log(`	Adding ${chalk.cyan(dest)} to the project`);
+	console.log(`	Adding ${picocolors.cyan(dest)} to the project`);
 	writeFileSync(dest, data, {encoding: 'utf8'});
 }
 
@@ -169,10 +169,10 @@ function configurePackage(bare) {
 	Object.keys(own.dependencies).forEach(key => {
 		if (!internal.includes(key)) {
 			if (content.includes(key)) {
-				console.log(`	Adding ${chalk.cyan(key)} to dependencies`);
+				console.log(`	Adding ${picocolors.cyan(key)} to dependencies`);
 				app.dependencies[key] = app.dependencies[key] || own.dependencies[key];
 			} else if (!enhanced.includes(key) || !bare) {
-				console.log(`	Adding ${chalk.cyan(key)} to devDependencies`);
+				console.log(`	Adding ${picocolors.cyan(key)} to devDependencies`);
 				app.devDependencies[key] = own.dependencies[key];
 			}
 		}
@@ -181,7 +181,7 @@ function configurePackage(bare) {
 	// Add any additional dependencies
 	if (bare) {
 		Object.keys(bareDeps).forEach(key => {
-			console.log(`	Adding ${chalk.cyan(key)} to devDependencies`);
+			console.log(`	Adding ${picocolors.cyan(key)} to devDependencies`);
 			app.devDependencies[key] = bareDeps[key];
 		});
 	}
@@ -189,17 +189,17 @@ function configurePackage(bare) {
 	console.log();
 
 	// Update NPM task scripts
-	const type = chalk.cyan('npm script');
+	const type = picocolors.cyan('npm script');
 	Object.keys(app.scripts).forEach(key => {
 		if (bare && bareTasks[key]) {
 			if (!conflicts.includes(type)) conflicts.push(type);
 			const bin = bareTasks[key].match(/^(?:node\s+)*(\S*)/);
 			const updated = (bin && bin[1]) || bareTasks[key];
-			console.log(`	Updating npm task ${chalk.cyan(key)} to use ${chalk.cyan(updated)}`);
+			console.log(`	Updating npm task ${picocolors.cyan(key)} to use ${picocolors.cyan(updated)}`);
 			app.scripts[key] = bareTasks[key];
 		} else if (!bare) {
 			app.scripts[key] = app.scripts[key].replace(enactCLI, (match, name) => {
-				console.log(`	Updating npm task ${chalk.cyan(key)} to use ` + chalk.cyan(`scripts/${name}.js`));
+				console.log(`	Updating npm task ${picocolors.cyan(key)} to use ` + picocolors.cyan(`scripts/${name}.js`));
 				return `node ./scripts/${name}.js`;
 			});
 		}
@@ -208,9 +208,9 @@ function configurePackage(bare) {
 	console.log();
 
 	// Update ESLint settings
-	console.log(`	Setting up ${chalk.cyan('ESlint')} config in package.json`);
+	console.log(`	Setting up ${picocolors.cyan('ESlint')} config in package.json`);
 	if (app.eslintConfig && JSON.stringify(app.eslintConfig) !== JSON.stringify(eslintConfig)) {
-		conflicts.push(chalk.cyan('ESLint'));
+		conflicts.push(picocolors.cyan('ESLint'));
 	}
 	app.eslintConfig = eslintConfig;
 	app.eslintIgnore = app.eslintIgnore || [];
@@ -239,7 +239,7 @@ function configurePackage(bare) {
 function backupOld(files) {
 	files.filter(existsSync).forEach(f => {
 		const backup = path.basename(f, path.extname(f)) + '.old' + path.extname(f);
-		console.log(`	Found existing ${chalk.cyan(f)}; backing up to ${chalk.cyan(backup)}`);
+		console.log(`	Found existing ${picocolors.cyan(f)}; backing up to ${picocolors.cyan(backup)}`);
 		renameSync(f, backup);
 	});
 }
@@ -265,21 +265,21 @@ function api({bare = false} = {}) {
 		if (!abort) {
 			console.log('Ejecting...');
 			console.log();
-			console.log(chalk.cyan(`Copying files into ${process.cwd()}`));
+			console.log(picocolors.cyan(`Copying files into ${process.cwd()}`));
 			assets.forEach(dir => !existsSync(dir.dest) && mkdirSync(dir.dest, {recursive: true}));
 			files.forEach(copySanitizedFile);
 			console.log();
-			console.log(chalk.cyan('Configuring package.json'));
+			console.log(picocolors.cyan('Configuring package.json'));
 			const con = configurePackage(bare);
 			console.log();
-			console.log(chalk.cyan('Running npm install...'));
+			console.log(picocolors.cyan('Running npm install...'));
 			return npmInstall().then(() => {
 				if (con.length > 0) {
 					let list = con[0];
 					if (con.length > 1) list = con.splice(1).join(', ') + ' and ' + list;
 					console.log();
 					console.log(
-						chalk.yellow(
+						picocolors.yellow(
 							`NOTICE: Existing ${list} settings within the package.json ` +
 								'were overwritten. A backup of the original content has been ' +
 								'preserved to package.old.json.'
@@ -287,7 +287,7 @@ function api({bare = false} = {}) {
 					);
 				}
 				console.log();
-				console.log(chalk.green('Ejected successfully!'));
+				console.log(picocolors.green('Ejected successfully!'));
 				console.log();
 			});
 		}
@@ -303,10 +303,10 @@ function cli(args) {
 
 	process.chdir(packageRoot().path);
 
-	import('chalk').then(({default: _chalk}) => {
-		chalk = _chalk;
+	import('picocolors').then(({default: _picocolors}) => {
+		picocolors = _picocolors;
 		api({bare: opts.bare}).catch(err => {
-			console.error(chalk.red('ERROR: ') + err.message);
+			console.error(picocolors.red('ERROR: ') + err.message);
 			process.exit(1);
 		});
 	});
