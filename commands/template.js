@@ -254,7 +254,7 @@ function api({action, target, name} = {}) {
 		let actionPromise;
 
 		if (['install', 'link', 'remove'].includes(action) && name === 'default')
-			throw new Error('Template "default" name is reserved. ' + 'Use "enact template default" to modify it.');
+			{throw new Error('Template "default" name is reserved. ' + 'Use "enact template default" to modify it.');}
 
 		switch (action) {
 			case 'install':

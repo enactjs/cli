@@ -36,7 +36,6 @@ process.on('unhandledRejection', err => {
 // As react-dev-utils assumes the webpack production packaging command is
 // "npm run build" with no way to modify it yet, we provide a basic override
 // to console.log to ensure the correct output is displayed to the user.
-// prettier-ignore
 console.log = (log => (data, ...rest) =>
 	typeof data === 'undefined'
 		? log()

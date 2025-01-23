@@ -569,7 +569,6 @@ module.exports = function (
 						// profile: true,
 					},
 					issue: {
-						// prettier-ignore
 						include: [
 							{file: '../**/src/**/*.{ts,tsx}'},
 							{file: '**/src/**/*.{ts,tsx}'}

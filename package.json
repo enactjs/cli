@@ -23,15 +23,6 @@
     "lint": "eslint .",
     "fix": "eslint . --fix"
   },
-  "prettier": {
-    "printWidth": 120,
-    "useTabs": true,
-    "tabWidth": 4,
-    "singleQuote": true,
-    "bracketSpacing": false,
-    "trailingComma": "none",
-    "arrowParens": "avoid"
-  },
   "keywords": [
     "enact",
     "toolkit",
@@ -124,9 +115,6 @@
     }
   },
   "devDependencies": {
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "prettier": "^3.4.2"
+    "eslint-plugin-import": "^2.31.0"
   }
 }
