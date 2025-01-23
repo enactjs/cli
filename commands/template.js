@@ -5,7 +5,6 @@ const {cp, rm, symlink} = require('node:fs/promises');
 const path = require('path');
 const url = require('url');
 const spawn = require('cross-spawn');
-const fs = require('fs-extra');
 const minimist = require('minimist');
 const prompts = require('prompts');
 const tar = require('tar');
