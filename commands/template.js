@@ -1,6 +1,7 @@
 // @remove-file-on-eject
 const os = require('os');
-const {existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, symlink} = require('node:fs');
+const {existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, rmSync} = require('node:fs');
+const {cp, rm, symlink} = require('node:fs/promises');
 const path = require('path');
 const url = require('url');
 const spawn = require('cross-spawn');
@@ -70,7 +71,7 @@ function initTemplateArea() {
 				try {
 					realpathSync(d);
 				} catch (e) {
-					fs.removeSync(d);
+					rmSync(d, {force: true, recursive: true});
 				}
 			});
 	}
@@ -126,7 +127,7 @@ function installFromGit(target, name = normalizeName(path.basename(url.parse(tar
 	const git = target.match(/^(?:(^.*)#([\w\d-_.]+)?|(^.*))$/);
 	const args = ['clone', git[1] || git[3], name, '-c', 'advice.detachedHead=false'];
 	if (git[2]) args.splice(2, 0, '-b', git[2]);
-	fs.removeSync(path.join(TEMPLATE_DIR, name));
+	rmSync(path.join(TEMPLATE_DIR, name), {force: true, recursive: true});
 	return new Promise((resolve, reject) => {
 		const child = spawn('git', args, {stdio: 'inherit', cwd: TEMPLATE_DIR});
 		child.on('close', code => {
@@ -142,10 +143,9 @@ function installFromGit(target, name = normalizeName(path.basename(url.parse(tar
 // Copy directory files
 function installFromLocal(target, name = normalizeName(path.basename(target))) {
 	const output = path.join(TEMPLATE_DIR, name);
-	fs.removeSync(output);
+	rmSync(output, {force: true, recursive: true});
 	ensureDirSync(output);
-	return fs
-		.copy(target, output)
+	return cp(target, output)
 		.then(() => name)
 		.catch(err => {
 			throw new Error(`Failed to copy template files from ${target}.\n${err.message}`);
@@ -155,7 +155,7 @@ function installFromLocal(target, name = normalizeName(path.basename(target))) {
 // Download and extract NPM package
 function installFromNPM(target, name = normalizeName(path.basename(target).replace(/@.*$/g, ''))) {
 	const tempDir = path.join(os.tmpdir(), 'enact');
-	fs.removeSync(tempDir);
+	rmSync(tempDir, {force: true, recursive: true});
 	ensureDirSync(tempDir);
 	return new Promise((resolve, reject) => {
 		const child = spawn('npm', ['--loglevel', 'error', 'pack', target], {stdio: 'ignore', cwd: tempDir});
@@ -180,7 +180,7 @@ function installFromNPM(target, name = normalizeName(path.basename(target).repla
 	})
 		.then(() => installFromLocal(path.join(tempDir, 'package'), name))
 		.then(() => {
-			fs.removeSync(tempDir);
+			rmSync(tempDir, {force: true, recursive: true});
 			return name;
 		});
 }
@@ -189,9 +189,8 @@ function doLink(target, name = normalizeName(path.basename(path.resolve(target))
 	const directory = path.resolve(target);
 	const prevCWD = process.cwd();
 	process.chdir(TEMPLATE_DIR);
-	return fs
-		.remove(name)
-		.then(() => fs.symlink(directory, name, 'junction'))
+	return rm(name, {recursive: true, force: true})
+		.then(() => symlink(directory, name, 'junction'))
 		.then(() => {
 			process.chdir(prevCWD);
 			return {target, name};
@@ -207,9 +206,8 @@ function doRemove(name) {
 	const isDefault = existsSync(DEFAULT_LINK) && realpathSync(output) === realpathSync(DEFAULT_LINK);
 	if (!existsSync(output)) return Promise.reject(new Error(`Unable to remove. Template "${name}" not found.`));
 
-	return fs
-		.remove(output)
-		.then(() => isDefault && fs.removeSync(DEFAULT_LINK))
+	return rm(name, {recursive: true, force: true})
+		.then(() => isDefault && rmSync(DEFAULT_LINK, {force: true, recursive: true}))
 		.catch(err => {
 			throw new Error(`Failed to delete template ${name}.\n${err.message}`);
 		});

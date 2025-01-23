@@ -9,15 +9,15 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-const {appendFileSync, existsSync, readdirSync, readFileSync, realpathSync, writeFileSync} = require('node:fs');
+const {appendFileSync, cpSync, existsSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync} = require('node:fs');
+const {cp} = require('node:fs/promises');
 const os = require('os');
 const path = require('path');
 const spawn = require('cross-spawn');
-const fs = require('fs-extra');
 const minimist = require('minimist');
 const validatePackageName = require('validate-npm-package-name');
 
-const {ensureDir} = require('../config/utils');
+const {ensureDir, readJsonSync} = require('../config/utils');
 
 let chalk;
 
@@ -41,7 +41,7 @@ const defaultGenerator = {
 						.join('/n')
 			);
 		} else {
-			const meta = JSON.parse(readFileSync(path.join(template, 'package.json'), {throws: false})) || {};
+			const meta = readJsonSync(path.join(template, 'package.json'), {throws: false}) || {};
 			const deps = Object.keys(meta.dependencies || {}).concat(Object.keys(meta.devDependencies || {}));
 			deps.sort();
 
@@ -101,7 +101,7 @@ const defaultGenerator = {
 		// Do stuff to setup the directory workspace after template is copied
 		// Update package.json name
 		const pkgJSON = path.join(directory, 'package.json');
-		const meta = JSON.parse(readFileSync(pkgJSON, {encoding: 'UTF8', throws: false})) || {};
+		const meta = readJsonSync(pkgJSON, {encoding: 'UTF8', throws: false}) || {};
 		meta.name = name;
 		writeFileSync(pkgJSON, JSON.stringify(meta), {encoding: 'UTF8', spaces: '\t'});
 
@@ -114,7 +114,7 @@ const defaultGenerator = {
 			}
 		}
 		if (appinfo) {
-			const aiMeta = JSON.parse(readFileSync(appinfo, {encoding: 'UTF8', throws: false})) || {};
+			const aiMeta = readJsonSync(appinfo, {encoding: 'UTF8', throws: false}) || {};
 
 			aiMeta.id = meta.name;
 			writeFileSync(appinfo, JSON.stringify(aiMeta), {encoding: 'UTF8', spaces: '\t'});
@@ -214,13 +214,13 @@ function copyTemplate(template, output, overwrite) {
 	if (existsSync(outputReadme) && existsSync(path.join(template, 'README.md'))) {
 		console.log(chalk.yellow('Found an existing README.md file. Renaming to README.old.md to avoid overwriting.'));
 		console.log();
-		fs.moveSync(outputReadme, path.join(output, 'README.old.md'));
+		cpSync(outputReadme, path.join(output, 'README.old.md'), {recursive: true});
+		rmSync(outputReadme, {recursive: true});
 	}
 
 	// Copy the files for the user
 	const filter = src => src !== templateGitIgnore;
-	return fs
-		.copy(template, output, {overwrite: overwrite, errorOnExist: !overwrite, filter: filter})
+	return cp(template, output, {overwrite: overwrite, errorOnExist: !overwrite, filter: filter, recursive: true})
 		.then(() => {
 			// Handle gitignore after the fact to prevent npm from renaming it to .npmignore
 			// See: https://github.com/npm/npm/issues/1862
@@ -230,7 +230,7 @@ function copyTemplate(template, output, overwrite) {
 					const data = readFileSync(templateGitIgnore, {encoding: 'UTF8'});
 					appendFileSync(outputGitIgnore, data, {encoding: 'UTF8'});
 				} else {
-					fs.copySync(templateGitIgnore, outputGitIgnore);
+					cpSync(templateGitIgnore, outputGitIgnore, {recursive: true});
 				}
 			}
 		})
