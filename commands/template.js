@@ -143,7 +143,7 @@ function installFromLocal(target, name = normalizeName(path.basename(target))) {
 	const output = path.join(TEMPLATE_DIR, name);
 	rmSync(output, {force: true, recursive: true});
 	ensureDirSync(output);
-	return cp(target, output)
+	return cp(target, output, {recursive: true})
 		.then(() => name)
 		.catch(err => {
 			throw new Error(`Failed to copy template files from ${target}.\n${err.message}`);
