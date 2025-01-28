@@ -7,7 +7,6 @@ const globals = require('globals');
 module.exports = [
 	...enactConfig,
 	{
-		files: ['*/.js', '*/.jsx', '*/.ts', '*/.tsx'],
 		languageOptions: {
 			ecmaVersion: 'latest',
 			sourceType: 'module',
