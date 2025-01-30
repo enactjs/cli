@@ -22,13 +22,9 @@ module.exports = [
 		plugins: {
 			import: importPlugin,
 			prettier: prettierPlugin
-		}
-	},
-	{
-		plugins: {
-			import: importPlugin
 		},
 		rules: {
+			// import plugin rules
 			'import/no-unresolved': ['error', {commonjs: true, caseSensitive: true}],
 			'import/named': 'error',
 			'import/first': 'warn',
@@ -41,14 +37,9 @@ module.exports = [
 					'newlines-between': 'never',
 					groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index']
 				}
-			]
-		}
-	},
-	{
-		plugins: {
-			prettier: prettierPlugin
-		},
-		rules: {
+			],
+
+			// prettier rules
 			...prettierPlugin.configs.recommended.rules,
 			...prettierConfig.rules
 		}
