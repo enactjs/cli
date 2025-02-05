@@ -1,3 +1,9 @@
+## unreleased
+
+### lint
+
+* Updated Enact ESLint config to v9 including eslint related modules and set temporary ESLINT_USE_FLAT_CONFIG env variable.
+
 ## 7.0.0-alpha.4 (January 17, 2025)
 
 * Updated all dependencies to the latest including React 19.
