@@ -37,9 +37,9 @@ function shouldESLint() {
 function eslint({strict = false, local = false, fix = false, eslintArgs = []} = {}) {
 	let args = [];
 	if (strict) {
-		args.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact/strict'));
+		args.push('--no-config-lookup', '--config', require.resolve('eslint-config-enact/strict'));
 	} else if (!local) {
-		args.push('--no-eslintrc', '--config', require.resolve('eslint-config-enact'));
+		args.push('--no-config-lookup', '--config', require.resolve('eslint-config-enact'));
 	}
 	if (local) {
 		args.push('--ignore-pattern', '**/node_modules/*');

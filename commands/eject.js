@@ -44,7 +44,7 @@ const bareTasks = {
 	'pack-p': 'webpack --env production --config config/webpack.config.js && cpy public dist',
 	watch: 'cpy public dist && webpack --env development --config config/webpack.config.js --watch',
 	clean: 'rimraf build dist',
-	lint: 'eslint --no-eslintrc --config enact --ignore-pattern config/* .',
+	lint: 'eslint --no-config-lookup --config enact --ignore-pattern config/* .',
 	license: 'license-checker ',
 	test: 'jest --config config/jest/jest.config.js',
 	'test-watch': 'jest --config config/jest/jest.config.js --watch'
@@ -216,7 +216,7 @@ function configurePackage(bare) {
 	app.eslintConfig = eslintConfig;
 	app.eslintIgnore = app.eslintIgnore || [];
 	app.eslintIgnore = app.eslintIgnore.concat(eslintIgnore.filter(l => !app.eslintIgnore.includes(l)));
-	backupOld(['.eslintignore', '.eslintrc.js', '.eslintrc.yaml', '.eslintrc.yml', '.eslintrc.json', '.eslintrc']);
+	backupOld(['.eslintignore', 'eslint.config.js']);
 
 	// Sort the package.json output
 	['dependencies', 'devDependencies'].forEach(obj => {
