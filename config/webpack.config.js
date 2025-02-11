@@ -15,7 +15,6 @@
 const fs = require('fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const enactConfig = require('eslint-config-enact/index');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const ForkTsCheckerWebpackPlugin =
 	process.env.TSC_COMPILE_ON_ERROR === 'true'
@@ -593,22 +592,7 @@ module.exports = function (
 				formatter: require.resolve('react-dev-utils/eslintFormatter'),
 				eslintPath: require.resolve('eslint'),
 				// @remove-on-eject-begin
-				baseConfig: [{
-					...enactConfig,
-					
-					// extends: [
-					// 	framework
-					// 		? require.resolve('eslint-config-enact/strict.js')
-					// 		: require.resolve('eslint-config-enact/index.js')
-					// ],
-					rules: {
-						...(!hasJsxRuntime && {
-							'react/jsx-uses-react': 'warn',
-							'react/react-in-jsx-scope': 'warn'
-						})
-					}
-				}],
-				overrideConfigFile: true,
+				overrideConfigFile: require.resolve('./eslintWebpackPluginConfig'),
 				// @remove-on-eject-end
 				cache: true
 			})
