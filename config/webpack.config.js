@@ -51,25 +51,14 @@ module.exports = function (
 ) {
 	process.chdir(app.context);
 
+	// we need to pass the framework value to eslintWebpackPluginConfig.js
+	process.env.FRAMEWORK = framework;
+
 	// Load applicable .env files into environment variables.
 	require('./dotenv').load(app.context);
 
 	// Sets the browserslist default fallback set of browsers to the Enact default browser support list.
 	app.setEnactTargetsAsDefault();
-
-	// Check if JSX transform is able
-	const hasJsxRuntime = (() => {
-		if (process.env.DISABLE_NEW_JSX_TRANSFORM === 'true') {
-			return false;
-		}
-
-		try {
-			require.resolve('react/jsx-runtime');
-			return true;
-		} catch (e) {
-			return false;
-		}
-	})();
 
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
