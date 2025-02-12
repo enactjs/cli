@@ -20,8 +20,8 @@
     "access": "public"
   },
   "scripts": {
-    "lint": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint .",
-    "fix": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint . --fix"
+    "lint": "eslint .",
+    "fix": "eslint . --fix"
   },
   "prettier": {
     "printWidth": 120,
@@ -63,7 +63,7 @@
     "css-minimizer-webpack-plugin": "^7.0.0",
     "dotenv": "^16.4.7",
     "dotenv-expand": "^12.0.1",
-    "eslint": "^9.18.0",
+    "eslint": "^9.20.0",
     "eslint-config-enact": "enactjs/eslint-config-enact#feature/eslint9",
     "eslint-webpack-plugin": "^4.2.0",
     "expose-loader": "^5.0.0",
@@ -125,10 +125,10 @@
     }
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
-    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.3",
+    "globals": "^15.14.0",
     "prettier": "^3.4.2"
   }
 }
