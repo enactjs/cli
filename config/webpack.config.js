@@ -46,13 +46,9 @@ module.exports = function (
 	isomorphic = false,
 	noAnimation = false,
 	noSplitCSS = false,
-	framework = false,
 	ilibAdditionalResourcesPath
 ) {
 	process.chdir(app.context);
-
-	// we need to pass the framework value to eslintWebpackPluginConfig.js
-	process.env.FRAMEWORK = framework;
 
 	// Load applicable .env files into environment variables.
 	require('./dotenv').load(app.context);
