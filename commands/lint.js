@@ -9,8 +9,6 @@ const globOpts = {
 	nodir: true
 };
 
-process.env.ESLINT_USE_FLAT_CONFIG = 'false';
-
 function displayHelp() {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
 	if (require.main !== module) e = 'enact lint';
