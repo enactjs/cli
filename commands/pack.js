@@ -262,7 +262,6 @@ function api(opts = {}) {
 		opts.isomorphic,
 		!opts.animation,
 		!opts['split-css'],
-		opts.framework,
 		opts['ilib-additional-path']
 	);
 
