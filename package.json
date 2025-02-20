@@ -64,7 +64,7 @@
     "dotenv": "^16.4.7",
     "dotenv-expand": "^12.0.1",
     "eslint": "^9.20.0",
-    "eslint-config-enact": "enactjs/eslint-config-enact#feature/eslint9",
+    "eslint-config-enact": "enactjs/eslint-config-enact#test/eslint9",
     "eslint-webpack-plugin": "^4.2.0",
     "expose-loader": "^5.0.0",
     "file-loader": "^6.2.0",
