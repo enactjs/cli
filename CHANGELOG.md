@@ -1,3 +1,9 @@
+## unreleased
+
+### lint
+
+* Updated `eslint` to v9 and adopted flat config.
+
 ## 7.0.0-alpha.4 (January 17, 2025)
 
 * Updated all dependencies to the latest including React 19.

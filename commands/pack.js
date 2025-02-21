@@ -252,6 +252,8 @@ function api(opts = {}) {
 		app.applyEnactMeta({template: path.join(__dirname, '..', 'config', 'custom-skin-template.ejs')});
 	}
 
+	// make the framework option available globally in order to be used by the eslint-webpack-plugin custom configuration
+	process.env.FRAMEWORK = opts.framework;
 	// Do this as the first thing so that any code reading it knows the right env.
 	const configFactory = require('../config/webpack.config');
 	const config = configFactory(
@@ -260,7 +262,6 @@ function api(opts = {}) {
 		opts.isomorphic,
 		!opts.animation,
 		!opts['split-css'],
-		opts.framework,
 		opts['ilib-additional-path']
 	);
 

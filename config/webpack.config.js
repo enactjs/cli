@@ -46,7 +46,6 @@ module.exports = function (
 	isomorphic = false,
 	noAnimation = false,
 	noSplitCSS = false,
-	framework = false,
 	ilibAdditionalResourcesPath
 ) {
 	process.chdir(app.context);
@@ -56,20 +55,6 @@ module.exports = function (
 
 	// Sets the browserslist default fallback set of browsers to the Enact default browser support list.
 	app.setEnactTargetsAsDefault();
-
-	// Check if JSX transform is able
-	const hasJsxRuntime = (() => {
-		if (process.env.DISABLE_NEW_JSX_TRANSFORM === 'true') {
-			return false;
-		}
-
-		try {
-			require.resolve('react/jsx-runtime');
-			return true;
-		} catch (e) {
-			return false;
-		}
-	})();
 
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
@@ -587,26 +572,12 @@ module.exports = function (
 				}),
 			new ESLintPlugin({
 				// Plugin options
+				configType: 'flat',
 				extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx'],
 				formatter: require.resolve('react-dev-utils/eslintFormatter'),
 				eslintPath: require.resolve('eslint'),
-				// ESLint class options
-				resolvePluginsRelativeTo: __dirname,
 				// @remove-on-eject-begin
-				baseConfig: {
-					extends: [
-						framework
-							? require.resolve('eslint-config-enact/strict.js')
-							: require.resolve('eslint-config-enact/index.js')
-					],
-					rules: {
-						...(!hasJsxRuntime && {
-							'react/jsx-uses-react': 'warn',
-							'react/react-in-jsx-scope': 'warn'
-						})
-					}
-				},
-				useEslintrc: false,
+				overrideConfigFile: require.resolve('./eslintWebpackPluginConfig'),
 				// @remove-on-eject-end
 				cache: true
 			})
