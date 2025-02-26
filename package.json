@@ -1,6 +1,6 @@
 {
   "name": "@enact/cli",
-  "version": "7.0.0-alpha.4",
+  "version": "7.0.0-alpha.5",
   "description": "Full-featured build environment tool for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
@@ -44,8 +44,8 @@
   ],
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.26.3",
-    "@enact/dev-utils": "^7.0.0-alpha.3",
-    "@enact/template-sandstone": "^3.0.0-alpha.1",
+    "@enact/dev-utils": "^7.0.0-alpha.4",
+    "@enact/template-sandstone": "^3.0.0-alpha.3",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
@@ -63,8 +63,8 @@
     "css-minimizer-webpack-plugin": "^7.0.0",
     "dotenv": "^16.4.7",
     "dotenv-expand": "^12.0.1",
-    "eslint": "^8.57.0",
-    "eslint-config-enact": "^5.0.0-alpha.4",
+    "eslint": "^9.20.0",
+    "eslint-config-enact": "^5.0.0-alpha.5",
     "eslint-webpack-plugin": "^4.2.0",
     "expose-loader": "^5.0.0",
     "file-loader": "^6.2.0",
@@ -90,7 +90,7 @@
     "postcss-loader": "^8.1.1",
     "postcss-normalize": "^13.0.1",
     "postcss-preset-env": "^10.1.3",
-    "postcss-resolution-independence": "^1.1.6",
+    "postcss-resolution-independence": "^1.1.7",
     "prompts": "^2.4.2",
     "react": "^19.0.0",
     "react-dev-utils": "^12.0.1",
@@ -125,9 +125,10 @@
     }
   },
   "devDependencies": {
-    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "globals": "^15.14.0",
     "prettier": "^3.4.2"
   }
 }
