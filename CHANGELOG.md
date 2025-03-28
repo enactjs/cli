@@ -1,3 +1,7 @@
+## 7.0.0-alpha.6 (March 28, 2025)
+
+* Updated dependencies.
+
 ## 7.0.0-alpha.5 (February 26, 2025)
 
 ### lint
