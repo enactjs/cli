@@ -1,3 +1,7 @@
+## 7.0.0-beta.1 (April 17, 2025)
+
+* Updated dependencies.
+
 ## 7.0.0-alpha.6 (March 28, 2025)
 
 * Updated dependencies.
