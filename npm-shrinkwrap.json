@@ -1,12 +1,12 @@
 {
   "name": "@enact/cli",
-  "version": "7.0.0-alpha.6",
+  "version": "7.0.0-beta.1",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
       "name": "@enact/cli",
-      "version": "7.0.0-alpha.6",
+      "version": "7.0.0-beta.1",
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/plugin-transform-modules-commonjs": "^7.26.3",
@@ -30764,6 +30764,7 @@
       "version": "15.15.0",
       "resolved": "https://registry.npmjs.org/globals/-/globals-15.15.0.tgz",
       "integrity": "sha512-7ACyT3wmyp3I61S4fG682L0VA2RGD9otkqGJIwNUMF1SWUombIIk+af1unuDYgMm082aHYwD+mzJvv9Iu8dsgg==",
+      "dev": true,
       "license": "MIT",
       "engines": {
         "node": ">=18"
