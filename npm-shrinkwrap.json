@@ -10,7 +10,7 @@
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/plugin-transform-modules-commonjs": "^7.23.3",
-        "@enact/dev-utils": "github:enactjs/dev-utils#feature/WRR-24257_6.1.x",
+        "@enact/dev-utils": "github:enactjs/dev-utils#release/6.1.x.develop",
         "@enact/template-sandstone": "^2.8.0",
         "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
         "@testing-library/jest-dom": "^6.2.0",
@@ -33607,7 +33607,7 @@
     },
     "@enact/dev-utils": {
       "version": "git+ssh://git@github.com/enactjs/dev-utils.git#bc3af541b597f086ffe5b2672cc95159f6ad7337",
-      "from": "@enact/dev-utils@github:enactjs/dev-utils#feature/WRR-24257_6.1.x",
+      "from": "@enact/dev-utils@github:enactjs/dev-utils#release/6.1.x.develop",
       "requires": {
         "browserslist": "^4.22.2",
         "chalk": "^5.3.0",

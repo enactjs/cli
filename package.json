@@ -44,7 +44,7 @@
   ],
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.23.3",
-    "@enact/dev-utils": "github:enactjs/dev-utils#feature/WRR-24257_6.1.x",
+    "@enact/dev-utils": "github:enactjs/dev-utils#release/6.1.x.develop",
     "@enact/template-sandstone": "^2.8.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
     "@testing-library/jest-dom": "^6.2.0",
