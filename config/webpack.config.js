@@ -128,8 +128,6 @@ module.exports = function (
 							// Fix and adjust for known flexbox issues
 							// See https://github.com/philipwalton/flexbugs
 							'postcss-flexbugs-fixes',
-							// Support @global-import syntax to import css in a global context.
-							'postcss-global-import',
 							// Transpile stage-3 CSS standards based on browserslist targets.
 							// See https://preset-env.cssdb.org/features for supported features.
 							// Includes support for targetted auto-prefixing.
