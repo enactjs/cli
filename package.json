@@ -109,9 +109,6 @@
     "webpack": "^5.97.1",
     "webpack-dev-server": "^5.2.0"
   },
-  "overrides": {
-    "postcss": "^8.4.49"
-  },
   "optionalDependencies": {
     "fsevents": "^2.3.3"
   },
