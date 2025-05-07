@@ -86,7 +86,6 @@
     "node-polyfill-webpack-plugin": "4.0.0",
     "postcss": "^8.4.49",
     "postcss-flexbugs-fixes": "^5.0.2",
-    "postcss-global-import": "^1.0.6",
     "postcss-loader": "^8.1.1",
     "postcss-normalize": "^13.0.1",
     "postcss-preset-env": "^10.1.3",
@@ -109,9 +108,6 @@
     "validate-npm-package-name": "^6.0.0",
     "webpack": "^5.97.1",
     "webpack-dev-server": "^5.2.0"
-  },
-  "overrides": {
-    "postcss": "^8.4.49"
   },
   "optionalDependencies": {
     "fsevents": "^2.3.3"
