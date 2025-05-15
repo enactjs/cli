@@ -1,3 +1,11 @@
+## 7.0.0-rc.1 (May 15, 2025)
+
+* Removed deprecated postcss plugin `postcss-global-import`.
+
+## 6.1.4 (April 24, 2025)
+
+* No significant changes.
+
 ## 7.0.0-beta.1 (April 17, 2025)
 
 * Updated dependencies.
