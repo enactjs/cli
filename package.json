@@ -1,6 +1,6 @@
 {
   "name": "@enact/cli",
-  "version": "7.0.0-rc.1",
+  "version": "7.0.0",
   "description": "Full-featured build environment tool for Enact applications.",
   "main": "index.js",
   "author": "Jason Robitaille <jason.robitaille@lge.com>",
@@ -44,8 +44,8 @@
   ],
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.27.1",
-    "@enact/dev-utils": "^7.0.0-rc.1",
-    "@enact/template-sandstone": "^3.0.0-alpha.3",
+    "@enact/dev-utils": "^7.0.0",
+    "@enact/template-sandstone": "^2.8.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.6.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -64,7 +64,7 @@
     "dotenv": "^16.5.0",
     "dotenv-expand": "^12.0.2",
     "eslint": "^9.26.0",
-    "eslint-config-enact": "^5.0.0-rc.1",
+    "eslint-config-enact": "^5.0.0",
     "eslint-webpack-plugin": "^5.0.1",
     "expose-loader": "^5.0.1",
     "file-loader": "^6.2.0",
