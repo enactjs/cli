@@ -1,3 +1,9 @@
+## unreleased
+
+### pack
+
+* Added `@daltontan/postcss-import-json` PostCSS plugin to process JSON imports in CSS.
+
 ## 7.0.0 (June 10, 2025)
 
 * Updated dependencies.
