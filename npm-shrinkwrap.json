@@ -10,6 +10,7 @@
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/plugin-transform-modules-commonjs": "^7.27.1",
+        "@daltontan/postcss-import-json": "^1.1.1",
         "@enact/dev-utils": "^7.0.0",
         "@enact/template-sandstone": "^2.8.0",
         "@pmmmwh/react-refresh-webpack-plugin": "^0.6.0",
@@ -3079,6 +3080,12 @@
       "peerDependencies": {
         "postcss": "^8.4"
       }
+    },
+    "node_modules/@daltontan/postcss-import-json": {
+      "version": "1.1.1",
+      "resolved": "https://registry.npmjs.org/@daltontan/postcss-import-json/-/postcss-import-json-1.1.1.tgz",
+      "integrity": "sha512-O00tu73ApgCIQeQ/P+Wm0Vysinq/YRL4rHsx0O42StdFs9MXnQtzpZw0C37CCg+bxBadwKlZowRy0sf4MTMeeA==",
+      "license": "ISC"
     },
     "node_modules/@enact/dev-utils": {
       "version": "7.0.0",
