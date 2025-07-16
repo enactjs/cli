@@ -44,6 +44,7 @@
   ],
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.27.1",
+    "@daltontan/postcss-import-json": "^1.1.1",
     "@enact/dev-utils": "^7.0.0",
     "@enact/template-sandstone": "^2.8.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.6.0",
