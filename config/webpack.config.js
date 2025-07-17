@@ -152,7 +152,7 @@ module.exports = function (
 								postcssPlugin: 'postcss-import-json-tilde',
 								Once(root) {
 									// Process all @import-json rules with ~ prefix first, before other plugins
-									root.walkAtRules('import-json', (atRule) => {
+									root.walkAtRules('import-json', atRule => {
 										let src = atRule.params.slice(1, -1); // Remove quotes
 
 										// Only handle ~ alias paths
@@ -169,27 +169,39 @@ module.exports = function (
 												let resolvedPath;
 												try {
 													// First try from current file's directory
-													resolvedPath = require.resolve(packagePath, {paths: [currentFileDir]});
+													resolvedPath = require.resolve(packagePath, {
+														paths: [currentFileDir]
+													});
 												} catch (e) {
 													// Fallback to current working directory
-													resolvedPath = require.resolve(packagePath, {paths: [process.cwd()]});
+													resolvedPath = require.resolve(packagePath, {
+														paths: [process.cwd()]
+													});
 												}
 
 												// Convert to relative path for the original plugin
 												const relativePath = path.relative(currentFileDir, resolvedPath);
 												atRule.params = `"${relativePath}"`;
-
 											} catch (error) {
 												// If resolution fails, try manual node_modules lookup
 												try {
-													let currentDir = path.dirname(atRule.source.input.file || process.cwd());
+													let currentDir = path.dirname(
+														atRule.source.input.file || process.cwd()
+													);
 													let found = false;
 
 													// Walk up directories to find node_modules
 													while (currentDir !== path.parse(currentDir).root && !found) {
-														const moduleDir = path.join(currentDir, 'node_modules', packagePath);
+														const moduleDir = path.join(
+															currentDir,
+															'node_modules',
+															packagePath
+														);
 														if (fs.existsSync(moduleDir)) {
-															const relativePath = path.relative(path.dirname(atRule.source.input.file || ''), moduleDir);
+															const relativePath = path.relative(
+																path.dirname(atRule.source.input.file || ''),
+																moduleDir
+															);
 															atRule.params = `"${relativePath}"`;
 															found = true;
 															break;
@@ -201,7 +213,10 @@ module.exports = function (
 														console.warn(`Could not resolve module path: ${packagePath}`);
 													}
 												} catch (fallbackError) {
-													console.warn(`Failed to resolve ${packagePath}:`, fallbackError.message);
+													console.warn(
+														`Failed to resolve ${packagePath}:`,
+														fallbackError.message
+													);
 												}
 											}
 										}
