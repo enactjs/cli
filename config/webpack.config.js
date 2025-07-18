@@ -147,7 +147,83 @@ module.exports = function (
 							!useTailwind && require('postcss-normalize'),
 							// Resolution indepedence support
 							app.ri !== false && require('postcss-resolution-independence')(app.ri),
-							// Support importing JSON files in CSS
+							// Support importing JSON files with ~ alias - custom plugin (must run first)
+							{
+								postcssPlugin: 'postcss-import-json-tilde',
+								Once(root) {
+									// Process all @import-json rules with ~ prefix first, before other plugins
+									root.walkAtRules('import-json', atRule => {
+										let src = atRule.params.slice(1, -1); // Remove quotes
+
+										// Only handle ~ alias paths
+										if (src.startsWith('~')) {
+											const packagePath = src.substring(1); // Remove ~
+
+											try {
+												// Use Node.js standard module resolution
+												// This mimics webpack's ~ alias behavior
+												const currentFileDir = path.dirname(atRule.source.input.file || '');
+
+												// Try to resolve the module using require.resolve
+												// This follows standard Node.js module resolution algorithm
+												let resolvedPath;
+												try {
+													// First try from current file's directory
+													resolvedPath = require.resolve(packagePath, {
+														paths: [currentFileDir]
+													});
+												} catch (e) {
+													// Fallback to current working directory
+													resolvedPath = require.resolve(packagePath, {
+														paths: [process.cwd()]
+													});
+												}
+
+												// Convert to relative path for the original plugin
+												const relativePath = path.relative(currentFileDir, resolvedPath);
+												atRule.params = `"${relativePath}"`;
+											} catch (error) {
+												// If resolution fails, try manual node_modules lookup
+												try {
+													let currentDir = path.dirname(
+														atRule.source.input.file || process.cwd()
+													);
+													let found = false;
+
+													// Walk up directories to find node_modules
+													while (currentDir !== path.parse(currentDir).root && !found) {
+														const moduleDir = path.join(
+															currentDir,
+															'node_modules',
+															packagePath
+														);
+														if (fs.existsSync(moduleDir)) {
+															const relativePath = path.relative(
+																path.dirname(atRule.source.input.file || ''),
+																moduleDir
+															);
+															atRule.params = `"${relativePath}"`;
+															found = true;
+															break;
+														}
+														currentDir = path.dirname(currentDir);
+													}
+
+													if (!found) {
+														console.warn(`Could not resolve module path: ${packagePath}`);
+													}
+												} catch (fallbackError) {
+													console.warn(
+														`Failed to resolve ${packagePath}:`,
+														fallbackError.message
+													);
+												}
+											}
+										}
+									});
+								}
+							},
+							// Support importing JSON files in CSS - original plugin (for non-~ paths)
 							[
 								'@daltontan/postcss-import-json',
 								{
