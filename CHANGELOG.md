@@ -1,3 +1,10 @@
+## 7.1.0 (July 18, 2025)
+
+### pack
+
+* Added `@daltontan/postcss-import-json` PostCSS plugin to process JSON imports in CSS.
+* Fixed `eslintWebpackPluginConfig` to not always run lint in strict mode when `enact pack`.
+
 ## 7.0.0 (June 10, 2025)
 
 * Updated dependencies.

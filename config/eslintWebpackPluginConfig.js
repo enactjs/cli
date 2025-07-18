@@ -15,7 +15,7 @@ const hasJsxRuntime = (() => {
 	}
 })();
 
-const loadedEnactConfig = process.env.FRAMEWORK ? eslintConfigEnactStrict : eslintConfigEnact;
+const loadedEnactConfig = process.env.FRAMEWORK === true ? eslintConfigEnactStrict : eslintConfigEnact;
 
 module.exports = [
 	...loadedEnactConfig,
