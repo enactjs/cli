@@ -35,7 +35,7 @@
         "eslint-webpack-plugin": "^5.0.2",
         "expose-loader": "^5.0.1",
         "file-loader": "^6.2.0",
-        "filesize": "^10.1.6",
+        "filesize": "^11.0.2",
         "fs-extra": "^11.3.0",
         "glob": "^11.0.3",
         "global-modules": "^2.0.0",
@@ -27276,9 +27276,9 @@
       }
     },
     "node_modules/filesize": {
-      "version": "10.1.6",
-      "resolved": "https://registry.npmjs.org/filesize/-/filesize-10.1.6.tgz",
-      "integrity": "sha512-sJslQKU2uM33qH5nqewAwVB2QgR6w1aMNsYUp3aN5rMRyXEwJGmZvaWzeJFNTOXWlHQyBFCWrdj3fV/fsTOX8w==",
+      "version": "11.0.2",
+      "resolved": "https://registry.npmjs.org/filesize/-/filesize-11.0.2.tgz",
+      "integrity": "sha512-s/iAeeWLk5BschUIpmdrF8RA8lhFZ/xDZgKw1Tan72oGws1/dFGB06nYEiyyssWUfjKNQTNRlrwMVjO9/hvXDw==",
       "license": "BSD-3-Clause",
       "engines": {
         "node": ">= 10.4.0"
