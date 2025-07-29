@@ -278,8 +278,8 @@ module.exports = function (
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
 		bail: true,
-		// Webpack noise constrained to errors and warnings
-		stats: 'errors-warnings',
+		// Webpack noise constrained to errors only
+		stats: 'errors-only',
 		// Use source maps during development builds or when specified by GENERATE_SOURCEMAP
 		devtool: shouldUseSourceMap && (isEnvProduction ? 'source-map' : 'cheap-module-source-map'),
 		// These are the "entry points" to our application.

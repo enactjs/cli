@@ -1,3 +1,9 @@
+## unreleased
+
+### pack
+
+* Fixed webpack config to webpack noise constrained to errors only.
+
 ## 7.1.0 (July 18, 2025)
 
 ### pack
