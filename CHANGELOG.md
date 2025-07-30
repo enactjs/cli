@@ -1,5 +1,9 @@
 ## unreleased
 
+### pack
+
+* Fixed webpack config to webpack noise constrained to errors only.
+
 ### test
 
 * Updated to Jest 30.
