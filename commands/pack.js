@@ -259,7 +259,7 @@ function api(opts = {}) {
 	const configFactory = require('../config/webpack.config');
 	const config = configFactory(
 		opts.production ? 'production' : 'development',
-		!opts.linting
+		!opts.linting,
 		opts['content-hash'],
 		opts.isomorphic,
 		!opts.animation,
