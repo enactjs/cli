@@ -15,8 +15,8 @@ order: 4
     -i, --isomorphic  Use isomorphic code layout
                       (includes prerendering)
     -l, --locales     Locales for isomorphic mode; one of:
-            [comma-separated-values] Locale list
-            [JSON-filepath] - Read locales from JSON file
+            <comma-separated-values> Locale list
+            <JSON-filepath> - Read locales from JSON file
             "none" - Disable locale-specific handling
             "used" - Detect locales used within ./resources/
             "tv" - Locales supported on webOS TV
@@ -26,6 +26,7 @@ order: 4
                       (requires V8_MKSNAPSHOT set)
     -m, --meta        JSON to override package.json enact metadata
     -c, --custom-skin Build with a custom skin
+    --no-linting      Build without code linting
     --no-animation    Build without effects such as animation and shadow
     --stats           Output bundle analysis file
     --verbose         Verbose log build details
