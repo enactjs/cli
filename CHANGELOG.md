@@ -2,6 +2,7 @@
 
 ### pack
 
+* Added `--no-linting` option to build without code linting.
 * Fixed webpack config to webpack noise constrained to errors only.
 
 ### test
