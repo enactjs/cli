@@ -49,6 +49,7 @@ function displayHelp() {
 	console.log('                      (requires V8_MKSNAPSHOT set)');
 	console.log('    -m, --meta        JSON to override package.json enact metadata');
 	console.log('    -c, --custom-skin Build with a custom skin');
+	console.log('    --no-linting      Build without code linting');
 	console.log('    --no-animation    Build without effects such as animation and shadow');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    --verbose         Verbose log build details');
@@ -258,6 +259,7 @@ function api(opts = {}) {
 	const configFactory = require('../config/webpack.config');
 	const config = configFactory(
 		opts.production ? 'production' : 'development',
+		!opts.linting
 		opts['content-hash'],
 		opts.isomorphic,
 		!opts.animation,
@@ -289,6 +291,7 @@ function api(opts = {}) {
 function cli(args) {
 	const opts = minimist(args, {
 		boolean: [
+			'linting',
 			'content-hash',
 			'custom-skin',
 			'minify',
@@ -305,7 +308,7 @@ function cli(args) {
 			'help'
 		],
 		string: ['externals', 'externals-public', 'locales', 'entry', 'ilib-additional-path', 'output', 'meta'],
-		default: {minify: true, 'split-css': true, animation: true},
+		default: {minify: true, 'split-css': true, animation: true, linting: true},
 		alias: {
 			o: 'output',
 			p: 'production',

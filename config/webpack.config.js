@@ -42,6 +42,7 @@ const createEnvironmentHash = require('./createEnvironmentHash');
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
 module.exports = function (
 	env,
+	noLinting = false,
 	contentHash = false,
 	isomorphic = false,
 	noAnimation = false,
@@ -659,17 +660,18 @@ module.exports = function (
 						infrastructure: 'silent'
 					}
 				}),
-			new ESLintPlugin({
-				// Plugin options
-				configType: 'flat',
-				extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx'],
-				formatter: require.resolve('react-dev-utils/eslintFormatter'),
-				eslintPath: require.resolve('eslint'),
-				// @remove-on-eject-begin
-				overrideConfigFile: require.resolve('./eslintWebpackPluginConfig'),
-				// @remove-on-eject-end
-				cache: true
-			})
+			!noLinting &&
+				new ESLintPlugin({
+					// Plugin options
+					configType: 'flat',
+					extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx'],
+					formatter: require.resolve('react-dev-utils/eslintFormatter'),
+					eslintPath: require.resolve('eslint'),
+					// @remove-on-eject-begin
+					overrideConfigFile: require.resolve('./eslintWebpackPluginConfig'),
+					// @remove-on-eject-end
+					cache: true
+				})
 		].filter(Boolean)
 	};
 };
