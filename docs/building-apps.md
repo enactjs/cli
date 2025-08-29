@@ -26,6 +26,7 @@ order: 4
                       (requires V8_MKSNAPSHOT set)
     -m, --meta        JSON to override package.json enact metadata
     -c, --custom-skin Build with a custom skin
+    --no-linting      Build without code linting
     --no-animation    Build without effects such as animation and shadow
     --stats           Output bundle analysis file
     --verbose         Verbose log build details

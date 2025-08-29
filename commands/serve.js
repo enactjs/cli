@@ -57,6 +57,7 @@ function displayHelp() {
 	console.log('    -f, --fast        Enables experimental frast refresh');
 	console.log('    -p, --port        Server port number');
 	console.log('    -m, --meta        JSON to override package.json enact metadata');
+	console.log('    --no-linting      Build without code linting');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -337,7 +338,7 @@ function api(opts) {
 	// Setup the development config with additional webpack-dev-server customizations.
 	const configFactory = require('../config/webpack.config');
 	const fastRefresh = process.env.FAST_REFRESH || opts.fast;
-	const config = hotDevServer(configFactory('development'), fastRefresh);
+	const config = hotDevServer(configFactory('development', !opts.linting), fastRefresh);
 
 	// Tools like Cloud9 rely on this.
 	const host = process.env.HOST || opts.host || '0.0.0.0';
@@ -354,7 +355,8 @@ function api(opts) {
 function cli(args) {
 	const opts = minimist(args, {
 		string: ['host', 'port', 'meta'],
-		boolean: ['browser', 'fast', 'help'],
+		boolean: ['browser', 'fast', 'help', 'linting'],
+		default: {linting: true},
 		alias: {b: 'browser', i: 'host', p: 'port', f: 'fast', m: 'meta', h: 'help'}
 	});
 	if (opts.help) displayHelp();

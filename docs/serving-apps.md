@@ -10,7 +10,12 @@ order: 6
   Options
     -b, --browser     Automatically open browser
     -i, --host        Server host IP address
+    -f, --fast        Enables experimental frast refresh
     -p, --port        Server port number
+    -m, --meta        JSON to override package.json enact metadata
+    --no-linting      Build without code linting
+    -v, --version     Display version information
+    -h, --help        Display help information
 ```
 The `enact serve` command (aliased as `npm run serve`) will build and host your project on **http://localhost:8080/**. The options allow you to customize the host IP and host port, which can also be overriden via `HOST` and `PORT` environment variable. While the `enact serve` is active, any changes to source code will trigger a rebuild and update any loaded browser windows.
 
