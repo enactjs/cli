@@ -1,6 +1,5 @@
 // @remove-file-on-eject
-/* eslint no-console: off, no-undef: off */
-/* eslint-disable no-undefined */
+/* eslint no-console: off, no-undef: off, no-undefined: off */
 /**
  * Portions of this source code file are from create-react-app, used under the
  * following MIT license:
