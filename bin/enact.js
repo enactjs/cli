@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint no-console: off, no-undef: off */
 
 'use strict';
 

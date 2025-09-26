@@ -1,4 +1,5 @@
 // @remove-file-on-eject
+/* eslint no-console: off, no-undef: off */
 const path = require('path');
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
@@ -8,7 +9,7 @@ const doLink = require('./link').api;
 
 let chalk;
 
-function displayHelp() {
+function displayHelp () {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
 	if (require.main !== module) e = 'enact bootstrap';
 
@@ -36,7 +37,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-function npmExec(args, cwd = process.cwd(), loglevel) {
+function npmExec (args, cwd = process.cwd(), loglevel) {
 	return new Promise((resolve, reject) => {
 		if (loglevel) args.unshift('--loglevel', loglevel);
 		const child = spawn('npm', args, {stdio: 'inherit', cwd});
@@ -50,11 +51,11 @@ function npmExec(args, cwd = process.cwd(), loglevel) {
 	});
 }
 
-function newline() {
+function newline () {
 	console.log();
 }
 
-function api({
+function api ({
 	cwd = process.cwd(),
 	base = true,
 	sampler = true,
@@ -165,7 +166,7 @@ function api({
 		});
 }
 
-function cli(args) {
+function cli (args) {
 	const opts = minimist(args, {
 		boolean: ['base', 'sampler', 'allsamples', 'link', 'verbose', 'help'],
 		string: ['loglevel', 'override'],

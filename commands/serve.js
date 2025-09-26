@@ -1,3 +1,4 @@
+/* eslint no-console: off, no-undef: off */
 /* eslint-env node, es6 */
 // @remove-on-eject-begin
 /**
@@ -37,14 +38,16 @@ process.on('unhandledRejection', err => {
 // "npm run build" with no way to modify it yet, we provide a basic override
 // to console.log to ensure the correct output is displayed to the user.
 // prettier-ignore
-console.log = (log => (data, ...rest) =>
-	typeof data === 'undefined'
-		? log()
-		: typeof data === 'string'
-		? log(data.replace(/npm run build/, 'npm run pack-p'), ...rest)
-		: log.call(this, data, ...rest))(console.log);
+console.log = (log => (data, ...rest) => {
+	if (typeof data === 'undefined') {
+		return log();
+	} else if (typeof data === 'string') {
+		return log(data.replace(/npm run build/, 'npm run pack-p'), ...rest);
+	}
+	return log.call(this, data, ...rest);
+})(console.log);
 
-function displayHelp() {
+function displayHelp () {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
 	if (require.main !== module) e = 'enact serve';
 
@@ -64,7 +67,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-function hotDevServer(config, fastRefresh) {
+function hotDevServer (config, fastRefresh) {
 	// Keep webpack alive when there are any errors, so user can fix and rebuild.
 	config.bail = false;
 	// Ensure the CLI version of Chalk is used for webpackHotDevClient
@@ -95,7 +98,7 @@ function hotDevServer(config, fastRefresh) {
 	return config;
 }
 
-function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
+function devServerConfig (host, port, protocol, publicPath, proxy, allowedHost) {
 	let server = {
 		type: 'http'
 	};
@@ -219,7 +222,7 @@ function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
 		},
 		// `proxy` is run between `before` and `after` `webpack-dev-server` hooks
 		proxy,
-		setupMiddlewares(middlewares, devServer) {
+		setupMiddlewares (middlewares, devServer) {
 			if (!devServer) {
 				throw new Error('webpack-dev-server is not defined');
 			}
@@ -248,7 +251,7 @@ function devServerConfig(host, port, protocol, publicPath, proxy, allowedHost) {
 	};
 }
 
-function serve(config, host, port, open) {
+function serve (config, host, port, open) {
 	// We attempt to use the default port but if it is busy, we offer the user to
 	// run on a different port. `detect()` Promise resolves to the next free port.
 	return choosePort(host, port).then(resolvedPort => {
@@ -317,7 +320,7 @@ function serve(config, host, port, open) {
 	});
 }
 
-function api(opts) {
+function api (opts) {
 	if (opts.meta) {
 		let meta;
 		try {
@@ -352,7 +355,7 @@ function api(opts) {
 	}
 }
 
-function cli(args) {
+function cli (args) {
 	const opts = minimist(args, {
 		string: ['host', 'port', 'meta'],
 		boolean: ['browser', 'fast', 'help', 'linting'],
@@ -366,7 +369,7 @@ function cli(args) {
 	import('chalk').then(({default: _chalk}) => {
 		chalk = _chalk;
 		api(opts).catch(err => {
-			//console.error(chalk.red('ERROR: ') + (err.message || err));
+			// console.error(chalk.red('ERROR: ') + (err.message || err));
 			console.log(err);
 			process.exit(1);
 		});

@@ -1,4 +1,5 @@
 // @remove-file-on-eject
+/* eslint no-console: off, no-undef: off */
 const path = require('path');
 const spawn = require('cross-spawn');
 const fs = require('fs-extra');
@@ -7,7 +8,7 @@ const packageRoot = require('@enact/dev-utils').packageRoot;
 
 let chalk;
 
-function displayHelp() {
+function displayHelp () {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
 	if (require.main !== module) e = 'enact link';
 
@@ -27,7 +28,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-function globalModules(cwd) {
+function globalModules (cwd) {
 	return new Promise(resolve => {
 		let prefix = '';
 		const proc = spawn('npm', ['config', 'get', 'prefix', '-g'], {
@@ -50,7 +51,7 @@ function globalModules(cwd) {
 	});
 }
 
-function api({cwd = process.cwd(), loglevel = 'error', verbose = false} = {}) {
+function api ({cwd = process.cwd(), loglevel = 'error', verbose = false} = {}) {
 	const linkArgs = ['--loglevel', verbose ? 'verbose' : loglevel, 'link'];
 	const pkg = packageRoot(cwd);
 	let enact = Object.keys(pkg.meta.dependencies || {}).concat(Object.keys(pkg.meta.devDependencies || {}));
@@ -85,7 +86,7 @@ function api({cwd = process.cwd(), loglevel = 'error', verbose = false} = {}) {
 	});
 }
 
-function cli(args) {
+function cli (args) {
 	const opts = minimist(args, {
 		boolean: ['verbose', 'help'],
 		string: ['loglevel'],

@@ -20,8 +20,8 @@
     "access": "public"
   },
   "scripts": {
-    "lint": "eslint .",
-    "fix": "eslint . --fix"
+    "lint": "enact lint --strict",
+    "fix": "enact lint --strict --fix"
   },
   "prettier": {
     "printWidth": 120,

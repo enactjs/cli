@@ -1,4 +1,6 @@
 // @remove-file-on-eject
+/* eslint no-console: off, no-undef: off */
+/* eslint-disable no-undefined */
 /**
  * Portions of this source code file are from create-react-app, used under the
  * following MIT license:
@@ -146,7 +148,7 @@ const defaultGenerator = {
 	}
 };
 
-function displayHelp() {
+function displayHelp () {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
 	if (require.main !== module) e = 'enact create';
 
@@ -167,7 +169,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-function resolveTemplateGenerator(template) {
+function resolveTemplateGenerator (template) {
 	return new Promise((resolve, reject) => {
 		let templatePath = path.join(TEMPLATE_DIR, template);
 		if (!fs.existsSync(templatePath)) {
@@ -201,7 +203,7 @@ function resolveTemplateGenerator(template) {
 	});
 }
 
-function copyTemplate(template, output, overwrite) {
+function copyTemplate (template, output, overwrite) {
 	const outputReadme = path.join(output, 'README.md');
 	const outputGitIgnore = path.join(output, '.gitignore');
 	let templateGitIgnore = fs.readdirSync(template).filter(f => ['.gitignore', 'gitignore'].includes(f))[0];
@@ -235,7 +237,7 @@ function copyTemplate(template, output, overwrite) {
 		});
 }
 
-function npmInstall(directory, verbose, ...rest) {
+function npmInstall (directory, verbose, ...rest) {
 	const args = ['--loglevel', verbose ? 'verbose' : 'error', 'install', ...rest];
 
 	return new Promise((resolve, reject) => {
@@ -250,7 +252,7 @@ function npmInstall(directory, verbose, ...rest) {
 	});
 }
 
-function api(opts = {}) {
+function api (opts = {}) {
 	return resolveTemplateGenerator(opts.template).then(({generator, templatePath}) => {
 		const params = Object.assign({}, opts, {opts, defaultGenerator, type: generator.type});
 
@@ -272,7 +274,7 @@ function api(opts = {}) {
 	});
 }
 
-function cli(args) {
+function cli (args) {
 	const opts = minimist(args, {
 		boolean: ['local', 'verbose', 'help'],
 		string: ['template'],
