@@ -1,4 +1,5 @@
 // @remove-file-on-eject
+/* eslint no-console: off, no-undef: off */
 const os = require('os');
 const path = require('path');
 const url = require('url');
@@ -14,7 +15,7 @@ const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 const INCLUDED = path.dirname(require.resolve('@enact/template-sandstone'));
 const DEFAULT_LINK = path.join(TEMPLATE_DIR, 'default');
 
-function displayHelp() {
+function displayHelp () {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
 	if (require.main !== module) e = 'enact template';
 
@@ -56,7 +57,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-function initTemplateArea() {
+function initTemplateArea () {
 	if (!fs.existsSync(TEMPLATE_DIR)) {
 		fs.mkdirSync(TEMPLATE_DIR);
 	} else {
@@ -76,7 +77,7 @@ function initTemplateArea() {
 	return init.then(() => !fs.existsSync(DEFAULT_LINK) && doLink(sandstoneLink, 'default'));
 }
 
-function doInstall(target, name) {
+function doInstall (target, name) {
 	const github = target.match(/^([a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38})\/([-_.\w]+)((?:#|@)?[-_.\w]+)?$/);
 	if (github) {
 		// If target is GitHub shorthand, resolve to full HTTPS URI
@@ -114,12 +115,12 @@ function doInstall(target, name) {
 	});
 }
 
-function normalizeName(name) {
+function normalizeName (name) {
 	return name.replace(/(?:^enact-template-|^template-)/g, '');
 }
 
 // Clone Git repository using specific branch if desired
-function installFromGit(target, name = normalizeName(path.basename(url.parse(target).pathname, '.git'))) {
+function installFromGit (target, name = normalizeName(path.basename(url.parse(target).pathname, '.git'))) {
 	const git = target.match(/^(?:(^.*)#([\w\d-_.]+)?|(^.*))$/);
 	const args = ['clone', git[1] || git[3], name, '-c', 'advice.detachedHead=false'];
 	if (git[2]) args.splice(2, 0, '-b', git[2]);
@@ -137,7 +138,7 @@ function installFromGit(target, name = normalizeName(path.basename(url.parse(tar
 }
 
 // Copy directory files
-function installFromLocal(target, name = normalizeName(path.basename(target))) {
+function installFromLocal (target, name = normalizeName(path.basename(target))) {
 	const output = path.join(TEMPLATE_DIR, name);
 	fs.removeSync(output);
 	fs.ensureDirSync(output);
@@ -150,7 +151,7 @@ function installFromLocal(target, name = normalizeName(path.basename(target))) {
 }
 
 // Download and extract NPM package
-function installFromNPM(target, name = normalizeName(path.basename(target).replace(/@.*$/g, ''))) {
+function installFromNPM (target, name = normalizeName(path.basename(target).replace(/@.*$/g, ''))) {
 	const tempDir = path.join(os.tmpdir(), 'enact');
 	fs.removeSync(tempDir);
 	fs.ensureDirSync(tempDir);
@@ -182,7 +183,7 @@ function installFromNPM(target, name = normalizeName(path.basename(target).repla
 		});
 }
 
-function doLink(target, name = normalizeName(path.basename(path.resolve(target)))) {
+function doLink (target, name = normalizeName(path.basename(path.resolve(target)))) {
 	const directory = path.resolve(target);
 	const prevCWD = process.cwd();
 	process.chdir(TEMPLATE_DIR);
@@ -199,7 +200,7 @@ function doLink(target, name = normalizeName(path.basename(path.resolve(target))
 		});
 }
 
-function doRemove(name) {
+function doRemove (name) {
 	const output = path.join(TEMPLATE_DIR, name);
 	const isDefault = fs.existsSync(DEFAULT_LINK) && fs.realpathSync(output) === fs.realpathSync(DEFAULT_LINK);
 	if (!fs.existsSync(output)) return Promise.reject(new Error(`Unable to remove. Template "${name}" not found.`));
@@ -212,7 +213,7 @@ function doRemove(name) {
 		});
 }
 
-function doDefault(name) {
+function doDefault (name) {
 	const all = fs.readdirSync(TEMPLATE_DIR).filter(t => t !== 'default');
 	let choice;
 	if (name && all.includes(name)) {
@@ -232,7 +233,7 @@ function doDefault(name) {
 	return choice.then(response => doLink(path.join(TEMPLATE_DIR, response.template), 'default'));
 }
 
-function doList() {
+function doList () {
 	const realDefault = fs.realpathSync(DEFAULT_LINK);
 	const all = fs.readdirSync(TEMPLATE_DIR).filter(t => t !== 'default');
 	console.log(chalk.bold('Available Templates'));
@@ -250,12 +251,13 @@ function doList() {
 	});
 }
 
-function api({action, target, name} = {}) {
+function api ({action, target, name} = {}) {
 	return initTemplateArea().then(() => {
 		let actionPromise;
 
-		if (['install', 'link', 'remove'].includes(action) && name === 'default')
+		if (['install', 'link', 'remove'].includes(action) && name === 'default') {
 			throw new Error('Template "default" name is reserved. ' + 'Use "enact template default" to modify it.');
+		}
 
 		switch (action) {
 			case 'install':
@@ -289,7 +291,7 @@ function api({action, target, name} = {}) {
 	});
 }
 
-function cli(args) {
+function cli (args) {
 	import('chalk').then(({default: _chalk}) => {
 		chalk = _chalk;
 		const opts = minimist(args, {
