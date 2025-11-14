@@ -1,4 +1,4 @@
-## unreleased
+## 7.2.0 (November 14, 2025)
 
 ### pack
 
