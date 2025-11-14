@@ -1,3 +1,4 @@
+/* eslint no-console: off, no-undef: off */
 /* eslint-env node, es6 */
 // @remove-on-eject-begin
 /**
@@ -17,9 +18,9 @@ const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const ForkTsCheckerWebpackPlugin =
-	process.env.TSC_COMPILE_ON_ERROR === 'true'
-		? require('react-dev-utils/ForkTsCheckerWarningWebpackPlugin')
-		: require('react-dev-utils/ForkTsCheckerWebpackPlugin');
+	process.env.TSC_COMPILE_ON_ERROR === 'true' ?
+		require('react-dev-utils/ForkTsCheckerWarningWebpackPlugin') :
+		require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
@@ -41,12 +42,13 @@ const createEnvironmentHash = require('./createEnvironmentHash');
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
 module.exports = function (
-	env,
-	contentHash = false,
-	isomorphic = false,
-	noAnimation = false,
-	noSplitCSS = false,
-	ilibAdditionalResourcesPath
+		env,
+		noLinting = false,
+		contentHash = false,
+		isomorphic = false,
+		noAnimation = false,
+		noSplitCSS = false,
+		ilibAdditionalResourcesPath
 ) {
 	process.chdir(app.context);
 
@@ -150,7 +152,7 @@ module.exports = function (
 							// Support importing JSON files with ~ alias - custom plugin (must run first)
 							{
 								postcssPlugin: 'postcss-import-json-tilde',
-								Once(root) {
+								Once (root) {
 									// Process all @import-json rules with ~ prefix first, before other plugins
 									root.walkAtRules('import-json', atRule => {
 										let src = atRule.params.slice(1, -1); // Remove quotes
@@ -278,8 +280,8 @@ module.exports = function (
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
 		bail: true,
-		// Webpack noise constrained to errors and warnings
-		stats: 'errors-warnings',
+		// Webpack noise constrained to errors only
+		stats: 'errors-only',
 		// Use source maps during development builds or when specified by GENERATE_SOURCEMAP
 		devtool: shouldUseSourceMap && (isEnvProduction ? 'source-map' : 'cheap-module-source-map'),
 		// These are the "entry points" to our application.
@@ -306,9 +308,9 @@ module.exports = function (
 			publicPath,
 			// Improved sourcemap path name mapping for system filepaths
 			devtoolModuleFilenameTemplate: info => {
-				let file = isEnvProduction
-					? path.relative(app.context, info.absoluteResourcePath)
-					: path.resolve(info.absoluteResourcePath);
+				let file = isEnvProduction ?
+					path.relative(app.context, info.absoluteResourcePath) :
+					path.resolve(info.absoluteResourcePath);
 				file = file.replace(/\\/g, '/').replace(/\.\./g, '_');
 				const loader = info.allLoaders.match(/[^\\/]+-loader/);
 				if (info.resource.includes('.less') && loader) {
@@ -329,6 +331,7 @@ module.exports = function (
 			store: 'pack',
 			buildDependencies: {
 				defaultWebpack: ['webpack/lib/'],
+				// eslint-disable-next-line no-undef
 				config: [__filename],
 				tsconfig: useTypeScript ? ['tsconfig.json'] : []
 			}
@@ -358,9 +361,9 @@ module.exports = function (
 			symlinks: false,
 			// Backward compatibility for apps using new ilib references with old Enact
 			// and old apps referencing old iLib location with new Enact
-			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
-				? Object.assign({ilib: '@enact/i18n/ilib'}, app.alias)
-				: Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias),
+			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib')) ?
+				Object.assign({ilib: '@enact/i18n/ilib'}, app.alias) :
+				Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias),
 			// Optional configuration for redirecting module requests.
 			fallback: app.resolveFallback
 		},
@@ -532,6 +535,7 @@ module.exports = function (
 							comments: false,
 							// Turned on because emoji and regex is not minified properly using default
 							// https://github.com/facebook/create-react-app/issues/2488
+							// eslint-disable-next-line camelcase
 							ascii_only: true
 						}
 					},
@@ -659,17 +663,18 @@ module.exports = function (
 						infrastructure: 'silent'
 					}
 				}),
-			new ESLintPlugin({
-				// Plugin options
-				configType: 'flat',
-				extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx'],
-				formatter: require.resolve('react-dev-utils/eslintFormatter'),
-				eslintPath: require.resolve('eslint'),
-				// @remove-on-eject-begin
-				overrideConfigFile: require.resolve('./eslintWebpackPluginConfig'),
-				// @remove-on-eject-end
-				cache: true
-			})
+			!noLinting &&
+				new ESLintPlugin({
+					// Plugin options
+					configType: 'flat',
+					extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx'],
+					formatter: require.resolve('react-dev-utils/eslintFormatter'),
+					eslintPath: require.resolve('eslint'),
+					// @remove-on-eject-begin
+					overrideConfigFile: require.resolve('./eslintWebpackPluginConfig'),
+					// @remove-on-eject-end
+					cache: true
+				})
 		].filter(Boolean)
 	};
 };

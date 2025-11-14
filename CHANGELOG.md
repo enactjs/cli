@@ -1,3 +1,14 @@
+## 7.2.0 (November 14, 2025)
+
+### pack
+
+* Added `--no-linting` option to build without code linting.
+* Fixed webpack config to webpack noise constrained to errors only.
+
+### test
+
+* Updated to Jest 30.
+
 ## 7.1.0 (July 18, 2025)
 
 ### pack
