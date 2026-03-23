@@ -114,11 +114,13 @@ function api ({cliInfo = false, dev = false} = {}) {
 
 				// Display info on notable 3rd party components
 				console.log(chalk.yellow.bold('==Third Party Components=='));
-				console.log(`Babel: ${require('@babel/core/package.json').version}`);
-				console.log(`ESLint: ${require('eslint/package.json').version}`);
-				console.log(`Jest: ${require('jest/package.json').version}`);
-				console.log(`LESS: ${require('less/package.json').version}`);
-				console.log(`Webpack: ${require('webpack/package.json').version}`);
+				console.log(`babel: ${require('@babel/core/package.json').version}`);
+				[
+					'eslint',
+					'jest',
+					'less',
+					'webpack'
+				].forEach(dep => logVersion(dep));
 			} else {
 				const app = require('@enact/dev-utils').optionParser;
 				const meta = require(path.join(app.context, 'package.json'));
