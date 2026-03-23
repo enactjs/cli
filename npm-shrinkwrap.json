@@ -3405,7 +3405,7 @@
     },
     "node_modules/@enact/dev-utils": {
       "version": "7.0.3",
-      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#8122e597f45ca113195d51d096231d02f678c101",
+      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#eaa43bcc411b7ba5fb2deb37646371366ef7d535",
       "license": "Apache-2.0",
       "dependencies": {
         "browserslist": "^4.28.1",
