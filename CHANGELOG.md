@@ -1,3 +1,7 @@
+## 7.2.2 (April 7, 2026)
+
+* Updated dependencies.
+
 ## 7.2.1 (January 13, 2026)
 
 * Updated dependencies.
