@@ -1,3 +1,7 @@
+## 7.2.3 (May 4, 2026)
+
+* Revert 7.2.2 changes to fix lint errors.
+
 ## 7.2.2 (April 7, 2026)
 
 * Updated dependencies.
