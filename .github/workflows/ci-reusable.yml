@@ -31,6 +31,7 @@ jobs:
       - name: Install project dependencies
         run: |
           npm install
+          npm link
 
       - name: Run ESLint
         run: |
