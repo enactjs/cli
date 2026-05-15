@@ -331,7 +331,6 @@ module.exports = function (
 			store: 'pack',
 			buildDependencies: {
 				defaultWebpack: ['webpack/lib/'],
-				// eslint-disable-next-line no-undef
 				config: [__filename],
 				tsconfig: useTypeScript ? ['tsconfig.json'] : []
 			}
