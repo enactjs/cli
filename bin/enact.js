@@ -19,7 +19,6 @@ if (
 			chalk.red(`You are running Node ${process.version}, but @enact/cli requires Node ${pkg.engines.node}.\n`) +
 				chalk.bold.red('Please update your version of Node.')
 		);
-		process.exit(1);
 	});
 }
 
