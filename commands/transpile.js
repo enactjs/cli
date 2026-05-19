@@ -1,4 +1,5 @@
 // @remove-file-on-eject
+/* eslint no-console: off, no-undef: off */
 const path = require('path');
 const babel = require('@babel/core');
 const fs = require('fs-extra');
@@ -15,7 +16,7 @@ const babelConfig = path.join(__dirname, '..', 'config', 'babel.config.js');
 const babelRename = {original: '^(\\.(?!.*\\bstyles\\b.*).*)\\.less$', replacement: '$1.css'};
 const lessPlugins = [new LessPluginResolve({prefix: '~'}), new LessPluginRi(app.ri)];
 
-function displayHelp() {
+function displayHelp () {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
 	if (require.main !== module) e = 'enact transpile';
 
@@ -33,7 +34,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-function transpile(src, dest, plugins) {
+function transpile (src, dest, plugins) {
 	return new Promise((resolve, reject) => {
 		babel.transformFile(src, {extends: babelConfig, plugins}, (err, result) => {
 			if (err) {
@@ -45,7 +46,7 @@ function transpile(src, dest, plugins) {
 	}).then(result => fs.writeFile(dest, result.code, {encoding: 'utf8'}));
 }
 
-function lessc(src, dest) {
+function lessc (src, dest) {
 	return less
 		.render(fs.readFileSync(src, {encoding: 'utf8'}), {
 			rewriteUrls: 'local',
@@ -56,7 +57,7 @@ function lessc(src, dest) {
 		.then(result => fs.writeFileSync(dest.replace(/\.less$/, '.css'), result.css, {encoding: 'utf8'}));
 }
 
-function api({source = '.', output = './build', commonjs = true, ignore} = {}) {
+function api ({source = '.', output = './build', commonjs = true, ignore} = {}) {
 	process.env.ES5 = 'true';
 	const babelPlugins = [
 		commonjs && require.resolve('@babel/plugin-transform-modules-commonjs'),
@@ -91,7 +92,7 @@ function api({source = '.', output = './build', commonjs = true, ignore} = {}) {
 	});
 }
 
-function cli(args) {
+function cli (args) {
 	const opts = minimist(args, {
 		string: ['output', 'ignore'],
 		boolean: ['commonjs', 'help'],

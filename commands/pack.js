@@ -1,3 +1,4 @@
+/* eslint no-console: off, no-undef: off */
 /* eslint-env node, es6 */
 // @remove-on-eject-begin
 /**
@@ -23,7 +24,7 @@ const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-ut
 let chalk;
 let stripAnsi;
 
-function displayHelp() {
+function displayHelp () {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
 	if (require.main !== module) e = 'enact pack';
 
@@ -49,6 +50,7 @@ function displayHelp() {
 	console.log('                      (requires V8_MKSNAPSHOT set)');
 	console.log('    -m, --meta        JSON to override package.json enact metadata');
 	console.log('    -c, --custom-skin Build with a custom skin');
+	console.log('    --no-linting      Build without code linting');
 	console.log('    --no-animation    Build without effects such as animation and shadow');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    --verbose         Verbose log build details');
@@ -69,7 +71,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-function details(err, stats, output) {
+function details (err, stats, output) {
 	let messages;
 	if (err) {
 		if (!err.message) return err;
@@ -139,7 +141,7 @@ function details(err, stats, output) {
 	}
 }
 
-function copyPublicFolder(output) {
+function copyPublicFolder (output) {
 	const staticAssets = './public';
 	if (fs.existsSync(staticAssets)) {
 		fs.copySync(staticAssets, output, {
@@ -149,7 +151,7 @@ function copyPublicFolder(output) {
 }
 
 // Print a detailed summary of build files.
-function printFileSizes(stats, output) {
+function printFileSizes (stats, output) {
 	const assets = stats
 		.toJson({all: false, assets: true, cachedAssets: true})
 		.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
@@ -178,7 +180,7 @@ function printFileSizes(stats, output) {
 	});
 }
 
-function printErrorDetails(err, handler) {
+function printErrorDetails (err, handler) {
 	console.log();
 	if (process.env.TSC_COMPILE_ON_ERROR === 'true') {
 		console.log(
@@ -196,7 +198,7 @@ function printErrorDetails(err, handler) {
 }
 
 // Create the production build and print the deployment instructions.
-function build(config) {
+function build (config) {
 	if (process.env.NODE_ENV === 'development') {
 		console.log('Creating a development build...');
 	} else {
@@ -217,7 +219,7 @@ function build(config) {
 }
 
 // Create the build and watch for changes.
-function watch(config) {
+function watch (config) {
 	// Make sure webpack doesn't immediate bail on errors when watching.
 	config.bail = false;
 	if (process.env.NODE_ENV === 'development') {
@@ -235,7 +237,7 @@ function watch(config) {
 	});
 }
 
-function api(opts = {}) {
+function api (opts = {}) {
 	if (opts.meta) {
 		let meta = opts.meta;
 		if (typeof meta === 'string') {
@@ -252,15 +254,17 @@ function api(opts = {}) {
 		app.applyEnactMeta({template: path.join(__dirname, '..', 'config', 'custom-skin-template.ejs')});
 	}
 
+	// make the framework option available globally in order to be used by the eslint-webpack-plugin custom configuration
+	process.env.FRAMEWORK = opts.framework;
 	// Do this as the first thing so that any code reading it knows the right env.
 	const configFactory = require('../config/webpack.config');
 	const config = configFactory(
 		opts.production ? 'production' : 'development',
+		!opts.linting,
 		opts['content-hash'],
 		opts.isomorphic,
 		!opts.animation,
 		!opts['split-css'],
-		opts.framework,
 		opts['ilib-additional-path']
 	);
 
@@ -285,9 +289,10 @@ function api(opts = {}) {
 	});
 }
 
-function cli(args) {
+function cli (args) {
 	const opts = minimist(args, {
 		boolean: [
+			'linting',
 			'content-hash',
 			'custom-skin',
 			'minify',
@@ -304,7 +309,7 @@ function cli(args) {
 			'help'
 		],
 		string: ['externals', 'externals-public', 'locales', 'entry', 'ilib-additional-path', 'output', 'meta'],
-		default: {minify: true, 'split-css': true, animation: true},
+		default: {minify: true, 'split-css': true, animation: true, linting: true},
 		alias: {
 			o: 'output',
 			p: 'production',

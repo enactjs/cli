@@ -1,4 +1,5 @@
 // @remove-file-on-eject
+/* eslint no-console: off, no-undef: off */
 /**
  * Portions of this source code file are from create-react-app, used under the
  * following MIT license:
@@ -44,13 +45,13 @@ const bareTasks = {
 	'pack-p': 'webpack --env production --config config/webpack.config.js && cpy public dist',
 	watch: 'cpy public dist && webpack --env development --config config/webpack.config.js --watch',
 	clean: 'rimraf build dist',
-	lint: 'eslint --no-eslintrc --config enact --ignore-pattern config/* .',
+	lint: 'eslint --no-config-lookup --config enact --ignore-pattern config/* .',
 	license: 'license-checker ',
 	test: 'jest --config config/jest/jest.config.js',
 	'test-watch': 'jest --config config/jest/jest.config.js --watch'
 };
 
-function displayHelp() {
+function displayHelp () {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
 	if (require.main !== module) e = 'enact eject';
 
@@ -67,7 +68,7 @@ function displayHelp() {
 	process.exit(0);
 }
 
-function validateEject() {
+function validateEject () {
 	return prompts({
 		type: 'confirm',
 		name: 'shouldEject',
@@ -100,7 +101,7 @@ function validateEject() {
 	});
 }
 
-function checkGitStatus() {
+function checkGitStatus () {
 	let status;
 	try {
 		const stdout = cp.execSync(`git status --porcelain`, {stdio: ['pipe', 'pipe', 'ignore']});
@@ -122,7 +123,7 @@ function checkGitStatus() {
 	}
 }
 
-function verifyAbsent({dest}) {
+function verifyAbsent ({dest}) {
 	if (fs.existsSync(dest)) {
 		throw new Error(
 			`"${dest}" already exists in your app folder. We cannot ` +
@@ -133,7 +134,7 @@ function verifyAbsent({dest}) {
 	}
 }
 
-function copySanitizedFile({src, dest}) {
+function copySanitizedFile ({src, dest}) {
 	let data = fs.readFileSync(src, {encoding: 'utf8'});
 
 	// Skip flagged files
@@ -153,7 +154,7 @@ function copySanitizedFile({src, dest}) {
 	fs.writeFileSync(dest, data, {encoding: 'utf8'});
 }
 
-function configurePackage(bare) {
+function configurePackage (bare) {
 	const own = require('../package.json');
 	const app = require(path.resolve('package.json'));
 	const backup = JSON.stringify(app, null, 2) + os.EOL;
@@ -216,7 +217,7 @@ function configurePackage(bare) {
 	app.eslintConfig = eslintConfig;
 	app.eslintIgnore = app.eslintIgnore || [];
 	app.eslintIgnore = app.eslintIgnore.concat(eslintIgnore.filter(l => !app.eslintIgnore.includes(l)));
-	backupOld(['.eslintignore', '.eslintrc.js', '.eslintrc.yaml', '.eslintrc.yml', '.eslintrc.json', '.eslintrc']);
+	backupOld(['.eslintignore', 'eslint.config.js']);
 
 	// Sort the package.json output
 	['dependencies', 'devDependencies'].forEach(obj => {
@@ -237,7 +238,7 @@ function configurePackage(bare) {
 	return conflicts;
 }
 
-function backupOld(files) {
+function backupOld (files) {
 	files.filter(fs.existsSync).forEach(f => {
 		const backup = path.basename(f, path.extname(f)) + '.old' + path.extname(f);
 		console.log(`	Found existing ${chalk.cyan(f)}; backing up to ${chalk.cyan(backup)}`);
@@ -245,7 +246,7 @@ function backupOld(files) {
 	});
 }
 
-function npmInstall() {
+function npmInstall () {
 	return new Promise((resolve, reject) => {
 		const proc = spawn('npm', ['--loglevel', 'error', 'install'], {stdio: 'inherit', cwd: process.cwd()});
 		proc.on('close', code => {
@@ -258,7 +259,7 @@ function npmInstall() {
 	});
 }
 
-function api({bare = false} = {}) {
+function api ({bare = false} = {}) {
 	if (bare) {
 		assets.pop();
 	}
@@ -295,7 +296,7 @@ function api({bare = false} = {}) {
 	});
 }
 
-function cli(args) {
+function cli (args) {
 	const opts = minimist(args, {
 		boolean: ['bare', 'help'],
 		alias: {b: 'bare', h: 'help'}

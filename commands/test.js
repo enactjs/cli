@@ -1,3 +1,4 @@
+/* eslint no-console: off, no-undef: off */
 /* eslint-env node, es6 */
 // @remove-on-eject-begin
 /**
@@ -26,7 +27,7 @@ process.on('unhandledRejection', err => {
 	throw err;
 });
 
-function isInGitRepository() {
+function isInGitRepository () {
 	try {
 		execSync('git rev-parse --is-inside-work-tree', {stdio: 'ignore'});
 		return true;
@@ -35,7 +36,7 @@ function isInGitRepository() {
 	}
 }
 
-function isInMercurialRepository() {
+function isInMercurialRepository () {
 	try {
 		execSync('hg --cwd . root', {stdio: 'ignore'});
 		return true;
@@ -46,14 +47,14 @@ function isInMercurialRepository() {
 
 // This is a very dirty workaround for https://github.com/facebook/jest/issues/5913.
 // We're trying to resolve the environment ourselves because Jest does it incorrectly.
-function resolveJestDefaultEnvironment(name) {
+function resolveJestDefaultEnvironment (name) {
 	const jestDir = path.dirname(resolve.sync('jest', {basedir: __dirname}));
 	const jestCLIDir = path.dirname(resolve.sync('jest-cli', {basedir: jestDir}));
 	const jestConfigDir = path.dirname(resolve.sync('jest-config', {basedir: jestCLIDir}));
 	return resolve.sync(name, {basedir: jestConfigDir});
 }
 
-function testEnvironment(args) {
+function testEnvironment (args) {
 	const env = (
 		args.reverse().find((curr, i, a) => curr.startsWith('--env=') || a[i + 1] === '--env') || 'jsdom'
 	).replace(/^--env=/, '');
@@ -74,7 +75,7 @@ function testEnvironment(args) {
 	return resolvedEnv || env;
 }
 
-function assignOverrides(config) {
+function assignOverrides (config) {
 	const {meta} = packageRoot();
 	const overrides = Object.assign({}, meta.jest);
 	const supportedKeys = [
@@ -149,7 +150,7 @@ function assignOverrides(config) {
 	}
 }
 
-function api(args = []) {
+function api (args = []) {
 	const config = require('../config/jest/jest.config');
 
 	// @TODO: readd dotenv parse support
@@ -171,7 +172,7 @@ function api(args = []) {
 	return jest.run(args);
 }
 
-function cli(args) {
+function cli (args) {
 	import('chalk').then(({default: _chalk}) => {
 		chalk = _chalk;
 		api(args).catch(() => {

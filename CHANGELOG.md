@@ -4,6 +4,62 @@
 
 * Updated `@enact/template-limestone` dependency.
 
+## 7.3.0 (May 4, 2026)
+
+* No significant changes.
+
+## 7.2.2 (April 7, 2026)
+
+* Updated dependencies.
+
+## 7.2.1 (January 13, 2026)
+
+* Updated dependencies.
+
+## 7.2.0 (November 14, 2025)
+
+### pack
+
+* Added `--no-linting` option to build without code linting.
+* Fixed webpack config to webpack noise constrained to errors only.
+
+### test
+
+* Updated to Jest 30.
+
+## 7.1.0 (July 18, 2025)
+
+### pack
+
+* Added `@daltontan/postcss-import-json` PostCSS plugin to process JSON imports in CSS.
+* Fixed `eslintWebpackPluginConfig` to not always run lint in strict mode when `enact pack`.
+
+## 7.0.0 (June 10, 2025)
+
+* Updated dependencies.
+
+## 7.0.0-rc.1 (May 15, 2025)
+
+* Removed deprecated postcss plugin `postcss-global-import`.
+
+## 6.1.4 (April 24, 2025)
+
+* No significant changes.
+
+## 7.0.0-beta.1 (April 17, 2025)
+
+* Updated dependencies.
+
+## 7.0.0-alpha.6 (March 28, 2025)
+
+* Updated dependencies.
+
+## 7.0.0-alpha.5 (February 26, 2025)
+
+### lint
+
+* Updated `eslint` to v9 and adopted flat config.
+
 ## 7.0.0-alpha.4 (January 17, 2025)
 
 * Updated all dependencies to the latest including React 19.
