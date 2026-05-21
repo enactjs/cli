@@ -1,3 +1,9 @@
+## unreleased
+
+### create, template
+
+* Updated `@enact/template-limestone` dependency.
+
 ## 7.3.0 (May 4, 2026)
 
 * No significant changes.
