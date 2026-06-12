@@ -86,12 +86,12 @@ module.exports = {
 		'^.+\\.module\\.(css|less|sass|scss)$'
 	],
 	moduleNameMapper: {
-		'^react-is$': require.resolve('react-is'), // resolves to the hoisted v19
 		'^.+\\.module\\.(css|less|sass|scss)$': require.resolve('identity-obj-proxy'),
 		'^@testing-library/jest-dom$': require.resolve('@testing-library/jest-dom'),
 		'^@testing-library/react$': require.resolve('@testing-library/react'),
 		'^@testing-library/user-event$': require.resolve('@testing-library/user-event'),
 		'^react$': require.resolve('react'),
+		'^react-is$': require.resolve('react-is'),
 		// Backward compatibility for new iLib location with old Enact
 		'^ilib[/](.*)$': path.join(app.context, globals.ILIB_BASE_PATH, '$1'),
 		// Backward compatibility for old iLib location with new Enact
