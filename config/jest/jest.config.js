@@ -86,6 +86,7 @@ module.exports = {
 		'^.+\\.module\\.(css|less|sass|scss)$'
 	],
 	moduleNameMapper: {
+		'^react-is$': require.resolve('react-is'), // resolves to the hoisted v19
 		'^.+\\.module\\.(css|less|sass|scss)$': require.resolve('identity-obj-proxy'),
 		'^@testing-library/jest-dom$': require.resolve('@testing-library/jest-dom'),
 		'^@testing-library/react$': require.resolve('@testing-library/react'),
