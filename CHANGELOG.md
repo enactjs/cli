@@ -1,4 +1,4 @@
-## 7.3.1 (May 4, 2026)
+## unreleased
 
 * Added `react-is` dependency and changed jest config and webpack config files to use it.
 
