@@ -1,5 +1,9 @@
 ## 7.3.1 (May 4, 2026)
 
+* Added `react-is` dependency and changed jest config and webpack config files to use it.
+
+## 7.3.1 (May 4, 2026)
+
 * Fixed `postcss-preset-env` version to v10 temporarily.
 
 ## 7.3.0 (May 4, 2026)
