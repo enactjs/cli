@@ -364,9 +364,9 @@ module.exports = function (
 				{
 					'react-is': path.dirname(require.resolve('react-is/package.json'))
 				},
-				fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib'))
-					? {ilib: '@enact/i18n/ilib'}
-					: {'@enact/i18n/ilib': 'ilib'},
+				fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib')) ?
+					{ilib: '@enact/i18n/ilib'} :
+					{'@enact/i18n/ilib': 'ilib'},
 				app.alias
 			),
 			// Optional configuration for redirecting module requests.
