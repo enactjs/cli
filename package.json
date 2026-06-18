@@ -46,7 +46,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.28.6",
     "@daltontan/postcss-import-json": "^1.1.1",
     "@enact/dev-utils": "^7.0.4",
-    "@enact/template-sandstone": "^2.8.0",
+    "@enact/template-sandstone": "2.8.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.6.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
