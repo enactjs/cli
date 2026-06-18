@@ -1,3 +1,9 @@
+## unreleased
+
+### create, template
+
+* Updated `@enact/template-limestone` dependency.
+
 ## 7.3.1 (May 4, 2026)
 
 * Fixed `postcss-preset-env` version to v10 temporarily.
