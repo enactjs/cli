@@ -20,7 +20,7 @@ const validatePackageName = require('validate-npm-package-name');
 let chalk;
 
 const ENACT_DEV_NPM = '@enact/cli';
-const INCLUDED = path.dirname(require.resolve('@enact/template-limestone'));
+const INCLUDED = path.dirname(require.resolve('@enact/template-sandstone'));
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
 
 const defaultGenerator = {

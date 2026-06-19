@@ -12,7 +12,7 @@ const tar = require('tar');
 let chalk;
 
 const TEMPLATE_DIR = path.join(process.env.APPDATA || os.homedir(), '.enact');
-const INCLUDED = path.dirname(require.resolve('@enact/template-limestone'));
+const INCLUDED = path.dirname(require.resolve('@enact/template-sandstone'));
 const DEFAULT_LINK = path.join(TEMPLATE_DIR, 'default');
 
 function displayHelp () {
