@@ -172,7 +172,7 @@ function resolveTemplateGenerator (template) {
 	return new Promise((resolve, reject) => {
 		let templatePath = path.join(TEMPLATE_DIR, template);
 		if (!fs.existsSync(templatePath)) {
-			if (['default', 'limestone'].includes(template)) {
+			if (['default', 'sandstone'].includes(template)) {
 				templatePath = path.join(INCLUDED, 'template');
 			} else {
 				reject(new Error(`Template ${chalk.bold(template)} not found.`));

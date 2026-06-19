@@ -72,8 +72,8 @@ function initTemplateArea () {
 				}
 			});
 	}
-	const init = doLink(path.join(INCLUDED, 'template'), 'limestone');
-	const limestoneLink = path.join(TEMPLATE_DIR, 'limestone');
+	const init = doLink(path.join(INCLUDED, 'template'), 'sandstone');
+	const limestoneLink = path.join(TEMPLATE_DIR, 'sandstone');
 	return init.then(() => !fs.existsSync(DEFAULT_LINK) && doLink(limestoneLink, 'default'));
 }
 
