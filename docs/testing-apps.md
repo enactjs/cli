@@ -1,7 +1,7 @@
 ---
 title: Testing Apps
 sidebar:
-  order: 7
+  order: 8
 ---
 ## Running Test Specs
 ```none

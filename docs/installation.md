@@ -1,7 +1,7 @@
 ---
 title: Installation
 sidebar:
-  order: 1
+  order: 2
 ---
 ## Requirements
 

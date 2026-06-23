@@ -1,7 +1,7 @@
 ---
 title: Loading an Existing App
 sidebar:
-  order: 3
+  order: 4
 ---
 ## Acquire the Source
 
