@@ -12,7 +12,7 @@
         "@babel/plugin-transform-modules-commonjs": "^7.29.7",
         "@daltontan/postcss-import-json": "^1.1.1",
         "@enact/dev-utils": "github:enactjs/dev-utils#test/7.0.5",
-        "@enact/template-sandstone": "2.8.0",
+        "@enact/template-limestone": "^1.0.0",
         "@pmmmwh/react-refresh-webpack-plugin": "^0.6.2",
         "@testing-library/jest-dom": "^6.9.1",
         "@testing-library/react": "^16.3.2",
@@ -3465,13 +3465,13 @@
         }
       }
     },
-    "node_modules/@enact/template-sandstone": {
-      "version": "2.8.0",
-      "resolved": "https://registry.npmjs.org/@enact/template-sandstone/-/template-sandstone-2.8.0.tgz",
-      "integrity": "sha512-7J6QnrXRjfYC3A3c6Qdb+euURhUFxL2Wp0SY6FZ6FL8Btwga29m1X8xpVNbuErNlQ74PY4l5uVCetFZCr2kjGw==",
+    "node_modules/@enact/template-limestone": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/@enact/template-limestone/-/template-limestone-1.0.0.tgz",
+      "integrity": "sha512-RsMw4gj3GmoRiWl9gxMtSN6kEqTdf7HRea1HNSuqJ3AyhbAsH7DmgiEnPkH4zZukB77AgxSkKCFojGEqNdMOEg==",
       "license": "Apache-2.0",
       "engines": {
-        "node": ">=6.4.0"
+        "node": ">=20.5.0"
       }
     },
     "node_modules/@eslint-community/eslint-utils": {
@@ -4113,7 +4113,19 @@
         "@babel/core": "^7.11.0 || ^8.0.0-0"
       }
     },
-    "node_modules/@jest/core/node_modules/babel-jest/node_modules/babel-preset-jest": {
+    "node_modules/@jest/core/node_modules/babel-plugin-jest-hoist": {
+      "version": "30.3.0",
+      "resolved": "https://registry.npmjs.org/babel-plugin-jest-hoist/-/babel-plugin-jest-hoist-30.3.0.tgz",
+      "integrity": "sha512-+TRkByhsws6sfPjVaitzadk1I0F5sPvOVUH5tyTSzhePpsGIVrdeunHSw/C36QeocS95OOk8lunc4rlu5Anwsg==",
+      "license": "MIT",
+      "dependencies": {
+        "@types/babel__core": "^7.20.5"
+      },
+      "engines": {
+        "node": "^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0"
+      }
+    },
+    "node_modules/@jest/core/node_modules/babel-preset-jest": {
       "version": "30.3.0",
       "resolved": "https://registry.npmjs.org/babel-preset-jest/-/babel-preset-jest-30.3.0.tgz",
       "integrity": "sha512-6ZcUbWHC+dMz2vfzdNwi87Z1gQsLNK2uLuK1Q89R11xdvejcivlYYwDlEv0FHX3VwEXpbBQ9uufB/MUNpZGfhQ==",
@@ -4127,18 +4139,6 @@
       },
       "peerDependencies": {
         "@babel/core": "^7.11.0 || ^8.0.0-beta.1"
-      }
-    },
-    "node_modules/@jest/core/node_modules/babel-plugin-jest-hoist": {
-      "version": "30.3.0",
-      "resolved": "https://registry.npmjs.org/babel-plugin-jest-hoist/-/babel-plugin-jest-hoist-30.3.0.tgz",
-      "integrity": "sha512-+TRkByhsws6sfPjVaitzadk1I0F5sPvOVUH5tyTSzhePpsGIVrdeunHSw/C36QeocS95OOk8lunc4rlu5Anwsg==",
-      "license": "MIT",
-      "dependencies": {
-        "@types/babel__core": "^7.20.5"
-      },
-      "engines": {
-        "node": "^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0"
       }
     },
     "node_modules/@jest/core/node_modules/brace-expansion": {
@@ -7076,9 +7076,6 @@
       "cpu": [
         "arm64"
       ],
-      "libc": [
-        "glibc"
-      ],
       "license": "MIT",
       "optional": true,
       "os": [
@@ -7091,9 +7088,6 @@
       "integrity": "sha512-KQ3Lki6l+Pz1k/eBipN41ES+YUK30beLGb9YqcB1O542cyLCNE6GaxrfcY3T6EezmGGk84wb5XyO9loTM9tkcA==",
       "cpu": [
         "arm64"
-      ],
-      "libc": [
-        "musl"
       ],
       "license": "MIT",
       "optional": true,
@@ -7108,9 +7102,6 @@
       "cpu": [
         "loong64"
       ],
-      "libc": [
-        "glibc"
-      ],
       "license": "MIT",
       "optional": true,
       "os": [
@@ -7123,9 +7114,6 @@
       "integrity": "sha512-jiuG/Obbel7uw1PwHNFfrkiKhLAF6mnyZ6aWlOAVN9WqKm8v0OFGnciJIHu8+CMvXLQ8AD51LPzAoUfT21D5Ew==",
       "cpu": [
         "loong64"
-      ],
-      "libc": [
-        "musl"
       ],
       "license": "MIT",
       "optional": true,
@@ -7140,9 +7128,6 @@
       "cpu": [
         "ppc64"
       ],
-      "libc": [
-        "glibc"
-      ],
       "license": "MIT",
       "optional": true,
       "os": [
@@ -7155,9 +7140,6 @@
       "integrity": "sha512-0CVdx6lcnT3Q9inOH8tsMIOJ6ImndllMjqJHg8RLVdB7Vq4SfkEXl9mCSsVNuNA4MCYycRicCUxPCabVHJRr6A==",
       "cpu": [
         "riscv64"
-      ],
-      "libc": [
-        "glibc"
       ],
       "license": "MIT",
       "optional": true,
@@ -7172,9 +7154,6 @@
       "cpu": [
         "riscv64"
       ],
-      "libc": [
-        "musl"
-      ],
       "license": "MIT",
       "optional": true,
       "os": [
@@ -7187,9 +7166,6 @@
       "integrity": "sha512-HYJtLfXq94q8iZNFT1lknx258wlkkWhZeUXJRqzKBBUJ00CvZ+N33zgbCqimLjsyw5Va6uUxhVa12mI+kaveEw==",
       "cpu": [
         "s390x"
-      ],
-      "libc": [
-        "glibc"
       ],
       "license": "MIT",
       "optional": true,
@@ -7204,9 +7180,6 @@
       "cpu": [
         "x64"
       ],
-      "libc": [
-        "glibc"
-      ],
       "license": "MIT",
       "optional": true,
       "os": [
@@ -7219,9 +7192,6 @@
       "integrity": "sha512-azrt6+5ydLd8Vt210AAFis/lZevSfPw93EJRIJG+xPu4WCJ8K0kppCTpMyLPcKT7H15M4Jnt2tMp5bOvCkRC6A==",
       "cpu": [
         "x64"
-      ],
-      "libc": [
-        "musl"
       ],
       "license": "MIT",
       "optional": true,
@@ -10758,53 +10728,6 @@
         "typescript": ">=4.8.4 <6.1.0"
       }
     },
-    "node_modules/eslint-config-enact/node_modules/@typescript-eslint/eslint-plugin/node_modules/@typescript-eslint/type-utils": {
-      "version": "8.62.0",
-      "resolved": "https://registry.npmjs.org/@typescript-eslint/type-utils/-/type-utils-8.62.0.tgz",
-      "integrity": "sha512-+g5O3j0w2ldzC86Pv6fvbO/xhAonbJFIdf/MKQ1d30gndlsVzUOE83ldfSE15Qrl9fhFjK6AovHs5Wpp6vx86w==",
-      "license": "MIT",
-      "dependencies": {
-        "@typescript-eslint/types": "8.62.0",
-        "@typescript-eslint/typescript-estree": "8.62.0",
-        "@typescript-eslint/utils": "8.62.0",
-        "debug": "^4.4.3",
-        "ts-api-utils": "^2.5.0"
-      },
-      "engines": {
-        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
-      },
-      "funding": {
-        "type": "opencollective",
-        "url": "https://opencollective.com/typescript-eslint"
-      },
-      "peerDependencies": {
-        "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0",
-        "typescript": ">=4.8.4 <6.1.0"
-      }
-    },
-    "node_modules/eslint-config-enact/node_modules/@typescript-eslint/eslint-plugin/node_modules/@typescript-eslint/utils": {
-      "version": "8.62.0",
-      "resolved": "https://registry.npmjs.org/@typescript-eslint/utils/-/utils-8.62.0.tgz",
-      "integrity": "sha512-82r66fi9zYwZ+mTq3vKgwjbZ1PVk/DJzrXFLpG6RnBbdvH8TEGVHIs9H4d2drhkOzf0syZuD/OZvvlu6GDbP4g==",
-      "license": "MIT",
-      "dependencies": {
-        "@eslint-community/eslint-utils": "^4.9.1",
-        "@typescript-eslint/scope-manager": "8.62.0",
-        "@typescript-eslint/types": "8.62.0",
-        "@typescript-eslint/typescript-estree": "8.62.0"
-      },
-      "engines": {
-        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
-      },
-      "funding": {
-        "type": "opencollective",
-        "url": "https://opencollective.com/typescript-eslint"
-      },
-      "peerDependencies": {
-        "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0",
-        "typescript": ">=4.8.4 <6.1.0"
-      }
-    },
     "node_modules/eslint-config-enact/node_modules/@typescript-eslint/parser": {
       "version": "8.62.0",
       "resolved": "https://registry.npmjs.org/@typescript-eslint/parser/-/parser-8.62.0.tgz",
@@ -10866,6 +10789,30 @@
         "typescript": ">=4.8.4 <6.1.0"
       }
     },
+    "node_modules/eslint-config-enact/node_modules/@typescript-eslint/type-utils": {
+      "version": "8.62.0",
+      "resolved": "https://registry.npmjs.org/@typescript-eslint/type-utils/-/type-utils-8.62.0.tgz",
+      "integrity": "sha512-+g5O3j0w2ldzC86Pv6fvbO/xhAonbJFIdf/MKQ1d30gndlsVzUOE83ldfSE15Qrl9fhFjK6AovHs5Wpp6vx86w==",
+      "license": "MIT",
+      "dependencies": {
+        "@typescript-eslint/types": "8.62.0",
+        "@typescript-eslint/typescript-estree": "8.62.0",
+        "@typescript-eslint/utils": "8.62.0",
+        "debug": "^4.4.3",
+        "ts-api-utils": "^2.5.0"
+      },
+      "engines": {
+        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
+      },
+      "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/typescript-eslint"
+      },
+      "peerDependencies": {
+        "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0",
+        "typescript": ">=4.8.4 <6.1.0"
+      }
+    },
     "node_modules/eslint-config-enact/node_modules/@typescript-eslint/typescript-estree": {
       "version": "8.62.0",
       "resolved": "https://registry.npmjs.org/@typescript-eslint/typescript-estree/-/typescript-estree-8.62.0.tgz",
@@ -10890,6 +10837,29 @@
         "url": "https://opencollective.com/typescript-eslint"
       },
       "peerDependencies": {
+        "typescript": ">=4.8.4 <6.1.0"
+      }
+    },
+    "node_modules/eslint-config-enact/node_modules/@typescript-eslint/utils": {
+      "version": "8.62.0",
+      "resolved": "https://registry.npmjs.org/@typescript-eslint/utils/-/utils-8.62.0.tgz",
+      "integrity": "sha512-82r66fi9zYwZ+mTq3vKgwjbZ1PVk/DJzrXFLpG6RnBbdvH8TEGVHIs9H4d2drhkOzf0syZuD/OZvvlu6GDbP4g==",
+      "license": "MIT",
+      "dependencies": {
+        "@eslint-community/eslint-utils": "^4.9.1",
+        "@typescript-eslint/scope-manager": "8.62.0",
+        "@typescript-eslint/types": "8.62.0",
+        "@typescript-eslint/typescript-estree": "8.62.0"
+      },
+      "engines": {
+        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
+      },
+      "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/typescript-eslint"
+      },
+      "peerDependencies": {
+        "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0",
         "typescript": ">=4.8.4 <6.1.0"
       }
     },
@@ -10941,29 +10911,6 @@
         "typescript": {
           "optional": true
         }
-      }
-    },
-    "node_modules/eslint-config-enact/node_modules/eslint-plugin-jest/node_modules/@typescript-eslint/utils": {
-      "version": "8.62.0",
-      "resolved": "https://registry.npmjs.org/@typescript-eslint/utils/-/utils-8.62.0.tgz",
-      "integrity": "sha512-82r66fi9zYwZ+mTq3vKgwjbZ1PVk/DJzrXFLpG6RnBbdvH8TEGVHIs9H4d2drhkOzf0syZuD/OZvvlu6GDbP4g==",
-      "license": "MIT",
-      "dependencies": {
-        "@eslint-community/eslint-utils": "^4.9.1",
-        "@typescript-eslint/scope-manager": "8.62.0",
-        "@typescript-eslint/types": "8.62.0",
-        "@typescript-eslint/typescript-estree": "8.62.0"
-      },
-      "engines": {
-        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
-      },
-      "funding": {
-        "type": "opencollective",
-        "url": "https://opencollective.com/typescript-eslint"
-      },
-      "peerDependencies": {
-        "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0",
-        "typescript": ">=4.8.4 <6.1.0"
       }
     },
     "node_modules/eslint-config-enact/node_modules/ignore": {
@@ -14699,7 +14646,19 @@
         "@babel/core": "^7.11.0 || ^8.0.0-0"
       }
     },
-    "node_modules/jest-cli/node_modules/babel-jest/node_modules/babel-preset-jest": {
+    "node_modules/jest-cli/node_modules/babel-plugin-jest-hoist": {
+      "version": "30.3.0",
+      "resolved": "https://registry.npmjs.org/babel-plugin-jest-hoist/-/babel-plugin-jest-hoist-30.3.0.tgz",
+      "integrity": "sha512-+TRkByhsws6sfPjVaitzadk1I0F5sPvOVUH5tyTSzhePpsGIVrdeunHSw/C36QeocS95OOk8lunc4rlu5Anwsg==",
+      "license": "MIT",
+      "dependencies": {
+        "@types/babel__core": "^7.20.5"
+      },
+      "engines": {
+        "node": "^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0"
+      }
+    },
+    "node_modules/jest-cli/node_modules/babel-preset-jest": {
       "version": "30.3.0",
       "resolved": "https://registry.npmjs.org/babel-preset-jest/-/babel-preset-jest-30.3.0.tgz",
       "integrity": "sha512-6ZcUbWHC+dMz2vfzdNwi87Z1gQsLNK2uLuK1Q89R11xdvejcivlYYwDlEv0FHX3VwEXpbBQ9uufB/MUNpZGfhQ==",
@@ -14713,18 +14672,6 @@
       },
       "peerDependencies": {
         "@babel/core": "^7.11.0 || ^8.0.0-beta.1"
-      }
-    },
-    "node_modules/jest-cli/node_modules/babel-plugin-jest-hoist": {
-      "version": "30.3.0",
-      "resolved": "https://registry.npmjs.org/babel-plugin-jest-hoist/-/babel-plugin-jest-hoist-30.3.0.tgz",
-      "integrity": "sha512-+TRkByhsws6sfPjVaitzadk1I0F5sPvOVUH5tyTSzhePpsGIVrdeunHSw/C36QeocS95OOk8lunc4rlu5Anwsg==",
-      "license": "MIT",
-      "dependencies": {
-        "@types/babel__core": "^7.20.5"
-      },
-      "engines": {
-        "node": "^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0"
       }
     },
     "node_modules/jest-cli/node_modules/brace-expansion": {
