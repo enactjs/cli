@@ -331,7 +331,6 @@ module.exports = function (
 			store: 'pack',
 			buildDependencies: {
 				defaultWebpack: ['webpack/lib/'],
-				// eslint-disable-next-line no-undef
 				config: [__filename],
 				tsconfig: useTypeScript ? ['tsconfig.json'] : []
 			}
@@ -361,9 +360,15 @@ module.exports = function (
 			symlinks: false,
 			// Backward compatibility for apps using new ilib references with old Enact
 			// and old apps referencing old iLib location with new Enact
-			alias: fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib')) ?
-				Object.assign({ilib: '@enact/i18n/ilib'}, app.alias) :
-				Object.assign({'@enact/i18n/ilib': 'ilib'}, app.alias),
+			alias: Object.assign(
+				{
+					'react-is': path.dirname(require.resolve('react-is/package.json'))
+				},
+				fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib')) ?
+					{ilib: '@enact/i18n/ilib'} :
+					{'@enact/i18n/ilib': 'ilib'},
+				app.alias
+			),
 			// Optional configuration for redirecting module requests.
 			fallback: app.resolveFallback
 		},

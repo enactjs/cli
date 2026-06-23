@@ -63,11 +63,11 @@ The @enact/cli tool will check the project's **package.json** looking for an opt
 * `isomorphic` _[string]_ - Alternate filepath to a custom isomorphic-compatible entry point. Not needed if main entry point is already isomorphic-compatible.
 * `title` _[string]_ - Title text that should be put within the HTML's `<title></title>` tags. Note: if this is a webOS-project, the title will, by default, be auto-detected from the **appinfo.json** content.
 * `alias` _[object]_ - String mapping of webpack alias paths to use when building.
-* `theme` _[object]_ - A simplified string name to extrapolate `fontGenerator`, `ri`, and `screenTypes` preset values from. For example, `"sandstone"`.
-* `fontGenerator` _[string]_ - Filepath to a CommonJS fontGenerator module which will build locale-specific font CSS to inject into the HTML. By default, will use any preset for a specified theme or fallback to sandstone.
-* `ri` _[object]_ - Resolution independence options to be forwarded to the [postcss-resolution-independence](https://github.com/enactjs/postcss-resolution-independence). By default, will use any preset for a specified theme or fallback to sandstone.
+* `theme` _[object]_ - A simplified string name to extrapolate `fontGenerator`, `ri`, and `screenTypes` preset values from. For example, `"limestone"`.
+* `fontGenerator` _[string]_ - Filepath to a CommonJS fontGenerator module which will build locale-specific font CSS to inject into the HTML. By default, will use any preset for a specified theme or fallback to limestone.
+* `ri` _[object]_ - Resolution independence options to be forwarded to the [postcss-resolution-independence](https://github.com/enactjs/postcss-resolution-independence). By default, will use any preset for a specified theme or fallback to limestone.
 	* `baseSize` _[number]_ - The root font-size to use when converting the value of the base unit to a resolution-independent unit. For example, when `baseSize` is set to 24, 48px in the LESS file will be converted to 2rem.
-* `screenTypes` _[array|string]_ - Array of 1 or more screentype definitions to be used with prerender HTML initialization. Can alternatively reference a json filepath to read for screentype definitions.  By default, will use any preset for a specified theme or fallback to sandstone.
+* `screenTypes` _[array|string]_ - Array of 1 or more screentype definitions to be used with prerender HTML initialization. Can alternatively reference a json filepath to read for screentype definitions.  By default, will use any preset for a specified theme or fallback to limestone.
 * `nodeBuiltins` _[object]_ - Configuration settings for polyfilling NodeJS built-ins. See `node` [webpack option](https://webpack.js.org/configuration/node/).
 * `resolveFallback` _[object]_ - Configuration settings for redirecting module requests when normal resolving fails. See `resolve.fallback` [webpack option](https://webpack.js.org/configuration/resolve/#resolvefallback).
 * `externalStartup` _[boolean]_ - Flag whether to externalize the startup/update js that is normally inlined within prerendered app HTML output.
@@ -82,7 +82,7 @@ For example:
 {
 	...
 	"enact": {
-		"theme": "sandstone",
+		"theme": "limestone",
 		"resolveFallback": {
 			fs: false,
 			net: false,
