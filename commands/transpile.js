@@ -10,8 +10,8 @@ const LessPluginRi = require('resolution-independence');
 const getRiPlugin = require('resolution-independence/lib/resolution-independence');
 // Patch: calc() containing var() must pass through unchanged — the RI plugin's
 // parseString regex groups "calc(132px" as one token, causing parseFloat to return NaN.
-LessPluginRi.prototype.install = function (less, pluginManager) {
-	const Plugin = getRiPlugin(less);
+LessPluginRi.prototype.install = function (_less, pluginManager) {
+	const Plugin = getRiPlugin(_less);
 	const origParseString = Plugin.prototype.parseString;
 	Plugin.prototype.parseString = function (ruleNode, stringValues) {
 		const value = stringValues || ruleNode.value;
