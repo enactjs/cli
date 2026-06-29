@@ -15,7 +15,7 @@ LessPluginRi.prototype.install = function (_less, pluginManager) {
 	const origParseString = Plugin.prototype.parseString;
 	Plugin.prototype.parseString = function (ruleNode, stringValues) {
 		const value = stringValues || ruleNode.value;
-		if (/calc\s*\(.*var\s*\(/.test(value)) return value;
+		if (/calc\s*\(/.test(value)) return value;
 		return origParseString.call(this, ruleNode, stringValues);
 	};
 	pluginManager.addVisitor(new Plugin(this.options));
