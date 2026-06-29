@@ -7,6 +7,19 @@ const less = require('less');
 const LessPluginResolve = require('less-plugin-npm-import');
 const minimist = require('minimist');
 const LessPluginRi = require('resolution-independence');
+const getRiPlugin = require('resolution-independence/lib/resolution-independence');
+// Patch: calc() containing var() must pass through unchanged — the RI plugin's
+// parseString regex groups "calc(132px" as one token, causing parseFloat to return NaN.
+LessPluginRi.prototype.install = function (_less, pluginManager) {
+	const Plugin = getRiPlugin(_less);
+	const origParseString = Plugin.prototype.parseString;
+	Plugin.prototype.parseString = function (ruleNode, stringValues) {
+		const value = stringValues || ruleNode.value;
+		if (/calc\s*\(/.test(value)) return value;
+		return origParseString.call(this, ruleNode, stringValues);
+	};
+	pluginManager.addVisitor(new Plugin(this.options));
+};
 const {optionParser: app} = require('@enact/dev-utils');
 
 let chalk;
