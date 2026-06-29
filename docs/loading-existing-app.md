@@ -1,6 +1,7 @@
 ---
 title: Loading an Existing App
-order: 3
+sidebar:
+  order: 4
 ---
 ## Acquire the Source
 

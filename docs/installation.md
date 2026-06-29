@@ -1,6 +1,7 @@
 ---
 title: Installation
-order: 1
+sidebar:
+  order: 2
 ---
 ## Requirements
 

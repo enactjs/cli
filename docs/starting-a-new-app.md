@@ -1,6 +1,7 @@
 ---
 title: Starting a New App
-order: 2
+sidebar:
+  order: 3
 ---
 ## Generating the Base App Template
 ```none
