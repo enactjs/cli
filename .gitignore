@@ -36,3 +36,9 @@ node_modules
 build
 dist
 bundle.js
+
+# Editor
+.idea
+.vscode
+
+package-lock.json
