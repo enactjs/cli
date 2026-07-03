@@ -52,6 +52,7 @@ function displayHelp () {
 	console.log('    -c, --custom-skin Build with a custom skin');
 	console.log('    --no-linting      Build without code linting');
 	console.log('    --no-animation    Build without effects such as animation and shadow');
+	console.log('    -r, --react-compiler    Build with react compiler');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    --verbose         Verbose log build details');
 	console.log('    -v, --version     Display version information');
@@ -254,6 +255,10 @@ function api (opts = {}) {
 		app.applyEnactMeta({template: path.join(__dirname, '..', 'config', 'custom-skin-template.ejs')});
 	}
 
+	if (opts['react-compiler']) {
+		process.env.REACT_COMPILER = 'true';
+	}
+
 	// make the framework option available globally in order to be used by the eslint-webpack-plugin custom configuration
 	process.env.FRAMEWORK = opts.framework;
 	// Do this as the first thing so that any code reading it knows the right env.
@@ -305,6 +310,7 @@ function cli (args) {
 			'snapshot',
 			'animation',
 			'verbose',
+			'react-compiler',
 			'watch',
 			'help'
 		],
@@ -319,6 +325,7 @@ function cli (args) {
 			m: 'meta',
 			c: 'custom-skin',
 			w: 'watch',
+			r: 'react-compiler',
 			h: 'help'
 		}
 	});
