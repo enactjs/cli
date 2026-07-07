@@ -1,6 +1,7 @@
 ---
 title: Measuring Performance
-order: 11
+sidebar:
+  order: 12
 ---
 By default, an app generated from `enact create` with Enact CLI includes a performance relayer that allows you to measure and analyze
 the performance of your application using different metrics.
