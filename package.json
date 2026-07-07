@@ -75,7 +75,7 @@
     "global-modules": "^2.0.0",
     "html-webpack-plugin": "^5.6.7",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "~30.4.2",
+    "jest": "~30.3.0",
     "jest-environment-jsdom": "29.7.0",
     "jest-watch-typeahead": "^3.0.1",
     "less": "^4.6.7",
