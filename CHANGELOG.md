@@ -1,3 +1,9 @@
+## 7.3.3 (July 7, 2026)
+
+### transpile
+
+* Added `LessPluginRi` patch to fix unexpected behaviors when `enact transhipe`.
+
 ## 7.3.2 (June 23, 2026)
 
 ### create, template
