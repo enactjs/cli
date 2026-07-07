@@ -2,7 +2,7 @@
 
 ### transpile
 
-* Added `LessPluginRi` patch to fix unexpected behaviors when `enact transhipe`.
+* Added `LessPluginRi` patch to fix unexpected behaviors when `enact transpile`.
 
 ## 7.3.2 (June 23, 2026)
 
