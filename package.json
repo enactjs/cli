@@ -43,7 +43,7 @@
     "upupdowndownleftrightleftrightbastart"
   ],
   "dependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.29.7",
+    "@babel/plugin-transform-modules-commonjs": "^8.0.1",
     "@daltontan/postcss-import-json": "^1.1.1",
     "@enact/dev-utils": "^7.0.5",
     "@enact/template-limestone": "1.0.0",
@@ -64,7 +64,7 @@
     "css-minimizer-webpack-plugin": "^8.0.0",
     "dotenv": "^17.4.2",
     "dotenv-expand": "^13.0.0",
-    "eslint": "^9.39.4",
+    "eslint": "^10.6.0",
     "eslint-config-enact": "^5.1.2",
     "eslint-webpack-plugin": "^6.0.0",
     "expose-loader": "^5.0.1",
@@ -115,6 +115,7 @@
     "fsevents": "^2.3.3"
   },
   "peerDependencies": {
+    "@babel/core": "^8.0.1",
     "typescript": "^5.4.0"
   },
   "peerDependenciesMeta": {
@@ -127,7 +128,7 @@
   },
   "devDependencies": {
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-import-x": "^4.17.1",
     "eslint-plugin-prettier": "^5.5.6",
     "globals": "^17.7.0",
     "prettier": "^3.9.4"
