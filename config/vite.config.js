@@ -1,0 +1,479 @@
+/* eslint no-console: off, no-undef: off */
+/* eslint-env node, es6 */
+
+/**
+ * Experimental Vite configuration for @enact/cli.
+ *
+ * This is a drop-in-oriented port of `webpack.config.js`. It mirrors the same
+ * factory signature so the `pack`/`serve` commands can build an equivalent
+ * config, and it reuses the existing Enact tooling wherever a webpack-agnostic
+ * equivalent exists:
+ *   - `@enact/dev-utils` optionParser    -> app options (ri, accent, alias, ...)
+ *   - `@enact/dev-utils` ViteHtmlPlugin  -> HTML document (webpack: HtmlWebpackPlugin)
+ *   - `@enact/dev-utils` ViteILibPlugin  -> iLib i18n runtime + locale filtering (webpack: ILibPlugin)
+ *   - `@enact/dev-utils` ViteWebOSMetaPlugin -> appinfo.json + assets (webpack: WebOSMetaPlugin)
+ *   - `babel-preset-enact`               -> via @vitejs/plugin-react `babel`
+ *   - PostCSS resolution-independence    -> via `css.postcss.plugins`
+ *   - LESS accent/skin modifyVars        -> via `css.preprocessorOptions.less`
+ *   - cssModuleIdent (getLocalIdent)     -> via `css.modules.generateScopedName`
+ *   - eslint-config-enact                -> via the inline `enact-eslint` plugin
+ *
+ * See `docs/vite-migration.md` for the feasibility analysis. The webpack-only
+ * features that remain unported (and for which `pack --vite` prints a "not
+ * supported, ignored" notice) are: isomorphic prerendering (see
+ * `docs/vite-isomorphic-scope.md`), V8 snapshot, and framework externals.
+ */
+
+const fs = require('fs');
+const path = require('path');
+const {
+	optionParser: app,
+	cssModuleIdent: getLocalIdent,
+	ViteHtmlPlugin,
+	ViteILibPlugin,
+	ViteWebOSMetaPlugin
+} = require('@enact/dev-utils');
+
+// PostCSS plugin: resolve `~pkg` prefixes in `@import-json` at-rules to a path
+// relative to the source file, so `@daltontan/postcss-import-json` can load them.
+// Ported from the inline plugin in webpack.config.js (mimics webpack's `~` alias).
+function tildeJsonImportPlugin () {
+	return {
+		postcssPlugin: 'postcss-import-json-tilde',
+		Once (root) {
+			root.walkAtRules('import-json', atRule => {
+				const src = atRule.params.slice(1, -1); // strip quotes
+				if (!src.startsWith('~')) return;
+				const packagePath = src.substring(1);
+				const currentFileDir = path.dirname((atRule.source.input && atRule.source.input.file) || '');
+				try {
+					let resolvedPath;
+					try {
+						resolvedPath = require.resolve(packagePath, {paths: [currentFileDir]});
+					} catch (e) {
+						resolvedPath = require.resolve(packagePath, {paths: [process.cwd()]});
+					}
+					atRule.params = `"${path.relative(currentFileDir, resolvedPath)}"`;
+				} catch (error) {
+					// Fallback: walk up directories looking for the module under node_modules.
+					let dir = currentFileDir || process.cwd();
+					while (dir !== path.parse(dir).root) {
+						const candidate = path.join(dir, 'node_modules', packagePath);
+						if (fs.existsSync(candidate)) {
+							atRule.params = `"${path.relative(currentFileDir, candidate)}"`;
+							return;
+						}
+						dir = path.dirname(dir);
+					}
+				}
+			});
+		}
+	};
+}
+
+// Load and initialize a PostCSS plugin. Unlike postcss-loader (which resolves
+// string plugin names), Vite's `css.postcss.plugins` expects instantiated
+// plugins, so we require each and invoke the creator with its options.
+function loadPostCss (name, opts) {
+	const mod = require(name);
+	const creator = mod && mod.default ? mod.default : mod;
+	return typeof creator === 'function' ? creator(opts) : creator;
+}
+
+// Reuse the same PostCSS plugin chain as the webpack build so CSS output is
+// equivalent (autoprefixing, resolution independence, JSON token imports).
+function getPostCssPlugins ({useTailwind}) {
+	return [
+		useTailwind && loadPostCss('tailwindcss'),
+		// Fix and adjust for known flexbox issues. See https://github.com/philipwalton/flexbugs
+		loadPostCss('postcss-flexbugs-fixes'),
+		// Transpile stage-3 CSS standards based on browserslist targets, with auto-prefixing.
+		loadPostCss('postcss-preset-env', {
+			autoprefixer: {flexbox: 'no-2009', remove: false},
+			stage: 3,
+			features: {'custom-properties': false}
+		}),
+		// Standardize browser quirks based on the browserslist targets.
+		!useTailwind && loadPostCss('postcss-normalize'),
+		// Resolution independence support.
+		app.ri !== false && loadPostCss('postcss-resolution-independence', app.ri),
+		// Resolve `~pkg` prefixes in `@import-json` rules to real paths before the
+		// import-json plugin runs (ported from the webpack config's inline plugin).
+		tildeJsonImportPlugin(),
+		// Support importing JSON files in CSS (design tokens -> CSS custom properties).
+		loadPostCss('@daltontan/postcss-import-json', {
+			map: (selector, value) => {
+				if (typeof value === 'object' && value !== null && value.$ref) {
+					const tokenPath = value.$ref.split('#/')[1];
+					return `var(--${tokenPath.replace(/\//g, '-')})`;
+				}
+				return value;
+			}
+		})
+	].filter(Boolean);
+}
+
+// Vite plugin that runs ESLint against the app sources, mirroring the webpack
+// build's `eslint-webpack-plugin` (same flat config in eslintWebpackPluginConfig).
+// Lints once at build start: warnings are printed; errors fail production builds.
+function enactEslintPlugin () {
+	let isBuild = true;
+	return {
+		name: 'enact-eslint',
+		configResolved (resolved) {
+			isBuild = resolved.command === 'build';
+		},
+		async buildStart () {
+			let ESLint;
+			try {
+				({ESLint} = require('eslint'));
+			} catch (e) {
+				return; // eslint not available; skip silently
+			}
+			const eslint = new ESLint({
+				cwd: app.context,
+				overrideConfigFile: require.resolve('./eslintWebpackPluginConfig'),
+				errorOnUnmatchedPattern: false,
+				cache: true,
+				cacheLocation: path.resolve('./node_modules/.cache/.eslintcache-vite')
+			});
+			const results = await eslint.lintFiles(['src/**/*.{js,mjs,jsx,ts,tsx}']);
+			const errorCount = results.reduce((n, r) => n + r.errorCount, 0);
+			const warningCount = results.reduce((n, r) => n + r.warningCount, 0);
+			if (errorCount || warningCount) {
+				const formatter = await eslint.loadFormatter('stylish');
+				const output = formatter.format(results);
+				if (output) console.log(output);
+			}
+			// Match webpack: errors fail the build; the dev server only warns.
+			if (isBuild && errorCount > 0) {
+				this.error(`ESLint found ${errorCount} error(s).`);
+			}
+		}
+	};
+}
+
+// Non-browser iLib platform loaders (`./lib/ilib-qt|rhino|ringo|node|….js`) and
+// their `*Loader.js` helpers. iLib selects these via runtime platform detection;
+// the browser branch never reaches them, but bundlers try (and fail) to resolve
+// them statically. Webpack sidestepped this with ILibPlugin + WebpackLoader; here
+// we neutralize them in both engines (Rollup build + esbuild dev optimizer).
+const ILIB_LOADER_RE = /(?:[/\\]|^\.\/lib\/)ilib-[\w-]+\.js$|(?:Node|Rhino|Qt|Ringo)Loader(?:\.js)?$/;
+
+// esbuild plugin (dev dependency optimizer) that stubs the iLib loaders to empty.
+const ilibStubEsbuildPlugin = {
+	name: 'enact-ilib-loader-stub',
+	setup (build) {
+		build.onResolve({filter: ILIB_LOADER_RE}, args => ({path: args.path, namespace: 'enact-ilib-stub'}));
+		build.onLoad({filter: /.*/, namespace: 'enact-ilib-stub'}, () => ({contents: 'module.exports = {};', loader: 'js'}));
+	}
+};
+
+// esbuild plugin (dev dependency optimizer) that runs babel-preset-enact on
+// `@enact/*` source. @enact packages ship raw, unbuilt source as their `main`
+// (JSX-in-.js, decorators, and proposals like `export default from 'ilib'`) that
+// esbuild's optimizer cannot parse. The Rollup build transforms them via
+// @vitejs/plugin-react; this does the equivalent for pre-bundling. ESM is
+// preserved (caller.supportsStaticESM) so esbuild can still bundle/tree-shake.
+const enactBabelEsbuildPlugin = {
+	name: 'enact-babel-optimize',
+	setup (build) {
+		let babel;
+		const preset = require.resolve('babel-preset-enact');
+		build.onLoad({filter: /[\\/]@enact[\\/].*\.(?:jsx?|mjs)$/}, async args => {
+			// iLib data/loaders under @enact/i18n are not Enact source — leave them
+			// to esbuild (and the loader stub) rather than paying babel on big files.
+			if (/[\\/]ilib[\\/]/.test(args.path)) return null;
+			babel = babel || require('@babel/core');
+			const source = fs.readFileSync(args.path, 'utf8');
+			const result = await babel.transformAsync(source, {
+				babelrc: false,
+				configFile: false,
+				filename: args.path,
+				caller: {name: 'vite-optimize', supportsStaticESM: true, supportsDynamicImport: true},
+				presets: [preset]
+			});
+			return {contents: result.code, loader: 'js'};
+		});
+	}
+};
+
+// LESS `~specifier` imports (e.g. `@import '~@enact/ui/styles/core.less'`) are a
+// webpack/less-loader convention that resolves the specifier from node_modules.
+// Vite's LESS has no such resolver, so provide a custom Less FileManager that
+// strips the `~` and resolves via Node module resolution (with sensible LESS
+// extension fallbacks). Mirrors less-loader's `~` behavior.
+function lessTildeImportPlugin (context) {
+	return {
+		install (less, pluginManager) {
+			class TildeFileManager extends less.FileManager {
+				supports (filename) {
+					return filename.charAt(0) === '~';
+				}
+				supportsSync () {
+					return false;
+				}
+				loadFile (filename, currentDirectory, options, environment) {
+					const spec = filename.slice(1);
+					const paths = [currentDirectory, context].filter(Boolean);
+					const candidates = [spec, spec + '.less', spec + '/index.less', spec + '.css'];
+					let resolved;
+					for (const candidate of candidates) {
+						try {
+							resolved = require.resolve(candidate, {paths});
+							break;
+						} catch (e) {
+							// try next candidate
+						}
+					}
+					if (!resolved) {
+						return Promise.reject({type: 'File', message: `'${filename}' wasn't found (tilde-resolve).`});
+					}
+					return super.loadFile(resolved, currentDirectory, options, environment);
+				}
+			}
+			pluginManager.addFileManager(new TildeFileManager());
+		}
+	};
+}
+
+// Webpack's entry is `[polyfills, appMain]`, bundled into a single `main` chunk.
+// Rollup has no array-concatenation entry, so we generate a tiny combined entry
+// module (in the build cache, not the source tree) that imports each in order.
+// Absolute-path targets are imported by a relative path; bare specifiers (e.g.
+// `core-js/stable`) are emitted as-is so Vite resolves + pre-bundles them.
+function createCombinedEntry (context, targets) {
+	const dir = path.join(context, 'node_modules', '.cache', 'enact-vite');
+	fs.mkdirSync(dir, {recursive: true});
+	const file = path.join(dir, 'index.js');
+	const body =
+		targets
+			.map(target => {
+				if (!path.isAbsolute(target)) return `import ${JSON.stringify(target)};`;
+				let rel = path.relative(dir, target).replace(/\\/g, '/');
+				if (!rel.startsWith('.')) rel = './' + rel;
+				return `import ${JSON.stringify(rel)};`;
+			})
+			.join('\n') + '\n';
+	fs.writeFileSync(file, body);
+	return file;
+}
+
+// Mirrors the webpack.config.js factory signature, plus a trailing `locales`
+// argument (Vite-specific) for iLib locale filtering (webpack threads `-l`
+// through the isomorphic mixin instead).
+module.exports = function (
+		env,
+		noLinting = false,
+		contentHash = false,
+		isomorphic = false,
+		noAnimation = false,
+		noSplitCSS = false,
+		ilibAdditionalResourcesPath,
+		locales
+) {
+	// Lazy-require so the CLI still runs without vite installed for the webpack path.
+	const react = require('@vitejs/plugin-react').default || require('@vitejs/plugin-react');
+
+	process.chdir(app.context);
+	require('./dotenv').load(app.context);
+	app.setEnactTargetsAsDefault();
+
+	const useTypeScript = fs.existsSync('tsconfig.json');
+	const useTailwind = fs.existsSync(path.join(app.context, 'tailwind.config.js'));
+
+	process.env.NODE_ENV = env || process.env.NODE_ENV;
+	const isEnvProduction = process.env.NODE_ENV === 'production';
+	const GENERATE_SOURCEMAP = process.env.GENERATE_SOURCEMAP || (isEnvProduction ? 'false' : 'true');
+	const shouldUseSourceMap = GENERATE_SOURCEMAP !== 'false';
+
+	// Resolve the concrete app entry file (webpack resolves the package dir to its main),
+	// then build a combined entry that loads core-js polyfills first, then the app.
+	// The CLI's `polyfills.js`/`corejs-proxy.js` are CommonJS (`require('core-js/stable')`)
+	// which the webpack build transpiles but Vite's browser ESM can't run; so we import
+	// `core-js/stable` directly as an ESM bare specifier (Vite pre-bundles the CJS→ESM),
+	// aliased below to the CLI's copy since apps don't depend on core-js directly.
+	const appEntry = require.resolve(app.context);
+	const entry = createCombinedEntry(app.context, ['core-js/stable', appEntry]);
+	const coreJsDir = path.dirname(require.resolve('core-js/package.json'));
+
+	const postcssPlugins = getPostCssPlugins({useTailwind});
+
+	// Backward-compatibility ilib alias, matching webpack.config.js.
+	const ilibAlias = fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib')) ?
+		{ilib: '@enact/i18n/ilib'} :
+		{'@enact/i18n/ilib': 'ilib'};
+
+	return {
+		root: app.context,
+		base: app.publicUrl || '/',
+		mode: isEnvProduction ? 'production' : 'development',
+		clearScreen: false,
+		logLevel: 'warn',
+		// Vite copies `<root>/public` into the build output automatically (webpack: copyPublicFolder).
+		publicDir: 'public',
+		define: {
+			'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
+			'process.env.PUBLIC_URL': JSON.stringify(app.publicUrl || ''),
+			// Isomorphic build selects hydrateRoot vs createRoot; animation gate.
+			ENACT_PACK_ISOMORPHIC: JSON.stringify(!!isomorphic),
+			ENACT_PACK_NO_ANIMATION: JSON.stringify(!!noAnimation)
+		},
+		resolve: {
+			extensions: ['.js', '.mjs', '.jsx', '.ts', '.tsx', '.json'].filter(
+				ext => useTypeScript || !ext.includes('ts')
+			),
+			// Array form so we can mix exact aliases with the regex `~` stripper.
+			alias: [
+				...Object.entries(
+					Object.assign(
+						{'react-is': path.dirname(require.resolve('react-is/package.json'))},
+						// Resolve `core-js` (imported by the generated entry) to the CLI's copy,
+						// since apps don't depend on it directly. Also dedupes @enact's core-js.
+						{'core-js': coreJsDir},
+						ilibAlias,
+						app.alias
+					)
+				).map(([find, replacement]) => ({find, replacement})),
+				// Strip the leading `~` from CSS `@import '~pkg'` so Vite resolves the bare
+				// specifier from node_modules (LESS `~` is handled by lessTildeImportPlugin).
+				{find: /^~/, replacement: ''}
+			],
+			// Force a single copy of React across the app and all (possibly nested,
+			// e.g. @enact/limestone/node_modules/@enact/*) dependencies. Without this,
+			// Vite pre-bundling resolves multiple physical react copies and mixing
+			// components across them triggers "Invalid hook call / more than one copy
+			// of React". Webpack avoids this via single-tree resolution + exposing
+			// React on global in the isomorphic path.
+			dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+			// Don't follow symlinks to their real paths (matches webpack `symlinks: false`).
+			preserveSymlinks: true
+		},
+		css: {
+			devSourcemap: shouldUseSourceMap,
+			postcss: {plugins: postcssPlugins},
+			// Vite treats *.module.* as CSS modules automatically. We only override the
+			// scoped-name generation to match the webpack cssModuleIdent output.
+			// cssModuleIdent expects a webpack-style loader context with `resourcePath`
+			// and `rootContext` (used for the ident hash); `localIdentName` is ignored.
+			// The result is sanitized to a valid CSS identifier: for nested @enact deps
+			// (e.g. @enact/limestone/node_modules/@enact/ui/…) the derived name embeds a
+			// literal `@`, which is invalid unescaped in a class selector. The trailing
+			// hash keeps names unique, so collapsing invalid chars to `_` is safe.
+			modules: {
+				generateScopedName (name, filename) {
+					const ident = getLocalIdent({resourcePath: filename, rootContext: app.context}, null, name);
+					return ident.replace(/[^a-zA-Z0-9_-]/g, '_');
+				}
+			},
+			preprocessorOptions: {
+				less: {
+					// Inject accent/skin vars and the __DEV__ flag, matching less-loader modifyVars.
+					modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent),
+					javascriptEnabled: true,
+					// Resolve `~pkg` LESS imports from node_modules (webpack/less-loader behavior).
+					plugins: [lessTildeImportPlugin(app.context)]
+				}
+			}
+		},
+		build: {
+			outDir: path.resolve('./dist'),
+			emptyOutDir: true,
+			sourcemap: shouldUseSourceMap,
+			minify: isEnvProduction ? 'terser' : false,
+			cssMinify: isEnvProduction,
+			// Preserve webpack-style split behaviour: single main CSS when --no-split-css.
+			cssCodeSplit: !noSplitCSS,
+			commonjsOptions: {
+				// Enact deps (notably iLib) mix ESM/CJS and use runtime platform detection
+				// that require()s Node/Qt/Rhino-only loaders. Those branches never execute
+				// in the browser, so ignore them at bundle time instead of failing to
+				// resolve. (Webpack handled iLib via ILibPlugin + WebpackLoader + node
+				// polyfills; a proper Vite ILib plugin is the real fix — see docs.)
+				transformMixedEsModules: true,
+				ignoreDynamicRequires: true,
+				ignore: id => ILIB_LOADER_RE.test(id)
+			},
+			rollupOptions: {
+				// Named `main` so output is `main.js`, matching the webpack bundle name.
+				input: {main: entry},
+				output: {
+					entryFileNames: contentHash ? '[name].[hash].js' : '[name].js',
+					chunkFileNames: contentHash ? 'chunk.[name].[hash].js' : 'chunk.[name].js',
+					assetFileNames: contentHash ? '[name].[hash][extname]' : '[name][extname]'
+				}
+			}
+		},
+		esbuild: {
+			legalComments: 'none'
+		},
+		optimizeDeps: {
+			// The dev-server dependency scanner/optimizer is esbuild-based and defaults
+			// the `.js` loader to `js`; Enact authors JSX inside plain `.js` files, which
+			// breaks the scan without this. (Request-time transforms go through
+			// @vitejs/plugin-react's babel, which already handles JSX-in-.js.)
+			esbuildOptions: {
+				loader: {'.js': 'jsx'},
+				// Order matters: stub iLib loaders first, then babel-transform @enact source.
+				plugins: [ilibStubEsbuildPlugin, enactBabelEsbuildPlugin]
+			}
+		},
+		server: {
+			host: process.env.HOST || '0.0.0.0',
+			port: parseInt(process.env.PORT || 8080),
+			hmr: true
+		},
+		plugins: [
+			react({
+				// @enact/* packages ship raw source (JSX inside .js, ESM) rather than
+				// pre-compiled output, so they must be transpiled like app code. Mirror
+				// webpack's `exclude: /node_modules.(?!@enact)/`: process everything except
+				// non-@enact node_modules.
+				exclude: /[\\/]node_modules[\\/](?!@enact[\\/])/,
+				// Reuse the exact Enact babel preset so JSX/TS/decorator handling matches webpack.
+				babel: {
+					babelrc: false,
+					configFile: false,
+					// Advertise ESM support so babel-preset-enact's @babel/preset-env
+					// (`modules: 'auto'`) preserves `import`/`export` for Rollup to bundle
+					// and tree-shake. babel-loader sets this in the webpack path; the Vite
+					// react plugin does not, so without it preset-env emits CommonJS and the
+					// app collapses into un-bundled runtime `require()` calls.
+					caller: {
+						name: 'vite-plugin-react',
+						supportsStaticESM: true,
+						supportsDynamicImport: true,
+						supportsTopLevelAwait: true
+					},
+					presets: [require.resolve('babel-preset-enact')]
+				}
+			}),
+			ViteHtmlPlugin({
+				entry,
+				// Fall back to the webOS appinfo title when no app/theme title is set.
+				title: app.title || ViteWebOSMetaPlugin.readTitle(app.context) || '',
+				template: app.template || path.join(__dirname, 'html-template.ejs')
+			}),
+			// webOS metadata: emit/serve appinfo.json + referenced icon/splash assets
+			// and localized resources/**/appinfo.json. Skip for non-browser targets.
+			!['node', 'async-node', 'webworker'].includes(app.environment) &&
+				ViteWebOSMetaPlugin({
+					context: app.context,
+					publicPath: app.publicUrl || '/'
+				}),
+			// iLib runtime: define ILIB_* constants and make locale/resource data
+			// available (build: copy trees; dev: serve from source), with optional
+			// `-l` locale filtering. Replaces the webpack ILibPlugin. Skip for
+			// non-browser targets.
+			!['node', 'async-node', 'webworker'].includes(app.environment) &&
+				ViteILibPlugin({
+					context: app.context,
+					publicPath: app.publicUrl || '/',
+					ilibAdditionalResourcesPath,
+					locales
+				}),
+			// ESLint (mirrors webpack eslint-webpack-plugin); skipped with --no-linting.
+			!noLinting && enactEslintPlugin()
+		].filter(Boolean)
+	};
+};

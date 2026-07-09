@@ -52,6 +52,7 @@ function displayHelp () {
 	console.log('    -c, --custom-skin Build with a custom skin');
 	console.log('    --no-linting      Build without code linting');
 	console.log('    --no-animation    Build without effects such as animation and shadow');
+	console.log('    --vite            [Experimental] Build with Vite instead of webpack');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    --verbose         Verbose log build details');
 	console.log('    -v, --version     Display version information');
@@ -197,6 +198,56 @@ function printErrorDetails (err, handler) {
 	}
 }
 
+function useVite (opts) {
+	return Boolean(opts.vite) || /^vite$/i.test(process.env.ENACT_BUNDLER || '');
+}
+
+// Experimental Vite build path. Mirrors the webpack `build`/`watch` behavior but
+// drives Vite's JS API. Webpack-only features (isomorphic, snapshot, framework
+// externals) are not yet supported here and are reported as ignored.
+async function viteBuild (opts) {
+	const {build: viteBuildApi} = require('vite');
+
+	['isomorphic', 'snapshot', 'framework', 'externals'].forEach(flag => {
+		if (opts[flag]) {
+			console.log(
+				chalk.yellow(`NOTICE: --${flag} is not yet supported by the Vite bundler and will be ignored.`)
+			);
+		}
+	});
+
+	const configFactory = require('../config/vite.config');
+	const config = configFactory(
+		opts.production ? 'production' : 'development',
+		!opts.linting,
+		opts['content-hash'],
+		opts.isomorphic,
+		!opts.animation,
+		!opts['split-css'],
+		opts['ilib-additional-path'],
+		opts.locales
+	);
+
+	// Entry override
+	if (opts.entry || app.entry) {
+		config.build.rollupOptions.input = {main: path.resolve(opts.entry || app.entry)};
+	}
+	// Output override
+	if (opts.output) config.build.outDir = path.resolve(opts.output);
+	// Watch mode
+	if (opts.watch) {
+		config.build.watch = {};
+		console.log('Creating a build and watching for changes...');
+	} else if (process.env.NODE_ENV === 'development') {
+		console.log('Creating a development build...');
+	} else {
+		console.log('Creating an optimized production build...');
+	}
+
+	await viteBuildApi(config);
+	if (!opts.watch) console.log(chalk.green('Compiled successfully.'));
+}
+
 // Create the production build and print the deployment instructions.
 function build (config) {
 	if (process.env.NODE_ENV === 'development') {
@@ -254,6 +305,12 @@ function api (opts = {}) {
 		app.applyEnactMeta({template: path.join(__dirname, '..', 'config', 'custom-skin-template.ejs')});
 	}
 
+	// Experimental Vite bundler path (opt-in via `--vite` or ENACT_BUNDLER=vite).
+	if (useVite(opts)) {
+		process.env.NODE_ENV = opts.production ? 'production' : 'development';
+		return viteBuild(opts);
+	}
+
 	// make the framework option available globally in order to be used by the eslint-webpack-plugin custom configuration
 	process.env.FRAMEWORK = opts.framework;
 	// Do this as the first thing so that any code reading it knows the right env.
@@ -306,6 +363,7 @@ function cli (args) {
 			'animation',
 			'verbose',
 			'watch',
+			'vite',
 			'help'
 		],
 		string: ['externals', 'externals-public', 'locales', 'entry', 'ilib-additional-path', 'output', 'meta'],

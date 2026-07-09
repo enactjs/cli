@@ -60,6 +60,7 @@ function displayHelp () {
 	console.log('    -f, --fast        Enables experimental frast refresh');
 	console.log('    -p, --port        Server port number');
 	console.log('    -m, --meta        JSON to override package.json enact metadata');
+	console.log('    --vite            [Experimental] Serve with Vite instead of webpack');
 	console.log('    --no-linting      Build without code linting');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
@@ -251,6 +252,58 @@ function devServerConfig (host, port, protocol, publicPath, proxy, allowedHost) 
 	};
 }
 
+// Whether the experimental Vite bundler is selected (via `--vite` or ENACT_BUNDLER=vite).
+function useVite (opts) {
+	return Boolean(opts.vite) || /^vite$/i.test(process.env.ENACT_BUNDLER || '');
+}
+
+// Experimental Vite dev server path. Uses Vite's native dev server (esbuild +
+// native ESM) in place of webpack-dev-server; HMR is handled by @vitejs/plugin-react.
+async function viteServe (opts, host, port) {
+	const {createServer} = require('vite');
+	const configFactory = require('../config/vite.config');
+	const config = configFactory('development', !opts.linting);
+
+	config.server = Object.assign({}, config.server, {
+		host,
+		port,
+		open: Boolean(opts.browser)
+	});
+
+	const server = await createServer(config);
+	await server.listen();
+	if (process.stdout.isTTY) clearConsole();
+
+	// Print the same "ready" message the webpack path shows (via react-dev-utils),
+	// using the same `prepareUrls` helper so the Local / On Your Network URLs match.
+	// Vite's own `server.printUrls()` logs at 'info', which our `logLevel: 'warn'`
+	// suppresses, so we format it ourselves. Vite compiles on demand, so this
+	// reports the server is ready rather than a completed upfront compile.
+	const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
+	// Strip a trailing slash from the base so root URLs read `http://host:port`
+	// (matching the webpack path, which passes `publicPath.slice(0, -1)`).
+	const urls = prepareUrls(protocol, host, port, (app.publicUrl || '/').replace(/\/$/, ''));
+	console.log(chalk.green('Compiled successfully!'));
+	console.log();
+	console.log(`You can now view ${chalk.bold(app.name)} in the browser.`);
+	console.log();
+	console.log(`  ${chalk.bold('Local:')}            ${urls.localUrlForTerminal}`);
+	if (urls.lanUrlForTerminal) {
+		console.log(`  ${chalk.bold('On Your Network:')}  ${urls.lanUrlForTerminal}`);
+	}
+	console.log();
+	console.log('Note that the development build is not optimized.');
+	console.log(`To create a production build, use ${chalk.cyan('npm run pack-p')}.`);
+	console.log();
+
+	['SIGINT', 'SIGTERM'].forEach(sig => {
+		process.on(sig, async () => {
+			await server.close();
+			process.exit();
+		});
+	});
+}
+
 function serve (config, host, port, open) {
 	// We attempt to use the default port but if it is busy, we offer the user to
 	// run on a different port. `detect()` Promise resolves to the next free port.
@@ -331,6 +384,21 @@ function api (opts) {
 		app.applyEnactMeta(meta);
 	}
 
+	// Tools like Cloud9 rely on this.
+	const host = process.env.HOST || opts.host || '0.0.0.0';
+	const port = parseInt(process.env.PORT || opts.port || 8080);
+
+	// Serving is only supported for browser targets, regardless of bundler.
+	if (['node', 'async-node', 'webworker'].includes(app.environment)) {
+		return Promise.reject(new Error('Serving is not supported for non-browser apps.'));
+	}
+
+	// Experimental Vite bundler path (opt-in via `--vite` or ENACT_BUNDLER=vite).
+	if (useVite(opts)) {
+		process.env.NODE_ENV = 'development';
+		return viteServe(opts, host, port);
+	}
+
 	// We can disable the typechecker formatter since react-dev-utils includes their
 	// own formatter in their dev client.
 	process.env.DISABLE_TSFORMATTER = 'true';
@@ -343,22 +411,14 @@ function api (opts) {
 	const fastRefresh = process.env.FAST_REFRESH || opts.fast;
 	const config = hotDevServer(configFactory('development', !opts.linting), fastRefresh);
 
-	// Tools like Cloud9 rely on this.
-	const host = process.env.HOST || opts.host || '0.0.0.0';
-	const port = parseInt(process.env.PORT || opts.port || 8080);
-
 	// Start serving
-	if (['node', 'async-node', 'webworker'].includes(app.environment)) {
-		return Promise.reject(new Error('Serving is not supported for non-browser apps.'));
-	} else {
-		return serve(config, host, port, opts.browser);
-	}
+	return serve(config, host, port, opts.browser);
 }
 
 function cli (args) {
 	const opts = minimist(args, {
 		string: ['host', 'port', 'meta'],
-		boolean: ['browser', 'fast', 'help', 'linting'],
+		boolean: ['browser', 'fast', 'help', 'linting', 'vite'],
 		default: {linting: true},
 		alias: {b: 'browser', i: 'host', p: 'port', f: 'fast', m: 'meta', h: 'help'}
 	});
