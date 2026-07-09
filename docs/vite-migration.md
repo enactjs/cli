@@ -131,10 +131,11 @@ non-obvious part of the port — were:
 | **ESLint** (`eslint-config-enact`, `--no-linting`) | `eslint-webpack-plugin` | inline `enact-eslint` plugin — lints at build start; errors fail the build, dev warns |
 | Source maps | `devtool` | `build.sourcemap` / `css.devSourcemap` |
 
-## What does NOT port yet (webpack-only, blocks a full swap)
+## Webpack-only concerns and their status
 
-These live in `@enact/dev-utils/plugins` and tap the webpack `compiler`/`compilation`
-lifecycle. Each needs a bespoke Vite/Rollup plugin:
+Items 1–6 are `@enact/dev-utils` webpack plugins that tap the
+`compiler`/`compilation` lifecycle; items 7–9 are webpack loader/config behaviors,
+not dev-utils plugins. Status varies (ported / dropped / resolved / not yet):
 
 1. ~~**`ILibPlugin`**~~ — **ported** as
    [`ViteILibPlugin`](../../dev-utils/plugins/ViteILibPlugin). Since `@enact/i18n`'s
@@ -182,14 +183,18 @@ lifecycle. Each needs a bespoke Vite/Rollup plugin:
    project, not validated here.
 6. **`GracefulFsPlugin`** — patches webpack's output FS to avoid EMFILE. Not
    needed under Vite (different FS handling). *Drop.*
-7. **`node-polyfill-webpack-plugin`** — Node builtin polyfills for screenshot
-   tests. Vite: use `vite-plugin-node-polyfills` if required.
+7. **`node-polyfill-webpack-plugin`** — supplies Node builtins (`global`,
+   `process`, `Buffer`) in the browser bundle. **Partly resolved:** the runtime
+   `global` reference in Enact's `polyfills.js` is handled (runtime fixes R1/R2 —
+   `ViteHtmlPlugin` shim + core-js ESM entry), and `process.env.NODE_ENV` is
+   covered by `define`. Fuller coverage (`Buffer`, full `process`), mostly for
+   screenshot tests, is **not** wired — add `vite-plugin-node-polyfills` if needed.
 8. **`icss` mode for non-`*.module` CSS / `forceCSSModules`** — Vite auto-treats
    only `*.module.*` as modules; the webpack `mode: 'icss'` nuance and the global
-   `forceCSSModules` toggle need a custom transform.
-9. ~~**LESS/CSS `~` npm imports**~~ — **resolved** (fixes #7 and #8 above):
-   `lessTildeImportPlugin` (LESS), `resolve.alias /^~/` (CSS), and
-   `tildeJsonImportPlugin` (`@import-json`).
+   `forceCSSModules` toggle need a custom transform. *Not ported.*
+9. ~~**LESS/CSS `~` npm imports**~~ — **resolved** (by config fixes #7 and #8 in
+   the config-issues list above): `lessTildeImportPlugin` (LESS),
+   `resolve.alias /^~/` (CSS), and `tildeJsonImportPlugin` (`@import-json`).
 
 ## Command wiring (applied, behind a flag)
 

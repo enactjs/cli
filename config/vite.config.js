@@ -34,84 +34,8 @@ const {
 	ViteWebOSMetaPlugin
 } = require('@enact/dev-utils');
 
-// PostCSS plugin: resolve `~pkg` prefixes in `@import-json` at-rules to a path
-// relative to the source file, so `@daltontan/postcss-import-json` can load them.
-// Ported from the inline plugin in webpack.config.js (mimics webpack's `~` alias).
-function tildeJsonImportPlugin () {
-	return {
-		postcssPlugin: 'postcss-import-json-tilde',
-		Once (root) {
-			root.walkAtRules('import-json', atRule => {
-				const src = atRule.params.slice(1, -1); // strip quotes
-				if (!src.startsWith('~')) return;
-				const packagePath = src.substring(1);
-				const currentFileDir = path.dirname((atRule.source.input && atRule.source.input.file) || '');
-				try {
-					let resolvedPath;
-					try {
-						resolvedPath = require.resolve(packagePath, {paths: [currentFileDir]});
-					} catch (e) {
-						resolvedPath = require.resolve(packagePath, {paths: [process.cwd()]});
-					}
-					atRule.params = `"${path.relative(currentFileDir, resolvedPath)}"`;
-				} catch (error) {
-					// Fallback: walk up directories looking for the module under node_modules.
-					let dir = currentFileDir || process.cwd();
-					while (dir !== path.parse(dir).root) {
-						const candidate = path.join(dir, 'node_modules', packagePath);
-						if (fs.existsSync(candidate)) {
-							atRule.params = `"${path.relative(currentFileDir, candidate)}"`;
-							return;
-						}
-						dir = path.dirname(dir);
-					}
-				}
-			});
-		}
-	};
-}
-
-// Load and initialize a PostCSS plugin. Unlike postcss-loader (which resolves
-// string plugin names), Vite's `css.postcss.plugins` expects instantiated
-// plugins, so we require each and invoke the creator with its options.
-function loadPostCss (name, opts) {
-	const mod = require(name);
-	const creator = mod && mod.default ? mod.default : mod;
-	return typeof creator === 'function' ? creator(opts) : creator;
-}
-
-// Reuse the same PostCSS plugin chain as the webpack build so CSS output is
-// equivalent (autoprefixing, resolution independence, JSON token imports).
-function getPostCssPlugins ({useTailwind}) {
-	return [
-		useTailwind && loadPostCss('tailwindcss'),
-		// Fix and adjust for known flexbox issues. See https://github.com/philipwalton/flexbugs
-		loadPostCss('postcss-flexbugs-fixes'),
-		// Transpile stage-3 CSS standards based on browserslist targets, with auto-prefixing.
-		loadPostCss('postcss-preset-env', {
-			autoprefixer: {flexbox: 'no-2009', remove: false},
-			stage: 3,
-			features: {'custom-properties': false}
-		}),
-		// Standardize browser quirks based on the browserslist targets.
-		!useTailwind && loadPostCss('postcss-normalize'),
-		// Resolution independence support.
-		app.ri !== false && loadPostCss('postcss-resolution-independence', app.ri),
-		// Resolve `~pkg` prefixes in `@import-json` rules to real paths before the
-		// import-json plugin runs (ported from the webpack config's inline plugin).
-		tildeJsonImportPlugin(),
-		// Support importing JSON files in CSS (design tokens -> CSS custom properties).
-		loadPostCss('@daltontan/postcss-import-json', {
-			map: (selector, value) => {
-				if (typeof value === 'object' && value !== null && value.$ref) {
-					const tokenPath = value.$ref.split('#/')[1];
-					return `var(--${tokenPath.replace(/\//g, '-')})`;
-				}
-				return value;
-			}
-		})
-	].filter(Boolean);
-}
+// PostCSS plugin chain, shared with webpack.config.js (single source of truth).
+const {getPostCssPlugins} = require('./postcss-plugins');
 
 // Vite plugin that runs ESLint against the app sources, mirroring the webpack
 // build's `eslint-webpack-plugin` (same flat config in eslintWebpackPluginConfig).

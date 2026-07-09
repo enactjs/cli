@@ -26,6 +26,7 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const {optionParser: app} = require('@enact/dev-utils');
+const {useVite} = require('./vite-utils');
 
 let chalk;
 
@@ -252,10 +253,6 @@ function devServerConfig (host, port, protocol, publicPath, proxy, allowedHost) 
 	};
 }
 
-// Whether the experimental Vite bundler is selected (via `--vite` or ENACT_BUNDLER=vite).
-function useVite (opts) {
-	return Boolean(opts.vite) || /^vite$/i.test(process.env.ENACT_BUNDLER || '');
-}
 
 // Experimental Vite dev server path. Uses Vite's native dev server (esbuild +
 // native ESM) in place of webpack-dev-server; HMR is handled by @vitejs/plugin-react.
@@ -270,15 +267,15 @@ async function viteServe (opts, host, port) {
 		open: Boolean(opts.browser)
 	});
 
+	// Show a "building" message while the server starts up, matching the webpack path.
+	if (process.stdout.isTTY) clearConsole();
+	console.log(chalk.cyan('Starting the development server...'));
+	console.log();
+
 	const server = await createServer(config);
 	await server.listen();
-	if (process.stdout.isTTY) clearConsole();
 
-	// Print the same "ready" message the webpack path shows (via react-dev-utils),
-	// using the same `prepareUrls` helper so the Local / On Your Network URLs match.
-	// Vite's own `server.printUrls()` logs at 'info', which our `logLevel: 'warn'`
-	// suppresses, so we format it ourselves. Vite compiles on demand, so this
-	// reports the server is ready rather than a completed upfront compile.
+	// Append the same "ready" message the webpack path shows
 	const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
 	// Strip a trailing slash from the base so root URLs read `http://host:port`
 	// (matching the webpack path, which passes `publicPath.slice(0, -1)`).

@@ -20,6 +20,7 @@ const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const printBuildError = require('react-dev-utils/printBuildError');
 const webpack = require('webpack');
 const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
+const {useVite} = require('./vite-utils');
 
 let chalk;
 let stripAnsi;
@@ -198,13 +199,13 @@ function printErrorDetails (err, handler) {
 	}
 }
 
-function useVite (opts) {
-	return Boolean(opts.vite) || /^vite$/i.test(process.env.ENACT_BUNDLER || '');
-}
 
 // Experimental Vite build path. Mirrors the webpack `build`/`watch` behavior but
-// drives Vite's JS API. Webpack-only features (isomorphic, snapshot, framework
-// externals) are not yet supported here and are reported as ignored.
+// drives Vite's JS API. The webpack-only features `--isomorphic` (prerendering),
+// `--snapshot`, and `--framework`/`--externals` are not supported here: each is
+// reported and then genuinely skipped. In particular `--isomorphic` is forced off
+// (client render) rather than forwarded, because setting ENACT_PACK_ISOMORPHIC
+// without prerendered markup would make the app hydrate an empty root.
 async function viteBuild (opts) {
 	const {build: viteBuildApi} = require('vite');
 
@@ -221,7 +222,9 @@ async function viteBuild (opts) {
 		opts.production ? 'production' : 'development',
 		!opts.linting,
 		opts['content-hash'],
-		opts.isomorphic,
+		// isomorphic forced off: prerendering isn't ported, so hydrateRoot has no
+		// server markup to hydrate. Client render (createRoot) is the correct fallback.
+		false,
 		!opts.animation,
 		!opts['split-css'],
 		opts['ilib-additional-path'],
