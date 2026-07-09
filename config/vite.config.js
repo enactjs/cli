@@ -77,6 +77,26 @@ function enactEslintPlugin () {
 	};
 }
 
+// Vite plugin that neutralizes webpack's HMR API in app source. Some Enact apps
+// guard reducer/hot-reload code with `if (module.hot) { module.hot.accept(…) }`.
+// `module` exists in the webpack runtime but not in Vite's browser ESM (app source
+// isn't CJS-wrapped like pre-bundled deps), so it throws `module is not defined`.
+// Vite's `define` can't replace `module.hot` (esbuild treats `module` specially),
+// so rewrite it to `false` here — the webpack-only block is skipped and Vite's own
+// HMR (import.meta.hot) still applies to the module graph.
+function enactNeutralizeWebpackHmrPlugin () {
+	return {
+		name: 'enact-neutralize-webpack-hmr',
+		enforce: 'pre',
+		transform (code, id) {
+			const file = id.split('?')[0];
+			if (file.includes('/node_modules/') || !/\.(?:jsx?|tsx?|mjs)$/.test(file)) return null;
+			if (!code.includes('module.hot')) return null;
+			return {code: code.replace(/\bmodule\.hot\b/g, 'false'), map: null};
+		}
+	};
+}
+
 // Non-browser iLib platform loaders (`./lib/ilib-qt|rhino|ringo|node|….js`) and
 // their `*Loader.js` helpers. iLib selects these via runtime platform detection;
 // the browser branch never reaches them, but bundlers try (and fail) to resolve
@@ -221,6 +241,19 @@ module.exports = function (
 	const entry = createCombinedEntry(app.context, ['core-js/stable', appEntry]);
 	const coreJsDir = path.dirname(require.resolve('core-js/package.json'));
 
+	// Enumerate the `@enact/*` packages installed in the app so they can be deduped
+	// (Vite `resolve.dedupe` takes exact names, not globs). Apps like the aggregate
+	// `all-samples` import source from many sibling packages, each with its own
+	// node_modules and thus its own copy of every `@enact/*` dep — deduping collapses
+	// them to one copy, cutting duplicate dependency optimization and bundle bloat.
+	const enactDir = path.join(app.context, 'node_modules', '@enact');
+	const enactPackages = fs.existsSync(enactDir) ?
+		fs
+			.readdirSync(enactDir)
+			.filter(name => !name.startsWith('.') && fs.statSync(path.join(enactDir, name)).isDirectory())
+			.map(name => '@enact/' + name) :
+		[];
+
 	const postcssPlugins = getPostCssPlugins({useTailwind});
 
 	// Backward-compatibility ilib alias, matching webpack.config.js.
@@ -269,7 +302,7 @@ module.exports = function (
 			// components across them triggers "Invalid hook call / more than one copy
 			// of React". Webpack avoids this via single-tree resolution + exposing
 			// React on global in the isomorphic path.
-			dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+			dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', ...enactPackages],
 			// Don't follow symlinks to their real paths (matches webpack `symlinks: false`).
 			preserveSymlinks: true
 		},
@@ -332,6 +365,14 @@ module.exports = function (
 			legalComments: 'none'
 		},
 		optimizeDeps: {
+			// Enact apps ship no `index.html`, so Vite's dependency scanner has no
+			// default entry to crawl and would otherwise discover every dependency
+			// lazily on first request — each new one triggering a re-optimize +
+			// full page reload. That churns badly for apps that import source from
+			// sibling packages (e.g. `all-samples`). Point the scanner at the app
+			// entry so it crawls the whole import graph (including cross-package
+			// imports) and pre-bundles everything in one pass.
+			entries: [path.relative(app.context, appEntry).replace(/\\/g, '/')],
 			// The dev-server dependency scanner/optimizer is esbuild-based and defaults
 			// the `.js` loader to `js`; Enact authors JSX inside plain `.js` files, which
 			// breaks the scan without this. (Request-time transforms go through
@@ -345,9 +386,20 @@ module.exports = function (
 		server: {
 			host: process.env.HOST || '0.0.0.0',
 			port: parseInt(process.env.PORT || 8080),
-			hmr: true
+			hmr: true,
+			fs: {
+				// Enact apps can import source/assets from sibling package directories
+				// outside the app root (e.g. the aggregate `all-samples` pulls views and
+				// fonts from neighbouring sample packages). Vite's default fs allow-list
+				// (the workspace root) blocks those with "outside of Vite serving allow
+				// list". Disable the restriction so the dev server serves any imported
+				// file, matching webpack-dev-server's behaviour.
+				strict: false
+			}
 		},
 		plugins: [
+			// Rewrite webpack's `module.hot` in app source before other transforms.
+			enactNeutralizeWebpackHmrPlugin(),
 			react({
 				// @enact/* packages ship raw source (JSX inside .js, ESM) rather than
 				// pre-compiled output, so they must be transpiled like app code. Mirror

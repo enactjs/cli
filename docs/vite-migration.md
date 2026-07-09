@@ -41,13 +41,15 @@ more representative case):
   copied/served); **locale filtering** `-l en-US,ko-KR` trims 70 MB → 19 MB
   (6,755 → 1,988 files, correct locales); **webOS meta** `appinfo.json` + icons
   emitted/served; **ESLint** lints the sources (clean) and enforces rules.
-- **Real-browser render** verified on `qa-dropdown` (nested-`@enact` app): the
-  app mounts and renders correctly (see runtime fixes below). Note: HTTP-200 /
-  transform checks do **not** execute the page JS — always load a real browser.
+- **Real-browser render** verified on several apps — `qa-dropdown` (nested
+  `@enact`), the redux sample (webpack HMR API), and the aggregate `all-samples`
+  (imports source from 15 sibling packages): each mounts and renders correctly
+  (see runtime fixes R1–R8 below). Note: HTTP-200 / transform checks do **not**
+  execute the page JS — always load a real browser.
 
-Eight config issues plus three runtime issues were found and fixed while
-validating. The runtime ones (only visible when the page actually executes in a
-browser) were:
+Eight config issues plus eight runtime issues were found and fixed while
+validating. The runtime ones (mostly only visible when the page actually executes
+in a real browser — HTTP-200/transform checks don't run the page JS) were:
 
 - **R1 — `global` is not defined.** Enact's `polyfills.js`/core-js reference the
   Node `global`, absent in the browser (webpack supplied it via
@@ -62,6 +64,35 @@ browser) were:
 - **R3 — multiple copies of React** ("Invalid hook call"). Nested `@enact` deps
   (`@enact/limestone/node_modules/@enact/*`) + Vite pre-bundling resolved several
   physical `react` copies. Fix: `resolve.dedupe: ['react','react-dom','react/jsx-runtime','react/jsx-dev-runtime']`.
+- **R4 — webpack's HMR API in app source** (`module is not defined`). Some apps
+  guard reducer hot-reload with `if (module.hot) { module.hot.accept(…) }`;
+  `module` exists in the webpack runtime but not in Vite's browser ESM (app source
+  isn't CJS-wrapped like pre-bundled deps). Vite's `define` can't replace it
+  (esbuild treats `module` specially), so a `transform` plugin
+  (`enact-neutralize-webpack-hmr`) rewrites `module.hot` → `false` in app source;
+  the webpack-only block is dead-stripped. (Surfaced on the redux sample.)
+- **R5 — Vite fs allow-list.** Apps that import source/assets from **sibling**
+  packages (e.g. the aggregate `all-samples`) are blocked by Vite's `server.fs`
+  allow-list ("outside of Vite serving allow list"). Fix: `server.fs.strict =
+  false`, matching webpack-dev-server's unrestricted file serving.
+- **R6 — dependency-scan churn / repeated reloads.** Enact apps ship no
+  `index.html`, so Vite's dep scanner had no entry to crawl and discovered deps
+  lazily on first request — each new one triggering a re-optimize + full page
+  reload (severe for apps importing from many packages). Fix:
+  `optimizeDeps.entries = [<app entry>]` so the scanner crawls the whole import
+  graph (incl. cross-package imports) and pre-bundles in one pass.
+- **R7 — theme i18n resource 404s.** `ViteILibPlugin` set `ILIB_<THEME>_PATH`
+  (used by the theme's `$L`/`ResBundle` as `basePath`) to the theme **package
+  root** instead of its `resources/` dir, so the loader fetched
+  `…/ilibmanifest.json` (404) and then blindly requested the default string paths
+  (`strings.json`, `en/strings.json`, … — all 404). Fix: point the constant at the
+  served data dir; the iLib **base** still points at the package dir (its loader
+  appends `locale/` itself). In `dev-utils/plugins/ViteILibPlugin`.
+- **R8 — duplicate `@enact` copies.** Apps that aggregate independently-installed
+  sibling packages resolve a separate physical copy of every `@enact/*` dep,
+  multiplying dep-optimization + bundle size (and risking multiple-instance bugs,
+  the `@enact` analogue of R3). Fix: extend `resolve.dedupe` to the app's installed
+  `@enact/*` packages (collapsed e.g. 15 copies → 1 on `all-samples`).
 
 The eight config issues (all in `config/vite.config.js` unless noted) — the
 non-obvious part of the port — were:

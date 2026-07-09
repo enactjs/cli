@@ -275,11 +275,15 @@ async function viteServe (opts, host, port) {
 	const server = await createServer(config);
 	await server.listen();
 
+	// Vite falls back to the next free port when the requested one is taken
+	const address = server.httpServer && server.httpServer.address();
+	const actualPort = (address && typeof address === 'object' && address.port) || port;
+
 	// Append the same "ready" message the webpack path shows
 	const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
 	// Strip a trailing slash from the base so root URLs read `http://host:port`
 	// (matching the webpack path, which passes `publicPath.slice(0, -1)`).
-	const urls = prepareUrls(protocol, host, port, (app.publicUrl || '/').replace(/\/$/, ''));
+	const urls = prepareUrls(protocol, host, actualPort, (app.publicUrl || '/').replace(/\/$/, ''));
 	console.log(chalk.green('Compiled successfully!'));
 	console.log();
 	console.log(`You can now view ${chalk.bold(app.name)} in the browser.`);
