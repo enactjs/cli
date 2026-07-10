@@ -26,7 +26,8 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const {optionParser: app} = require('@enact/dev-utils');
-const {useVite} = require('./vite-utils');
+
+const {isViteBundler} = require('./vite-utils');
 
 let chalk;
 
@@ -395,7 +396,7 @@ function api (opts) {
 	}
 
 	// Experimental Vite bundler path (opt-in via `--vite` or ENACT_BUNDLER=vite).
-	if (useVite(opts)) {
+	if (isViteBundler(opts)) {
 		process.env.NODE_ENV = 'development';
 		return viteServe(opts, host, port);
 	}

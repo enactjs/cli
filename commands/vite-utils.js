@@ -5,8 +5,8 @@
  */
 
 // Whether the experimental Vite bundler is selected (via `--vite` or ENACT_BUNDLER=vite).
-function useVite (opts) {
+function isViteBundler (opts) {
 	return Boolean(opts.vite) || /^vite$/i.test(process.env.ENACT_BUNDLER || '');
 }
 
-module.exports = {useVite};
+module.exports = {isViteBundler};

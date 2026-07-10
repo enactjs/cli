@@ -20,7 +20,8 @@ const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const printBuildError = require('react-dev-utils/printBuildError');
 const webpack = require('webpack');
 const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
-const {useVite} = require('./vite-utils');
+
+const {isViteBundler} = require('./vite-utils');
 
 let chalk;
 let stripAnsi;
@@ -309,7 +310,7 @@ function api (opts = {}) {
 	}
 
 	// Experimental Vite bundler path (opt-in via `--vite` or ENACT_BUNDLER=vite).
-	if (useVite(opts)) {
+	if (isViteBundler(opts)) {
 		process.env.NODE_ENV = opts.production ? 'production' : 'development';
 		return viteBuild(opts);
 	}
