@@ -50,6 +50,32 @@ const bareTasks = {
 	test: 'jest --config config/jest/jest.config.js',
 	'test-watch': 'jest --config config/jest/jest.config.js --watch'
 };
+// Vite variants of the barebones setup (used with `--vite`). Vite copies `public/`
+// automatically (no `cpy` step) and loads the generated root `vite.config.mjs`.
+// Reuse the same `rimraf` pin as the webpack bare setup so the version lives in one place.
+const bareDepsVite = {rimraf: bareDeps.rimraf};
+const bareTasksVite = {
+	serve: 'vite',
+	pack: 'vite build --mode development',
+	'pack-p': 'vite build',
+	watch: 'vite build --watch --mode development',
+	clean: 'rimraf build dist',
+	lint: bareTasks.lint,
+	license: bareTasks.license,
+	test: bareTasks.test,
+	'test-watch': bareTasks['test-watch']
+};
+// Bundler-driven scripts that understand `--vite`; used to steer a non-bare Vite eject.
+const VITE_CAPABLE_SCRIPTS = ['serve', 'pack'];
+// The Enact Vite config (config/vite.config.js) is a factory `(mode) => InlineConfig`,
+// not the object/`{command, mode}` shape Vite's CLI expects. A bare Vite eject writes
+// this thin root config to adapt it so `vite` / `vite build` work directly.
+const VITE_ROOT_CONFIG =
+	"import {createRequire} from 'module';\n" +
+	"const require = createRequire(import.meta.url);\n" +
+	'// config/vite.config.js exports `(mode) => InlineConfig`; Vite calls with {command, mode}.\n' +
+	"const enactViteConfig = require('./config/vite.config.js');\n" +
+	"export default ({mode}) => enactViteConfig(mode || 'production');\n";
 
 function displayHelp () {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -62,6 +88,9 @@ function displayHelp () {
 	console.log('    -b, --bare        Abandon Enact CLI command enhancements');
 	console.log('                      and eject into a a barebones setup (using');
 	console.log('                      webpack, eslint, karma, etc. directly)');
+	console.log('    --vite            [Experimental] Use Vite instead of webpack:');
+	console.log('                      alone, points the serve/pack scripts at the');
+	console.log('                      Vite path; with --bare, emits a bare Vite setup');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -154,12 +183,15 @@ function copySanitizedFile ({src, dest}) {
 	fs.writeFileSync(dest, data, {encoding: 'utf8'});
 }
 
-function configurePackage (bare) {
+function configurePackage (bare, vite) {
 	const own = require('../package.json');
 	const app = require(path.resolve('package.json'));
 	const backup = JSON.stringify(app, null, 2) + os.EOL;
 	const availScripts = fs.existsSync('./scripts') ? fs.readdirSync('./scripts').map(f => f.replace(/\.js$/, '')) : [];
 	const enactCLI = new RegExp('enact (' + availScripts.join('|') + ')', 'g');
+	// Select the webpack or Vite flavor of the barebones tasks/deps.
+	const tasks = vite ? bareTasksVite : bareTasks;
+	const deps = vite ? bareDepsVite : bareDeps;
 	const eslintConfig = {extends: 'enact'};
 	const eslintIgnore = ['build/*', 'config/*', 'dist/*', 'node_modules/*', 'scripts/*'];
 	const conflicts = [];
@@ -182,9 +214,9 @@ function configurePackage (bare) {
 
 	// Add any additional dependencies
 	if (bare) {
-		Object.keys(bareDeps).forEach(key => {
+		Object.keys(deps).forEach(key => {
 			console.log(`	Adding ${chalk.cyan(key)} to devDependencies`);
-			app.devDependencies[key] = bareDeps[key];
+			app.devDependencies[key] = deps[key];
 		});
 	}
 
@@ -193,16 +225,20 @@ function configurePackage (bare) {
 	// Update NPM task scripts
 	const type = chalk.cyan('npm script');
 	Object.keys(app.scripts).forEach(key => {
-		if (bare && bareTasks[key]) {
+		if (bare && tasks[key]) {
 			if (!conflicts.includes(type)) conflicts.push(type);
-			const bin = bareTasks[key].match(/^(?:node\s+)*(\S*)/);
-			const updated = (bin && bin[1]) || bareTasks[key];
+			const bin = tasks[key].match(/^(?:node\s+)*(\S*)/);
+			const updated = (bin && bin[1]) || tasks[key];
 			console.log(`	Updating npm task ${chalk.cyan(key)} to use ${chalk.cyan(updated)}`);
-			app.scripts[key] = bareTasks[key];
+			app.scripts[key] = tasks[key];
 		} else if (!bare) {
 			app.scripts[key] = app.scripts[key].replace(enactCLI, (match, name) => {
-				console.log(`	Updating npm task ${chalk.cyan(key)} to use ` + chalk.cyan(`scripts/${name}.js`));
-				return `node ./scripts/${name}.js`;
+				// In a non-bare Vite eject, steer the bundler-driven scripts down the
+				// Vite path so `npm run serve`/`pack` use Vite, not webpack. Only the
+				// commands that understand the flag (serve, pack) get it.
+				const viteFlag = vite && VITE_CAPABLE_SCRIPTS.includes(name) ? ' --vite' : '';
+				console.log(`	Updating npm task ${chalk.cyan(key)} to use ` + chalk.cyan(`scripts/${name}.js${viteFlag}`));
+				return `node ./scripts/${name}.js${viteFlag}`;
 			});
 		}
 	});
@@ -259,7 +295,7 @@ function npmInstall () {
 	});
 }
 
-function api ({bare = false} = {}) {
+function api ({bare = false, vite = false} = {}) {
 	if (bare) {
 		assets.pop();
 	}
@@ -270,9 +306,15 @@ function api ({bare = false} = {}) {
 			console.log(chalk.cyan(`Copying files into ${process.cwd()}`));
 			assets.forEach(dir => !fs.existsSync(dir.dest) && fs.mkdirSync(dir.dest, {recursive: true}));
 			files.forEach(copySanitizedFile);
+			// A bare Vite eject drives the Vite CLI directly, which loads a root
+			// config; write the adapter that wires it to config/vite.config.js.
+			if (bare && vite) {
+				console.log(`	Adding ${chalk.cyan('vite.config.mjs')} to the project`);
+				fs.writeFileSync('vite.config.mjs', VITE_ROOT_CONFIG, {encoding: 'utf8'});
+			}
 			console.log();
 			console.log(chalk.cyan('Configuring package.json'));
-			const con = configurePackage(bare);
+			const con = configurePackage(bare, vite);
 			console.log();
 			console.log(chalk.cyan('Running npm install...'));
 			return npmInstall().then(() => {
@@ -298,7 +340,7 @@ function api ({bare = false} = {}) {
 
 function cli (args) {
 	const opts = minimist(args, {
-		boolean: ['bare', 'help'],
+		boolean: ['bare', 'vite', 'help'],
 		alias: {b: 'bare', h: 'help'}
 	});
 	if (opts.help) displayHelp();
@@ -307,7 +349,7 @@ function cli (args) {
 
 	import('chalk').then(({default: _chalk}) => {
 		chalk = _chalk;
-		api({bare: opts.bare}).catch(err => {
+		api({bare: opts.bare, vite: opts.vite}).catch(err => {
 			console.error(chalk.red('ERROR: ') + err.message);
 			process.exit(1);
 		});
