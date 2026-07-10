@@ -207,6 +207,8 @@ function printErrorDetails (err, handler) {
 // reported and then genuinely skipped. In particular `--isomorphic` is forced off
 // (client render) rather than forwarded, because setting ENACT_PACK_ISOMORPHIC
 // without prerendered markup would make the app hydrate an empty root.
+//
+// Wired here (via mixins.applyVite): --no-minify, --verbose, --stats.
 async function viteBuild (opts) {
 	const {build: viteBuildApi} = require('vite');
 
@@ -214,6 +216,18 @@ async function viteBuild (opts) {
 		if (opts[flag]) {
 			console.log(
 				chalk.yellow(`NOTICE: --${flag} is not yet supported by the Vite bundler and will be ignored.`)
+			);
+		}
+	});
+	// These only shape the --framework/--externals output, which isn't ported, so
+	// they're inert on the Vite path; note it rather than fail silently.
+	['externals-public', 'externals-polyfill', 'externals-corejs'].forEach(flag => {
+		if (opts[flag]) {
+			console.log(
+				chalk.yellow(
+					`NOTICE: --${flag} only applies alongside --framework/--externals, which the Vite ` +
+						'bundler does not support yet; ignored.'
+				)
 			);
 		}
 	});
@@ -238,6 +252,10 @@ async function viteBuild (opts) {
 	}
 	// Output override
 	if (opts.output) config.build.outDir = path.resolve(opts.output);
+	// Apply the build-shaping flags (--no-minify, --verbose, --stats), mirroring the
+	// webpack path's `mixins.apply`. Runs after the output override so --stats writes
+	// stats.html into the final outDir.
+	mixins.applyVite(config, opts);
 	// Watch mode
 	if (opts.watch) {
 		config.build.watch = {};

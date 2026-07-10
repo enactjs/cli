@@ -234,8 +234,18 @@ opted into via **`--vite`** or **`ENACT_BUNDLER=vite`**; otherwise webpack runs
 unchanged. Both bundlers coexist during migration.
 
 - `enact serve --vite` → `vite.createServer(...).listen()` (native ESM dev server, HMR via `@vitejs/plugin-react`).
-- `enact pack --vite` / `enact pack -p --vite` → `vite.build(...)` (supports `--watch`, `-o/--output`, `--content-hash`, `--no-split-css`, `-l/--locales`, `--no-linting`).
-- Webpack-only flags on the Vite path (`--isomorphic`, `--snapshot`, framework/externals) print a "not yet supported, ignored" notice.
+- `enact pack --vite` / `enact pack -p --vite` → `vite.build(...)` (supports `--watch`, `-o/--output`, `--content-hash`, `--no-split-css`, `-l/--locales`, `--no-linting`, `--entry`).
+- Build-shaping flags are wired via **`mixins.applyVite`** (the Vite counterpart to
+  the webpack `mixins.apply`, in `dev-utils/mixins/vite.js`):
+  - `--stats` → static bundle-analysis treemap `dist/stats.html`
+    (`rollup-plugin-visualizer`, mirroring webpack's `webpack-bundle-analyzer`).
+  - `--verbose` → raises Vite's log level and narrates build phases with a module
+    count (no percentage — Rollup has no fixed total up front, unlike webpack's `ProgressPlugin`).
+  - `--no-minify` (private) → Terser with `mangle:false` + beautify, keeping dead-code
+    removal (mirrors the webpack `unmangled` mixin). Only affects production builds.
+- `enact eject --vite` wires the ejected app's scripts to the Vite path (see
+  [vite-eject-testing.md](vite-eject-testing.md)).
+- Webpack-only flags on the Vite path (`--isomorphic`, `--snapshot`, framework/externals) print a "not yet supported, ignored" notice. `--externals-public`/`--externals-polyfill`/`--externals-corejs` only shape that (unported) framework/externals output, so they print an "ignored" notice too.
 
 The reusable bundler plugins were **added to `@enact/dev-utils`** — mirroring how
 the webpack plugins (`ILibPlugin`, `WebOSMetaPlugin`, …) live there — and are
