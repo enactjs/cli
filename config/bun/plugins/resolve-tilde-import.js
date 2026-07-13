@@ -86,17 +86,55 @@ function parseCssUrls (value) {
 	return urls;
 }
 
-function resolveCssUrlPath (url, fromDir) {
+function normalizeCssUrlPath (url) {
+	return url.replace(/\\/g, '/').split(/[?#]/)[0];
+}
+
+function resolveCssAssetPath (url, fromDir) {
 	if (isExternalUrl(url) || isAppRootUrl(url)) {
 		return null;
 	}
 
-	const resolvedPath = path.resolve(fromDir, url);
-	if (fs.existsSync(resolvedPath)) {
-		return toCssRelativeImport(fromDir, resolvedPath);
+	const directPath = path.resolve(fromDir, url);
+	if (fs.existsSync(directPath)) {
+		return directPath;
+	}
+
+	// LESS keeps url() paths relative to the file where they were authored, even
+	// after those sheets are imported elsewhere (e.g. fonts.less -> ThemeDecorator).
+	const segments = normalizeCssUrlPath(url).split('/').filter(Boolean);
+	while (segments[0] === '..') {
+		segments.shift();
+	}
+
+	if (!segments.length) {
+		return null;
+	}
+
+	const tailPath = segments.join('/');
+	let searchDir = fromDir;
+	while (searchDir !== path.dirname(searchDir)) {
+		const candidate = path.join(searchDir, tailPath);
+		if (fs.existsSync(candidate)) {
+			return candidate;
+		}
+		searchDir = path.dirname(searchDir);
 	}
 
 	return null;
+}
+
+function toBundlerCssUrl (filePath) {
+	return filePath.replace(/\\/g, '/');
+}
+
+function resolveCssUrlPath (url, fromDir) {
+	const resolvedPath = resolveCssAssetPath(url, fromDir);
+	if (!resolvedPath) {
+		return null;
+	}
+
+	return toBundlerCssUrl(resolvedPath);
 }
 
 function rewriteCssUrls (value, fromDir) {
@@ -142,6 +180,7 @@ module.exports = {
 	isExternalUrl,
 	isAppRootUrl,
 	resolveAppRootImport,
+	resolveCssAssetPath,
 	resolveCssUrlPath,
 	rewriteCssUrls,
 	createPostcssUrlPlugin

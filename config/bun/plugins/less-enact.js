@@ -37,6 +37,20 @@ async function compileSass (source, filePath) {
 	return result.css;
 }
 
+function createCssLoadResult (filePath, processed, moduleMode) {
+	const result = {
+		loader: 'css',
+		contents: processed.css,
+		resolveDir: path.dirname(filePath)
+	};
+
+	if (moduleMode) {
+		result.exports = processed.exports;
+	}
+
+	return result;
+}
+
 function createLessEnactPlugin (options = {}) {
 	const postcssPlugin = createPostcssEnactPlugin(options);
 	const appContext = options.context || process.cwd();
@@ -51,18 +65,7 @@ function createLessEnactPlugin (options = {}) {
 				const moduleMode = isModuleStylesheet(args.path, options.forceCSSModules);
 				const processed = await postcssPlugin.processCss(css, args.path, moduleMode);
 
-				if (moduleMode) {
-					return {
-						loader: 'css',
-						contents: processed.css,
-						exports: processed.exports
-					};
-				}
-
-				return {
-					loader: 'css',
-					contents: processed.css
-				};
+				return createCssLoadResult(args.path, processed, moduleMode);
 			});
 
 			build.onLoad({filter: /\.less$/}, async args => {
@@ -79,37 +82,15 @@ function createLessEnactPlugin (options = {}) {
 				const moduleMode = isModuleStylesheet(args.path, options.forceCSSModules);
 				const processed = await postcssPlugin.processCss(lessResult.css, args.path, moduleMode);
 
-				if (moduleMode) {
-					return {
-						loader: 'css',
-						contents: processed.css,
-						exports: processed.exports
-					};
-				}
-
-				return {
-					loader: 'css',
-					contents: processed.css
-				};
+				return createCssLoadResult(args.path, processed, moduleMode);
 			});
 
 			build.onLoad({filter: /\.css$/}, async args => {
-				const isModule = /\.module\.css$/.test(args.path) || options.forceCSSModules;
+				const moduleMode = /\.module\.css$/.test(args.path) || options.forceCSSModules;
 				const cssSource = await Bun.file(args.path).text();
-				const cssProcessed = await postcssPlugin.processCss(cssSource, args.path, isModule);
+				const cssProcessed = await postcssPlugin.processCss(cssSource, args.path, moduleMode);
 
-				if (isModule) {
-					return {
-						loader: 'css',
-						contents: cssProcessed.css,
-						exports: cssProcessed.exports
-					};
-				}
-
-				return {
-					loader: 'css',
-					contents: cssProcessed.css
-				};
+				return createCssLoadResult(args.path, cssProcessed, moduleMode);
 			});
 		}
 	};
