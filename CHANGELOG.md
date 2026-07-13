@@ -3,6 +3,13 @@
 ### bootstrap
 
 * Fixed `--override` to support `package-lock.json` with `lockfileVersion` 2 and 3.
+* Detects `bun.lock` / `bun.lockb` and uses `bun install` instead of npm when present.
+
+### serve, pack
+
+* Replaced webpack and webpack-dev-server with [Bun](https://bun.com) (`Bun.build()` and `Bun.serve()` with HMR).
+* Added `config/bun/` bundler plugins for Babel, LESS, PostCSS, SCSS, and CSS Modules.
+* Requires Bun 1.3+ (`engines.bun`).
 
 ## 7.3.3 (July 7, 2026)
 

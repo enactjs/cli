@@ -5,7 +5,10 @@ sidebar:
 ---
 ## Requirements
 
-Node 10 LTS or later.
+* Node.js 20.12+, 22.x, or 24+
+* [Bun](https://bun.com) 1.3+ (bundler and dev server)
+
+Install Bun from https://bun.com/docs/installation before using `@enact/cli` v8+.
 
 ## Installation via npm
 

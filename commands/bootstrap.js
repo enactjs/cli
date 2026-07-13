@@ -17,9 +17,9 @@ function displayHelp () {
 	console.log(`    ${e} [options]`);
 	console.log();
 	console.log('  Options');
-	console.log('    -b, --base        NPM install root level package');
+	console.log('    -b, --base        Install root level package dependencies');
 	console.log('                      (enabled by default)');
-	console.log('    -s, --sampler     NPM install sampler package');
+	console.log('    -s, --sampler     Install sampler package');
 	console.log('                      (enabled by default)');
 	console.log('    -a, --allsamples  NPM install all sample packages');
 	console.log('    -l, --link        After install, attempt to link any available');
@@ -37,10 +37,17 @@ function displayHelp () {
 	process.exit(0);
 }
 
-function npmExec (args, cwd = process.cwd(), loglevel) {
+function detectPackageManager (cwd) {
+	if (fs.existsSync(path.join(cwd, 'bun.lock')) || fs.existsSync(path.join(cwd, 'bun.lockb'))) {
+		return 'bun';
+	}
+	return 'npm';
+}
+
+function packageExec (command, args, cwd = process.cwd(), loglevel) {
 	return new Promise((resolve, reject) => {
-		if (loglevel) args.unshift('--loglevel', loglevel);
-		const child = spawn('npm', args, {stdio: 'inherit', cwd});
+		if (command === 'npm' && loglevel) args.unshift('--loglevel', loglevel);
+		const child = spawn(command, args, {stdio: 'inherit', cwd});
 		child.on('close', code => {
 			if (code !== 0) {
 				reject(new Error('Failed to ' + args[args.length - 1] + ': ' + path.basename(cwd)));
@@ -49,6 +56,20 @@ function npmExec (args, cwd = process.cwd(), loglevel) {
 			}
 		});
 	});
+}
+
+function npmExec (args, cwd = process.cwd(), loglevel) {
+	const pm = detectPackageManager(cwd);
+	if (pm === 'bun') {
+		if (args[0] === 'install') {
+			return packageExec('bun', ['install'], cwd, loglevel);
+		}
+		if (args[0] === 'run') {
+			return packageExec('bun', ['run', args[1]], cwd, loglevel);
+		}
+	}
+	if (loglevel) args.unshift('--loglevel', loglevel);
+	return packageExec('npm', args, cwd, loglevel);
 }
 
 function newline () {

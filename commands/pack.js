@@ -1,25 +1,11 @@
 /* eslint no-console: off, no-undef: off */
 /* eslint-env node, es6 */
-// @remove-on-eject-begin
-/**
- * Portions of this source code file are from create-react-app, used under the
- * following MIT license:
- *
- * Copyright (c) 2013-present, Facebook, Inc.
- * https://github.com/facebook/create-react-app
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-// @remove-on-eject-end
 const path = require('path');
 const {filesize} = require('filesize');
 const fs = require('fs-extra');
 const minimist = require('minimist');
-const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
-const printBuildError = require('react-dev-utils/printBuildError');
-const webpack = require('webpack');
-const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
+const {optionParser: app} = require('@enact/dev-utils');
+const {spawnBunScript} = require('../config/bun/spawn');
 
 let chalk;
 let stripAnsi;
@@ -57,110 +43,19 @@ function displayHelp () {
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
-	/*
-		Private Options:
-			--entry              	Specify an override entrypoint
-			--no-minify           	Will skip minification during production build
-			--no-split-css        	Will not split CSS into separate files
-			--framework           	Builds the @enact/*, react, and react-dom into an external framework
-			--externals           	Specify a local directory path to the standalone external framework
-			--externals-public    	Remote public path to the external framework for use injecting into HTML
-			--externals-polyfill  	Flag whether to use external polyfill (or include in framework build)
-			--ilib-additional-path	Specify iLib additional resources path
-	*/
 	process.exit(0);
 }
 
-function details (err, stats, output) {
-	let messages;
-	if (err) {
-		if (!err.message) return err;
-		let msg = err.message;
-
-		// Add additional information for postcss errors
-		if (Object.prototype.hasOwnProperty.call(err, 'postcssNode')) {
-			msg += '\nCompileError: Begins at CSS selector ' + err['postcssNode'].selector;
-		}
-
-		// Generate pretty/formatted warnins/errors
-		messages = formatWebpackMessages({
-			errors: [msg],
-			warnings: []
-		});
-	} else {
-		// Remove any ESLint fixable notices since we're not running via eslint command
-		// and don't support a `--fix` optiob ourselves; don't want to confuse devs
-		stats.compilation.warnings.forEach(w => {
-			const eslintFix = /\n.* potentially fixable with the `--fix` option./gm;
-			w.message = w.message.replace(eslintFix, '');
-		});
-
-		// Generate pretty/formatted warnins/errors
-		const statsJSON = stats.toJson({all: false, warnings: true, errors: true});
-		messages = formatWebpackMessages(statsJSON);
-	}
-
-	if (messages.errors.length) {
-		return new Error(messages.errors.join('\n\n'));
-	} else if (
-		typeof process.env.CI === 'string' &&
-		process.env.CI.toLowerCase() !== 'false' &&
-		messages.warnings.length
-	) {
-		// Ignore sourcemap warnings in CI builds. See #8227 for more info.
-		const filteredWarnings = messages.warnings.filter(w => !/Failed to parse source map/.test(w));
-		if (filteredWarnings.length) {
-			console.log(
-				chalk.yellow(
-					'\nTreating warnings as errors because process.env.CI = true. \n' +
-						'Most CI servers set it automatically.\n'
-				)
-			);
-			return new Error(filteredWarnings.join('\n\n'));
-		}
-	} else {
-		copyPublicFolder(output);
-		if (messages.warnings.length) {
-			console.log(chalk.yellow('Compiled with warnings:\n'));
-			console.log(messages.warnings.join('\n\n') + '\n');
-		} else {
-			console.log(chalk.green('Compiled successfully.'));
-		}
-		if (process.env.NODE_ENV === 'development') {
-			console.log(
-				chalk.yellow(
-					'NOTICE: This build contains debugging functionality and may run' +
-						' slower than in production mode.'
-				)
-			);
-		}
-		console.log();
-
-		printFileSizes(stats, output);
-		console.log();
-	}
-}
-
-function copyPublicFolder (output) {
-	const staticAssets = './public';
-	if (fs.existsSync(staticAssets)) {
-		fs.copySync(staticAssets, output, {
-			dereference: true
-		});
-	}
-}
-
-// Print a detailed summary of build files.
-function printFileSizes (stats, output) {
-	const assets = stats
-		.toJson({all: false, assets: true, cachedAssets: true})
-		.assets.filter(asset => /\.(js|css|bin)$/.test(asset.name))
-		.map(asset => {
-			const size = fs.statSync(path.join(output, asset.name)).size;
+function printFileSizes (output) {
+	const assets = fs
+		.readdirSync(output)
+		.filter(name => /\.(js|css|bin)$/.test(name))
+		.map(name => {
+			const size = fs.statSync(path.join(output, name)).size;
 			return {
-				folder: path.relative(app.context, path.join(output, path.dirname(asset.name))),
-				name: path.basename(asset.name),
-				size: size,
+				folder: path.relative(app.context, output),
+				name,
+				size,
 				sizeLabel: filesize(size)
 			};
 		});
@@ -173,8 +68,7 @@ function printFileSizes (stats, output) {
 		let sizeLabel = asset.sizeLabel;
 		const sizeLength = stripAnsi(sizeLabel).length;
 		if (sizeLength < longestSizeLabelLength) {
-			const rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
-			sizeLabel += rightPadding;
+			sizeLabel += ' '.repeat(longestSizeLabelLength - sizeLength);
 		}
 		console.log('	' + sizeLabel + '	' + chalk.dim(asset.folder + path.sep) + chalk.cyan(asset.name));
 	});
@@ -182,59 +76,33 @@ function printFileSizes (stats, output) {
 
 function printErrorDetails (err, handler) {
 	console.log();
-	if (process.env.TSC_COMPILE_ON_ERROR === 'true') {
-		console.log(
-			chalk.yellow(
-				'Compiled with the following type errors (you may want to check ' +
-					'these before deploying your app):\n'
-			)
-		);
-		printBuildError(err);
-	} else {
-		console.log(chalk.red('Failed to compile.\n'));
-		printBuildError(err);
-		if (handler) handler();
-	}
+	console.log(chalk.red('Failed to compile.\n'));
+	console.log(err.message || err);
+	if (handler) handler();
 }
 
-// Create the production build and print the deployment instructions.
-function build (config) {
-	if (process.env.NODE_ENV === 'development') {
-		console.log('Creating a development build...');
-	} else {
-		console.log('Creating an optimized production build...');
-	}
-
-	return new Promise((resolve, reject) => {
-		const compiler = webpack(config);
-		compiler.run((err, stats) => {
-			err = details(err, stats, config.output.path);
-			if (err) {
-				reject(err);
-			} else {
-				resolve();
-			}
-		});
-	});
-}
-
-// Create the build and watch for changes.
-function watch (config) {
-	// Make sure webpack doesn't immediate bail on errors when watching.
-	config.bail = false;
-	if (process.env.NODE_ENV === 'development') {
-		console.log('Creating a development build and watching for changes...');
-	} else {
-		console.log('Creating an optimized production build and watching for changes...');
-	}
-	copyPublicFolder(config.output.path);
-	webpack(config).watch({}, (err, stats) => {
-		err = details(err, stats, config.output.path);
-		if (err) {
-			printErrorDetails(err);
-		}
-		console.log();
-	});
+function buildArgs (opts) {
+	const args = ['--context', app.context];
+	if (opts.production) args.push('--production');
+	if (opts.watch) args.push('--watch');
+	if (opts.isomorphic) args.push('--isomorphic');
+	if (opts.locales) args.push('--locales', opts.locales);
+	if (opts.snapshot) args.push('--snapshot');
+	if (opts.stats) args.push('--stats');
+	if (!opts.animation) args.push('--no-animation');
+	if (opts['content-hash']) args.push('--content-hash');
+	if (opts.minify === false) args.push('--no-minify');
+	if (opts.verbose) args.push('--verbose');
+	if (!opts.linting) args.push('--no-linting');
+	if (!opts['split-css']) args.push('--no-split-css');
+	if (opts['externals-corejs'] || opts['externals-polyfill']) args.push('--externals-polyfill');
+	if (opts.externals) args.push('--externals', opts.externals);
+	if (opts['externals-public']) args.push('--externals-public', opts['externals-public']);
+	if (opts.output) args.push('--output', opts.output);
+	if (opts.entry) args.push('--entry', opts.entry);
+	if (opts['ilib-additional-path']) args.push('--ilib-additional-path', opts['ilib-additional-path']);
+	if (opts['custom-skin']) args.push('--custom-skin');
+	return args;
 }
 
 function api (opts = {}) {
@@ -254,38 +122,62 @@ function api (opts = {}) {
 		app.applyEnactMeta({template: path.join(__dirname, '..', 'config', 'custom-skin-template.ejs')});
 	}
 
-	// make the framework option available globally in order to be used by the eslint-webpack-plugin custom configuration
 	process.env.FRAMEWORK = opts.framework;
-	// Do this as the first thing so that any code reading it knows the right env.
-	const configFactory = require('../config/webpack.config');
-	const config = configFactory(
-		opts.production ? 'production' : 'development',
-		!opts.linting,
-		opts['content-hash'],
-		opts.isomorphic,
-		!opts.animation,
-		!opts['split-css'],
-		opts['ilib-additional-path']
-	);
 
-	// Set any entry path override
-	if (opts.entry || app.entry) helper.replaceEntry(config, opts.entry || app.entry);
-
-	// Set any output path override
-	if (opts.output) config.output.path = path.resolve(opts.output);
-
-	mixins.apply(config, opts);
-
-	// Remove all content but keep the directory so that
-	// if you're in it, you don't end up in Trash
-	return fs.emptyDir(config.output.path).then(() => {
-		// Start the webpack build
-		if (opts.watch) {
-			// This will run infinitely until killed, even through errors
-			watch(config);
+	if (opts.framework) {
+		if (process.env.NODE_ENV === 'development' || !opts.production) {
+			console.log('Creating a development framework build...');
 		} else {
-			return build(config);
+			console.log('Creating an optimized production framework build...');
 		}
+		const output = path.resolve(opts.output || path.join(app.context, 'dist'));
+		return fs.emptyDir(output).then(() =>
+			spawnBunScript('build-framework.mjs', buildArgs({...opts, output}), {cwd: app.context}).then(() => {
+				console.log(chalk.green('Compiled successfully.'));
+				console.log();
+				printFileSizes(output);
+				console.log();
+			})
+		);
+	}
+
+	if (opts.entry || app.entry) {
+		opts.entry = opts.entry || app.entry;
+	}
+
+	if (opts.snapshot) {
+		opts.isomorphic = true;
+	}
+
+	const output = path.resolve(opts.output || path.join(app.context, 'dist'));
+
+	if (process.env.NODE_ENV === 'development' || !opts.production) {
+		console.log('Creating a development build...');
+	} else {
+		console.log('Creating an optimized production build...');
+	}
+
+	return fs.emptyDir(output).then(() => {
+		const build = spawnBunScript('build.mjs', buildArgs({...opts, output}), {cwd: app.context});
+		if (opts.watch) {
+			return build;
+		}
+		return build.then(() => {
+			console.log(chalk.green('Compiled successfully.'));
+			if (!opts.production) {
+				console.log(
+					chalk.yellow(
+						'NOTICE: This build contains debugging functionality and may run slower than in production mode.'
+					)
+				);
+			}
+			console.log();
+			printFileSizes(output);
+			if (opts.stats && fs.existsSync(path.join(output, 'stats.html'))) {
+				console.log(chalk.cyan('Bundle analysis written to ') + chalk.underline(path.join(output, 'stats.html')));
+			}
+			console.log();
+		});
 	});
 }
 
@@ -299,6 +191,7 @@ function cli (args) {
 			'split-css',
 			'framework',
 			'externals-corejs',
+			'externals-polyfill',
 			'stats',
 			'production',
 			'isomorphic',

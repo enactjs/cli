@@ -125,7 +125,7 @@ To use Sass, install Sass globally:
 npm install -g sass
 ```
 
-Now you can rename `src/App.css` to `src/App.scss` or `src/App.sass` and for using CSS modules, `src/App.module.scss` or `src/App.module.sass`. And update `src/App.js` to import `src/App.scss`. Enact CLI will compile these files properly through webpack for you.
+Now you can rename `src/App.css` to `src/App.scss` or `src/App.sass` and for using CSS modules, `src/App.module.scss` or `src/App.module.sass`. And update `src/App.js` to import `src/App.scss`. Enact CLI will compile these files properly through Bun for you.
 
 More information can be found [here](https://sass-lang.com/guide) to learn about Sass.
 
@@ -233,7 +233,7 @@ To accommodate devices with lower performance, the Enact CLI offers the `--no-an
 
 ## Caching
 
-For supporting better [`caching`](https://webpack.js.org/guides/caching/), Enact CLI provides `--content-hash` option to add a unique hash to each output file name based on the content of an asset.
+For supporting better caching, Enact CLI provides `--content-hash` option to add a unique hash to each output file name based on the content of an asset.
 
 Building With this option should produce the following output:
 
@@ -248,7 +248,7 @@ When the content changes, the output file name will change as well.
         199.85 kB       dist/main.2088c66150ab73b27793.css
 ```
 
-> **NOTE** The filename `main.*.js` will be changed after another building, even without making any changes. This is because webpack includes certain boilerplate, specifically the runtime and manifest, in the entry chunk.
+> **NOTE** The filename `main.*.js` may change after another building, even without making changes, depending on bundler runtime output.
 
 ## Isomorphic Support & Prerendering
 By using the isomorphic code layout option, your project bundle will be outputted in a versatile universal code format allowing potential usage outside the browser. The Enact CLI takes advantage of this mode by additionally generating an HTML output of your project and embedding it directly with the resulting **index.html**. By default, isomorphic mode will attempt to prerender only `en-US`, however with the `--locales` option, a wide variety of locales can be specified and prerendered. More details on isomorphic support and its limitations can be found [here](./isomorphic-support.md).
@@ -260,7 +260,10 @@ The v8 snapshot blob creation feature is highly experimental and temperamental d
 Similar to the [`enact serve`](./serving-apps.md) command, the watcher will build the project and wait for any detected source code changes. When a change is detected, it will rebuild the project. The rebuild time will be significantly faster since the process can actively cache and build only what has changed.
 
 ## Stats Analysis
-The Bundle analysis file option uses the popular [webpack-bundle-analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer) to create a visual representation of the project build to **stats.html**, showing the full module hierarchy arranged by output size. This can be very useful in determining where bloat is coming from or finding dependencies that may have been included by mistake.
+The `--stats` option generates bundle analysis files in the output directory using Bun's build metafile:
+
+* **stats.html** — static report with largest modules and output breakdown
+* **stats.json** — raw metafile data (compatible with [esbuild's bundle analyzer](https://esbuild.github.io/analyze/))
 
 ## Override Metadata
 The @enact/cli tool inspects the `enact` object in the project's package.json for [customization options](./starting-a-new-app.md#enact-project-settings). 
