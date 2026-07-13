@@ -1,35 +1,50 @@
-const fs = require('fs');
 const path = require('path');
 const postcss = require('postcss');
 const postcssImportJson = require('@daltontan/postcss-import-json');
 const postcssModules = require('postcss-modules');
 const {cssModuleIdent: getLocalIdent} = require('@enact/dev-utils');
+const {
+	resolveTildeImport,
+	toCssRelativeImport,
+	parseImportPath,
+	formatImportParams
+} = require('./resolve-tilde-import');
 
-function createPostcssImportJsonTildePlugin () {
+function createPostcssImportTildePlugin (appContext = process.cwd()) {
 	return {
-		postcssPlugin: 'postcss-import-json-tilde',
+		postcssPlugin: 'postcss-import-tilde',
 		Once (root) {
-			root.walkAtRules('import-json', atRule => {
-				let src = atRule.params.slice(1, -1);
-				if (!src.startsWith('~')) return;
+			const inputFile = root.source?.input?.file || appContext;
+			const currentFileDir = path.dirname(inputFile);
 
-				const packagePath = src.substring(1);
-				const currentFileDir = path.dirname(atRule.source.input.file || process.cwd());
-				let resolvedPath;
-				try {
-					resolvedPath = require.resolve(packagePath, {paths: [currentFileDir]});
-				} catch (e) {
-					resolvedPath = require.resolve(packagePath, {paths: [process.cwd()]});
+			root.walkAtRules(atRule => {
+				if (atRule.name !== 'import' && atRule.name !== 'import-json') {
+					return;
 				}
-				atRule.params = `"${path.relative(currentFileDir, resolvedPath)}"`;
+
+				const src = parseImportPath(atRule.params);
+				if (!src.startsWith('~')) {
+					return;
+				}
+
+				try {
+					const resolvedPath = resolveTildeImport(src.slice(1), currentFileDir, appContext);
+					const relativePath = toCssRelativeImport(currentFileDir, resolvedPath);
+					atRule.params = formatImportParams(atRule.params, relativePath);
+				} catch (error) {
+					if (process.env.NODE_ENV !== 'test') {
+						console.warn(`Could not resolve ${src}: ${error.message}`);
+					}
+				}
 			});
 		}
 	};
 }
-createPostcssImportJsonTildePlugin.postcss = true;
+createPostcssImportTildePlugin.postcss = true;
 
 function buildPostcssPlugins (options = {}) {
 	return [
+		createPostcssImportTildePlugin(options.context),
 		options.useTailwind && require('tailwindcss'),
 		require('postcss-flexbugs-fixes'),
 		require('postcss-preset-env')({
@@ -39,7 +54,6 @@ function buildPostcssPlugins (options = {}) {
 		}),
 		!options.useTailwind && require('postcss-normalize'),
 		options.ri !== false && require('postcss-resolution-independence')(options.ri),
-		createPostcssImportJsonTildePlugin(),
 		postcssImportJson({
 			map: (selector, value) => {
 				if (typeof value === 'object' && value !== null && value.$ref) {

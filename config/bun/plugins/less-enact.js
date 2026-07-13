@@ -1,11 +1,31 @@
 const path = require('path');
 const less = require('less');
 const sass = require('sass');
-const postcss = require('postcss');
 const {createPostcssEnactPlugin} = require('./postcss-enact');
+const {resolveTildeImport} = require('./resolve-tilde-import');
 
 function isModuleStylesheet (filePath, forceCSSModules) {
 	return forceCSSModules || /\.module\.(css|less|scss|sass)$/.test(filePath);
+}
+
+function createLessTildePlugin (appContext) {
+	class TildeFileManager extends less.FileManager {
+		supports (filename) {
+			return filename.charAt(0) === '~';
+		}
+
+		loadFile (filename, currentDirectory, options, environment) {
+			const resolvedPath = resolveTildeImport(filename.slice(1), currentDirectory, appContext);
+			return super.loadFile(resolvedPath, path.dirname(resolvedPath), options, environment);
+		}
+	}
+
+	return {
+		install (_less, pluginManager) {
+			pluginManager.addFileManager(new TildeFileManager());
+		},
+		minVersion: [3, 0, 0]
+	};
 }
 
 async function compileSass (source, filePath) {
@@ -19,6 +39,8 @@ async function compileSass (source, filePath) {
 
 function createLessEnactPlugin (options = {}) {
 	const postcssPlugin = createPostcssEnactPlugin(options);
+	const appContext = options.context || process.cwd();
+	const lessTildePlugin = createLessTildePlugin(appContext);
 
 	return {
 		name: 'enact-less',
@@ -47,9 +69,10 @@ function createLessEnactPlugin (options = {}) {
 				const source = await Bun.file(args.path).text();
 				const lessResult = await less.render(source, {
 					filename: args.path,
-					paths: [path.dirname(args.path)],
+					paths: [path.dirname(args.path), path.join(appContext, 'node_modules')],
 					modifyVars: Object.assign({__DEV__: !options.production}, options.accent || {}),
-					javascriptEnabled: true
+					javascriptEnabled: true,
+					plugins: [lessTildePlugin]
 				});
 
 				const processed = await postcssPlugin.processCss(lessResult.css, args.path);
