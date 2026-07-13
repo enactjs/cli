@@ -296,12 +296,13 @@ enact pack -p --vite -l en-US,ko-KR  # production build, locale-filtered
   now ported.)
 - **`icss` mode / `forceCSSModules`** (gap #8): Vite treats only `*.module.*` as
   CSS modules; the webpack `mode: 'icss'` nuance isn't replicated.
-- **Framework refinements** (post-port): building `--framework` *in a theme repo*
+- **Framework refinement** (post-port): building `--framework` *in a theme repo*
   (e.g. limestone) should include the theme's own components (webpack's
   `libraries.push('.')` case) — the current enumeration scans `node_modules/@enact`,
   so build the framework where all `@enact` incl. the theme are installed (e.g. an
-  app/sample context). `--externals-polyfill` (move core-js into the framework) is
-  not yet wired.
+  app/sample context). (`--externals-polyfill` — move core-js into the framework — **is**
+  wired: `pack --framework --externals-polyfill` folds core-js into the framework, and
+  `pack --externals=<path> --externals-polyfill` delegates it out of the app.)
 
 ## Recommendation
 
