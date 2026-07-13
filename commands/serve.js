@@ -44,7 +44,7 @@ function api (opts) {
 	if (opts.fast) process.env.FAST_REFRESH = 'true';
 
 	const host = process.env.HOST || opts.host || '0.0.0.0';
-	const port = parseInt(process.env.PORT || opts.port || 8080, 10);
+	const port = parseInt(process.env.PORT || opts.port || 8080);
 
 	if (['node', 'async-node', 'webworker'].includes(app.environment)) {
 		return Promise.reject(new Error('Serving is not supported for non-browser apps.'));

@@ -7,7 +7,8 @@ const {
 	resolveTildeImport,
 	toCssRelativeImport,
 	parseImportPath,
-	formatImportParams
+	formatImportParams,
+	createPostcssUrlPlugin
 } = require('./resolve-tilde-import');
 
 function createPostcssImportTildePlugin (appContext = process.cwd()) {
@@ -45,6 +46,7 @@ createPostcssImportTildePlugin.postcss = true;
 function buildPostcssPlugins (options = {}) {
 	return [
 		createPostcssImportTildePlugin(options.context),
+		createPostcssUrlPlugin(options.context),
 		options.useTailwind && require('tailwindcss'),
 		require('postcss-flexbugs-fixes'),
 		require('postcss-preset-env')({
@@ -69,7 +71,7 @@ function buildPostcssPlugins (options = {}) {
 function createPostcssEnactPlugin (options = {}) {
 	return {
 		async processCss (source, filePath, asModule) {
-			let exports = {};
+			let moduleExports = {};
 			const plugins = [...buildPostcssPlugins(options)];
 
 			if (asModule) {
@@ -81,15 +83,15 @@ function createPostcssEnactPlugin (options = {}) {
 								'[name]_[local]',
 								name
 							),
-						getJSON: (_cssFileName, moduleExports) => {
-							exports = moduleExports;
+						getJSON: (_cssFileName, cssExports) => {
+							moduleExports = cssExports;
 						}
 					})
 				);
 			}
 
 			const result = await postcss(plugins).process(source, {from: filePath});
-			return {css: result.css, exports: asModule ? exports : undefined};
+			return {css: result.css, exports: asModule ? moduleExports : undefined};
 		}
 	};
 }

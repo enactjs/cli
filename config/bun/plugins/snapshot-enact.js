@@ -16,7 +16,7 @@ function resolveSnapshotHelper (name) {
 
 	try {
 		return require.resolve(`@enact/dev-utils/plugins/SnapshotPlugin/${name}`);
-	} catch (e) {
+	} catch (_e) {
 		resolveDevUtilsModule(`plugins/SnapshotPlugin/${name}`);
 		throw new Error(`Unable to resolve SnapshotPlugin helper: ${name}`);
 	}

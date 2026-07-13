@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-function createCaseSensitiveEnactPlugin (options = {}) {
+function createCaseSensitiveEnactPlugin (_options = {}) {
 	if (process.platform === 'win32' || process.platform === 'darwin') {
 		return null;
 	}
@@ -34,11 +34,11 @@ function createCaseSensitiveEnactPlugin (options = {}) {
 							`Cannot resolve path '${args.path}' with different casing than the real path '${real}'.`
 						);
 					}
-				} catch (e) {
-					if (e.code === 'ENOENT') {
+				} catch (error) {
+					if (error.code === 'ENOENT') {
 						return undefined;
 					}
-					throw e;
+					throw error;
 				}
 
 				return undefined;

@@ -53,7 +53,7 @@ function resolveOvenBun () {
 				if (fs.existsSync(resolved)) {
 					return resolved;
 				}
-			} catch (err) {
+			} catch (_err) {
 				// optional platform package not installed
 			}
 		}

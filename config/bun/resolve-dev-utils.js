@@ -21,7 +21,7 @@ function resolveModulePath (basePath) {
 function resolveDevUtilsModule (subpath) {
 	try {
 		return require(`@enact/dev-utils/${subpath}`);
-	} catch (e) {
+	} catch (_e) {
 		// continue
 	}
 
@@ -32,7 +32,7 @@ function resolveDevUtilsModule (subpath) {
 		if (resolved) {
 			return require(resolved);
 		}
-	} catch (e) {
+	} catch (_e) {
 		// continue
 	}
 

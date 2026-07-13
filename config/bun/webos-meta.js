@@ -22,7 +22,7 @@ function readAppInfo (file) {
 	if (!fs.existsSync(file)) return null;
 	try {
 		return JSON.parse(fs.readFileSync(file, {encoding: 'utf8'}));
-	} catch (e) {
+	} catch (_e) {
 		console.log('ERROR: unable to read/parse appinfo.json at ' + file);
 		return null;
 	}

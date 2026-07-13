@@ -6,7 +6,7 @@ function resolveApplyBunPostBuild () {
 		if (typeof PrerenderPlugin.applyBunPostBuild === 'function') {
 			return PrerenderPlugin.applyBunPostBuild;
 		}
-	} catch (e) {
+	} catch (_e) {
 		// continue
 	}
 

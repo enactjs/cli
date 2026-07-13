@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs';
-import {fileURLToPath} from 'url';
 import {createRequire} from 'module';
 import {createBuildOptions, getCacheDir, ensureEntryFile} from './build-options.js';
 import {writeDevHtml} from './generate-html.js';
@@ -14,8 +13,7 @@ import {
 	createSetupProxyHandler
 } from './dev-serve-utils.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const require = createRequire(import.meta.url);
+const nodeRequire = createRequire(import.meta.url);
 
 function parseArgs (argv) {
 	const opts = {
@@ -37,17 +35,17 @@ function parseArgs (argv) {
 	return opts;
 }
 
-async function runBuild (buildOpts, entryFile, plugins, cacheDir) {
+async function runBuild (opts, entry, buildPlugins, outDir) {
 	const result = await Bun.build({
-		entrypoints: [entryFile],
-		outdir: cacheDir,
+		entrypoints: [entry],
+		outdir: outDir,
 		target: 'browser',
 		minify: false,
-		sourcemap: buildOpts.sourcemap ? 'linked' : 'none',
-		define: buildOpts.defines,
-		publicPath: buildOpts.publicPath || '/',
-		plugins,
-		alias: buildOpts.aliases
+		sourcemap: opts.sourcemap ? 'linked' : 'none',
+		define: opts.defines,
+		publicPath: opts.publicPath || '/',
+		plugins: buildPlugins,
+		alias: opts.aliases
 	});
 	if (!result.success) {
 		for (const log of result.logs) console.error(log);
@@ -71,7 +69,7 @@ const buildOpts = createBuildOptions({
 const cacheDir = getCacheDir(buildOpts.context);
 fs.mkdirSync(cacheDir, {recursive: true});
 
-const app = require('@enact/dev-utils/option-parser');
+const app = nodeRequire('@enact/dev-utils/option-parser');
 const entryFile = ensureEntryFile(buildOpts.context, buildOpts.mainEntry, {
 	isomorphic: false,
 	snapshot: false,
@@ -81,6 +79,7 @@ const plugins = createEnactPlugins({
 	production: false,
 	sourcemap: buildOpts.sourcemap,
 	context: buildOpts.context,
+	additionalModulePaths: buildOpts.additionalModulePaths,
 	accent: buildOpts.accent,
 	forceCSSModules: buildOpts.forceCSSModules,
 	useTailwind: buildOpts.useTailwind,
@@ -190,7 +189,7 @@ const localUrl = `${protocol}://localhost:${server.port}${normalizePublicPath(pu
 console.log(`Starting the development server at ${localUrl}`);
 
 if (cliOpts.open) {
-	const openBrowser = require('react-dev-utils/openBrowser');
+	const openBrowser = nodeRequire('react-dev-utils/openBrowser');
 	openBrowser(localUrl);
 }
 

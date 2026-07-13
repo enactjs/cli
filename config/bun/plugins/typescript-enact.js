@@ -25,7 +25,7 @@ function runTypeCheck (context) {
 	let ts;
 	try {
 		ts = require(require.resolve('typescript', {paths: [context, __dirname]}));
-	} catch (e) {
+	} catch (_e) {
 		return Promise.resolve();
 	}
 

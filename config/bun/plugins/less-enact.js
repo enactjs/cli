@@ -72,6 +72,7 @@ function createLessEnactPlugin (options = {}) {
 					paths: [path.dirname(args.path), path.join(appContext, 'node_modules')],
 					modifyVars: Object.assign({__DEV__: !options.production}, options.accent || {}),
 					javascriptEnabled: true,
+					rewriteUrls: 'all',
 					plugins: [lessTildePlugin]
 				});
 
@@ -93,20 +94,21 @@ function createLessEnactPlugin (options = {}) {
 			});
 
 			build.onLoad({filter: /\.css$/}, async args => {
-				if (/\.module\.css$/.test(args.path) || options.forceCSSModules) {
-					const source = await Bun.file(args.path).text();
-					const processed = await postcssPlugin.processCss(source, args.path, true);
+				const isModule = /\.module\.css$/.test(args.path) || options.forceCSSModules;
+				const cssSource = await Bun.file(args.path).text();
+				const cssProcessed = await postcssPlugin.processCss(cssSource, args.path, isModule);
+
+				if (isModule) {
 					return {
 						loader: 'css',
-						contents: processed.css,
-						exports: processed.exports
+						contents: cssProcessed.css,
+						exports: cssProcessed.exports
 					};
 				}
-				const source = await Bun.file(args.path).text();
-				const processed = await postcssPlugin.processCss(source, args.path);
+
 				return {
 					loader: 'css',
-					contents: processed.css
+					contents: cssProcessed.css
 				};
 			});
 		}

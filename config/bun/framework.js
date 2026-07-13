@@ -45,7 +45,7 @@ function getModuleId (nodeModules, file) {
 						return path.relative(nodeModules, dir).replace(/\\/g, '/');
 					}
 				}
-			} catch (e) {
+			} catch (_e) {
 				// ignore invalid package.json
 			}
 			if (/[/\\]index\.(js|jsx|es6)$/.test(absPath)) {
@@ -75,7 +75,7 @@ function getCoreJsModules () {
 			id: path.relative(coreJsRoot, file).replace(/\\/g, '/').replace(/\.js$/, ''),
 			request: file
 		}));
-	} catch (e) {
+	} catch (_e) {
 		return [];
 	}
 }

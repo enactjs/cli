@@ -21,8 +21,8 @@
     "access": "public"
   },
   "scripts": {
-    "lint": "enact lint --strict",
-    "fix": "enact lint --strict --fix"
+    "lint": "eslint .",
+    "fix": "eslint . --fix"
   },
   "prettier": {
     "printWidth": 120,

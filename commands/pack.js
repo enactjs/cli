@@ -130,12 +130,12 @@ function api (opts = {}) {
 		} else {
 			console.log('Creating an optimized production framework build...');
 		}
-		const output = path.resolve(opts.output || path.join(app.context, 'dist'));
-		return fs.emptyDir(output).then(() =>
-			spawnBunScript('build-framework.mjs', buildArgs({...opts, output}), {cwd: app.context}).then(() => {
+		const frameworkOutput = path.resolve(opts.output || path.join(app.context, 'dist'));
+		return fs.emptyDir(frameworkOutput).then(() =>
+			spawnBunScript('build-framework.mjs', buildArgs({...opts, output: frameworkOutput}), {cwd: app.context}).then(() => {
 				console.log(chalk.green('Compiled successfully.'));
 				console.log();
-				printFileSizes(output);
+				printFileSizes(frameworkOutput);
 				console.log();
 			})
 		);

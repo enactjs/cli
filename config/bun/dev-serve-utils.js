@@ -46,10 +46,9 @@ function createSetupProxyHandler (context) {
 		return null;
 	}
 
-	let createProxyMiddleware;
 	try {
-		createProxyMiddleware = require(require.resolve('http-proxy-middleware', {paths: [context]}));
-	} catch (e) {
+		require(require.resolve('http-proxy-middleware', {paths: [context]}));
+	} catch (_e) {
 		console.warn('setupProxy.js found but http-proxy-middleware is not installed in the project.');
 		return null;
 	}
@@ -87,7 +86,7 @@ function createSetupProxyHandler (context) {
 function getDevOverlayScript () {
 	try {
 		const requireFromCli = createRequire(path.join(__dirname, '..', '..', 'package.json'));
-		const overlayPath = requireFromCli.resolve('react-error-overlay/lib/index');
+		requireFromCli.resolve('react-error-overlay/lib/index');
 		return [
 			'<script>',
 			'window.__ENACT_BUILD_ERROR__ = null;',
@@ -96,7 +95,7 @@ function getDevOverlayScript () {
 			'});',
 			'</script>'
 		].join('\n');
-	} catch (e) {
+	} catch (_e) {
 		return '';
 	}
 }

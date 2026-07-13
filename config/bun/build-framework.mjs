@@ -4,8 +4,8 @@ import {createRequire} from 'module';
 import {createBuildOptions} from './build-options.js';
 import {createEnactPlugins} from './plugins/index.js';
 
-const require = createRequire(import.meta.url);
-const {applyFramework} = require('./framework.js');
+const nodeRequire = createRequire(import.meta.url);
+const {applyFramework} = nodeRequire('./framework.js');
 
 function parseArgs (argv) {
 	const opts = {production: false, output: null, context: null, snapshot: false, externalsPolyfill: false, linting: true};

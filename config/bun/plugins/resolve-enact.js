@@ -1,18 +1,48 @@
 const path = require('path');
 const fs = require('fs');
+const {resolveAppRootImport} = require('./resolve-tilde-import');
 
 function normalizeBundlerPath (filePath) {
 	return filePath.replace(/\\/g, '/');
 }
 
+function normalizeAdditionalModulePaths (paths, context) {
+	if (!paths) return [];
+	const list = Array.isArray(paths) ? paths : [paths];
+	return list.map(modulePath => path.resolve(context, modulePath));
+}
+
+function resolveFromModulePaths (request, modulePaths) {
+	for (const modulePath of modulePaths) {
+		const resolved = path.join(modulePath, request);
+		if (fs.existsSync(resolved)) {
+			return resolved;
+		}
+	}
+	return null;
+}
+
 function createResolveEnactPlugin (options = {}) {
 	const context = options.context || process.cwd();
 	const aliases = options.aliases || {};
+	const additionalModulePaths = normalizeAdditionalModulePaths(options.additionalModulePaths, context);
 
 	return {
 		name: 'enact-resolve',
 		setup (build) {
 			build.onResolve({filter: /.*/}, args => {
+				const appRootPath = resolveAppRootImport(args.path, context);
+				if (appRootPath) {
+					return {path: normalizeBundlerPath(appRootPath)};
+				}
+
+				if (!args.path.startsWith('.') && !path.isAbsolute(args.path)) {
+					const fromModulePaths = resolveFromModulePaths(args.path, additionalModulePaths);
+					if (fromModulePaths) {
+						return {path: normalizeBundlerPath(fromModulePaths)};
+					}
+				}
+
 				for (const [key, target] of Object.entries(aliases)) {
 					if (args.path === key) {
 						let resolved = target;
@@ -21,7 +51,7 @@ function createResolveEnactPlugin (options = {}) {
 						} else {
 							try {
 								resolved = require.resolve(target, {paths: [context, args.importer].filter(Boolean)});
-							} catch (e) {
+							} catch (_e) {
 								return undefined;
 							}
 						}
@@ -36,7 +66,7 @@ function createResolveEnactPlugin (options = {}) {
 							return {
 								path: normalizeBundlerPath(require.resolve(check, {paths: [context, args.importer].filter(Boolean)}))
 							};
-						} catch (e) {
+						} catch (_e) {
 							// continue
 						}
 					}

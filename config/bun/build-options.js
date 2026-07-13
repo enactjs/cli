@@ -169,6 +169,7 @@ function createBuildOptions (opts = {}) {
 		minify: opts.minify !== false && opts.production,
 		sourcemap: (process.env.GENERATE_SOURCEMAP || (opts.production ? 'false' : 'true')) !== 'false',
 		aliases: getResolveAliases(context),
+		additionalModulePaths: app.additionalModulePaths,
 		isomorphic: !!opts.isomorphic,
 		snapshot: useSnapshot,
 		noAnimation: !!opts.noAnimation,

@@ -6,7 +6,7 @@ import {writeIndexHtml} from './generate-html.js';
 import {createEnactPlugins} from './plugins/index.js';
 import {getIsomorphicExternals} from './plugins/isomorphic-enact.js';
 
-const require = createRequire(import.meta.url);
+const nodeRequire = createRequire(import.meta.url);
 
 function parseArgs (argv) {
 	const opts = {
@@ -116,7 +116,7 @@ function createBuildConfig (buildOpts, options, plugins) {
 
 function getExternalHtmlAssets (buildOpts) {
 	if (!buildOpts.externals) return null;
-	const {getExternalAssets} = require('./externals.js');
+	const {getExternalAssets} = nodeRequire('./externals.js');
 	return getExternalAssets(buildOpts.externals, buildOpts.externalsPublic);
 }
 
@@ -139,7 +139,7 @@ function getStartupAssets (publicPath, jsName, buildOpts) {
 	return assets;
 }
 
-async function buildReactGlobals (options, buildOpts) {
+async function buildReactGlobals (options, _buildOpts) {
 	const globalsEntry = path.join(path.dirname(fileURLToPath(import.meta.url)), 'react-globals-entry.js');
 	const result = await Bun.build({
 		entrypoints: [globalsEntry],
@@ -190,7 +190,7 @@ function finalizeBuild (result, buildOpts, options) {
 		externalStyles: externalAssets?.styles
 	});
 
-	require('./post-build.js').applyPostBuild(options.context, options.outputPath, {
+	nodeRequire('./post-build.js').applyPostBuild(options.context, options.outputPath, {
 		publicPath: options.publicPath,
 		ilibAdditionalResourcesPath: options.ilibAdditionalResourcesPath,
 		customSkin: options.customSkin,
@@ -198,8 +198,8 @@ function finalizeBuild (result, buildOpts, options) {
 	});
 
 	if (buildOpts.isomorphic) {
-		const app = require('@enact/dev-utils/option-parser');
-		const applyBunPostBuild = require('./prerender.js').applyPrerender;
+		const app = nodeRequire('@enact/dev-utils/option-parser');
+		const applyBunPostBuild = nodeRequire('./prerender.js').applyPrerender;
 		applyBunPostBuild({
 			context: options.context,
 			output: options.outputPath,
@@ -218,13 +218,13 @@ function finalizeBuild (result, buildOpts, options) {
 	let v8SnapshotFile;
 	if (buildOpts.snapshot) {
 		if (buildOpts.externals) {
-			const {getFrameworkPublicPath} = require('./externals.js');
+			const {getFrameworkPublicPath} = nodeRequire('./externals.js');
 			const frameworkPublicPath = getFrameworkPublicPath(buildOpts.externals, buildOpts.externalsPublic);
 			if (frameworkPublicPath) {
 				v8SnapshotFile = `${frameworkPublicPath}/snapshot_blob.bin`.replace(/\/{2,}/g, '/');
 			}
 		} else {
-			require('./snapshot.js').applySnapshot({
+			nodeRequire('./snapshot.js').applySnapshot({
 				output: options.outputPath,
 				target: jsName
 			});
@@ -233,13 +233,13 @@ function finalizeBuild (result, buildOpts, options) {
 	}
 
 	if (v8SnapshotFile) {
-		require('./webos-meta.js').applyWebOSMeta(options.context, options.outputPath, {
+		nodeRequire('./webos-meta.js').applyWebOSMeta(options.context, options.outputPath, {
 			v8SnapshotFile
 		});
 	}
 
 	if (buildOpts.stats) {
-		require('./generate-stats.js').writeStatsReport(options.outputPath, result.metafile);
+		nodeRequire('./generate-stats.js').writeStatsReport(options.outputPath, result.metafile);
 	}
 
 	return {jsName, cssName};
@@ -271,6 +271,7 @@ async function runBuild (buildOpts) {
 		production: buildOpts.production,
 		sourcemap: options.sourcemap,
 		context: options.context,
+		additionalModulePaths: options.additionalModulePaths,
 		accent: options.accent,
 		forceCSSModules: options.forceCSSModules,
 		useTailwind: options.useTailwind,
@@ -284,7 +285,7 @@ async function runBuild (buildOpts) {
 			? {
 				polyfill: polyfillPath,
 				context: options.context,
-				local: require('./plugins/externals-enact').shouldEnableLocalExternals(options.context)
+				local: nodeRequire('./plugins/externals-enact').shouldEnableLocalExternals(options.context)
 			}
 			: undefined
 	});
@@ -297,7 +298,7 @@ async function runBuild (buildOpts) {
 	if (buildOpts.watch) {
 		console.log('Watching for file changes...');
 
-		const result = await Bun.build({
+		const watchResult = await Bun.build({
 			...buildConfig,
 			watch: {
 				onRebuild (error, rebuildResult) {
@@ -305,18 +306,18 @@ async function runBuild (buildOpts) {
 						console.error('Rebuild failed:', error);
 						return;
 					}
-					const info = finalizeBuild(rebuildResult, buildOpts, options);
-					if (info) {
+					const rebuildInfo = finalizeBuild(rebuildResult, buildOpts, options);
+					if (rebuildInfo) {
 						console.log('Recompiled successfully.');
-						logBuildResult(buildOpts, options, info);
+						logBuildResult(buildOpts, options, rebuildInfo);
 					}
 				}
 			}
 		});
 
-		const info = finalizeBuild(result, buildOpts, options);
-		if (!info) process.exit(1);
-		logBuildResult(buildOpts, options, info);
+		const watchInfo = finalizeBuild(watchResult, buildOpts, options);
+		if (!watchInfo) process.exit(1);
+		logBuildResult(buildOpts, options, watchInfo);
 
 		await new Promise(() => {});
 		return;

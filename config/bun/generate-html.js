@@ -23,7 +23,7 @@ function readWebOSTitle (context) {
 			try {
 				const appinfo = JSON.parse(fs.readFileSync(appinfoPath, {encoding: 'utf8'}));
 				if (appinfo.title) return appinfo.title;
-			} catch (e) {
+			} catch (_e) {
 				// ignore parse errors
 			}
 		}
@@ -31,7 +31,7 @@ function readWebOSTitle (context) {
 	return null;
 }
 
-function renderHtml ({title, publicPath, scriptSrc, cssHref, isomorphic, externalScripts, externalStyles, customSkin}) {
+function renderHtml ({title, scriptSrc, cssHref, isomorphic, externalScripts, externalStyles, customSkin}) {
 	const customSkinHead = customSkin ? getCustomSkinHeadHtml() : '';
 	const externalCss = (externalStyles || [])
 		.map(href => `\n\t\t<link rel="stylesheet" href="${href}" />`)
