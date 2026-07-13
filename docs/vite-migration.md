@@ -204,14 +204,14 @@ not dev-utils plugins. Status varies (ported / dropped / resolved / not yet):
    environment, so unverifiable) and is coupled to the webpack module runtime +
    injected snapshot-helper entries. A Rollup equivalent would need its own
    snapshot-safe bootstrap; deferred until the mksnapshot toolchain is available.
-5. **Framework externals** (`EnactFrameworkPlugin` / `EnactFrameworkRefPlugin`,
-   `mixins/framework.js`, `mixins/externals.js`) — DLL-style shared `@enact/*` +
-   react framework bundle. *Effort: high — not ported.* Webpack's DLL maps module
-   requests to IDs in a prebuilt bundle via a manifest; Rollup has no equivalent.
-   A Vite port needs a two-build strategy (a UMD `enact_framework` lib build +
-   `build.rollupOptions.external` in the app build) plus runtime linking of
-   `@enact/*`/`react` to the external bundle (import map or UMD globals) — a real
-   project, not validated here.
+5. ~~**Framework externals**~~ — **ported** (`mixins/vite-framework.js` +
+   `pack.js` `--framework`/`--externals`). Webpack's DLL maps deep module requests to
+   IDs in a prebuilt bundle via a manifest; the Vite analog is a shared framework ESM
+   build addressed by an **import map** (exact keys per specifier, from a manifest),
+   with `build.rollupOptions.external` on the app build. Browser-validated end-to-end
+   on limestone/qa-a11y: 138-specifier framework + `enact.css`, app externalizes 60
+   specifiers, boots fully styled with a single React instance, console clean. Full
+   findings in [`vite-framework-externals-spike.md`](./vite-framework-externals-spike.md).
 6. **`GracefulFsPlugin`** — patches webpack's output FS to avoid EMFILE. Not
    needed under Vite (different FS handling). *Drop.*
 7. **`node-polyfill-webpack-plugin`** — supplies Node builtins (`global`,
@@ -245,7 +245,16 @@ unchanged. Both bundlers coexist during migration.
     removal (mirrors the webpack `unmangled` mixin). Only affects production builds.
 - `enact eject --vite` wires the ejected app's scripts to the Vite path (see
   [vite-eject-testing.md](vite-eject-testing.md)).
-- Webpack-only flags on the Vite path (`--isomorphic`, `--snapshot`, framework/externals) print a "not yet supported, ignored" notice. `--externals-public`/`--externals-polyfill`/`--externals-corejs` only shape that (unported) framework/externals output, so they print an "ignored" notice too.
+- **`--framework` / `--externals`** are wired via **`mixins/vite-framework.js`** (the
+  Vite counterpart to the webpack DLL `framework`/`externals` mixins): `--framework`
+  builds the shared `@enact`+react+ilib bundle as reusable ESM + a specifier manifest +
+  one `enact.css`; `--externals=<path>` externalizes those specifiers from the app build
+  and injects an import map (+ the shared stylesheet) resolved from the manifest.
+  `--externals-public` sets the import-map base URL (remote framework path).
+  Browser-validated on limestone/qa-a11y. See
+  [vite-framework-externals-spike.md](vite-framework-externals-spike.md).
+- Webpack-only flags still not ported (`--isomorphic`, `--snapshot`) print a "not yet
+  supported, ignored" notice.
 
 The reusable bundler plugins were **added to `@enact/dev-utils`** — mirroring how
 the webpack plugins (`ILibPlugin`, `WebOSMetaPlugin`, …) live there — and are
@@ -281,11 +290,18 @@ enact pack -p --vite -l en-US,ko-KR  # production build, locale-filtered
 
 ## Still not ported (webpack remains the default for these)
 
-- **`--isomorphic`** prerendering, **`--snapshot`**, and **framework externals** —
-  see gaps #3–#5 above. Each is a substantial project (not a config tweak); the
-  Vite path prints a "not yet supported, ignored" notice for these flags.
+- **`--isomorphic`** prerendering and **`--snapshot`** — see gaps #3–#4 above. Each is
+  a substantial project (not a config tweak); the Vite path prints a "not yet
+  supported, ignored" notice for these flags. (**Framework externals** — gap #5 — is
+  now ported.)
 - **`icss` mode / `forceCSSModules`** (gap #8): Vite treats only `*.module.*` as
   CSS modules; the webpack `mode: 'icss'` nuance isn't replicated.
+- **Framework refinements** (post-port): building `--framework` *in a theme repo*
+  (e.g. limestone) should include the theme's own components (webpack's
+  `libraries.push('.')` case) — the current enumeration scans `node_modules/@enact`,
+  so build the framework where all `@enact` incl. the theme are installed (e.g. an
+  app/sample context). `--externals-polyfill` (move core-js into the framework) is
+  not yet wired.
 
 ## Recommendation
 

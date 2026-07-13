@@ -20,6 +20,7 @@ const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const printBuildError = require('react-dev-utils/printBuildError');
 const webpack = require('webpack');
 const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
+const viteFw = require('@enact/dev-utils/mixins/vite-framework');
 
 const {isViteBundler} = require('./vite-utils');
 
@@ -201,33 +202,50 @@ function printErrorDetails (err, handler) {
 }
 
 
+// Build the shared Enact framework bundle (react + ilib + all @enact) as reusable ESM
+// addressed by an import map, plus a manifest. Vite counterpart to webpack `pack --framework`.
+async function viteFramework (opts) {
+	const {createRequire} = require('module');
+	const {build: viteBuildApi} = require('vite');
+	const appRequire = createRequire(path.join(app.context, 'package.json'));
+
+	const specs = viteFw.enumerateSpecifiers(app.context);
+	const srcDir = path.join(app.context, '.enact-framework-src');
+	const {input, names} = viteFw.writeWrappers(specs, srcDir, appRequire);
+
+	const configFactory = require('../config/vite.config');
+	const config = configFactory(opts.production ? 'production' : 'development', !opts.linting);
+	const outDir = opts.output ? path.resolve(opts.output) : path.resolve('./dist');
+	viteFw.applyFramework(config, {input, outDir});
+	// --no-minify/--verbose/--stats still apply to the framework build.
+	mixins.applyVite(config, opts);
+
+	console.log(`Creating the Enact framework bundle (${Object.keys(input).length} modules)...`);
+	await viteBuildApi(config);
+	const manifest = viteFw.writeManifest(outDir, names);
+	fs.removeSync(srcDir);
+	console.log(
+		chalk.green(`Framework compiled successfully. (${Object.keys(manifest.imports).length} specifiers)`)
+	);
+}
+
 // Experimental Vite build path. Mirrors the webpack `build`/`watch` behavior but
-// drives Vite's JS API. The webpack-only features `--isomorphic` (prerendering),
-// `--snapshot`, and `--framework`/`--externals` are not supported here: each is
-// reported and then genuinely skipped. In particular `--isomorphic` is forced off
-// (client render) rather than forwarded, because setting ENACT_PACK_ISOMORPHIC
-// without prerendered markup would make the app hydrate an empty root.
+// drives Vite's JS API. `--isomorphic` (prerendering) and `--snapshot` are not ported and
+// are reported + skipped; `--isomorphic` is forced off (client render) rather than
+// forwarded, because setting ENACT_PACK_ISOMORPHIC without prerendered markup would make
+// the app hydrate an empty root.
 //
-// Wired here (via mixins.applyVite): --no-minify, --verbose, --stats.
+// Wired here: --framework (shared bundle), --externals (import-map externalization),
+// and via mixins.applyVite: --no-minify, --verbose, --stats.
 async function viteBuild (opts) {
 	const {build: viteBuildApi} = require('vite');
 
-	['isomorphic', 'snapshot', 'framework', 'externals'].forEach(flag => {
+	if (opts.framework) return viteFramework(opts);
+
+	['isomorphic', 'snapshot'].forEach(flag => {
 		if (opts[flag]) {
 			console.log(
 				chalk.yellow(`NOTICE: --${flag} is not yet supported by the Vite bundler and will be ignored.`)
-			);
-		}
-	});
-	// These only shape the --framework/--externals output, which isn't ported, so
-	// they're inert on the Vite path; note it rather than fail silently.
-	['externals-public', 'externals-polyfill', 'externals-corejs'].forEach(flag => {
-		if (opts[flag]) {
-			console.log(
-				chalk.yellow(
-					`NOTICE: --${flag} only applies alongside --framework/--externals, which the Vite ` +
-						'bundler does not support yet; ignored.'
-				)
 			);
 		}
 	});
@@ -252,6 +270,12 @@ async function viteBuild (opts) {
 	}
 	// Output override
 	if (opts.output) config.build.outDir = path.resolve(opts.output);
+
+	// --externals: externalize the shared framework specifiers out of the app build,
+	// collecting the ones actually imported so we can build a minimal import map.
+	const collected = new Set();
+	if (opts.externals) viteFw.applyExternals(config, collected);
+
 	// Apply the build-shaping flags (--no-minify, --verbose, --stats), mirroring the
 	// webpack path's `mixins.apply`. Runs after the output override so --stats writes
 	// stats.html into the final outDir.
@@ -267,6 +291,22 @@ async function viteBuild (opts) {
 	}
 
 	await viteBuildApi(config);
+
+	// --externals post-step: resolve the collected specifiers against the framework's
+	// manifest and inject the import map + shared stylesheet into the built index.html.
+	if (opts.externals && !opts.watch) {
+		const frameworkPath = path.resolve(opts.externals);
+		const manifest = viteFw.readManifest(frameworkPath);
+		let base = opts['externals-public'];
+		if (!base) {
+			// No remote public path: serve the framework locally under ./framework.
+			fs.copySync(frameworkPath, path.join(config.build.outDir, 'framework'), {dereference: true});
+			base = './framework';
+		}
+		const n = viteFw.injectHtml(path.join(config.build.outDir, 'index.html'), manifest, collected, base);
+		console.log(chalk.cyan(`Externalized ${n} framework specifiers via import map (base: ${base}).`));
+	}
+
 	if (!opts.watch) console.log(chalk.green('Compiled successfully.'));
 }
 
