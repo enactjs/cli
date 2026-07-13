@@ -209,7 +209,7 @@ async function viteFramework (opts) {
 	const {build: viteBuildApi} = require('vite');
 	const appRequire = createRequire(path.join(app.context, 'package.json'));
 
-	const specs = viteFw.enumerateSpecifiers(app.context);
+	const specs = viteFw.enumerateSpecifiers(app.context, {polyfill: opts['externals-polyfill']});
 	const srcDir = path.join(app.context, '.enact-framework-src');
 	const {input, names} = viteFw.writeWrappers(specs, srcDir, appRequire);
 
@@ -272,9 +272,15 @@ async function viteBuild (opts) {
 	if (opts.output) config.build.outDir = path.resolve(opts.output);
 
 	// --externals: externalize the shared framework specifiers out of the app build,
-	// collecting the ones actually imported so we can build a minimal import map.
+	// collecting the ones actually imported so we can build a minimal import map. The
+	// framework manifest is read up front so externalization is manifest-aware (only
+	// externalize what the framework actually provides).
 	const collected = new Set();
-	if (opts.externals) viteFw.applyExternals(config, collected);
+	let manifest = null;
+	if (opts.externals) {
+		manifest = viteFw.readManifest(path.resolve(opts.externals));
+		viteFw.applyExternals(config, collected, manifest, {polyfill: opts['externals-polyfill']});
+	}
 
 	// Apply the build-shaping flags (--no-minify, --verbose, --stats), mirroring the
 	// webpack path's `mixins.apply`. Runs after the output override so --stats writes
@@ -295,12 +301,10 @@ async function viteBuild (opts) {
 	// --externals post-step: resolve the collected specifiers against the framework's
 	// manifest and inject the import map + shared stylesheet into the built index.html.
 	if (opts.externals && !opts.watch) {
-		const frameworkPath = path.resolve(opts.externals);
-		const manifest = viteFw.readManifest(frameworkPath);
 		let base = opts['externals-public'];
 		if (!base) {
 			// No remote public path: serve the framework locally under ./framework.
-			fs.copySync(frameworkPath, path.join(config.build.outDir, 'framework'), {dereference: true});
+			fs.copySync(path.resolve(opts.externals), path.join(config.build.outDir, 'framework'), {dereference: true});
 			base = './framework';
 		}
 		const n = viteFw.injectHtml(path.join(config.build.outDir, 'index.html'), manifest, collected, base);

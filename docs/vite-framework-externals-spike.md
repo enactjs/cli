@@ -115,9 +115,22 @@ Implementation:
   scans `node_modules/@enact`, so build the framework in a context where all `@enact`
   *including the theme* are installed (an app/sample context works; qa-a11y gave 138
   specifiers incl. limestone). Adding theme-self globbing would let it run in the bare theme repo.
-- **`--externals-polyfill`** — moving core-js into the framework bundle (vs. the app's
-  combined entry) is not yet wired.
 - **`--snapshot`** interaction — deferred until `--snapshot` itself is ported.
+
+### `--externals-polyfill` — wired
+
+`pack --framework --externals-polyfill` adds `core-js/stable` as a framework entry (a
+side-effect wrapper; folds all core-js into the shared bundle, manifest key `core-js/stable`).
+`pack --externals=<path> --externals-polyfill` then externalizes core-js out of the app:
+because the app config *aliases* `core-js` to the CLI's copy (so the `external` fn only sees
+488 resolved internals, never the bare specifier), the externals path **drops that alias** so
+`core-js/stable` stays a bare specifier and externalizes as one unit → the ~488 core-js
+modules leave the app bundle and resolve to the framework via the import map. Externalization
+is **manifest-aware**, so core-js (and any @enact the framework doesn't provide) is only
+externalized when the framework actually carries it — otherwise it stays bundled and the app
+still builds. Browser-unverified but bundle-verified: with the flag, core-js internals are
+absent from `main.js` and `core-js/stable` appears in the import map; without it, core-js
+stays in the app.
 
 ## Risk assessment
 
