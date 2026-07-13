@@ -34,7 +34,8 @@ function createBabelEnactPlugin (options = {}) {
 
 				return {
 					loader,
-					contents: result.code
+					contents: result.code,
+					resolveDir: path.dirname(args.path)
 				};
 			});
 		}

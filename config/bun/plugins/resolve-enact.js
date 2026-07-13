@@ -22,6 +22,36 @@ function resolveFromModulePaths (request, modulePaths) {
 	return null;
 }
 
+function getModuleSearchPaths (args, context, additionalModulePaths) {
+	const paths = new Set();
+
+	if (args.resolveDir) {
+		paths.add(args.resolveDir);
+	}
+	if (args.importer) {
+		paths.add(path.dirname(args.importer));
+	}
+	if (context) {
+		paths.add(context);
+	}
+	for (const modulePath of additionalModulePaths) {
+		paths.add(modulePath);
+	}
+
+	return [...paths];
+}
+
+function resolveNodeModule (request, searchPaths) {
+	for (const searchPath of searchPaths) {
+		try {
+			return require.resolve(request, {paths: [searchPath]});
+		} catch (_e) {
+			// continue
+		}
+	}
+	return null;
+}
+
 function createResolveEnactPlugin (options = {}) {
 	const context = options.context || process.cwd();
 	const aliases = options.aliases || {};
@@ -69,6 +99,14 @@ function createResolveEnactPlugin (options = {}) {
 						} catch (_e) {
 							// continue
 						}
+					}
+				}
+
+				if (!args.path.startsWith('.') && !path.isAbsolute(args.path)) {
+					const searchPaths = getModuleSearchPaths(args, context, additionalModulePaths);
+					const resolved = resolveNodeModule(args.path, searchPaths);
+					if (resolved) {
+						return {path: normalizeBundlerPath(resolved)};
 					}
 				}
 
