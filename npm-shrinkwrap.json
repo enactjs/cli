@@ -3111,7 +3111,7 @@
     },
     "node_modules/@enact/dev-utils": {
       "version": "7.0.5",
-      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#1da19e806d8fc97af08d9ab01caecd631fca30f4",
+      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#f8655d783c42f5c589c919bce6003e8d33402308",
       "license": "Apache-2.0",
       "dependencies": {
         "browserslist": "^4.28.2",
@@ -22988,6 +22988,8 @@
     },
     "node_modules/rollup-plugin-visualizer": {
       "version": "6.0.11",
+      "resolved": "https://registry.npmjs.org/rollup-plugin-visualizer/-/rollup-plugin-visualizer-6.0.11.tgz",
+      "integrity": "sha512-TBwVHVY7buHjIKVLqr9scTVFwqZqMXINcCphPwIWKPDCOBIa+jCQfafvbjRJDZgXdq/A996Dy6yGJ/+/NtAXDQ==",
       "license": "MIT",
       "dependencies": {
         "open": "^8.0.0",
