@@ -48,8 +48,8 @@ function createLessEnactPlugin (options = {}) {
 			build.onLoad({filter: /\.(scss|sass)$/}, async args => {
 				const source = await Bun.file(args.path).text();
 				const css = await compileSass(source, args.path);
-				const processed = await postcssPlugin.processCss(css, args.path);
 				const moduleMode = isModuleStylesheet(args.path, options.forceCSSModules);
+				const processed = await postcssPlugin.processCss(css, args.path, moduleMode);
 
 				if (moduleMode) {
 					return {
@@ -75,8 +75,8 @@ function createLessEnactPlugin (options = {}) {
 					plugins: [lessTildePlugin]
 				});
 
-				const processed = await postcssPlugin.processCss(lessResult.css, args.path);
 				const moduleMode = isModuleStylesheet(args.path, options.forceCSSModules);
+				const processed = await postcssPlugin.processCss(lessResult.css, args.path, moduleMode);
 
 				if (moduleMode) {
 					return {
