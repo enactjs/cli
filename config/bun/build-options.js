@@ -145,15 +145,22 @@ function createBuildOptions (opts = {}) {
 	const template = app.template || path.join(__dirname, '..', 'html-template.ejs');
 	const customSkin = !!(opts.customSkin || usesCustomSkinTemplate(template));
 
-	if (externalsPath && !process.env.ILIB_BASE_PATH) {
-		const {getFrameworkPublicPath} = require('./externals');
-		const frameworkPublicPath = getFrameworkPublicPath(externalsPath, externalsPublic);
-		if (frameworkPublicPath) {
-			const ilibInEnact = path.join(frameworkPublicPath, 'node_modules', '@enact', 'i18n', 'ilib');
-			const ilibStandalone = path.join(frameworkPublicPath, 'node_modules', 'ilib');
-			process.env.ILIB_BASE_PATH = fs.existsSync(path.join(context, 'node_modules', '@enact', 'i18n', 'ilib'))
-				? ilibInEnact.replace(/\\/g, '/')
-				: ilibStandalone.replace(/\\/g, '/');
+	if (!process.env.ILIB_BASE_PATH) {
+		if (externalsPath) {
+			const {getFrameworkPublicPath} = require('./externals');
+			const frameworkPublicPath = getFrameworkPublicPath(externalsPath, externalsPublic);
+			if (frameworkPublicPath) {
+				const ilibInEnact = path.join(frameworkPublicPath, 'node_modules', '@enact', 'i18n', 'ilib');
+				const ilibStandalone = path.join(frameworkPublicPath, 'node_modules', 'ilib');
+				process.env.ILIB_BASE_PATH = fs.existsSync(path.join(context, 'node_modules', '@enact', 'i18n', 'ilib'))
+					? ilibInEnact.replace(/\\/g, '/')
+					: ilibStandalone.replace(/\\/g, '/');
+			}
+		} else if (opts.isomorphic || useSnapshot) {
+			// Prerender uses FileXHR, which maps bundled ilib URLs back to the filesystem via ILIB_BASE_PATH.
+			if (defines.ILIB_BASE_PATH) {
+				process.env.ILIB_BASE_PATH = JSON.parse(defines.ILIB_BASE_PATH);
+			}
 		}
 	}
 
