@@ -49,6 +49,37 @@ function findIlibPath (context) {
 	);
 }
 
+function resolveIlibFsPath (context) {
+	const candidates = [];
+	const fromEnact = packageSearch(context, path.join('@enact', 'i18n', 'ilib'));
+	const standalone = packageSearch(context, 'ilib');
+
+	if (fromEnact) candidates.push(fromEnact);
+	if (standalone && standalone !== fromEnact) candidates.push(standalone);
+	if (fs.existsSync(path.join(context, 'ilib'))) {
+		candidates.push('ilib');
+	}
+
+	for (const rel of candidates) {
+		const full = path.join(context, rel);
+		if (!fs.existsSync(full)) continue;
+
+		const resolved = fs.realpathSync(full).replace(/\\/g, '/');
+		if (fs.existsSync(path.join(resolved, 'locale', 'likelylocales.json'))) {
+			return resolved;
+		}
+	}
+
+	for (const rel of candidates) {
+		const full = path.join(context, rel);
+		if (fs.existsSync(full)) {
+			return fs.realpathSync(full).replace(/\\/g, '/');
+		}
+	}
+
+	return null;
+}
+
 function readManifestFiles (manifestPath) {
 	if (!fs.existsSync(manifestPath)) return [];
 	const data = JSON.parse(fs.readFileSync(manifestPath, {encoding: 'utf8'}));
@@ -157,4 +188,4 @@ function applyIlibResources (context, output, options = {}) {
 	}
 }
 
-module.exports = {getIlibDefines, applyIlibResources, findIlibPath, bundleConst};
+module.exports = {getIlibDefines, applyIlibResources, findIlibPath, resolveIlibFsPath, bundleConst};

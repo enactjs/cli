@@ -157,9 +157,15 @@ function createBuildOptions (opts = {}) {
 					: ilibStandalone.replace(/\\/g, '/');
 			}
 		} else if (opts.isomorphic || useSnapshot) {
-			// Prerender uses FileXHR, which maps bundled ilib URLs back to the filesystem via ILIB_BASE_PATH.
+			// Prerender uses FileXHR, which maps bundled ilib URLs back to the filesystem.
+			// ILIB_BASE_PATH must match the bundled define; ILIB_FS_PATH is the resolved source tree.
 			if (defines.ILIB_BASE_PATH) {
 				process.env.ILIB_BASE_PATH = JSON.parse(defines.ILIB_BASE_PATH);
+			}
+			const {resolveIlibFsPath} = require('./ilib-meta');
+			const ilibFsPath = resolveIlibFsPath(context);
+			if (ilibFsPath) {
+				process.env.ILIB_FS_PATH = ilibFsPath;
 			}
 		}
 	}
