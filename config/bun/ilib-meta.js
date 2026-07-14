@@ -4,15 +4,20 @@ const glob = require('glob');
 const app = require('@enact/dev-utils/option-parser');
 
 function packageSearch (dir, pkg) {
-	if (!path.isAbsolute(dir)) dir = path.join(process.cwd(), dir);
+	const root = path.isAbsolute(dir) ? dir : path.join(process.cwd(), dir);
+	dir = root;
 	while (dir.length > 0 && dir !== path.dirname(dir)) {
 		const full = path.join(dir, 'node_modules', pkg);
 		if (fs.existsSync(full)) {
-			return path.relative(process.cwd(), full).replace(/\\/g, '/');
+			return path.relative(root, full).replace(/\\/g, '/');
 		}
 		dir = path.dirname(dir);
 	}
 	return null;
+}
+
+function hasLocaleMatchJson (ilibPath) {
+	return fs.existsSync(path.join(ilibPath, 'locale', 'localematch.json'));
 }
 
 function transformPath (context, file) {
@@ -30,11 +35,18 @@ function bundleConst (name) {
 	);
 }
 
-function resolveBundlePath ({dir, context, publicPath, relative}) {
+function resolveBundlePath ({dir, context, publicPath, relative, symlinks = true}) {
 	if (path.isAbsolute(dir)) {
 		return JSON.stringify(dir.replace(/\\/g, '/'));
 	}
-	const full = fs.existsSync(path.join(context, dir)) ? path.join(context, dir) : dir;
+	let full = path.join(context, dir);
+	if (fs.existsSync(full)) {
+		if (symlinks) {
+			full = fs.realpathSync(full);
+		}
+	} else {
+		full = dir;
+	}
 	if (relative) {
 		return JSON.stringify(transformPath(context, full));
 	}
@@ -42,11 +54,20 @@ function resolveBundlePath ({dir, context, publicPath, relative}) {
 }
 
 function findIlibPath (context) {
-	return (
-		packageSearch(context, path.join('@enact', 'i18n', 'ilib')) ||
-		packageSearch(context, 'ilib') ||
-		(fs.existsSync(path.join(context, 'ilib')) && 'ilib')
-	);
+	const candidates = [
+		packageSearch(context, path.join('@enact', 'i18n', 'ilib')),
+		packageSearch(context, 'ilib'),
+		fs.existsSync(path.join(context, 'ilib')) && 'ilib'
+	].filter(Boolean);
+
+	for (const rel of candidates) {
+		const full = path.join(context, rel);
+		if (fs.existsSync(full) && hasLocaleMatchJson(fs.realpathSync(full))) {
+			return rel;
+		}
+	}
+
+	return candidates[0] || null;
 }
 
 function resolveIlibFsPath (context) {
@@ -65,15 +86,8 @@ function resolveIlibFsPath (context) {
 		if (!fs.existsSync(full)) continue;
 
 		const resolved = fs.realpathSync(full).replace(/\\/g, '/');
-		if (fs.existsSync(path.join(resolved, 'locale', 'likelylocales.json'))) {
+		if (hasLocaleMatchJson(resolved)) {
 			return resolved;
-		}
-	}
-
-	for (const rel of candidates) {
-		const full = path.join(context, rel);
-		if (fs.existsSync(full)) {
-			return fs.realpathSync(full).replace(/\\/g, '/');
 		}
 	}
 
