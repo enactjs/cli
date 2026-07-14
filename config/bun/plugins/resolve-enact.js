@@ -6,9 +6,64 @@ function normalizeBundlerPath (filePath) {
 	return path.resolve(filePath).replace(/\\/g, '/');
 }
 
+const IMPORT_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx', '.json', '.mjs', '.cjs'];
+
+function resolveDirectoryEntry (dirPath) {
+	const pkgPath = path.join(dirPath, 'package.json');
+	if (fs.existsSync(pkgPath)) {
+		try {
+			const pkg = JSON.parse(fs.readFileSync(pkgPath, {encoding: 'utf8'}));
+			if (pkg.main) {
+				const mainPath = resolveImportPath(path.resolve(dirPath, pkg.main));
+				if (mainPath) {
+					return mainPath;
+				}
+			}
+		} catch (_e) {
+			// continue
+		}
+	}
+
+	for (const index of ['index.js', 'index.jsx', 'index.ts', 'index.tsx', 'index.mjs']) {
+		const indexPath = path.join(dirPath, index);
+		if (fs.existsSync(indexPath) && fs.statSync(indexPath).isFile()) {
+			return indexPath;
+		}
+	}
+
+	return null;
+}
+
+function resolveImportPath (requestPath) {
+	const resolved = path.resolve(requestPath);
+
+	if (fs.existsSync(resolved)) {
+		const stat = fs.statSync(resolved);
+		if (stat.isFile()) {
+			return resolved;
+		}
+		if (stat.isDirectory()) {
+			return resolveDirectoryEntry(resolved);
+		}
+	}
+
+	for (const ext of IMPORT_EXTENSIONS) {
+		const withExt = `${resolved}${ext}`;
+		if (fs.existsSync(withExt) && fs.statSync(withExt).isFile()) {
+			return withExt;
+		}
+	}
+
+	return null;
+}
+
 function toResolveResult (filePath) {
 	const absolutePath = path.resolve(filePath);
-	if (!path.isAbsolute(absolutePath)) {
+	if (
+		!path.isAbsolute(absolutePath) ||
+		!fs.existsSync(absolutePath) ||
+		!fs.statSync(absolutePath).isFile()
+	) {
 		return undefined;
 	}
 
@@ -29,8 +84,8 @@ function normalizeAdditionalModulePaths (paths, context) {
 
 function resolveFromModulePaths (request, modulePaths) {
 	for (const modulePath of modulePaths) {
-		const resolved = path.join(modulePath, request);
-		if (fs.existsSync(resolved)) {
+		const resolved = resolveImportPath(path.join(modulePath, request));
+		if (resolved) {
 			return resolved;
 		}
 	}
@@ -80,14 +135,17 @@ function createResolveEnactPlugin (options = {}) {
 					return {external: true};
 				}
 
-				if (path.isAbsolute(args.path) && fs.existsSync(args.path)) {
-					return toResolveResult(args.path);
+				if (path.isAbsolute(args.path)) {
+					const absoluteImport = resolveImportPath(args.path);
+					if (absoluteImport) {
+						return toResolveResult(absoluteImport);
+					}
 				}
 
 				if (args.path.startsWith('.') && args.resolveDir) {
-					const relativePath = path.resolve(args.resolveDir, args.path);
-					if (fs.existsSync(relativePath)) {
-						return toResolveResult(relativePath);
+					const relativeImport = resolveImportPath(path.resolve(args.resolveDir, args.path));
+					if (relativeImport) {
+						return toResolveResult(relativeImport);
 					}
 				}
 
@@ -154,4 +212,9 @@ function createResolveEnactPlugin (options = {}) {
 	};
 }
 
-module.exports = {createResolveEnactPlugin, normalizeBundlerPath, toResolveResult};
+module.exports = {
+	createResolveEnactPlugin,
+	normalizeBundlerPath,
+	toResolveResult,
+	resolveImportPath
+};
