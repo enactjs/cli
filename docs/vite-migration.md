@@ -187,8 +187,11 @@ not dev-utils plugins. Status varies (ported / dropped / resolved / not yet):
    `resources/**/appinfo.json`, emits them and their referenced icon/splash assets
    (build: `writeBundle` copy; dev: middleware), and supplies the `<title>`
    fallback via `ViteWebOSMetaPlugin.readTitle`. **Validated:** `appinfo.json` +
-   `icon*.png` land in `dist` and serve (HTTP 200) in dev. *Remaining:*
-   `$`-prefixed sys-assets.
+   `icon*.png` land in `dist` and serve (HTTP 200) in dev. `$`-prefixed sys-assets
+   (`$icon.png` → `sys-assets/<spec>/icon.png`, emitted per-spec preserving the
+   layout, appinfo value left untouched) are now handled — matching the webpack
+   plugin; verified against a fixture (sys-assets across specs, dedup across
+   locales, regular assets, untouched `$` values).
 3. ~~**`PrerenderPlugin` + isomorphic mixin**~~ — **ported** (`mixins/vite-isomorphic.js` +
    `pack.js` `viteIsomorphic`). Uses a real **`vite build --ssr`** of the app entry (the key
    correction from the first spike, which used `ssrLoadModule` and hit the JSX-in-`.js`

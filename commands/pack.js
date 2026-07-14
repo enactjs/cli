@@ -297,6 +297,7 @@ async function viteIsomorphic (opts) {
 			if (k.startsWith(ssrOut)) delete ssrRequire.cache[k];
 		});
 		const mod = ssrRequire(bundlePath);
+		// eslint-disable-next-line no-undefined
 		return mod && mod.default !== undefined ? mod.default : mod;
 	};
 	const {prerenders, attr, aliasOf} = viteIso.prerender({
