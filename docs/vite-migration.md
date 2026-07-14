@@ -12,9 +12,10 @@ starts and HMR. Several webOS-specific features that started as webpack compiler
 plugins have since been **re-authored as Vite/Rollup plugins** in `@enact/dev-utils`
 and validated: **iLib i18n runtime + locale filtering** (`ViteILibPlugin`), **webOS
 metadata** (`ViteWebOSMetaPlugin`), plus the HTML document (`ViteHtmlPlugin`) and
-**ESLint**. Three features are **not yet ported** and still require webpack:
-`--isomorphic` prerendering, `--snapshot` (V8), and framework externals (see the
-gap list below). For those, `pack --vite` prints a "not supported, ignored" notice.
+**ESLint**. **`--isomorphic` prerendering and framework externals are also now ported and
+browser-validated** (`mixins/vite-isomorphic.js`, `mixins/vite-framework.js`). Only
+**`--snapshot`** (V8) still requires webpack — it needs the webOS `V8_MKSNAPSHOT` toolchain,
+unavailable here — and `pack --vite` prints a "not supported, ignored" notice for it.
 
 The Vite config lives at [`config/vite.config.js`](../config/vite.config.js); it
 mirrors the `webpack.config.js` factory signature and reuses the existing Enact
@@ -188,17 +189,18 @@ not dev-utils plugins. Status varies (ported / dropped / resolved / not yet):
    fallback via `ViteWebOSMetaPlugin.readTitle`. **Validated:** `appinfo.json` +
    `icon*.png` land in `dist` and serve (HTTP 200) in dev. *Remaining:*
    `$`-prefixed sys-assets.
-3. **`PrerenderPlugin` + isomorphic mixin** — server-renders the app to static
-   HTML per-locale (`enact pack --isomorphic`). *Effort: high — not ported.*
-   **Investigated:** Vite has native SSR (`ssrLoadModule`), but a spike hit a
-   concrete first blocker — the SSR module runner does not apply the JSX-in-`.js`
-   transform (`App.js: Unexpected token '<'`), and that is only the first hurdle.
-   A faithful port also needs a `window`/`document` mock, the `FileXHR` locale-data
-   loader, per-locale rendering, `screenTypes`/font handling, a `locale-map`, and
-   hydration-safe markup — i.e. a re-implementation of `vdom-server-render` +
-   `templates`, not a config tweak. Left on webpack. **A full implementation
-   scope** (phases, effort, risks, validation plan) is in
-   [`vite-isomorphic-scope.md`](./vite-isomorphic-scope.md).
+3. ~~**`PrerenderPlugin` + isomorphic mixin**~~ — **ported** (`mixins/vite-isomorphic.js` +
+   `pack.js` `viteIsomorphic`). Uses a real **`vite build --ssr`** of the app entry (the key
+   correction from the first spike, which used `ssrLoadModule` and hit the JSX-in-`.js`
+   transform gap), then per-locale server render (`FileXHR` for iLib locale data, no DOM
+   shim needed) + assembly into the webpack-compatible output (fallback `index.html` +
+   deduped `index.<variant>.html` + `locale-map.json` + per-locale webOS `appinfo.json`),
+   reusing the bundler-agnostic `templates.js`/`FileXHR`. Browser-validated end-to-end on
+   qa-a11y (`-p -i -l en-US,ko-KR`): prerendered markup hydrates with no console warnings in the
+   production build. (A dev build shows two dev-only React warnings that are by-design in
+   `@enact/i18n` — locale class deferred to the client — and identical to webpack's isomorphic
+   output, including with `--externals`; `-p` strips them. Details in the scope doc.)
+   Full findings/phases in [`vite-isomorphic-scope.md`](./vite-isomorphic-scope.md).
 4. **`SnapshotPlugin`** — emits a V8 snapshot blob (`--snapshot`). *Not portable
    here.* Requires the webOS `V8_MKSNAPSHOT` toolchain (absent in this
    environment, so unverifiable) and is coupled to the webpack module runtime +
@@ -253,8 +255,11 @@ unchanged. Both bundlers coexist during migration.
   `--externals-public` sets the import-map base URL (remote framework path).
   Browser-validated on limestone/qa-a11y. See
   [vite-framework-externals-spike.md](vite-framework-externals-spike.md).
-- Webpack-only flags still not ported (`--isomorphic`, `--snapshot`) print a "not yet
-  supported, ignored" notice.
+- **`--isomorphic`** is wired via **`mixins/vite-isomorphic.js`** + `pack.js`'s
+  `viteIsomorphic` (client `hydrateRoot` build + `vite build --ssr` + per-locale prerender +
+  webpack-compatible HTML/`locale-map.json`/`appinfo.json` assembly). Browser-validated.
+- `--snapshot` is not ported (needs the webOS `V8_MKSNAPSHOT` toolchain) and prints a "not
+  yet supported, ignored" notice.
 
 The reusable bundler plugins were **added to `@enact/dev-utils`** — mirroring how
 the webpack plugins (`ILibPlugin`, `WebOSMetaPlugin`, …) live there — and are
@@ -290,10 +295,11 @@ enact pack -p --vite -l en-US,ko-KR  # production build, locale-filtered
 
 ## Still not ported (webpack remains the default for these)
 
-- **`--isomorphic`** prerendering and **`--snapshot`** — see gaps #3–#4 above. Each is
-  a substantial project (not a config tweak); the Vite path prints a "not yet
-  supported, ignored" notice for these flags. (**Framework externals** — gap #5 — is
-  now ported.)
+- **`--snapshot`** (gap #4) — needs the webOS `V8_MKSNAPSHOT` toolchain (absent here,
+  so unverifiable); the Vite path prints a "not yet supported, ignored" notice.
+  (**`--isomorphic`** — gap #3 — and **framework externals** — gap #5 — are now ported;
+  isomorphic is browser-validated end-to-end via `vite build --ssr` + per-locale prerender,
+  see [vite-isomorphic-scope.md](vite-isomorphic-scope.md).)
 - **`icss` mode / `forceCSSModules`** (gap #8): Vite treats only `*.module.*` as
   CSS modules; the webpack `mode: 'icss'` nuance isn't replicated.
 - **Framework refinement** (post-port): building `--framework` *in a theme repo*
@@ -307,9 +313,7 @@ enact pack -p --vite -l en-US,ko-KR  # production build, locale-filtered
 ## Recommendation
 
 Adopt Vite behind a feature flag for the **browser dev/build** path first (biggest
-DX win, lowest risk) — now validated end-to-end including i18n runtime, locale
-filtering, webOS metadata, and ESLint. Keep webpack as the default for
-`--isomorphic`, `--snapshot`, and framework-externals builds; those three are the
-remaining work and each warrants its own focused effort (isomorphic first, as it's
-the most-used; snapshot last, as it needs the webOS mksnapshot toolchain to even
-validate).
+DX win, lowest risk) — validated end-to-end including i18n runtime, locale filtering,
+webOS metadata, and ESLint. Beyond that, **`--isomorphic` and framework externals are
+now ported and validated** too, leaving only **`--snapshot`** on webpack (it needs the
+webOS `V8_MKSNAPSHOT` toolchain to build/validate — unavailable here).

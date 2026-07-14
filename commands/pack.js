@@ -21,6 +21,8 @@ const printBuildError = require('react-dev-utils/printBuildError');
 const webpack = require('webpack');
 const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
 const viteFw = require('@enact/dev-utils/mixins/vite-framework');
+const viteIso = require('@enact/dev-utils/mixins/vite-isomorphic');
+const {parseLocales} = require('@enact/dev-utils/plugins/PrerenderPlugin/parse-locales');
 
 const {isViteBundler} = require('./vite-utils');
 
@@ -229,20 +231,104 @@ async function viteFramework (opts) {
 	);
 }
 
+// Isomorphic (prerendered) Vite build. Client build (hydrateRoot) + a real `vite build --ssr`
+// of the app entry, then per-locale server render (FileXHR for iLib data) and assembly into
+// the webpack-compatible output (fallback index.html + deduped index.<variant>.html +
+// locale-map.json + per-locale webOS appinfo). Vite counterpart to webpack `pack --isomorphic`.
+async function viteIsomorphic (opts) {
+	const {createRequire} = require('module');
+	const {build: viteBuildApi} = require('vite');
+	const appRequire = createRequire(path.join(app.context, 'package.json'));
+	const configFactory = require('../config/vite.config');
+
+	const locales = opts.locales ? parseLocales(app.context, opts.locales) || ['en-US'] : ['en-US'];
+	const outDir = opts.output ? path.resolve(opts.output) : path.resolve('./dist');
+	const serverEntry = path.resolve(opts.entry || app.entry || path.join(app.context, 'src/index.js'));
+	const ssrOut = path.join(app.context, '.enact-ssr');
+
+	console.log(`Creating an isomorphic production build (${locales.length} locale(s))...`);
+
+	// 1) Client build (isomorphic ON → the app entry uses hydrateRoot).
+	const clientConfig = configFactory(
+		opts.production ? 'production' : 'development',
+		!opts.linting,
+		opts['content-hash'],
+		true /* isomorphic */,
+		!opts.animation,
+		!opts['split-css'],
+		opts['ilib-additional-path'],
+		opts.locales
+	);
+	if (opts.output) clientConfig.build.outDir = outDir;
+	// --externals: externalize the shared framework from the CLIENT build (browser loads it via
+	// import map). The SSR build below always bundles @enact so it can render. CSS-module hashes
+	// stay consistent because both reuse the factory (same rootContext) as the framework build.
+	const collected = new Set();
+	let manifest = null;
+	if (opts.externals) {
+		manifest = viteFw.readManifest(path.resolve(opts.externals));
+		viteFw.applyExternals(clientConfig, collected, manifest, {polyfill: opts['externals-polyfill']});
+	}
+	mixins.applyVite(clientConfig, opts);
+	await viteBuildApi(clientConfig);
+
+	// Inject the framework import map (+ shared stylesheet) into the client index.html BEFORE
+	// the isomorphic assembly transforms it into the fallback/variant files.
+	if (opts.externals) {
+		let base = opts['externals-public'];
+		if (!base) {
+			fs.copySync(path.resolve(opts.externals), path.join(outDir, 'framework'), {dereference: true});
+			base = './framework';
+		}
+		viteFw.injectHtml(path.join(outDir, 'index.html'), manifest, collected, base);
+	}
+
+	// 2) SSR build (Node-loadable CJS whose default export is the app element).
+	const ssrConfig = configFactory(opts.production ? 'production' : 'development', true, false, true);
+	viteIso.applySsrBuild(ssrConfig, {serverEntry, outDir: ssrOut});
+	await viteBuildApi(ssrConfig);
+
+	// 3) Per-locale prerender. Load the SSR bundle fresh for each locale so iLib re-initializes.
+	const bundlePath = path.join(ssrOut, 'app.server.cjs');
+	const ssrRequire = createRequire(path.join(ssrOut, 'noop.js'));
+	const {renderToString} = appRequire('react-dom/server');
+	const load = () => {
+		Object.keys(ssrRequire.cache || {}).forEach(k => {
+			if (k.startsWith(ssrOut)) delete ssrRequire.cache[k];
+		});
+		const mod = ssrRequire(bundlePath);
+		return mod && mod.default !== undefined ? mod.default : mod;
+	};
+	const {prerenders, attr, aliasOf} = viteIso.prerender({
+		locales,
+		load,
+		renderToString,
+		fontGenerator: app.fontGenerator
+	});
+
+	// 4) Assemble HTML + locale-map, then (5) webOS per-locale appinfo.
+	const {localeMap} = viteIso.assemble({outDir, locales, prerenders, attr, aliasOf, screenTypes: app.screenTypes || []});
+	viteIso.writeAppinfo({outDir, locales, localeMap});
+
+	fs.removeSync(ssrOut);
+	console.log(
+		chalk.cyan(`Prerendered ${locales.length} locale(s) into ${prerenders.length} variant(s).`)
+	);
+	console.log(chalk.green('Compiled successfully.'));
+}
+
 // Experimental Vite build path. Mirrors the webpack `build`/`watch` behavior but
-// drives Vite's JS API. `--isomorphic` (prerendering) and `--snapshot` are not ported and
-// are reported + skipped; `--isomorphic` is forced off (client render) rather than
-// forwarded, because setting ENACT_PACK_ISOMORPHIC without prerendered markup would make
-// the app hydrate an empty root.
+// drives Vite's JS API. `--snapshot` is not ported (reported + skipped).
 //
 // Wired here: --framework (shared bundle), --externals (import-map externalization),
-// and via mixins.applyVite: --no-minify, --verbose, --stats.
+// --isomorphic (prerendering), and via mixins.applyVite: --no-minify, --verbose, --stats.
 async function viteBuild (opts) {
 	const {build: viteBuildApi} = require('vite');
 
 	if (opts.framework) return viteFramework(opts);
+	if (opts.isomorphic) return viteIsomorphic(opts);
 
-	['isomorphic', 'snapshot'].forEach(flag => {
+	['snapshot'].forEach(flag => {
 		if (opts[flag]) {
 			console.log(
 				chalk.yellow(`NOTICE: --${flag} is not yet supported by the Vite bundler and will be ignored.`)
