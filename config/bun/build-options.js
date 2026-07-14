@@ -116,7 +116,7 @@ function getDefines (opts = {}) {
 }
 
 function createBuildOptions (opts = {}) {
-	const context = opts.context || app.context;
+	const context = path.resolve(opts.context || app.context);
 	loadProjectEnv(context, opts.production);
 
 	if (opts.snapshot) {

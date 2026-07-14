@@ -1,9 +1,24 @@
 const path = require('path');
 const fs = require('fs');
-const {resolveAppRootImport} = require('./resolve-tilde-import');
+const {resolveAppRootImport, isExternalUrl} = require('./resolve-tilde-import');
 
 function normalizeBundlerPath (filePath) {
-	return filePath.replace(/\\/g, '/');
+	return path.resolve(filePath).replace(/\\/g, '/');
+}
+
+function toResolveResult (filePath) {
+	const absolutePath = path.resolve(filePath);
+	if (!path.isAbsolute(absolutePath)) {
+		return undefined;
+	}
+
+	return {path: normalizeBundlerPath(absolutePath)};
+}
+
+function isNodeBuiltin (request) {
+	const normalized = request.replace(/^node:/, '');
+	const builtins = require('module').builtinModules || [];
+	return builtins.includes(normalized) || builtins.includes(`node:${normalized}`);
 }
 
 function normalizeAdditionalModulePaths (paths, context) {
@@ -53,7 +68,7 @@ function resolveNodeModule (request, searchPaths) {
 }
 
 function createResolveEnactPlugin (options = {}) {
-	const context = options.context || process.cwd();
+	const context = path.resolve(options.context || process.cwd());
 	const aliases = options.aliases || {};
 	const additionalModulePaths = normalizeAdditionalModulePaths(options.additionalModulePaths, context);
 
@@ -61,15 +76,34 @@ function createResolveEnactPlugin (options = {}) {
 		name: 'enact-resolve',
 		setup (build) {
 			build.onResolve({filter: /.*/}, args => {
+				if (isExternalUrl(args.path)) {
+					return {external: true};
+				}
+
+				if (path.isAbsolute(args.path) && fs.existsSync(args.path)) {
+					return toResolveResult(args.path);
+				}
+
+				if (args.path.startsWith('.') && args.resolveDir) {
+					const relativePath = path.resolve(args.resolveDir, args.path);
+					if (fs.existsSync(relativePath)) {
+						return toResolveResult(relativePath);
+					}
+				}
+
 				const appRootPath = resolveAppRootImport(args.path, context);
 				if (appRootPath) {
-					return {path: normalizeBundlerPath(appRootPath)};
+					return toResolveResult(appRootPath);
 				}
 
 				if (!args.path.startsWith('.') && !path.isAbsolute(args.path)) {
+					if (isNodeBuiltin(args.path)) {
+						return undefined;
+					}
+
 					const fromModulePaths = resolveFromModulePaths(args.path, additionalModulePaths);
 					if (fromModulePaths) {
-						return {path: normalizeBundlerPath(fromModulePaths)};
+						return toResolveResult(fromModulePaths);
 					}
 				}
 
@@ -77,7 +111,7 @@ function createResolveEnactPlugin (options = {}) {
 					if (args.path === key) {
 						let resolved = target;
 						if (!path.isAbsolute(target) && !target.startsWith('@')) {
-							resolved = path.join(context, target);
+							resolved = path.resolve(context, target);
 						} else {
 							try {
 								resolved = require.resolve(target, {paths: [context, args.importer].filter(Boolean)});
@@ -85,7 +119,7 @@ function createResolveEnactPlugin (options = {}) {
 								return undefined;
 							}
 						}
-						return {path: normalizeBundlerPath(resolved)};
+						return toResolveResult(resolved);
 					}
 				}
 
@@ -93,9 +127,7 @@ function createResolveEnactPlugin (options = {}) {
 					const checks = ['@enact/i18n/ilib', 'ilib'];
 					for (const check of checks) {
 						try {
-							return {
-								path: normalizeBundlerPath(require.resolve(check, {paths: [context, args.importer].filter(Boolean)}))
-							};
+							return toResolveResult(require.resolve(check, {paths: [context, args.importer].filter(Boolean)}));
 						} catch (_e) {
 							// continue
 						}
@@ -106,7 +138,7 @@ function createResolveEnactPlugin (options = {}) {
 					const searchPaths = getModuleSearchPaths(args, context, additionalModulePaths);
 					const resolved = resolveNodeModule(args.path, searchPaths);
 					if (resolved) {
-						return {path: normalizeBundlerPath(resolved)};
+						return toResolveResult(resolved);
 					}
 				}
 
@@ -122,4 +154,4 @@ function createResolveEnactPlugin (options = {}) {
 	};
 }
 
-module.exports = {createResolveEnactPlugin, normalizeBundlerPath};
+module.exports = {createResolveEnactPlugin, normalizeBundlerPath, toResolveResult};

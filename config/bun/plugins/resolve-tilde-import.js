@@ -6,7 +6,17 @@ function isExternalUrl (url) {
 }
 
 function isAppRootUrl (url) {
-	return url.startsWith('/') && !url.startsWith('//');
+	if (!url.startsWith('/') || url.startsWith('//')) {
+		return false;
+	}
+
+	// PostCSS rewrites asset URLs to absolute filesystem paths on Linux (e.g.
+	// /home/.../fonts/foo.ttf). Those are not app-root imports like /assets/foo.png.
+	if (path.isAbsolute(url) && fs.existsSync(url)) {
+		return false;
+	}
+
+	return true;
 }
 
 function resolveAppRootImport (importPath, appContext = process.cwd()) {
@@ -14,7 +24,7 @@ function resolveAppRootImport (importPath, appContext = process.cwd()) {
 		return null;
 	}
 
-	const resolvedPath = path.join(appContext, importPath.slice(1));
+	const resolvedPath = path.resolve(appContext, importPath.slice(1));
 	return fs.existsSync(resolvedPath) ? resolvedPath : null;
 }
 
