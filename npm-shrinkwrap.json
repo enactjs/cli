@@ -3111,7 +3111,7 @@
     },
     "node_modules/@enact/dev-utils": {
       "version": "7.0.5",
-      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#f8655d783c42f5c589c919bce6003e8d33402308",
+      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#a3d42d05cb861a8d5aa93f9c920246ea3164efd9",
       "license": "Apache-2.0",
       "dependencies": {
         "browserslist": "^4.28.2",
@@ -25030,9 +25030,9 @@
       }
     },
     "node_modules/webpack-bundle-analyzer": {
-      "version": "5.3.0",
-      "resolved": "https://registry.npmjs.org/webpack-bundle-analyzer/-/webpack-bundle-analyzer-5.3.0.tgz",
-      "integrity": "sha512-PEhAoqiJ+47d0uLMx/+zo5XOvaU+Vk6N2ZLht7H3n09QLy/fhyvqGNwjdRUHJDgMN8crBR2ZwVHkIswT3Xuawg==",
+      "version": "5.3.1",
+      "resolved": "https://registry.npmjs.org/webpack-bundle-analyzer/-/webpack-bundle-analyzer-5.3.1.tgz",
+      "integrity": "sha512-wP2EusncRGL1tZyMHC/umLkjPdYMkTL9nPEKh8G8dkYCJ9TyF6xnXFqjhdqmv5J900irN/g0P5jMvLT22krEXQ==",
       "license": "MIT",
       "dependencies": {
         "@discoveryjs/json-ext": "^0.6.3",
