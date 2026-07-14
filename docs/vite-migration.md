@@ -219,15 +219,34 @@ not dev-utils plugins. Status varies (ported / dropped / resolved / not yet):
    findings in [`vite-framework-externals-spike.md`](./vite-framework-externals-spike.md).
 6. **`GracefulFsPlugin`** — patches webpack's output FS to avoid EMFILE. Not
    needed under Vite (different FS handling). *Drop.*
-7. **`node-polyfill-webpack-plugin`** — supplies Node builtins (`global`,
-   `process`, `Buffer`) in the browser bundle. **Partly resolved:** the runtime
-   `global` reference in Enact's `polyfills.js` is handled (runtime fixes R1/R2 —
-   `ViteHtmlPlugin` shim + core-js ESM entry), and `process.env.NODE_ENV` is
-   covered by `define`. Fuller coverage (`Buffer`, full `process`), mostly for
-   screenshot tests, is **not** wired — add `vite-plugin-node-polyfills` if needed.
-8. **`icss` mode for non-`*.module` CSS / `forceCSSModules`** — Vite auto-treats
-   only `*.module.*` as modules; the webpack `mode: 'icss'` nuance and the global
-   `forceCSSModules` toggle need a custom transform. *Not ported.*
+7. ~~**`node-polyfill-webpack-plugin`**~~ — **ported.** `global` is supplied by
+   `ViteHtmlPlugin`'s head shim (R1) and `process.env.NODE_ENV` by `define`; fuller
+   coverage (`Buffer`, full `process`, and the node builtin modules — the webpack
+   plugin's `additionalAliases: console/domain/process/stream`) is now wired via
+   **`vite-plugin-node-polyfills`** in `config/vite.config.js`, gated to browser
+   targets. Globals are injected **reference-only** (like webpack's `ProvidePlugin`
+   — no global `typeof process` flip, no bundle bloat when unused; verified qa-a11y
+   doesn't bundle `buffer` and exposes no `window.Buffer`/`process`). A small
+   `enact-node-polyfill-resolver` `resolveId` plugin resolves the injected shim
+   specifiers (`vite-plugin-node-polyfills/*`, `node-stdlib-browser`) from the CLI's
+   `node_modules`, since apps are built with `root: app.context` and can't reach
+   them otherwise. For the SSR/isomorphic build, `vite-isomorphic.js`'s
+   `applySsrBuild` drops these plugins so the Node bundle uses the real builtins
+   (`path`/`fs`/`crypto`); verified the isomorphic build still prerenders cleanly.
+8. ~~**`icss` mode for non-`*.module` CSS / `forceCSSModules`**~~ — **`forceCSSModules`
+   ported; `icss` assessed as a no-op.** The Enact `forceCSSModules` option (scope ALL
+   css/less/scss, not just `*.module.*`) is wired via `enactForceCSSModulesPlugin` in
+   `config/vite.config.js`. Vite decides module-ness only from the `.module.` filename
+   infix (`cssModuleRE`) with no override hook, so the plugin resolves each non-module
+   style import and redirects it to a **virtual `.module` id** — keeping the real
+   directory so LESS `@import`/`url()` still resolve, serving the real file via `load`,
+   and letting `generateScopedName` recover the real path for webpack-parity hashing.
+   Verified end-to-end (standalone): non-module CSS **and** LESS scope, export a class
+   map, and LESS `@import` inlines+scopes; the default path (option off) is a verified
+   no-op with consistent CSS↔JS hashes. The webpack `mode:'icss'` nuance — ICSS
+   `:export`/`:import` interop in *non-module* CSS — is **not** separately wired because
+   it's a no-op here: Vite already leaves non-module CSS classes global (same scoping
+   behavior), and `:export` blocks appear **nowhere** in @enact/limestone source.
 9. ~~**LESS/CSS `~` npm imports**~~ — **resolved** (by config fixes #7 and #8 in
    the config-issues list above): `lessTildeImportPlugin` (LESS),
    `resolve.alias /^~/` (CSS), and `tildeJsonImportPlugin` (`@import-json`).
@@ -292,9 +311,8 @@ enact pack -p --vite -l en-US,ko-KR  # production build, locale-filtered
 ```
 
 > Status: **validated** on Sandstone and Limestone (build + serve), including
-> iLib i18n runtime + locale filtering, webOS metadata, and ESLint. Not yet
-> exercised: the `icss`/`forceCSSModules` nuance. Node 20+ is required for
-> `require()` of the ESM-only `vite` package (validated on Node 24).
+> iLib i18n runtime + locale filtering, webOS metadata, and ESLint. Node 20+ is
+> required for `require()` of the ESM-only `vite` package (validated on Node 24).
 
 ## Still not ported (webpack remains the default for these)
 
@@ -303,8 +321,6 @@ enact pack -p --vite -l en-US,ko-KR  # production build, locale-filtered
   (**`--isomorphic`** — gap #3 — and **framework externals** — gap #5 — are now ported;
   isomorphic is browser-validated end-to-end via `vite build --ssr` + per-locale prerender,
   see [vite-isomorphic-scope.md](vite-isomorphic-scope.md).)
-- **`icss` mode / `forceCSSModules`** (gap #8): Vite treats only `*.module.*` as
-  CSS modules; the webpack `mode: 'icss'` nuance isn't replicated.
 - **Framework refinement** (post-port): building `--framework` *in a theme repo*
   (e.g. limestone) should include the theme's own components (webpack's
   `libraries.push('.')` case) — the current enumeration scans `node_modules/@enact`,
