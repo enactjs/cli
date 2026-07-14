@@ -160,15 +160,13 @@ function createBuildOptions (opts = {}) {
 	if (opts.isomorphic || useSnapshot) {
 		// Prerender uses FileXHR, which maps bundled ilib URLs back to the filesystem.
 		process.env.ILIB_CONTEXT = context;
-		if (!process.env.ILIB_BASE_PATH && defines.ILIB_BASE_PATH) {
+		if (defines.ILIB_BASE_PATH) {
 			process.env.ILIB_BASE_PATH = JSON.parse(defines.ILIB_BASE_PATH);
 		}
-		if (!process.env.ILIB_FS_PATH) {
-			const {resolveIlibFsPath} = require('./ilib-meta');
-			const ilibFsPath = resolveIlibFsPath(context);
-			if (ilibFsPath) {
-				process.env.ILIB_FS_PATH = ilibFsPath;
-			}
+		const {resolveIlibFsPath} = require('./ilib-meta');
+		const ilibFsPath = resolveIlibFsPath(context);
+		if (ilibFsPath) {
+			process.env.ILIB_FS_PATH = ilibFsPath;
 		}
 	}
 
