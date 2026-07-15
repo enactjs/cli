@@ -274,20 +274,45 @@ not dev-utils plugins. Status varies (ported / dropped / resolved / not yet):
    them otherwise. For the SSR/isomorphic build, `vite-isomorphic.js`'s
    `applySsrBuild` drops these plugins so the Node bundle uses the real builtins
    (`path`/`fs`/`crypto`); verified the isomorphic build still prerenders cleanly.
-8. ~~**`icss` mode for non-`*.module` CSS / `forceCSSModules`**~~ — **`forceCSSModules`
-   ported; `icss` assessed as a no-op.** The Enact `forceCSSModules` option (scope ALL
-   css/less/scss, not just `*.module.*`) is wired via `enactForceCSSModulesPlugin` in
-   `config/vite.config.js`. Vite decides module-ness only from the `.module.` filename
-   infix (`cssModuleRE`) with no override hook, so the plugin resolves each non-module
-   style import and redirects it to a **virtual `.module` id** — keeping the real
-   directory so LESS `@import`/`url()` still resolve, serving the real file via `load`,
-   and letting `generateScopedName` recover the real path for webpack-parity hashing.
-   Verified end-to-end (standalone): non-module CSS **and** LESS scope, export a class
-   map, and LESS `@import` inlines+scopes; the default path (option off) is a verified
-   no-op with consistent CSS↔JS hashes. The webpack `mode:'icss'` nuance — ICSS
-   `:export`/`:import` interop in *non-module* CSS — is **not** separately wired because
-   it's a no-op here: Vite already leaves non-module CSS classes global (same scoping
-   behavior), and `:export` blocks appear **nowhere** in @enact/limestone source.
+8. ~~**`icss` mode for non-`*.module` CSS / `forceCSSModules`**~~ — **both ported.**
+   The Enact `forceCSSModules` option (scope ALL css/less/scss, not just `*.module.*`)
+   is wired via `enactForceCSSModulesPlugin` in `config/vite.config.js`. Vite decides
+   module-ness only from the `.module.` filename infix (`cssModuleRE`) with no override
+   hook, so the plugin resolves each non-module style import and redirects it to a
+   **virtual `.module` id** — keeping the real directory so LESS `@import`/`url()` still
+   resolve, serving the real file via `load`, and letting `generateScopedName` recover
+   the real path for webpack-parity hashing. Verified end-to-end: non-module CSS **and**
+   LESS scope and export a class map, matching webpack's ident (`src_App_App_app__<hash>`).
+
+   The webpack `mode:'icss'` path (the **default**, option off) was initially assessed as
+   a no-op on the grounds that Vite already leaves non-module CSS global and `:export`
+   is unused in @enact/limestone. **That assessment was wrong** and is now fixed. Scoping
+   is indeed identical, but css-loader in `icss` mode still emits a **default export**
+   (the ICSS `:export` locals, usually `{}`), whereas Vite emits *no* default export for
+   plain CSS at build time. So the classic Enact idiom on a **non-module** stylesheet —
+   ```js
+   import css from './App.less';        // plain .less, global classes
+   kind({styles: {css, className: 'app'}});
+   ```
+   — is a hard Vite build error (`"default" is not exported by "src/App/App.less"`),
+   even though webpack builds it fine (`classnames/bind` just falls back to the literal
+   global class name). `limestone/samples/qa-i18n` hits exactly this; `qa-a11y` does not,
+   because it uses `App.module.less`.
+
+   Parity is restored by `enactICSSInteropPlugins()` — **without scoping anything**:
+   - `enact-icss-extract` (normal order → after `vite:css` compiles LESS/SCSS, before
+     `vite:css-post` builds the JS proxy) lifts `:export {…}` blocks into a locals map
+     and strips them from the emitted CSS, as css-loader does.
+   - `enact-icss-default-export` (`enforce:'post'` → after `vite:css-post`) appends
+     `export default <locals>` when the proxy has none. Modules that already have a
+     default export (dev's CSS-string proxy, `?inline`/`?url`/`?raw`) are left alone.
+
+   Verified against webpack on `qa-i18n` with a `.app{color:#123456}` rule plus an
+   `:export{brandColor:#ff0000}` block — both bundlers emit the identical
+   `styles:{css:{brandColor:"#ff0000"},className:"app"}`, keep `.app` **global**
+   (unscoped), and strip `:export` from the CSS. `*.module.*` files are untouched
+   (`qa-a11y` still scopes 623/660 classes; the rest are the deliberately global
+   `enact-locale-*`).
 9. ~~**LESS/CSS `~` npm imports**~~ — **resolved** (by config fixes #7 and #8 in
    the config-issues list above): `lessTildeImportPlugin` (LESS),
    `resolve.alias /^~/` (CSS), and `tildeJsonImportPlugin` (`@import-json`).

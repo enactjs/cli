@@ -163,6 +163,66 @@ function enactForceCSSModulesPlugin (virtualToReal) {
 	};
 }
 
+// True for a style file that Vite will NOT treat as a CSS module: a css/less/scss
+// without the `.module.` infix, imported normally (not `?raw`/`?url`/`?inline`, which
+// Vite already gives a default export of their own).
+function isPlainStyleId (id) {
+	const [file, query = ''] = String(id).split('?');
+	if (!FORCE_CSS_STYLE_RE.test(file) || FORCE_CSS_MODULE_RE.test(file)) return false;
+	return !/(?:^|&)(?:raw|url|inline)(?:&|=|$)/.test(query);
+}
+
+// ICSS interop for non-`*.module.*` CSS — the webpack `modules:{mode:'icss'}` behaviour.
+// Enact apps conventionally do `import css from './App.less'` on a PLAIN (non-module)
+// stylesheet and hand the map to `kind({styles:{css, className:'app'}})`. Under webpack,
+// css-loader in `icss` mode leaves the class names global but still emits a default
+// export (the ICSS `:export` locals, usually `{}`), so the import resolves and
+// `classnames/bind` falls back to the literal global class name. Vite emits no default
+// export for plain CSS at build time, so the same import is a hard error:
+//   "default" is not exported by "src/App/App.less"
+// These two plugins restore parity WITHOUT scoping anything (scoping stays webpack-
+// identical: plain CSS remains global; only `forceCSSModules` scopes it):
+//   1. `enact-icss-extract` (normal order → runs after vite:css has compiled LESS/SCSS
+//      to CSS, before vite:css-post builds the JS proxy): lifts `:export {…}` blocks out
+//      of the compiled CSS into a locals map, and strips them from the emitted CSS
+//      (css-loader does the same; `:export` is not valid CSS for a browser).
+//   2. `enact-icss-default-export` (post order → runs after vite:css-post): appends
+//      `export default <locals>` when the proxy has none. Anything that already has a
+//      default export (dev's CSS-string proxy, `?inline`, `?url`, `?raw`) is left alone.
+function enactICSSInteropPlugins () {
+	const icssExports = new Map();
+	const key = id => String(id).split('?')[0];
+	return [
+		{
+			name: 'enact-icss-extract',
+			transform (code, id) {
+				if (!isPlainStyleId(id)) return null;
+				const locals = {};
+				const stripped = code.replace(/:export\s*\{([^}]*)\}/g, (match, body) => {
+					body.split(';').forEach(decl => {
+						const at = decl.indexOf(':');
+						if (at === -1) return;
+						const name = decl.slice(0, at).trim();
+						if (name) locals[name] = decl.slice(at + 1).trim();
+					});
+					return '';
+				});
+				icssExports.set(key(id), locals);
+				return stripped === code ? null : {code: stripped, map: {mappings: ''}};
+			}
+		},
+		{
+			name: 'enact-icss-default-export',
+			enforce: 'post',
+			transform (code, id) {
+				if (!isPlainStyleId(id) || /(?:^|[;\s])export\s+default\s/.test(code)) return null;
+				const locals = icssExports.get(key(id)) || {};
+				return {code: code + '\nexport default ' + JSON.stringify(locals) + ';\n', map: {mappings: ''}};
+			}
+		}
+	];
+}
+
 // Non-browser iLib platform loaders (`./lib/ilib-qt|rhino|ringo|node|….js`) and
 // their `*Loader.js` helpers. iLib selects these via runtime platform detection;
 // the browser branch never reaches them, but bundlers try (and fail) to resolve
@@ -474,7 +534,9 @@ module.exports = function (
 			// Rewrite webpack's `module.hot` in app source before other transforms.
 			enactNeutralizeWebpackHmrPlugin(),
 			// `forceCSSModules`: scope ALL css/less/scss as CSS modules (not just *.module.*).
-			app.forceCSSModules && enactForceCSSModulesPlugin(forcedCSSVirtual),
+			// Otherwise plain css/less/scss stays global (webpack `mode:'icss'`) and only
+			// needs the ICSS default export so `import css from './App.less'` resolves.
+			app.forceCSSModules ? enactForceCSSModulesPlugin(forcedCSSVirtual) : enactICSSInteropPlugins(),
 			// Node builtin polyfills for the browser (webpack: node-polyfill-webpack-plugin
 			// with additionalAliases console/domain/process/stream). `global` is already
 			// supplied by ViteHtmlPlugin's head shim (R1), so only inject Buffer/process.
