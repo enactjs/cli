@@ -28,7 +28,8 @@ function parseArgs (argv) {
 		customSkin: false,
 		linting: true,
 		splitCss: true,
-		externalsPolyfill: false
+		externalsPolyfill: false,
+		prerenderOnly: false
 	};
 	for (let i = 0; i < argv.length; i++) {
 		const arg = argv[i];
@@ -51,6 +52,7 @@ function parseArgs (argv) {
 		else if (arg === '--externals') opts.externals = argv[++i];
 		else if (arg === '--externals-public') opts.externalsPublic = argv[++i];
 		else if (arg === '--custom-skin') opts.customSkin = true;
+		else if (arg === '--prerender-only') opts.prerenderOnly = true;
 		else if (arg === '--context') opts.context = argv[++i];
 	}
 	return opts;
@@ -139,6 +141,29 @@ function getStartupAssets (publicPath, jsName, buildOpts) {
 	return assets;
 }
 
+function getPrerenderPayload (options, buildOpts, jsName) {
+	const app = nodeRequire('@enact/dev-utils/option-parser');
+	return {
+		context: options.context,
+		output: options.outputPath,
+		chunk: jsName,
+		locales: buildOpts.locales || 'en-US',
+		publicPath: options.publicPath,
+		screenTypes: app.screenTypes,
+		deep: app.deep,
+		fontGenerator: app.fontGenerator,
+		externalStartup: app.externalStartup,
+		externals: buildOpts.externals,
+		startupAssets: getStartupAssets(options.publicPath, jsName, buildOpts)
+	};
+}
+
+function runIsomorphicPrerender (options, buildOpts, jsName) {
+	nodeRequire('./run-prerender-in-node.cjs').runPrerenderInNode(
+		getPrerenderPayload(options, buildOpts, jsName)
+	);
+}
+
 async function buildReactGlobals (options, _buildOpts) {
 	const globalsEntry = path.join(path.dirname(fileURLToPath(import.meta.url)), 'react-globals-entry.js');
 	const result = await Bun.build({
@@ -198,21 +223,7 @@ function finalizeBuild (result, buildOpts, options) {
 	});
 
 	if (buildOpts.isomorphic) {
-		const app = nodeRequire('@enact/dev-utils/option-parser');
-		const applyBunPostBuild = nodeRequire('./prerender.js').applyPrerender;
-		applyBunPostBuild({
-			context: options.context,
-			output: options.outputPath,
-			chunk: jsName,
-			locales: buildOpts.locales || 'en-US',
-			publicPath: options.publicPath,
-			screenTypes: app.screenTypes,
-			deep: app.deep,
-			fontGenerator: app.fontGenerator,
-			externalStartup: app.externalStartup,
-			externals: buildOpts.externals,
-			startupAssets: getStartupAssets(options.publicPath, jsName, buildOpts)
-		});
+		runIsomorphicPrerender(options, buildOpts, jsName);
 	}
 
 	let v8SnapshotFile;
@@ -258,9 +269,21 @@ function logBuildResult (buildOpts, options, info) {
 	}));
 }
 
+async function runPrerenderOnly (buildOpts) {
+	buildOpts.isomorphic = true;
+	const options = createBuildOptions(buildOpts);
+	const jsName = buildOpts.chunk || 'main.js';
+	runIsomorphicPrerender(options, buildOpts, jsName);
+	console.log(JSON.stringify({success: true, prerenderOnly: true, locales: buildOpts.locales}));
+}
+
 async function runBuild (buildOpts) {
 	if (buildOpts.snapshot) {
 		buildOpts.isomorphic = true;
+	}
+
+	if (buildOpts.prerenderOnly) {
+		return runPrerenderOnly(buildOpts);
 	}
 
 	const options = createBuildOptions(buildOpts);

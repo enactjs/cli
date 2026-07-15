@@ -8,7 +8,7 @@ function spawnBunScript (script, args = [], opts = {}) {
 	const spawnOpts = {
 		stdio: 'inherit',
 		cwd: opts.cwd || process.cwd(),
-		env: {...process.env, ...opts.env}
+		env: {...process.env, ENACT_NODE: process.execPath, ...opts.env}
 	};
 
 	return new Promise((resolve, reject) => {
