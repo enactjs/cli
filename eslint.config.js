@@ -27,7 +27,7 @@ const bunRules = {
 module.exports = [
 	...strict,
 	{
-		files: ['config/bun/**/*.{js,mjs}'],
+		files: ['config/bun/**/*.{js,mjs,cjs}'],
 		languageOptions: {
 			globals: bunGlobals
 		},
