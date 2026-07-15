@@ -67,10 +67,7 @@ function getOutputNaming (buildOpts) {
 	if (buildOpts.contentHash) {
 		return 'main.[hash].[ext]';
 	}
-	if (!buildOpts.splitCss) {
-		return 'main.[ext]';
-	}
-	return buildOpts.isomorphic ? 'main.[ext]' : '[name].[ext]';
+	return 'main.[ext]';
 }
 
 function getIsomorphicExternalsList () {
@@ -213,6 +210,7 @@ function finalizeBuild (result, buildOpts, options) {
 
 	writeIndexHtml(options.outputPath, {
 		title: options.title,
+		fallbackTitle: options.fallbackTitle,
 		context: options.context,
 		publicPath: options.publicPath,
 		scriptSrc: `${options.publicPath}${jsName}`.replace(/\/{2,}/g, '/'),

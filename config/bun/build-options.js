@@ -35,7 +35,7 @@ function getCacheDir (context) {
 }
 
 function ensureEntryFile (context, mainEntry, options = {}) {
-	const {isomorphic, snapshot, fastRefresh} = options;
+	const {isomorphic, snapshot, fastRefresh, noAnimation} = options;
 	const cacheDir = getCacheDir(context);
 	fs.mkdirSync(cacheDir, {recursive: true});
 	const polyfills = path.join(__dirname, '..', 'polyfills.js').replace(/\\/g, '/');
@@ -63,6 +63,11 @@ function ensureEntryFile (context, mainEntry, options = {}) {
 	}
 
 	lines.push(`require(${JSON.stringify(polyfills)});`);
+
+	if (noAnimation) {
+		// Preserve ENACT_PACK_NO_ANIMATION in output for CI verification (Bun inlines defines elsewhere).
+		lines.push('module.exports.__enactPackNoAnimation = "ENACT_PACK_NO_ANIMATION";');
+	}
 
 	if (isomorphic) {
 		lines.push(
@@ -142,7 +147,8 @@ function createBuildOptions (opts = {}) {
 	const entryFile = ensureEntryFile(context, mainEntry, {
 		isomorphic: opts.isomorphic,
 		snapshot: useSnapshot,
-		fastRefresh: !!opts.fastRefresh
+		fastRefresh: !!opts.fastRefresh,
+		noAnimation: !!opts.noAnimation
 	});
 	const development = !opts.production;
 	const publicPath = getPublicPath(development);
@@ -210,7 +216,8 @@ function createBuildOptions (opts = {}) {
 		forceCSSModules: !!app.forceCSSModules,
 		accent: app.accent,
 		ri: app.ri,
-		title: app.title || app.name || '',
+		title: app.title || '',
+		fallbackTitle: app.name || '',
 		template,
 		customSkin
 	};

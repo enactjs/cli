@@ -63,7 +63,7 @@ function renderHtml ({title, scriptSrc, cssHref, isomorphic, externalScripts, ex
 
 function writeIndexHtml (outputDir, options) {
 	fs.mkdirSync(outputDir, {recursive: true});
-	const title = options.title || readWebOSTitle(options.context) || '';
+	const title = options.title || readWebOSTitle(options.context) || options.fallbackTitle || '';
 	const html = renderHtml({...options, title});
 	const target = path.join(outputDir, 'index.html');
 	fs.writeFileSync(target, html, {encoding: 'utf8'});
