@@ -18,10 +18,11 @@
  *   - cssModuleIdent (getLocalIdent)     -> via `css.modules.generateScopedName`
  *   - eslint-config-enact                -> via the inline `enact-eslint` plugin
  *
- * See `docs/vite-migration.md` for the feasibility analysis. The webpack-only
- * features that remain unported (and for which `pack --vite` prints a "not
- * supported, ignored" notice) are: isomorphic prerendering (see
- * `docs/vite-isomorphic-scope.md`), V8 snapshot, and framework externals.
+ * See `docs/vite-migration.md` for the feasibility analysis. Isomorphic prerendering
+ * (see `docs/vite-isomorphic-scope.md`), framework externals, and the V8 snapshot
+ * (`mixins/vite-snapshot.js`) are all ported. The only build-time combination that
+ * prints a "not supported" notice is `--snapshot --externals` (the snapshot must
+ * embed `@enact`, matching webpack).
  */
 
 const fs = require('fs');
@@ -33,6 +34,15 @@ const {
 	ViteILibPlugin,
 	ViteWebOSMetaPlugin
 } = require('@enact/dev-utils');
+
+// Node core-module polyfills for the browser bundle — the Vite analog of the
+// webpack build's `node-polyfill-webpack-plugin` (needed mainly for screenshot
+// tests, which reference `Buffer`/`process`/`stream`/etc.). Injects globals
+// reference-only (like webpack's ProvidePlugin — no global `typeof process`
+// flip) and aliases node builtins to browser implementations. Dropped for the
+// SSR/isomorphic build (see `vite-isomorphic.js` applySsrBuild), which needs the
+// real Node builtins.
+const {nodePolyfills} = require('vite-plugin-node-polyfills');
 
 // PostCSS plugin chain, shared with webpack.config.js (single source of truth).
 const {getPostCssPlugins} = require('./postcss-plugins');
@@ -93,6 +103,62 @@ function enactNeutralizeWebpackHmrPlugin () {
 			if (file.includes('/node_modules/') || !/\.(?:jsx?|tsx?|mjs)$/.test(file)) return null;
 			if (!code.includes('module.hot')) return null;
 			return {code: code.replace(/\bmodule\.hot\b/g, 'false'), map: null};
+		}
+	};
+}
+
+// vite-plugin-node-polyfills injects bare imports of its own shims and
+// `node-stdlib-browser` into app modules. Those packages live in the CLI's
+// node_modules, not the app's, so an app built with `root: app.context` (e.g. a
+// sample under a theme repo) can't resolve them. Resolve those specifiers from the
+// CLI instead; their transitive deps then resolve from the CLI tree naturally.
+function enactNodePolyfillResolverPlugin () {
+	const FROM_CLI = /^(?:vite-plugin-node-polyfills|node-stdlib-browser)(?:\/|$)/;
+	return {
+		name: 'enact-node-polyfill-resolver',
+		enforce: 'pre',
+		resolveId (source) {
+			if (!FROM_CLI.test(source)) return null;
+			try {
+				return require.resolve(source);
+			} catch (e) {
+				return null;
+			}
+		}
+	};
+}
+
+const FORCE_CSS_STYLE_RE = /\.(?:css|less|s[ac]ss)(?:\?.*)?$/;
+const FORCE_CSS_MODULE_RE = /\.module\.(?:css|less|s[ac]ss)(?:\?.*)?$/;
+
+// The Enact `forceCSSModules` build option makes ALL css/less/scss behave as CSS
+// modules (scoped), not just `*.module.*` — matching the webpack build, whose
+// non-module style rules use `modules:{getLocalIdent}` (no `mode:'icss'`) when the
+// option is set. Vite decides module-ness purely from the `.module.` filename infix
+// (cssModuleRE) with no override hook, so we resolve each non-module style import and
+// redirect it to a virtual id that carries a `.module` infix. The virtual id keeps the
+// real directory (so LESS `@import`/`url()` still resolve) and `load` serves the real
+// file's contents. `virtualToReal` also lets `generateScopedName` recover the real
+// path for the ident hash (webpack parity); genuine `*.module.*` files are untouched.
+function enactForceCSSModulesPlugin (virtualToReal) {
+	return {
+		name: 'enact-force-css-modules',
+		enforce: 'pre',
+		async resolveId (source, importer, options) {
+			if (!FORCE_CSS_STYLE_RE.test(source) || FORCE_CSS_MODULE_RE.test(source)) return null;
+			const resolved = await this.resolve(source, importer, {...options, skipSelf: true});
+			if (!resolved || resolved.external || FORCE_CSS_MODULE_RE.test(resolved.id)) return resolved;
+			// Inject `.module` before the extension, preserving the directory + any query.
+			const virtual = resolved.id.replace(/(\.(?:css|less|s[ac]ss))(\?.*)?$/, '.module$1$2');
+			virtualToReal.set(virtual.split('?')[0], resolved.id.split('?')[0]);
+			return Object.assign({}, resolved, {id: virtual});
+		},
+		load (id) {
+			const real = virtualToReal.get(id.split('?')[0]);
+			if (!real) return null;
+			// Watch the real file so edits invalidate the virtual module (dev HMR).
+			this.addWatchFile(real);
+			return fs.readFileSync(real, 'utf8');
 		}
 	};
 }
@@ -241,6 +307,10 @@ module.exports = function (
 	const entry = createCombinedEntry(app.context, ['core-js/stable', appEntry]);
 	const coreJsDir = path.dirname(require.resolve('core-js/package.json'));
 
+	// Maps `forceCSSModules` virtual `.module` ids back to their real style files, so
+	// `generateScopedName` can hash on the real path (see enactForceCSSModulesPlugin).
+	const forcedCSSVirtual = new Map();
+
 	// Enumerate the `@enact/*` packages installed in the app so they can be deduped
 	// (Vite `resolve.dedupe` takes exact names, not globs). Apps like the aggregate
 	// `all-samples` import source from many sibling packages, each with its own
@@ -319,7 +389,10 @@ module.exports = function (
 			// hash keeps names unique, so collapsing invalid chars to `_` is safe.
 			modules: {
 				generateScopedName (name, filename) {
-					const ident = getLocalIdent({resourcePath: filename, rootContext: app.context}, null, name);
+					// For `forceCSSModules` virtual ids, hash on the real path (webpack parity);
+					// genuine `*.module.*` files pass through unchanged.
+					const resourcePath = forcedCSSVirtual.get(filename.split('?')[0]) || filename;
+					const ident = getLocalIdent({resourcePath, rootContext: app.context}, null, name);
 					return ident.replace(/[^a-zA-Z0-9_-]/g, '_');
 				}
 			},
@@ -400,6 +473,19 @@ module.exports = function (
 		plugins: [
 			// Rewrite webpack's `module.hot` in app source before other transforms.
 			enactNeutralizeWebpackHmrPlugin(),
+			// `forceCSSModules`: scope ALL css/less/scss as CSS modules (not just *.module.*).
+			app.forceCSSModules && enactForceCSSModulesPlugin(forcedCSSVirtual),
+			// Node builtin polyfills for the browser (webpack: node-polyfill-webpack-plugin
+			// with additionalAliases console/domain/process/stream). `global` is already
+			// supplied by ViteHtmlPlugin's head shim (R1), so only inject Buffer/process.
+			// Skip for non-browser targets. Dropped for the SSR build in applySsrBuild.
+			!['node', 'async-node', 'webworker'].includes(app.environment) &&
+				enactNodePolyfillResolverPlugin(),
+			!['node', 'async-node', 'webworker'].includes(app.environment) &&
+				nodePolyfills({
+					globals: {Buffer: true, process: true, global: false},
+					protocolImports: true
+				}),
 			react({
 				// @enact/* packages ship raw source (JSX inside .js, ESM) rather than
 				// pre-compiled output, so they must be transpiled like app code. Mirror
