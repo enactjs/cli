@@ -253,9 +253,9 @@ async function viteIsomorphic (opts) {
 	const ssrOut = path.join(app.context, '.enact-ssr');
 
 	console.log(
-		opts.snapshot
-			? `Creating a V8 snapshot production build (${locales.length} locale(s))...`
-			: `Creating an isomorphic production build (${locales.length} locale(s))...`
+		opts.snapshot ?
+			`Creating a V8 snapshot production build (${locales.length} locale(s))...` :
+			`Creating an isomorphic production build (${locales.length} locale(s))...`
 	);
 
 	// 1) Client build (isomorphic ON → the app entry uses hydrateRoot).
