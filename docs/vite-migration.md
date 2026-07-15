@@ -5,17 +5,19 @@ replaced with Vite in `@enact/cli`, then apply a new Vite configuration.
 
 ## Verdict
 
-**Yes for the everyday browser dev/build workflow (validated end-to-end); three
-webOS-packaging features remain on webpack.** Vite (Rollup + esbuild) cleanly
+**Yes for the everyday browser dev/build workflow (validated end-to-end); every
+webOS-packaging feature is now ported.** Vite (Rollup + esbuild) cleanly
 covers `enact serve` / `enact pack` for a browser app and brings much faster cold
 starts and HMR. Several webOS-specific features that started as webpack compiler
 plugins have since been **re-authored as Vite/Rollup plugins** in `@enact/dev-utils`
 and validated: **iLib i18n runtime + locale filtering** (`ViteILibPlugin`), **webOS
 metadata** (`ViteWebOSMetaPlugin`), plus the HTML document (`ViteHtmlPlugin`) and
-**ESLint**. **`--isomorphic` prerendering and framework externals are also now ported and
-browser-validated** (`mixins/vite-isomorphic.js`, `mixins/vite-framework.js`). Only
-**`--snapshot`** (V8) still requires webpack — it needs the webOS `V8_MKSNAPSHOT` toolchain,
-unavailable here — and `pack --vite` prints a "not supported, ignored" notice for it.
+**ESLint**. **`--isomorphic` prerendering and framework externals are also ported and
+browser-validated** (`mixins/vite-isomorphic.js`, `mixins/vite-framework.js`).
+**`--snapshot`** (V8) is now ported too (`mixins/vite-snapshot.js`) and locally validated
+as snapshot-safe — its only remaining step is a build + install on a webOS board with the
+firmware-matched `V8_MKSNAPSHOT` toolchain (unavailable in this environment; see the
+"Testing `--snapshot` on a webOS board" section).
 
 The Vite config lives at [`config/vite.config.js`](../config/vite.config.js); it
 mirrors the `webpack.config.js` factory signature and reuses the existing Enact
@@ -204,11 +206,50 @@ not dev-utils plugins. Status varies (ported / dropped / resolved / not yet):
    `@enact/i18n` — locale class deferred to the client — and identical to webpack's isomorphic
    output, including with `--externals`; `-p` strips them. Details in the scope doc.)
    Full findings/phases in [`vite-isomorphic-scope.md`](./vite-isomorphic-scope.md).
-4. **`SnapshotPlugin`** — emits a V8 snapshot blob (`--snapshot`). *Not portable
-   here.* Requires the webOS `V8_MKSNAPSHOT` toolchain (absent in this
-   environment, so unverifiable) and is coupled to the webpack module runtime +
-   injected snapshot-helper entries. A Rollup equivalent would need its own
-   snapshot-safe bootstrap; deferred until the mksnapshot toolchain is available.
+4. ~~**`SnapshotPlugin`**~~ — **ported (build-complete; on-device validation pending
+   the toolchain).** `--snapshot` (which implies `--isomorphic`) now builds through
+   `mixins/vite-snapshot.js`: the client build becomes a **self-contained UMD** `main.js`
+   (`output.format:'umd'`, `name:'App'`, `preserveEntrySignatures:'strict'`,
+   `inlineDynamicImports`) with a `global` banner for the bare-V8 context, so the app's
+   default export is exposed as the `App` global — mirroring webpack's
+   `output.library='App'`/`libraryTarget='umd'`. The snapshot helpers are reimplemented in
+   **ESM** ([`snapshot-helper-esm.js`](../../dev-utils/plugins/SnapshotPlugin/snapshot-helper-esm.js)
+   + [`snapshot-mock.js`](../../dev-utils/plugins/SnapshotPlugin/snapshot-mock.js), reusing
+   the bundler-agnostic `mock-window.js` + `@enact/core/snapshot`): import order deterministically
+   installs the mock window before `react-dom/client` loads (Rollup hoists CJS requires, so the
+   original CJS helper's in-line ordering can't be reproduced), and `global.updateEnvironment`
+   is defined for the on-device window rebind. A resolver redirects `react-dom/client` → the
+   facade and no-ops absent optional deps (`fbjs` is gone in React 19; a theme may lack
+   `internal/$L`). After the isomorphic prerender/assembly (startup script kept **classic**, since
+   `main.js` is UMD), `mksnapshot` (`V8_MKSNAPSHOT`) runs against `main.js` to emit
+   `snapshot_blob.bin` and tag `appinfo.json` `v8SnapshotFile`.
+   **Validated end-to-end with a real toolchain.** Against `mksnapshot` (V8) the UMD bundle
+   produces a genuine, non-zero startup blob (qa-a11y: **4.6 MB**, in line with the ~4.3 MB
+   webpack reference). The syntax must parse in the target board's V8; the app's browserslist
+   drives the output by default, and `V8_SNAPSHOT_TARGET` force-lowers it for a much older
+   firmware than the app targets. `--snapshot --externals` is unsupported (the snapshot must
+   embed `@enact`), matching webpack. The blob's V8 must match the firmware — a mismatched
+   `mksnapshot` is rejected/unparseable (see the matrix below).
+
+   **core-js in the snapshot — parity with webpack, verified.** core-js is included by default
+   (as in the webpack path). Its WeakMap-based internal state serializes fine on a **modern**
+   snapshot V8, but a **very old** one (~Chrome 53) can't serialize a WeakMap-with-entries —
+   `mksnapshot` throws `illegal access` → 0-byte blob. This is a **core-js-3 + old-V8
+   limitation, not a bundler difference**: measured on the *same* `mksnapshot.53` against
+   qa-a11y built at `chrome 53`:
+
+   | Bundle (chrome 53 target, core-js 3.22.8) | Result |
+   | --- | --- |
+   | **webpack** + core-js | `illegal access` → 0-byte blob |
+   | **Vite** + core-js | `illegal access` → 0-byte blob (identical) |
+   | **Vite**, `ENACT_SNAPSHOT_NO_COREJS=1` | ✅ 4.6 MB blob |
+
+   So webpack and Vite behave identically; Vite additionally offers `ENACT_SNAPSHOT_NO_COREJS`
+   to still emit a blob (minus runtime builtin polyfills) on such old firmware, where webpack
+   emits nothing. On a firmware-matched **modern** `mksnapshot` (e.g. Chrome 132) neither the
+   `V8_SNAPSHOT_TARGET` lowering nor the no-core-js opt-out is needed — the default build (app
+   target + core-js) is correct for both bundlers. **Not validated here:** the blob on the
+   actual firmware (needs that firmware's `mksnapshot`) + on-device hydration.
 5. ~~**Framework externals**~~ — **ported** (`mixins/vite-framework.js` +
    `pack.js` `--framework`/`--externals`). Webpack's DLL maps deep module requests to
    IDs in a prebuilt bundle via a manifest; the Vite analog is a shared framework ESM
@@ -314,25 +355,75 @@ enact pack -p --vite -l en-US,ko-KR  # production build, locale-filtered
 > iLib i18n runtime + locale filtering, webOS metadata, and ESLint. Node 20+ is
 > required for `require()` of the ESM-only `vite` package (validated on Node 24).
 
-## Still not ported (webpack remains the default for these)
+## Ported, pending on-device validation
 
-- **`--snapshot`** (gap #4) — needs the webOS `V8_MKSNAPSHOT` toolchain (absent here,
-  so unverifiable); the Vite path prints a "not yet supported, ignored" notice.
-  (**`--isomorphic`** — gap #3 — and **framework externals** — gap #5 — are now ported;
-  isomorphic is browser-validated end-to-end via `vite build --ssr` + per-locale prerender,
-  see [vite-isomorphic-scope.md](vite-isomorphic-scope.md).)
-- **Framework refinement** (post-port): building `--framework` *in a theme repo*
-  (e.g. limestone) should include the theme's own components (webpack's
-  `libraries.push('.')` case) — the current enumeration scans `node_modules/@enact`,
-  so build the framework where all `@enact` incl. the theme are installed (e.g. an
-  app/sample context). (`--externals-polyfill` — move core-js into the framework — **is**
-  wired: `pack --framework --externals-polyfill` folds core-js into the framework, and
-  `pack --externals=<path> --externals-polyfill` delegates it out of the app.)
+- **`--snapshot`** (gap #4) — **build-complete and locally validated** (the UMD `main.js`
+  evaluates snapshot-safe in a bare V8 and exposes the `App`/`updateEnvironment`/`ReactDOMClient`
+  globals); only the actual `mksnapshot` blob + on-device hydration remain, which need the
+  firmware-specific `V8_MKSNAPSHOT` toolchain and a webOS board. See gap #4 above and the
+  **Testing `--snapshot` on a webOS board** section below.
+
+## Everything else is ported
+
+- ~~**Framework self-inclusion in a theme repo**~~ — **ported.** Building `--framework`
+  *inside* a theme repo (e.g. limestone) now includes the theme's own components, mirroring
+  webpack's `libraries.push('.')`. `mixins/vite-framework.js` `enumerateSelfSpecs(context)`
+  detects a `@enact/*` theme package (has `ThemeDecorator`/`MoonstoneDecorator`, or is
+  `@enact/i18n`) and enumerates its own component subpaths as `@enact/<theme>/<component>`
+  specifiers; `applyFramework` adds a `resolve.alias` (`@enact/<theme>` → repo root, covering
+  transitive self-references) and extends `commonjsOptions` to the repo root so the theme's
+  own CJS-in-source (e.g. a `module.exports` `fontGenerator`) interops. Verified on limestone:
+  a repo-root `--framework` build emits **138 specifiers = 56 own components + 76 node_modules
+  `@enact` + react/ilib**, with `enact.css`. The change is gated on theme-repo detection, so a
+  sample/app-context build (the Jenkins path) is unaffected. (`--externals-polyfill` — move
+  core-js into the framework — is also wired: `pack --framework --externals-polyfill` folds
+  core-js in, and `pack --externals=<path> --externals-polyfill` delegates it out of the app.)
 
 ## Recommendation
 
 Adopt Vite behind a feature flag for the **browser dev/build** path first (biggest
 DX win, lowest risk) — validated end-to-end including i18n runtime, locale filtering,
 webOS metadata, and ESLint. Beyond that, **`--isomorphic` and framework externals are
-now ported and validated** too, leaving only **`--snapshot`** on webpack (it needs the
-webOS `V8_MKSNAPSHOT` toolchain to build/validate — unavailable here).
+now ported and validated** too. **`--snapshot`** is now ported and locally validated
+(snapshot-safe UMD bundle); it just needs a final on-device pass on a webOS board with
+the `V8_MKSNAPSHOT` toolchain — see below.
+
+## Testing `--snapshot` on a webOS board
+
+The snapshot blob is a **build-time** artifact and requires a `mksnapshot` binary whose
+V8 version **matches the target firmware's Chrome** (from the same webOS SDK/NDK release) —
+e.g. a Chrome-132 board needs that firmware's `mksnapshot`, **not** an arbitrary/old one. A
+mismatched binary either can't parse the modern output or produces a blob the board ignores
+at load. `mksnapshot` is a **Linux** tool (32-bit for older releases); on Windows run it via
+WSL or a Linux build machine (the guide's "doesn't support Windows OS" note). Steps:
+
+1. **Build with the firmware-matched toolchain**:
+   ```
+   export V8_MKSNAPSHOT=/path/to/mksnapshot        # matches the board's Chrome
+   ENACT_BUNDLER=vite enact pack -p --snapshot      # add -l en-US,ko-KR for multi-locale
+   ```
+   Expect: `Generated V8 snapshot blob (snapshot_blob.bin) and tagged appinfo.json.`
+   Verify `dist/snapshot_blob.bin` is **non-zero** and `dist/appinfo.json` has
+   `"v8SnapshotFile": "snapshot_blob.bin"`. (Without `V8_MKSNAPSHOT` the build still
+   succeeds and prints a skip notice; the app runs, just without the snapshot.)
+   *Old-firmware knobs (rarely needed):* `V8_SNAPSHOT_TARGET=chrome53` force-lowers the
+   syntax for a V8 older than the app targets, and `ENACT_SNAPSHOT_NO_COREJS=1` drops core-js
+   when that old V8 can't serialize its WeakMap state (see gap #4 — webpack hits the same
+   wall). On a modern firmware-matched `mksnapshot`, use neither.
+2. **Package + install (developer mode, not hosted)** — the snapshot is loaded by WAM
+   from the app's local install dir, so it must be a packaged IPK, not a served URL:
+   ```
+   ares-package dist
+   ares-install ./com.*.ipk        # Developer Mode enabled on the board
+   ```
+3. **Confirm the snapshot is actually used** — launch the app and check it renders, then
+   confirm WAM loaded the blob (via WAM logs / the `--profile-deserialization` output, or a
+   measurable cold-start improvement) rather than silently falling back — a `mksnapshot`
+   whose V8 doesn't match the firmware is ignored at load, so "it rendered" alone isn't proof.
+
+If step 1's blob is 0-byte, check `mksnapshot`'s stderr: `Unexpected token` means the
+binary is **older** than the app's syntax target (use the firmware-matched one, or
+`V8_SNAPSHOT_TARGET`); `illegal access` in module init is the core-js/WeakMap case on very
+old V8 (`ENACT_SNAPSHOT_NO_COREJS=1`, same limitation as webpack); a `window`/`document`
+`ReferenceError` means app/framework code touched the DOM at snapshot time (the local
+bare-V8 `vm` check guards this and is clean for qa-a11y).

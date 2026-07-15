@@ -18,10 +18,11 @@
  *   - cssModuleIdent (getLocalIdent)     -> via `css.modules.generateScopedName`
  *   - eslint-config-enact                -> via the inline `enact-eslint` plugin
  *
- * See `docs/vite-migration.md` for the feasibility analysis. The webpack-only
- * features that remain unported (and for which `pack --vite` prints a "not
- * supported, ignored" notice) are: isomorphic prerendering (see
- * `docs/vite-isomorphic-scope.md`), V8 snapshot, and framework externals.
+ * See `docs/vite-migration.md` for the feasibility analysis. Isomorphic prerendering
+ * (see `docs/vite-isomorphic-scope.md`), framework externals, and the V8 snapshot
+ * (`mixins/vite-snapshot.js`) are all ported. The only build-time combination that
+ * prints a "not supported" notice is `--snapshot --externals` (the snapshot must
+ * embed `@enact`, matching webpack).
  */
 
 const fs = require('fs');
