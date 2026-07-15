@@ -52,6 +52,7 @@ function parseArgs (argv) {
 		else if (arg === '--externals') opts.externals = argv[++i];
 		else if (arg === '--externals-public') opts.externalsPublic = argv[++i];
 		else if (arg === '--custom-skin') opts.customSkin = true;
+		else if (arg === '--meta' || arg === '-m') opts.meta = argv[++i];
 		else if (arg === '--prerender-only') opts.prerenderOnly = true;
 		else if (arg === '--context') opts.context = argv[++i];
 	}
@@ -203,6 +204,13 @@ function finalizeBuild (result, buildOpts, options) {
 		}
 	}
 
+	nodeRequire('./post-build.js').applyPostBuild(options.context, options.outputPath, {
+		publicPath: options.publicPath,
+		ilibAdditionalResourcesPath: options.ilibAdditionalResourcesPath,
+		customSkin: options.customSkin,
+		watch: buildOpts.watch
+	});
+
 	writeIndexHtml(options.outputPath, {
 		title: options.title,
 		context: options.context,
@@ -213,13 +221,6 @@ function finalizeBuild (result, buildOpts, options) {
 		customSkin: options.customSkin,
 		externalScripts: externalAssets?.scripts,
 		externalStyles: externalAssets?.styles
-	});
-
-	nodeRequire('./post-build.js').applyPostBuild(options.context, options.outputPath, {
-		publicPath: options.publicPath,
-		ilibAdditionalResourcesPath: options.ilibAdditionalResourcesPath,
-		customSkin: options.customSkin,
-		watch: buildOpts.watch
 	});
 
 	if (buildOpts.isomorphic) {

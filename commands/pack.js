@@ -102,6 +102,9 @@ function buildArgs (opts) {
 	if (opts.entry) args.push('--entry', opts.entry);
 	if (opts['ilib-additional-path']) args.push('--ilib-additional-path', opts['ilib-additional-path']);
 	if (opts['custom-skin']) args.push('--custom-skin');
+	if (opts.meta) {
+		args.push('--meta', typeof opts.meta === 'string' ? opts.meta : JSON.stringify(opts.meta));
+	}
 	return args;
 }
 

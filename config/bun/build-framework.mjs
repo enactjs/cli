@@ -44,7 +44,8 @@ async function run () {
 		useTailwind: options.useTailwind,
 		ri: options.ri,
 		aliases: options.aliases,
-		linting: options.linting
+		linting: options.linting,
+		framework: true
 	});
 
 	const output = await applyFramework({

@@ -1,6 +1,7 @@
 const {createBabelEnactPlugin} = require('./babel-enact');
 const {createLessEnactPlugin} = require('./less-enact');
 const {createResolveEnactPlugin} = require('./resolve-enact');
+const {createFrameworkExclusionsPlugin} = require('./framework-exclusions');
 const {createExternalsEnactPlugin} = require('./externals-enact');
 const {createIsomorphicEnactPlugin} = require('./isomorphic-enact');
 const {createEslintEnactPlugin} = require('./eslint-enact');
@@ -10,6 +11,10 @@ const {createTypescriptEnactPlugin} = require('./typescript-enact');
 
 function createEnactPlugins (options = {}) {
 	const plugins = [];
+
+	if (options.framework) {
+		plugins.unshift(createFrameworkExclusionsPlugin());
+	}
 
 	const eslintPlugin = createEslintEnactPlugin(options);
 	if (eslintPlugin) {
@@ -55,6 +60,7 @@ module.exports = {
 	createEnactPlugins,
 	createBabelEnactPlugin,
 	createLessEnactPlugin,
+	createFrameworkExclusionsPlugin,
 	createExternalsEnactPlugin,
 	createIsomorphicEnactPlugin,
 	createEslintEnactPlugin,

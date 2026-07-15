@@ -115,9 +115,23 @@ function getDefines (opts = {}) {
 	return defines;
 }
 
+function applyMetaOverride (meta) {
+	if (!meta) return;
+	let parsed = meta;
+	if (typeof parsed === 'string') {
+		try {
+			parsed = JSON.parse(parsed);
+		} catch (e) {
+			throw new Error('Invalid metadata; must be a valid JSON string.\n' + e.message);
+		}
+	}
+	app.applyEnactMeta(parsed);
+}
+
 function createBuildOptions (opts = {}) {
 	const context = path.resolve(opts.context || app.context);
 	loadProjectEnv(context, opts.production);
+	applyMetaOverride(opts.meta);
 
 	if (opts.snapshot) {
 		opts.isomorphic = true;

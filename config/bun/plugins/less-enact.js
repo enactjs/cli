@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const less = require('less');
 const sass = require('sass');
 const {createPostcssEnactPlugin} = require('./postcss-enact');
@@ -26,6 +27,35 @@ function createLessTildePlugin (appContext) {
 		},
 		minVersion: [3, 0, 0]
 	};
+}
+
+function getLessSearchPaths (filePath, appContext) {
+	const paths = new Set([
+		path.dirname(filePath),
+		path.join(appContext, 'node_modules')
+	]);
+
+	let dir = path.dirname(filePath);
+	while (dir) {
+		if (
+			fs.existsSync(path.join(dir, 'ThemeDecorator')) ||
+			fs.existsSync(path.join(dir, 'MoonstoneDecorator')) ||
+			fs.existsSync(path.join(dir, 'AgateDecorator'))
+		) {
+			paths.add(dir);
+			const stylesDir = path.join(dir, 'styles');
+			if (fs.existsSync(stylesDir)) {
+				paths.add(stylesDir);
+			}
+		}
+		const parent = path.dirname(dir);
+		if (parent === dir) {
+			break;
+		}
+		dir = parent;
+	}
+
+	return [...paths];
 }
 
 async function compileSass (source, filePath) {
@@ -72,7 +102,7 @@ function createLessEnactPlugin (options = {}) {
 				const source = await Bun.file(args.path).text();
 				const lessResult = await less.render(source, {
 					filename: args.path,
-					paths: [path.dirname(args.path), path.join(appContext, 'node_modules')],
+					paths: getLessSearchPaths(args.path, appContext),
 					modifyVars: Object.assign({__DEV__: !options.production}, options.accent || {}),
 					javascriptEnabled: true,
 					rewriteUrls: 'all',

@@ -5,6 +5,7 @@ const fastGlob = require(require.resolve('fast-glob', {
 	paths: [path.dirname(require.resolve('@enact/dev-utils/package.json'))]
 }));
 const packageRoot = require('@enact/dev-utils/package-root');
+const {shouldExcludePath} = require('./plugins/framework-exclusions');
 
 const ROOT_PACKAGES = [
 	'react',
@@ -26,9 +27,29 @@ const FRAMEWORK_IGNORE = [
 	'**/@enact/storybook-utils/**/*.*',
 	'**/@enact/ui-test-utils/**/*.*',
 	'**/@enact/screenshot-test-utils/**/*.*',
+	'**/ilib/localedata/**/*.*',
+	'**/node_modules/**/*.*',
 	'**/samples/**/*.*',
-	'**/tests/**/*.*'
+	'**/tests/**/*.*',
+	'**/ilib-node*.js',
+	'**/AsyncNodeLoader.js',
+	'**/NodeLoader.js',
+	'**/RhinoLoader.js',
+	'**/react-dom/cjs/react-dom-server.node.*'
 ];
+
+const ILIB_IGNORE = [
+	'!node_modules',
+	'!locale',
+	'**/ilib-node*.js',
+	'**/AsyncNodeLoader.js',
+	'**/NodeLoader.js',
+	'**/RhinoLoader.js'
+];
+
+function isFrameworkModuleFile (file) {
+	return !/(^|[/\\])test[/\\]|\.test\.(js|jsx|es6)$|[-.]specs?\.(js|jsx|es6)$|\.bak(?:\.|\/|\\)/.test(file);
+}
 
 function getModuleId (nodeModules, file) {
 	const absPath = path.join(nodeModules, file);
@@ -108,16 +129,20 @@ function getThemeLocalModules (context) {
 				'!tests',
 				'**/__tests__/**/*.{js,jsx,ts,tsx}',
 				'**/?(*.)+(spec|test).[jt]s?(x)',
-				'**/*-specs.{js,jsx,ts,tsx}'
+				'**/*-specs.{js,jsx,ts,tsx}',
+				'**/*.bak*/**',
+				'**/*bak*/**'
 			]
 		})
 		.map(file => {
 			const abs = path.resolve(app.path, file);
-			let id = file.replace(/\.(jsx|es6|js)$/, '').replace(/\\/g, '/');
+			let id = './' + file.replace(/\.(jsx|es6|js)$/, '').replace(/\\/g, '/');
 			if (id.endsWith('/index') && id.length > 6) {
 				id = id.slice(0, -6);
 			}
-			id = id.replace(/^\.\//, app.meta.name + '/');
+			if (id.startsWith('.') && !id.startsWith('..')) {
+				id = id.replace(/^\./, app.meta.name);
+			}
 			return {id, request: abs};
 		});
 }
@@ -128,14 +153,21 @@ function getFrameworkModuleRequests (context, options = {}) {
 		cwd: nodeModules,
 		onlyFiles: true,
 		ignore: FRAMEWORK_IGNORE,
-		followSymbolicLinks: true
+		followSymbolicLinks: false
+	});
+	const ilibFiles = fastGlob.sync('ilib/**/*.@(js|jsx|es6)', {
+		cwd: nodeModules,
+		onlyFiles: true,
+		ignore: ILIB_IGNORE,
+		followSymbolicLinks: false
 	});
 
 	const modules = new Map();
 	for (const pkg of ROOT_PACKAGES) {
 		modules.set(pkg, pkg);
 	}
-	for (const file of enactFiles) {
+	for (const file of enactFiles.concat(ilibFiles)) {
+		if (!isFrameworkModuleFile(file)) continue;
 		const id = getModuleId(nodeModules, file);
 		if (!modules.has(id)) {
 			modules.set(id, id);
@@ -175,11 +207,19 @@ function writeFrameworkEntry (context, modules, options = {}) {
 	}
 
 	for (const {id, request} of modules) {
+		const normalizedRequest = String(request).replace(/\\/g, '/');
+		if (shouldExcludePath(normalizedRequest)) {
+			continue;
+		}
 		lines.push(`__register(${JSON.stringify(id)}, function () { return require(${JSON.stringify(request)}); });`);
 	}
 
 	lines.push('', '// Eagerly load framework modules for CSS extraction');
 	for (const {request} of modules) {
+		const normalizedRequest = String(request).replace(/\\/g, '/');
+		if (shouldExcludePath(normalizedRequest)) {
+			continue;
+		}
 		lines.push(`require(${JSON.stringify(request)});`);
 	}
 
