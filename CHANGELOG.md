@@ -1,3 +1,9 @@
+## unreleased
+
+### pack, serve, eject
+
+* Added experimental support for the Vite bundler, enabled with the `--vite` option or the `ENACT_BUNDLER=vite` environment variable.
+
 ## 7.3.3 (July 7, 2026)
 
 ### transpile
