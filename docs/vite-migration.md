@@ -1,13 +1,8 @@
-# Replacing webpack with Vite in `@enact/cli`: feasibility & status
-
-**Task:** Look through React tooling libraries and assess whether webpack can be
-replaced with Vite in `@enact/cli`, then apply a new Vite configuration.
+# Replacing webpack with Vite in `@enact/cli`: feasibility and status
 
 ## Verdict
 
-**Yes for the everyday browser dev/build workflow (validated end-to-end); every
-webOS-packaging feature is now ported.** Vite (Rollup + esbuild) cleanly
-covers `enact serve` / `enact pack` for a browser app and brings much faster cold
+Vite (Rollup + esbuild) cleanly covers `enact serve` / `enact pack` for a browser app and brings much faster cold
 starts and HMR. Several webOS-specific features that started as webpack compiler
 plugins have since been **re-authored as Vite/Rollup plugins** in `@enact/dev-utils`
 and validated: **iLib i18n runtime + locale filtering** (`ViteILibPlugin`), **webOS
@@ -404,10 +399,115 @@ enact pack -p --vite -l en-US,ko-KR  # production build, locale-filtered
   core-js into the framework — is also wired: `pack --framework --externals-polyfill` folds
   core-js in, and `pack --externals=<path> --externals-polyfill` delegates it out of the app.)
 
+## Measured: webpack vs Vite, command by command
+
+Real measurements, not estimates. **App:** `limestone/samples/qa-a11y`. **Machine:** 22
+logical cores / 31.5 GB RAM, Windows. Both bundlers run the same `enact pack`/`enact serve`
+CLI with `NODE_OPTIONS=--max-old-space-size=8192` (webpack's `--framework` build OOMs at the
+default heap, so the larger heap is given to *both* for fairness).
+
+**Methodology** (metric set follows [rstackjs/build-tools-performance](https://github.com/rstackjs/build-tools-performance),
+the reference bundler benchmark: startup, build no-cache/with-cache, memory, output size,
+gzipped size):
+
+- **No cache** — `<app>/node_modules/.cache` (webpack's `cache:{type:'filesystem'}` + the
+  babel-loader cache) and `<app>/node_modules/.vite` (Vite's dep-optimizer cache) are deleted
+  before the run. This matters: webpack has a persistent build cache and Vite has none, so
+  *not* clearing it silently hands webpack a warm cache and makes the comparison meaningless.
+- **With cache** — an immediate second run. Both runs build into an **empty** output dir, so
+  the cache is the only variable (otherwise the second run also pays to replace ~6.8k files
+  and reads as *slower* than the first).
+- **Peak RSS** — the build process's own `process.resourceUsage().maxRSS` (exact, zero
+  overhead). Covers the main build process, not parallel minifier workers.
+- **Gzipped** — gzip(level 9) of all emitted JS+CSS+HTML: a network-transfer proxy.
+- Single run per cell (not 3-run averaged); treat differences under ~5% as noise.
+
+### Build & startup time
+
+| Command | webpack (no cache) | Vite (no cache) | webpack (cached) | Vite (cached) |
+|---|---|---|---|---|
+| `pack` (dev) | **33.8s** | 44.8s | **28.5s** | 40.8s |
+| `pack -p` | **40.3s** | 48.0s | **36.3s** | 44.4s |
+| `pack -p --no-minify` ¹ | 39.5s | 44.1s | — | — |
+| `pack -p --content-hash` | **40.9s** | 47.1s | — | — |
+| `pack -p -i` (isomorphic) | **53.5s** | 81.5s | — | — |
+| `pack -p -i -l en-US,ko-KR` ² | **54.2s** | 73.5s | — | — |
+| `pack -p --snapshot` | **54.9s** | 78.7s | — | — |
+| `serve` (dev server ready) | 44.8s | **10.5s** | 38.6s | **7.5s** |
+
+### Peak memory (RSS)
+
+| Command | webpack | Vite |
+|---|---|---|
+| `pack` (dev) | **1162 MB** | 2355 MB |
+| `pack -p` | **1310 MB** | 1854 MB |
+| `pack -p -i` | **1334 MB** | 1920 MB |
+| `pack -p --snapshot` | **1646 MB** | 2036 MB |
+| `serve` | 1241 MB | **449 MB** |
+
+### Output size
+
+| Command | webpack files / total / main.js / gzip | Vite files / total / main.js / gzip |
+|---|---|---|
+| `pack` (dev) | 6779 / 71.8 MB / 5679 KB / 1011 KB | 6778 / 72.2 MB / **4283 KB** / **877 KB** |
+| `pack -p` | 6778 / 61.0 MB / **1108 KB** / **385 KB** | 6777 / 61.8 MB / 1263 KB / 448 KB |
+| `pack -p --no-minify` ¹ | 6778 / 61.2 MB / 1108 KB / 390 KB | 6777 / 63.8 MB / 3226 KB / 678 KB |
+| `pack -p -i` | 6778 / 61.1 MB / **1108 KB** / **391 KB** | 6777 / 61.9 MB / 1263 KB / 453 KB |
+| `pack -p -i -l en-US,ko-KR` ² | 6782 / 61.1 MB / 1108 KB / 392 KB | **2013 / 19.4 MB** / 1263 KB / 455 KB |
+| `pack -p --snapshot` | 6778 / 61.1 MB / **1115 KB** / **393 KB** | 6777 / 61.9 MB / 1275 KB / 454 KB |
+
+Total output is dominated by iLib locale JSON (~60 MB); `main.js`/gzip are the figures that
+track bundling quality.
+
+### What the numbers say
+
+- **Dev server is Vite's decisive win**: ready in **10.5s vs 44.8s** cold (**4.3×**) and
+  **7.5s vs 38.6s** warm (**5.1×**), using **449 MB vs 1241 MB** (**2.8× less**). This is the
+  day-to-day feedback loop and the main reason to migrate.
+- **webpack is currently faster for production builds** — 16–19% on plain `-p`, and **~1.5×**
+  on `-i`/`--snapshot`. The isomorphic gap is structural: the Vite path runs **two** builds
+  (client + a real `vite build --ssr`), where webpack prerenders from a single compilation.
+- **webpack's persistent cache is worth 10–16%**; Vite's dep cache buys 7–9% on builds but
+  ~30% on dev startup.
+- **Vite uses ~40–60% more memory** to build (but ~⅓ as much to serve).
+- **webpack's production bundle is smaller**: `main.js` 1108 KB vs 1263 KB (+14%), gzipped
+  385 KB vs 448 KB (**+16%**). Worth a follow-up (CJS interop / tree-shaking differences);
+  it is the one clear regression in the Vite output. Note Vite's **dev** bundle is *smaller*
+  (4283 KB vs 5679 KB).
+
+¹ **`--no-minify` is not comparable — the webpack flag is a silent no-op.** webpack's
+`main.js` is byte-identical with and without it (1108 KB, gzip 314 KB), while Vite's grows
+2.6× as expected. Cause: `terser-webpack-plugin@5.6.1` normalizes constructor options into
+`options.minimizer.options`, but `dev-utils/mixins/unmangled.js` writes to
+`options.terserOptions` — a key v5 never reads, so `mangle` stays `{safari10:true}`. This is
+a pre-existing webpack-path bug, unrelated to the Vite port.
+
+² **`-l` means different things in the two bundlers.** `locales` appears **nowhere** in
+webpack's `ILibPlugin`: there, `-l` scopes *prerendering only* (matching `pack --help`:
+"Locales for isomorphic mode") and the full iLib tree always ships. `ViteILibPlugin`
+*additionally* trims the emitted locale data — hence **2013 files / 19.4 MB vs 6782 / 61.1 MB**
+(**68% smaller**). Attractive for a TV app, but a **behavioral deviation**: a webpack build
+made with `-l en-US,ko-KR` can still switch to any locale at runtime, whereas the Vite build
+ships no data for unlisted locales and would fall back to unlocalized output. (Shared
+non-locale data such as `localematch.json` is kept, so it degrades rather than crashes.)
+Decide deliberately: gate it behind its own flag, or adopt it as intentional.
+
+### Not measured
+
+`pack -p --framework` and `pack -p --externals` are **excluded**. The webpack `--framework`
+build alone measured **12,905s (3.6 hours)**, single-threaded, and `--externals` needs a
+second framework build on top — together they dominated the run ~20:1 over every other
+command combined. It also **OOMs at the default heap** (hence `--max-old-space-size=8192`).
+Whether Vite's framework build is comparably slow is **unknown and worth measuring** — if it
+is dramatically faster, that is likely the single strongest argument in this comparison.
+
+Harness: `scratchpad/bench.cjs` + `bench-run.cjs` (throwaway; not part of the repo).
+
 ## Recommendation
 
 Adopt Vite behind a feature flag for the **browser dev/build** path first (biggest
-DX win, lowest risk) — validated end-to-end including i18n runtime, locale filtering,
+DX win, lowest risk — measured **4–5× faster dev server startup** at **⅓ the memory**;
+see the benchmark above) — validated end-to-end including i18n runtime, locale filtering,
 webOS metadata, and ESLint. Beyond that, **`--isomorphic` and framework externals are
 now ported and validated** too. **`--snapshot`** is now ported and locally validated
 (snapshot-safe UMD bundle); it just needs a final on-device pass on a webOS board with
