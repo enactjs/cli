@@ -4,7 +4,7 @@
 /**
  * Experimental Vite configuration for @enact/cli.
  *
- * This is a drop-in-oriented port of `webpack.config.js`. It mirrors the same
+ * This is a vite equivalent of `webpack.config.js`. It mirrors the same
  * factory signature so the `pack`/`serve` commands can build an equivalent
  * config, and it reuses the existing Enact tooling wherever a webpack-agnostic
  * equivalent exists:
@@ -18,11 +18,6 @@
  *   - cssModuleIdent (getLocalIdent)     -> via `css.modules.generateScopedName`
  *   - eslint-config-enact                -> via the inline `enact-eslint` plugin
  *
- * See `docs/vite-migration.md` for the feasibility analysis. Isomorphic prerendering
- * (see `docs/vite-isomorphic-scope.md`), framework externals, and the V8 snapshot
- * (`mixins/vite-snapshot.js`) are all ported. The only build-time combination that
- * prints a "not supported" notice is `--snapshot --externals` (the snapshot must
- * embed `@enact`, matching webpack).
  */
 
 const fs = require('fs');
@@ -35,21 +30,13 @@ const {
 	ViteWebOSMetaPlugin
 } = require('@enact/dev-utils');
 
-// Node core-module polyfills for the browser bundle — the Vite analog of the
-// webpack build's `node-polyfill-webpack-plugin` (needed mainly for screenshot
-// tests, which reference `Buffer`/`process`/`stream`/etc.). Injects globals
-// reference-only (like webpack's ProvidePlugin — no global `typeof process`
-// flip) and aliases node builtins to browser implementations. Dropped for the
-// SSR/isomorphic build (see `vite-isomorphic.js` applySsrBuild), which needs the
-// real Node builtins.
 const {nodePolyfills} = require('vite-plugin-node-polyfills');
 
-// PostCSS plugin chain, shared with webpack.config.js (single source of truth).
+// PostCSS plugin chain, shared with webpack.config.js.
 const {getPostCssPlugins} = require('./postcss-plugins');
 
 // Vite plugin that runs ESLint against the app sources, mirroring the webpack
 // build's `eslint-webpack-plugin` (same flat config in eslintWebpackPluginConfig).
-// Lints once at build start: warnings are printed; errors fail production builds.
 function enactEslintPlugin () {
 	let isBuild = true;
 	return {
@@ -87,12 +74,12 @@ function enactEslintPlugin () {
 	};
 }
 
-// Vite plugin that neutralizes webpack's HMR API in app source. Some Enact apps
+// Vite plugin that neutralizes webpack's HMR API in-app source. Some Enact apps
 // guard reducer/hot-reload code with `if (module.hot) { module.hot.accept(…) }`.
-// `module` exists in the webpack runtime but not in Vite's browser ESM (app source
+// `module` exists in the webpack runtime but not in Vite's browser ESM (the app source
 // isn't CJS-wrapped like pre-bundled deps), so it throws `module is not defined`.
 // Vite's `define` can't replace `module.hot` (esbuild treats `module` specially),
-// so rewrite it to `false` here — the webpack-only block is skipped and Vite's own
+// so rewrite it to `false` here. The webpack-only block is skipped, and Vite's own
 // HMR (import.meta.hot) still applies to the module graph.
 function enactNeutralizeWebpackHmrPlugin () {
 	return {
@@ -110,7 +97,7 @@ function enactNeutralizeWebpackHmrPlugin () {
 // vite-plugin-node-polyfills injects bare imports of its own shims and
 // `node-stdlib-browser` into app modules. Those packages live in the CLI's
 // node_modules, not the app's, so an app built with `root: app.context` (e.g. a
-// sample under a theme repo) can't resolve them. Resolve those specifiers from the
+// sample under a theme repo) can't resolve them. We need to resolve those specifiers from the
 // CLI instead; their transitive deps then resolve from the CLI tree naturally.
 function enactNodePolyfillResolverPlugin () {
 	const FROM_CLI = /^(?:vite-plugin-node-polyfills|node-stdlib-browser)(?:\/|$)/;
@@ -132,7 +119,7 @@ const FORCE_CSS_STYLE_RE = /\.(?:css|less|s[ac]ss)(?:\?.*)?$/;
 const FORCE_CSS_MODULE_RE = /\.module\.(?:css|less|s[ac]ss)(?:\?.*)?$/;
 
 // The Enact `forceCSSModules` build option makes ALL css/less/scss behave as CSS
-// modules (scoped), not just `*.module.*` — matching the webpack build, whose
+// modules (scoped), not just `*.module.*`, matching the webpack build, whose
 // non-module style rules use `modules:{getLocalIdent}` (no `mode:'icss'`) when the
 // option is set. Vite decides module-ness purely from the `.module.` filename infix
 // (cssModuleRE) with no override hook, so we resolve each non-module style import and
@@ -182,7 +169,7 @@ function isPlainStyleId (id) {
 //   "default" is not exported by "src/App/App.less"
 // These two plugins restore parity WITHOUT scoping anything (scoping stays webpack-
 // identical: plain CSS remains global; only `forceCSSModules` scopes it):
-//   1. `enact-icss-extract` (normal order → runs after vite:css has compiled LESS/SCSS
+//   1. `enact-icss-extract` (normal order → runs after vite: css has compiled LESS/SCSS
 //      to CSS, before vite:css-post builds the JS proxy): lifts `:export {…}` blocks out
 //      of the compiled CSS into a locals map, and strips them from the emitted CSS
 //      (css-loader does the same; `:export` is not valid CSS for a browser).
@@ -251,7 +238,7 @@ const enactBabelEsbuildPlugin = {
 		let babel;
 		const preset = require.resolve('babel-preset-enact');
 		build.onLoad({filter: /[\\/]@enact[\\/].*\.(?:jsx?|mjs)$/}, async args => {
-			// iLib data/loaders under @enact/i18n are not Enact source — leave them
+			// iLib data/loaders under @enact/i18n are not Enact source. Leave them
 			// to esbuild (and the loader stub) rather than paying babel on big files.
 			if (/[\\/]ilib[\\/]/.test(args.path)) return null;
 			babel = babel || require('@babel/core');
@@ -426,8 +413,7 @@ module.exports = function (
 				// specifier from node_modules (LESS `~` is handled by lessTildeImportPlugin).
 				{find: /^~/, replacement: ''}
 			],
-			// Force a single copy of React across the app and all (possibly nested,
-			// e.g. @enact/limestone/node_modules/@enact/*) dependencies. Without this,
+			// Force a single copy of React across the app and all dependencies. Without this,
 			// Vite pre-bundling resolves multiple physical react copies and mixing
 			// components across them triggers "Invalid hook call / more than one copy
 			// of React". Webpack avoids this via single-tree resolution + exposing
@@ -500,7 +486,7 @@ module.exports = function (
 		optimizeDeps: {
 			// Enact apps ship no `index.html`, so Vite's dependency scanner has no
 			// default entry to crawl and would otherwise discover every dependency
-			// lazily on first request — each new one triggering a re-optimize +
+			// lazily on the first request, each new one triggering a re-optimize +
 			// full page reload. That churns badly for apps that import source from
 			// sibling packages (e.g. `all-samples`). Point the scanner at the app
 			// entry so it crawls the whole import graph (including cross-package
