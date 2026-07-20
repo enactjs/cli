@@ -38,6 +38,7 @@ const {
 	WebOSMetaPlugin
 } = require('@enact/dev-utils');
 const createEnvironmentHash = require('./createEnvironmentHash');
+const {getPostCssPlugins} = require('./postcss-plugins');
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
@@ -125,122 +126,7 @@ module.exports = function (
 						// Necessary for external CSS imports to work
 						// https://github.com/facebook/create-react-app/issues/2677
 						ident: 'postcss',
-						plugins: [
-							useTailwind && 'tailwindcss',
-							// Fix and adjust for known flexbox issues
-							// See https://github.com/philipwalton/flexbugs
-							'postcss-flexbugs-fixes',
-							// Transpile stage-3 CSS standards based on browserslist targets.
-							// See https://preset-env.cssdb.org/features for supported features.
-							// Includes support for targetted auto-prefixing.
-							[
-								'postcss-preset-env',
-								{
-									autoprefixer: {
-										flexbox: 'no-2009',
-										remove: false
-									},
-									stage: 3,
-									features: {'custom-properties': false}
-								}
-							],
-							// Adds PostCSS Normalize to standardize browser quirks based on
-							// the browserslist targets.
-							!useTailwind && require('postcss-normalize'),
-							// Resolution indepedence support
-							app.ri !== false && require('postcss-resolution-independence')(app.ri),
-							// Support importing JSON files with ~ alias - custom plugin (must run first)
-							{
-								postcssPlugin: 'postcss-import-json-tilde',
-								Once (root) {
-									// Process all @import-json rules with ~ prefix first, before other plugins
-									root.walkAtRules('import-json', atRule => {
-										let src = atRule.params.slice(1, -1); // Remove quotes
-
-										// Only handle ~ alias paths
-										if (src.startsWith('~')) {
-											const packagePath = src.substring(1); // Remove ~
-
-											try {
-												// Use Node.js standard module resolution
-												// This mimics webpack's ~ alias behavior
-												const currentFileDir = path.dirname(atRule.source.input.file || '');
-
-												// Try to resolve the module using require.resolve
-												// This follows standard Node.js module resolution algorithm
-												let resolvedPath;
-												try {
-													// First try from current file's directory
-													resolvedPath = require.resolve(packagePath, {
-														paths: [currentFileDir]
-													});
-												} catch (e) {
-													// Fallback to current working directory
-													resolvedPath = require.resolve(packagePath, {
-														paths: [process.cwd()]
-													});
-												}
-
-												// Convert to relative path for the original plugin
-												const relativePath = path.relative(currentFileDir, resolvedPath);
-												atRule.params = `"${relativePath}"`;
-											} catch (error) {
-												// If resolution fails, try manual node_modules lookup
-												try {
-													let currentDir = path.dirname(
-														atRule.source.input.file || process.cwd()
-													);
-													let found = false;
-
-													// Walk up directories to find node_modules
-													while (currentDir !== path.parse(currentDir).root && !found) {
-														const moduleDir = path.join(
-															currentDir,
-															'node_modules',
-															packagePath
-														);
-														if (fs.existsSync(moduleDir)) {
-															const relativePath = path.relative(
-																path.dirname(atRule.source.input.file || ''),
-																moduleDir
-															);
-															atRule.params = `"${relativePath}"`;
-															found = true;
-															break;
-														}
-														currentDir = path.dirname(currentDir);
-													}
-
-													if (!found) {
-														console.warn(`Could not resolve module path: ${packagePath}`);
-													}
-												} catch (fallbackError) {
-													console.warn(
-														`Failed to resolve ${packagePath}:`,
-														fallbackError.message
-													);
-												}
-											}
-										}
-									});
-								}
-							},
-							// Support importing JSON files in CSS - original plugin (for non-~ paths)
-							[
-								'@daltontan/postcss-import-json',
-								{
-									map: (selector, value) => {
-										if (typeof value === 'object' && value !== null && value.$ref) {
-											const tokenPath = value.$ref.split('#/')[1];
-											const cssVariableName = '--' + tokenPath.replace(/\//g, '-');
-
-											return `var(${cssVariableName})`;
-										}
-										return value;
-									}
-								}
-							]
-						].filter(Boolean)
+						plugins: getPostCssPlugins({useTailwind})
 					},
 					sourceMap: shouldUseSourceMap
 				}

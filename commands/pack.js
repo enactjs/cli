@@ -20,6 +20,12 @@ const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const printBuildError = require('react-dev-utils/printBuildError');
 const webpack = require('webpack');
 const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
+const viteFw = require('@enact/dev-utils/mixins/vite-framework');
+const viteIso = require('@enact/dev-utils/mixins/vite-isomorphic');
+const viteSnap = require('@enact/dev-utils/mixins/vite-snapshot');
+const {parseLocales} = require('@enact/dev-utils/plugins/PrerenderPlugin/parse-locales');
+
+const {isViteBundler} = require('./vite-utils');
 
 let chalk;
 let stripAnsi;
@@ -52,6 +58,7 @@ function displayHelp () {
 	console.log('    -c, --custom-skin Build with a custom skin');
 	console.log('    --no-linting      Build without code linting');
 	console.log('    --no-animation    Build without effects such as animation and shadow');
+	console.log('    --vite            [Experimental] Build with Vite instead of webpack');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    --verbose         Verbose log build details');
 	console.log('    -v, --version     Display version information');
@@ -113,7 +120,7 @@ function details (err, stats, output) {
 			console.log(
 				chalk.yellow(
 					'\nTreating warnings as errors because process.env.CI = true. \n' +
-						'Most CI servers set it automatically.\n'
+					'Most CI servers set it automatically.\n'
 				)
 			);
 			return new Error(filteredWarnings.join('\n\n'));
@@ -130,7 +137,7 @@ function details (err, stats, output) {
 			console.log(
 				chalk.yellow(
 					'NOTICE: This build contains debugging functionality and may run' +
-						' slower than in production mode.'
+					' slower than in production mode.'
 				)
 			);
 		}
@@ -186,7 +193,7 @@ function printErrorDetails (err, handler) {
 		console.log(
 			chalk.yellow(
 				'Compiled with the following type errors (you may want to check ' +
-					'these before deploying your app):\n'
+				'these before deploying your app):\n'
 			)
 		);
 		printBuildError(err);
@@ -195,6 +202,234 @@ function printErrorDetails (err, handler) {
 		printBuildError(err);
 		if (handler) handler();
 	}
+}
+
+
+// Build the shared Enact framework bundle (react + ilib + all @enact) as reusable ESM
+// addressed by an import map, plus a manifest. Vite counterpart to webpack `pack --framework`.
+async function viteFramework (opts) {
+	const {createRequire} = require('module');
+	const {build: viteBuildApi} = require('vite');
+	const appRequire = createRequire(path.join(app.context, 'package.json'));
+
+	const specs = viteFw.enumerateSpecifiers(app.context, {polyfill: opts['externals-polyfill']});
+	// Building --framework inside a theme repo: also include the theme's own components
+	// (webpack's `libraries.push('.')`), which aren't in the repo's node_modules/@enact.
+	const self = viteFw.enumerateSelfSpecs(app.context);
+	const allSpecs = self ? specs.concat(self.specs.filter(s => !specs.includes(s))) : specs;
+	const selfSet = self ? new Set(self.specs) : null;
+	const srcDir = path.join(app.context, '.enact-framework-src');
+	const {input, names} = viteFw.writeWrappers(allSpecs, srcDir, appRequire, selfSet);
+
+	const configFactory = require('../config/vite.config');
+	const config = configFactory(opts.production ? 'production' : 'development', !opts.linting);
+	const outDir = opts.output ? path.resolve(opts.output) : path.resolve('./dist');
+	viteFw.applyFramework(config, {input, outDir, selfAlias: self && {find: self.name, replacement: self.root}});
+	// --no-minify/--verbose/--stats still apply to the framework build.
+	mixins.applyVite(config, opts);
+
+	console.log(`Creating the Enact framework bundle (${Object.keys(input).length} modules)...`);
+	await viteBuildApi(config);
+	const manifest = viteFw.writeManifest(outDir, names);
+	fs.removeSync(srcDir);
+	console.log(
+		chalk.green(`Framework compiled successfully. (${Object.keys(manifest.imports).length} specifiers)`)
+	);
+}
+
+// Isomorphic (prerendered) Vite build. Client build (hydrateRoot) + a real `vite build --ssr`
+// of the app entry, then per-locale server render (FileXHR for iLib data) and assembly into
+// the webpack-compatible output (fallback index.html + deduped index.<variant>.html +
+// locale-map.json + per-locale webOS appinfo). Vite counterpart to webpack `pack --isomorphic`.
+async function viteIsomorphic (opts) {
+	const {createRequire} = require('module');
+	const {build: viteBuildApi} = require('vite');
+	const appRequire = createRequire(path.join(app.context, 'package.json'));
+	const configFactory = require('../config/vite.config');
+
+	const locales = opts.locales ? parseLocales(app.context, opts.locales) || ['en-US'] : ['en-US'];
+	const outDir = opts.output ? path.resolve(opts.output) : path.resolve('./dist');
+	const serverEntry = path.resolve(opts.entry || app.entry || path.join(app.context, 'src/index.js'));
+	const ssrOut = path.join(app.context, '.enact-ssr');
+
+	console.log(
+		opts.snapshot ?
+			`Creating a V8 snapshot production build (${locales.length} locale(s))...` :
+			`Creating an isomorphic production build (${locales.length} locale(s))...`
+	);
+
+	// 1) Client build (isomorphic ON → the app entry uses hydrateRoot).
+	const clientConfig = configFactory(
+		opts.production ? 'production' : 'development',
+		!opts.linting,
+		opts['content-hash'],
+		true /* isomorphic */,
+		!opts.animation,
+		!opts['split-css'],
+		opts['ilib-additional-path'],
+		opts.locales
+	);
+	if (opts.output) clientConfig.build.outDir = outDir;
+	// --externals: externalize the shared framework from the CLIENT build (browser loads it via
+	// import map). The SSR build below always bundles @enact so it can render. CSS-module hashes
+	// stay consistent because both reuse the factory (same rootContext) as the framework build.
+	const collected = new Set();
+	let manifest = null;
+	if (opts.externals) {
+		manifest = viteFw.readManifest(path.resolve(opts.externals));
+		viteFw.applyExternals(clientConfig, collected, manifest, {polyfill: opts['externals-polyfill']});
+	}
+	// --snapshot: build the client as a self-contained UMD bundle (App global) that mksnapshot
+	// can snapshot. Implies isomorphic; --snapshot + --externals is unsupported (the snapshot
+	// must embed @enact, not externalize it), matching webpack (`opts.snapshot && !opts.externals`).
+	if (opts.snapshot && !opts.externals) {
+		viteSnap.applySnapshotBuild(clientConfig, {context: app.context, appEntry: serverEntry});
+	}
+	mixins.applyVite(clientConfig, opts);
+	await viteBuildApi(clientConfig);
+
+	// Inject the framework import map (+ shared stylesheet) into the client index.html BEFORE
+	// the isomorphic assembly transforms it into the fallback/variant files.
+	if (opts.externals) {
+		let base = opts['externals-public'];
+		if (!base) {
+			fs.copySync(path.resolve(opts.externals), path.join(outDir, 'framework'), {dereference: true});
+			base = './framework';
+		}
+		viteFw.injectHtml(path.join(outDir, 'index.html'), manifest, collected, base);
+	}
+
+	// 2) SSR build (Node-loadable CJS whose default export is the app element).
+	const ssrConfig = configFactory(opts.production ? 'production' : 'development', true, false, true);
+	viteIso.applySsrBuild(ssrConfig, {serverEntry, outDir: ssrOut});
+	await viteBuildApi(ssrConfig);
+
+	// 3) Per-locale prerender. Load the SSR bundle fresh for each locale so iLib re-initializes.
+	const bundlePath = path.join(ssrOut, 'app.server.cjs');
+	const ssrRequire = createRequire(path.join(ssrOut, 'noop.js'));
+	const {renderToString} = appRequire('react-dom/server');
+	const load = () => {
+		Object.keys(ssrRequire.cache || {}).forEach(k => {
+			if (k.startsWith(ssrOut)) delete ssrRequire.cache[k];
+		});
+		const mod = ssrRequire(bundlePath);
+		// eslint-disable-next-line no-undefined
+		return mod && mod.default !== undefined ? mod.default : mod;
+	};
+	const {prerenders, attr, aliasOf} = viteIso.prerender({
+		locales,
+		load,
+		renderToString,
+		fontGenerator: app.fontGenerator
+	});
+
+	// 4) Assemble HTML + locale-map, then (5) webOS per-locale appinfo.
+	const {localeMap} = viteIso.assemble({
+		outDir, locales, prerenders, attr, aliasOf,
+		screenTypes: app.screenTypes || [],
+		snapshot: !!opts.snapshot
+	});
+	viteIso.writeAppinfo({outDir, locales, localeMap});
+
+	fs.removeSync(ssrOut);
+	console.log(
+		chalk.cyan(`Prerendered ${locales.length} locale(s) into ${prerenders.length} variant(s).`)
+	);
+
+	// 6) V8 snapshot: run mksnapshot against the UMD main.js and record the blob in appinfo.
+	// Requires the webOS `V8_MKSNAPSHOT` toolchain; without it the build still succeeds and
+	// the startup script falls back to loading main.js (classic <script>) at runtime.
+	if (opts.snapshot && !opts.externals) {
+		const result = viteSnap.runMkSnapshot({outDir});
+		if (result.ok) {
+			viteSnap.writeSnapshotAppinfo({outDir, blob: result.blob});
+			console.log(chalk.green(`Generated V8 snapshot blob (${result.blob}) and tagged appinfo.json.`));
+		} else {
+			console.log(chalk.yellow(`V8 snapshot blob not generated: ${result.error.message.split('\n')[0]}`));
+			console.log(chalk.yellow('Set V8_MKSNAPSHOT to the webOS mksnapshot binary to emit the blob; the app runs without it.'));
+		}
+	} else if (opts.snapshot && opts.externals) {
+		console.log(chalk.yellow('NOTICE: --snapshot with --externals is not supported; the snapshot must embed @enact. Built without a snapshot.'));
+	}
+
+	console.log(chalk.green('Compiled successfully.'));
+}
+
+// Experimental Vite build path. Mirrors the webpack `build`/`watch` behavior but
+// drives Vite's JS API.
+//
+// Wired here: --framework (shared bundle), --externals (import-map externalization),
+// --isomorphic (prerendering), --snapshot (V8 snapshot), and via mixins.applyVite:
+// --no-minify, --verbose, --stats.
+async function viteBuild (opts) {
+	const {build: viteBuildApi} = require('vite');
+
+	if (opts.framework) return viteFramework(opts);
+	// --snapshot implies --isomorphic (the snapshot embeds the prerendered app).
+	if (opts.snapshot || opts.isomorphic) return viteIsomorphic(opts);
+
+	const configFactory = require('../config/vite.config');
+	const config = configFactory(
+		opts.production ? 'production' : 'development',
+		!opts.linting,
+		opts['content-hash'],
+		// isomorphic forced off: prerendering isn't ported, so hydrateRoot has no
+		// server markup to hydrate. Client render (createRoot) is the correct fallback.
+		false,
+		!opts.animation,
+		!opts['split-css'],
+		opts['ilib-additional-path'],
+		opts.locales
+	);
+
+	// Entry override
+	if (opts.entry || app.entry) {
+		config.build.rollupOptions.input = {main: path.resolve(opts.entry || app.entry)};
+	}
+	// Output override
+	if (opts.output) config.build.outDir = path.resolve(opts.output);
+
+	// --externals: externalize the shared framework specifiers out of the app build,
+	// collecting the ones actually imported so we can build a minimal import map. The
+	// framework manifest is read up front so externalization is manifest-aware (only
+	// externalize what the framework actually provides).
+	const collected = new Set();
+	let manifest = null;
+	if (opts.externals) {
+		manifest = viteFw.readManifest(path.resolve(opts.externals));
+		viteFw.applyExternals(config, collected, manifest, {polyfill: opts['externals-polyfill']});
+	}
+
+	// Apply the build-shaping flags (--no-minify, --verbose, --stats), mirroring the
+	// webpack path's `mixins.apply`. Runs after the output override so --stats writes
+	// stats.html into the final outDir.
+	mixins.applyVite(config, opts);
+	// Watch mode
+	if (opts.watch) {
+		config.build.watch = {};
+		console.log('Creating a build and watching for changes...');
+	} else if (process.env.NODE_ENV === 'development') {
+		console.log('Creating a development build...');
+	} else {
+		console.log('Creating an optimized production build...');
+	}
+
+	await viteBuildApi(config);
+
+	// --externals post-step: resolve the collected specifiers against the framework's
+	// manifest and inject the import map + shared stylesheet into the built index.html.
+	if (opts.externals && !opts.watch) {
+		let base = opts['externals-public'];
+		if (!base) {
+			// No remote public path: serve the framework locally under ./framework.
+			fs.copySync(path.resolve(opts.externals), path.join(config.build.outDir, 'framework'), {dereference: true});
+			base = './framework';
+		}
+		const n = viteFw.injectHtml(path.join(config.build.outDir, 'index.html'), manifest, collected, base);
+		console.log(chalk.cyan(`Externalized ${n} framework specifiers via import map (base: ${base}).`));
+	}
+
+	if (!opts.watch) console.log(chalk.green('Compiled successfully.'));
 }
 
 // Create the production build and print the deployment instructions.
@@ -254,6 +489,12 @@ function api (opts = {}) {
 		app.applyEnactMeta({template: path.join(__dirname, '..', 'config', 'custom-skin-template.ejs')});
 	}
 
+	// Experimental Vite bundler path (opt-in via `--vite` or ENACT_BUNDLER=vite).
+	if (isViteBundler(opts)) {
+		process.env.NODE_ENV = opts.production ? 'production' : 'development';
+		return viteBuild(opts);
+	}
+
 	// make the framework option available globally in order to be used by the eslint-webpack-plugin custom configuration
 	process.env.FRAMEWORK = opts.framework;
 	// Do this as the first thing so that any code reading it knows the right env.
@@ -306,6 +547,7 @@ function cli (args) {
 			'animation',
 			'verbose',
 			'watch',
+			'vite',
 			'help'
 		],
 		string: ['externals', 'externals-public', 'locales', 'entry', 'ilib-additional-path', 'output', 'meta'],
