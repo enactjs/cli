@@ -396,6 +396,7 @@ module.exports = function (
 						{
 							test: /\.(js|mjs|jsx|ts|tsx)$/,
 							exclude: /node_modules.(?!@enact)/,
+							resolve: { fullySpecified: false },
 							loader: require.resolve('babel-loader'),
 							options: {
 								configFile: path.join(__dirname, 'babel.config.js'),
