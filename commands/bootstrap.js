@@ -98,7 +98,7 @@ function api ({
 						}
 						// Update dependency entry for local entries that exist
 						local.forEach(dep => {
-							const fileDep = 'file:' + path.join(override, dep, 'package.tgz');
+							const fileDep = 'file:' + path.join(override, dep, 'package.tgz').split(path.sep).join('/');
 							if (!lockfile) {
 								if (obj.dependencies && obj.dependencies[dep]) {
 									obj.dependencies[dep] = fileDep;
@@ -125,9 +125,9 @@ function api ({
 								Object.keys(obj.packages)
 									.filter(key => key === suffix || key.endsWith('/' + suffix))
 									.forEach(key => {
-										obj.packages[key].version = fileDep;
+										obj.packages[key].resolved = fileDep;
 										// Remove unneeded properties to avoid issues
-										['resolved', 'from', 'integrity', 'requires'].forEach(
+										['version', 'from', 'integrity', 'requires'].forEach(
 											k => delete obj.packages[key][k]
 										);
 									});
