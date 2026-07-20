@@ -119,9 +119,10 @@ function api ({
 							if (obj.packages) {
 								const nodeModulesKey = 'node_modules/' + dep;
 								if (obj.packages[nodeModulesKey]) {
+									obj.packages[nodeModulesKey].version = fileDep;
 									obj.packages[nodeModulesKey].resolved = fileDep;
 									// Remove unneeded properties to avoid issues
-									['from', 'integrity'].forEach(
+									['from', 'integrity', 'requires'].forEach(
 										key => delete obj.packages[nodeModulesKey][key]
 									);
 								}
