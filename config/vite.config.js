@@ -115,6 +115,36 @@ function enactNodePolyfillResolverPlugin () {
 	};
 }
 
+// Webpack parity for `resolve.modules: [path.resolve('./node_modules'), 'node_modules']`:
+// webpack adds the APP-ROOT node_modules as a global resolution root, so a bare specifier
+// imported from ANY file in the graph resolves there — even source pulled in from a
+// sibling directory outside the app root (e.g. the `all-samples` aggregate imports
+// `../../../pattern-locale-switching/src/main`, whose code does `import {Provider} from
+// 'react-redux'`; `react-redux` is a dep of all-samples, not of the sibling). Vite/Rollup
+// only walk up from the importing file, so such a sibling's bare deps go unresolved. This
+// plugin restores the app-root fallback: when normal resolution fails for a bare specifier,
+// retry from `<app root>/node_modules`.
+function enactAppModulesResolverPlugin (appContext) {
+	const appModules = path.join(appContext, 'node_modules');
+	return {
+		name: 'enact-app-modules-resolver',
+		async resolveId (source, importer, options) {
+			// Only bare specifiers; skip relative/absolute/virtual ids and entries.
+			if (!importer || /^[./]/.test(source) || source.startsWith('\0') || path.isAbsolute(source)) {
+				return null;
+			}
+			// Act only as a fallback: let the normal pipeline resolve first.
+			const resolved = await this.resolve(source, importer, {...options, skipSelf: true});
+			if (resolved) return resolved;
+			try {
+				return require.resolve(source, {paths: [appModules]});
+			} catch (e) {
+				return null;
+			}
+		}
+	};
+}
+
 const FORCE_CSS_STYLE_RE = /\.(?:css|less|s[ac]ss)(?:\?.*)?$/;
 const FORCE_CSS_MODULE_RE = /\.module\.(?:css|less|s[ac]ss)(?:\?.*)?$/;
 
@@ -529,6 +559,9 @@ module.exports = function (
 		plugins: [
 			// Rewrite webpack's `module.hot` in app source before other transforms.
 			enactNeutralizeWebpackHmrPlugin(),
+			// Webpack `resolve.modules` parity: resolve bare specifiers from the app-root
+			// node_modules when they can't be resolved from the importer
+			enactAppModulesResolverPlugin(app.context),
 			// `forceCSSModules`: scope ALL css/less/scss as CSS modules (not just *.module.*).
 			// Otherwise plain css/less/scss stays global (webpack `mode:'icss'`) and only
 			// needs the ICSS default export so `import css from './App.less'` resolves.
