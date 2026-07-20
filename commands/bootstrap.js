@@ -117,15 +117,20 @@ function api ({
 							// lockfileVersion 2 & 3: the "packages" map keyed by
 							// install path (e.g. "node_modules/@enact/core")
 							if (obj.packages) {
-								const nodeModulesKey = 'node_modules/' + dep;
-								if (obj.packages[nodeModulesKey]) {
-									obj.packages[nodeModulesKey].version = fileDep;
-									obj.packages[nodeModulesKey].resolved = fileDep;
-									// Remove unneeded properties to avoid issues
-									['from', 'integrity', 'requires'].forEach(
-										key => delete obj.packages[nodeModulesKey][key]
-									);
-								}
+								// A dependency can be installed at the top level
+								// ("node_modules/@enact/core") or nested
+								// ("node_modules/@enact/limestone/node_modules/@enact/core"),
+								// so update every path that resolves to this package.
+								const suffix = 'node_modules/' + dep;
+								Object.keys(obj.packages)
+									.filter(key => key === suffix || key.endsWith('/' + suffix))
+									.forEach(key => {
+										obj.packages[key].version = fileDep;
+										// Remove unneeded properties to avoid issues
+										['resolved', 'from', 'integrity', 'requires'].forEach(
+											k => delete obj.packages[key][k]
+										);
+									});
 								// The root package ("") mirrors package.json's
 								// dependency specifiers
 								const root = obj.packages[''];
