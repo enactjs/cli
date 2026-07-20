@@ -1,147 +1,84 @@
-# Replacing webpack with Vite in `@enact/cli`: feasibility and status
+# Vite bundler support in `@enact/cli`
 
-## Verdict
-
-Vite (Rollup + esbuild) cleanly covers `enact serve` / `enact pack` for a browser app and brings much faster cold
-starts and HMR. Several webOS-specific features that started as webpack compiler
-plugins have since been **re-authored as Vite/Rollup plugins** in `@enact/dev-utils`
-and validated: **iLib i18n runtime + locale filtering** (`ViteILibPlugin`), **webOS
-metadata** (`ViteWebOSMetaPlugin`), plus the HTML document (`ViteHtmlPlugin`) and
-**ESLint**. **`--isomorphic` prerendering and framework externals are also ported and
-browser-validated** (`mixins/vite-isomorphic.js`, `mixins/vite-framework.js`).
-**`--snapshot`** (V8) is now ported too (`mixins/vite-snapshot.js`) and locally validated
-as snapshot-safe — its only remaining step is a build + install on a webOS board with the
-firmware-matched `V8_MKSNAPSHOT` toolchain (unavailable in this environment; see the
-"Testing `--snapshot` on a webOS board" section).
+`@enact/cli` supports **Vite (Rollup + esbuild)** as a bundler alongside webpack for
+`enact serve` and `enact pack`. The Vite path is opt-in — `--vite` or
+`ENACT_BUNDLER=vite`. Webpack remains the default.
 
 The Vite config lives at [`config/vite.config.js`](../config/vite.config.js); it
 mirrors the `webpack.config.js` factory signature and reuses the existing Enact
 tooling.
 
-### Validated end-to-end ✅
+## Overview
 
-Both paths were run against real apps — **Sandstone**
+Vite covers `enact serve` / `enact pack` for a browser app and brings much faster cold
+starts and HMR. The webOS-specific features that exist as webpack compiler plugins are
+re-authored as Vite/Rollup plugins in `@enact/dev-utils`: **iLib i18n runtime + locale
+filtering** (`ViteILibPlugin`), **webOS metadata** (`ViteWebOSMetaPlugin`), the HTML
+document (`ViteHtmlPlugin`), and **ESLint**. **`--isomorphic` prerendering and framework
+externals** are implemented and browser-validated (`mixins/vite-isomorphic.js`,
+`mixins/vite-framework.js`). **`--snapshot`** (V8) is implemented
+(`mixins/vite-snapshot.js`) and produces a genuine startup blob; on-device deployment
+uses the firmware-matched `V8_MKSNAPSHOT` toolchain (procedure in *Testing `--snapshot`
+on a webOS board*).
+
+### Validation
+
+Both paths are validated against real apps — **Sandstone**
 (`samples/sandstone/tutorial-hello-enact`, React 18, pre-compiled deps) and
 **Limestone** (`samples/limestone/tutorial-hello-enact`, React 19, which ships
 **raw `@enact` source** with JSX-in-`.js` and uses `~` npm imports — the harder,
 more representative case):
 
-- **`enact pack -p --vite`** → success on both. Limestone emits `main.js`
-  (~550 kB), `main.css` (~70 kB with resolution-independence applied — `px` →
-  `rem`, and design tokens as CSS custom properties from `@import-json`),
-  `index.html` linking both, and font assets. CSS-module scoping is consistent
-  across JS and CSS (e.g. `src_App_App_app__e2Hkq` in both), matching the webpack
-  `cssModuleIdent` format.
-- **`enact serve --vite`** → success on both. Serves the synthesized HTML with
-  Vite's HMR client injected, transforms JSX-in-`.js` via the React automatic
-  runtime, and pre-bundles the `@enact/*` dependencies.
+- **`enact pack -p --vite`** → succeeds on both. 
+- **`enact serve --vite`** → succeeds on both. 
 - **iLib i18n runtime** validated (constants baked/defined, locale data
   copied/served); **locale filtering** `-l en-US,ko-KR` trims 70 MB → 19 MB
-  (6,755 → 1,988 files, correct locales); **webOS meta** `appinfo.json` + icons
+  (correct locales); **webOS meta** `appinfo.json` + icons
   emitted/served; **ESLint** lints the sources (clean) and enforces rules.
-- **Real-browser render** verified on several apps — `qa-dropdown` (nested
-  `@enact`), the redux sample (webpack HMR API), and the aggregate `all-samples`
-  (imports source from 15 sibling packages): each mounts and renders correctly
-  (see runtime fixes R1–R8 below). Note: HTTP-200 / transform checks do **not**
-  execute the page JS — always load a real browser.
+- **Real-browser render** verified on several apps:`qa-dropdown` (nested
+  `@enact`), the redux sample (webpack HMR API), and the aggregated `all-samples`
 
-Eight config issues plus eight runtime issues were found and fixed while
-validating. The runtime ones (mostly only visible when the page actually executes
-in a real browser — HTTP-200/transform checks don't run the page JS) were:
+### Config details handled
 
-- **R1 — `global` is not defined.** Enact's `polyfills.js`/core-js reference the
-  Node `global`, absent in the browser (webpack supplied it via
-  node-polyfill-webpack-plugin). Fix: `ViteHtmlPlugin` injects a classic
-  `<script>globalThis.global=globalThis</script>` in `<head>`, before the deferred
-  module entry.
-- **R2 — CommonJS polyfills.** `polyfills.js` → `corejs-proxy.js` use
-  `require('core-js/stable')`; `require` doesn't exist in browser ESM
-  (`require is not defined`). Fix: the generated combined entry imports
-  `core-js/stable` as an ESM bare specifier (Vite pre-bundles the CJS→ESM),
-  aliased to the CLI's `core-js` since apps don't depend on it directly.
-- **R3 — multiple copies of React** ("Invalid hook call"). Nested `@enact` deps
-  (`@enact/limestone/node_modules/@enact/*`) + Vite pre-bundling resolved several
-  physical `react` copies. Fix: `resolve.dedupe: ['react','react-dom','react/jsx-runtime','react/jsx-dev-runtime']`.
-- **R4 — webpack's HMR API in app source** (`module is not defined`). Some apps
-  guard reducer hot-reload with `if (module.hot) { module.hot.accept(…) }`;
-  `module` exists in the webpack runtime but not in Vite's browser ESM (app source
-  isn't CJS-wrapped like pre-bundled deps). Vite's `define` can't replace it
-  (esbuild treats `module` specially), so a `transform` plugin
-  (`enact-neutralize-webpack-hmr`) rewrites `module.hot` → `false` in app source;
-  the webpack-only block is dead-stripped. (Surfaced on the redux sample.)
-- **R5 — Vite fs allow-list.** Apps that import source/assets from **sibling**
-  packages (e.g. the aggregate `all-samples`) are blocked by Vite's `server.fs`
-  allow-list ("outside of Vite serving allow list"). Fix: `server.fs.strict =
-  false`, matching webpack-dev-server's unrestricted file serving.
-- **R6 — dependency-scan churn / repeated reloads.** Enact apps ship no
-  `index.html`, so Vite's dep scanner had no entry to crawl and discovered deps
-  lazily on first request — each new one triggering a re-optimize + full page
-  reload (severe for apps importing from many packages). Fix:
-  `optimizeDeps.entries = [<app entry>]` so the scanner crawls the whole import
-  graph (incl. cross-package imports) and pre-bundles in one pass.
-- **R7 — theme i18n resource 404s.** `ViteILibPlugin` set `ILIB_<THEME>_PATH`
-  (used by the theme's `$L`/`ResBundle` as `basePath`) to the theme **package
-  root** instead of its `resources/` dir, so the loader fetched
-  `…/ilibmanifest.json` (404) and then blindly requested the default string paths
-  (`strings.json`, `en/strings.json`, … — all 404). Fix: point the constant at the
-  served data dir; the iLib **base** still points at the package dir (its loader
-  appends `locale/` itself). In `dev-utils/plugins/ViteILibPlugin`.
-- **R8 — duplicate `@enact` copies.** Apps that aggregate independently-installed
-  sibling packages resolve a separate physical copy of every `@enact/*` dep,
-  multiplying dep-optimization + bundle size (and risking multiple-instance bugs,
-  the `@enact` analogue of R3). Fix: extend `resolve.dedupe` to the app's installed
-  `@enact/*` packages (collapsed e.g. 15 copies → 1 on `all-samples`).
-
-The eight config issues (all in `config/vite.config.js` unless noted) — the
-non-obvious part of the port — were:
+The non-obvious parts of the port (all in `config/vite.config.js` unless noted):
 
 1. **ESM must be preserved for Rollup.** `babel-preset-enact`'s `@babel/preset-env`
    uses `modules: 'auto'`, which emits **CommonJS** unless the caller advertises
    ESM support. `babel-loader` sets this; `@vitejs/plugin-react` does **not**, so
-   the app collapsed into un-bundled runtime `require()` (a 1 kB bundle). Fix: pass
-   `babel.caller = { supportsStaticESM: true, … }`.
-2. **PostCSS plugins must be instances.** Vite's `css.postcss.plugins` wants
-   instantiated plugins, not the string names `postcss-loader` resolves. Fix:
-   `require()` + invoke each (`loadPostCss`).
+   the config passes `babel.caller = { supportsStaticESM: true, … }`.
+2. **PostCSS plugins are instances.** Vite's `css.postcss.plugins` wants
+   instantiated plugins, not string names — `require()` + invoke each (`loadPostCss`).
 3. **`cssModuleIdent` loader context + CSS-safe names.** It reads
-   `context.rootContext` (for the hash); passing only `resourcePath` threw
-   `path.relative(undefined,…)`. Fix: pass `{resourcePath, rootContext: app.context}`.
-   Also, for **nested** `@enact` deps (e.g.
-   `@enact/limestone/node_modules/@enact/ui/…`) the derived readable name embeds a
-   literal `@`, invalid unescaped in a CSS class selector (108 `css-syntax-error`
-   warnings + broken selectors on `qa-dropdown`). Webpack avoids this by using
-   short hashes in production; our config uses readable names in both modes, so we
-   sanitize the ident to `[A-Za-z0-9_-]` (the trailing hash keeps it unique).
+   `context.rootContext` (for the hash), so the config passes
+   `{resourcePath, rootContext: app.context}`. For **nested** `@enact` deps the
+   derived readable name would embed a literal `@`, invalid unescaped in a CSS class
+   selector, so the ident is sanitized to `[A-Za-z0-9_-]` (the trailing hash keeps
+   it unique). (Webpack sidesteps this with short hashes in production; this config
+   uses readable names in both modes.)
 4. **JSX-in-`.js` for the dev scanner.** esbuild's dep scanner defaults `.js` to
-   the `js` loader and can't parse Enact's JSX-in-`.js`. Fix:
+   the `js` loader and can't parse Enact's JSX-in-`.js`:
    `optimizeDeps.esbuildOptions.loader = { '.js': 'jsx' }`.
-5. **iLib non-browser loaders** (see below) break both the Rollup build and the
-   esbuild optimizer. Fix: a shared `ILIB_LOADER_RE` neutralizes them via
-   `build.commonjsOptions.ignore` and an esbuild stub plugin.
-6. **`@enact/*` deps ship raw source.** Unlike most packages, `@enact/*` is
-   distributed unbuilt (`main` points at `src/`): JSX-in-`.js`, ESM, decorators,
-   and Babel proposals like `export default from 'ilib'`. It must be transpiled
-   like app code — exactly what webpack's `exclude: /node_modules.(?!@enact)/` does.
-   Two fixes, because the build and the dev pre-bundler use different engines:
-   (a) **Rollup build** — set the react plugin's
+5. **iLib non-browser loaders** (see item 1 in *webOS-specific features*) would break
+   both the Rollup build and the esbuild optimizer; a shared `ILIB_LOADER_RE`
+   neutralizes them via `build.commonjsOptions.ignore` and an esbuild stub plugin.
+6. **`@enact/*` deps ship raw source.** `@enact/*` is distributed unbuilt (`main`
+   points at `src/`): JSX-in-`.js`, ESM, decorators, and Babel proposals like
+   `export default from 'ilib'`. It is transpiled like app code (webpack does this
+   via `exclude: /node_modules.(?!@enact)/`). Two mechanisms, because build and dev
+   pre-bundler use different engines: (a) the react plugin's
    `exclude: /[\\/]node_modules[\\/](?!@enact[\\/])/` so babel-preset-enact runs on
-   `@enact/*`. (b) **Dev dependency optimizer** — esbuild can't parse the raw
-   syntax at all (e.g. `export default from` → `Expected ";"`), so an
-   `optimizeDeps` esbuild plugin (`enact-babel-optimize`) runs babel-preset-enact
-   on `@enact/*` source (ESM-preserving) before esbuild pre-bundles it.
-   (Fix (a) surfaced on Limestone; fix (b) surfaced on apps like `qa-dropdown`
-   whose graph pulls `@enact/i18n` into pre-bundling.)
-7. **LESS/CSS `~` npm imports.** `~pkg` resolves via webpack in `less-loader`;
-   Vite has no equivalent. Fix: a custom Less `FileManager` (`lessTildeImportPlugin`)
-   for LESS `@import`s, plus a `resolve.alias` `{find: /^~/, replacement: ''}` for
-   plain CSS `@import`s.
-8. **`~` in `@import-json` rules.** The webpack config had an inline
-   `postcss-import-json-tilde` plugin (which I initially missed) to resolve `~`
-   before `@daltontan/postcss-import-json`. Fix: ported as `tildeJsonImportPlugin`.
+   `@enact/*`; (b) an `optimizeDeps` esbuild plugin (`enact-babel-optimize`) runs
+   babel-preset-enact on `@enact/*` source (ESM-preserving) before esbuild
+   pre-bundles it (esbuild can't parse the raw syntax, e.g. `export default from`).
+7. **LESS/CSS `~` npm imports.** A custom Less `FileManager`
+   (`lessTildeImportPlugin`) for LESS `@import`s, plus a `resolve.alias`
+   `{find: /^~/, replacement: ''}` for plain CSS `@import`s.
+8. **`~` in `@import-json` rules.** Ported as `tildeJsonImportPlugin`, resolving `~`
+   before `@daltontan/postcss-import-json`.
 
-## What ports cleanly (done in `vite.config.js`)
+## webpack → Vite mapping
 
-| Concern | webpack | Vite equivalent |
+| Concern | webpack | Vite |
 | --- | --- | --- |
 | JSX / TS / decorators | `babel-loader` + `babel-preset-enact` | `@vitejs/plugin-react` with `babel.presets: [babel-preset-enact]` |
 | App options (ri, accent, alias, title, publicUrl…) | `optionParser` (`@enact/dev-utils`) | same `optionParser`, reused verbatim |
@@ -152,213 +89,181 @@ non-obvious part of the port — were:
 | `define` globals (`NODE_ENV`, `PUBLIC_URL`, `ENACT_PACK_ISOMORPHIC`, `ENACT_PACK_NO_ANIMATION`) | `DefinePlugin` | `define` |
 | Content hashing / no-split-css | `output.[contenthash]`, `splitChunks` | `rollupOptions.output`, `build.cssCodeSplit` |
 | Minification | Terser + CssMinimizer | `build.minify: 'terser'`, `cssMinify` |
-| HTML document (no `index.html` in Enact apps) | `HtmlWebpackPlugin` + `.ejs` | `@enact/dev-utils` `ViteHtmlPlugin` renders the same template; serves it in dev, emits `index.html` (entry + CSS) in build |
+| HTML document (no `index.html` in Enact apps) | `HtmlWebpackPlugin` + `.ejs` | `ViteHtmlPlugin` renders the same template; serves it in dev, emits `index.html` (entry + CSS) in build |
 | Polyfills first | `entry: [polyfills, appMain]` | generated combined entry (`node_modules/.cache/enact-vite/index.js`) |
-| **iLib i18n runtime** (`ILIB_*` constants + locale/resource data) | `ILibPlugin` (`DefinePlugin` + asset emission) | `@enact/dev-utils` `ViteILibPlugin` — defines the constants (build + dev-optimizer) and copies (build) / serves (dev) the data |
+| **iLib i18n runtime** (`ILIB_*` constants + locale/resource data) | `ILibPlugin` | `ViteILibPlugin` — defines the constants (build + dev-optimizer) and copies (build) / serves (dev) the data |
 | **iLib locale filtering** (`-l used/tv/signage/all/list`) | via isomorphic/prerender flow | `ViteILibPlugin` `locales` option — trims the emitted/served manifest to requested locales + shared data |
-| **webOS metadata** (`appinfo.json` + icons, localized appinfo) | `WebOSMetaPlugin` | `@enact/dev-utils` `ViteWebOSMetaPlugin` — emits (build) / serves (dev) appinfo + assets; title fallback |
+| **webOS metadata** (`appinfo.json` + icons, localized appinfo) | `WebOSMetaPlugin` | `ViteWebOSMetaPlugin` — emits (build) / serves (dev) appinfo + assets; title fallback |
 | **ESLint** (`eslint-config-enact`, `--no-linting`) | `eslint-webpack-plugin` | inline `enact-eslint` plugin — lints at build start; errors fail the build, dev warns |
 | Source maps | `devtool` | `build.sourcemap` / `css.devSourcemap` |
 
-## Webpack-only concerns and their status
+## webOS-specific features and how they're implemented
 
-Items 1–6 are `@enact/dev-utils` webpack plugins that tap the
-`compiler`/`compilation` lifecycle; items 7–9 are webpack loader/config behaviors,
-not dev-utils plugins. Status varies (ported / dropped / resolved / not yet):
+Items 1–6 correspond to `@enact/dev-utils` webpack plugins that tap the
+`compiler`/`compilation` lifecycle; items 7–9 are webpack loader/config behaviors.
 
-1. ~~**`ILibPlugin`**~~ — **ported** as
-   [`ViteILibPlugin`](../../dev-utils/plugins/ViteILibPlugin). Since `@enact/i18n`'s
-   runtime `Loader.js` is bundler-agnostic (XHR from the `ILIB_*` constants), the
-   Vite plugin defines those constants (build **and** the dev dep-optimizer, via
-   `optimizeDeps.esbuildOptions.define`) and makes the data available — copying the
-   iLib `locale/` + app/theme `resources/` trees on `writeBundle` (build) and
-   serving them from source via middleware (dev). Non-browser iLib loaders are
-   neutralized separately (`ILIB_LOADER_RE`). **Locale filtering** (webpack's `-l`)
-   is supported via the `locales` option — `-l en-US,ko-KR` trims 70 MB → 19 MB
-   (6,755 → 1,988 files) and emits a trimmed manifest. **Validated:**
-   `/node_modules/ilib` baked into the prod bundle; full and filtered data
-   copied (build) / served (HTTP 200, dev).
-2. ~~**`WebOSMetaPlugin`**~~ — **ported** as
-   [`ViteWebOSMetaPlugin`](../../dev-utils/plugins/ViteWebOSMetaPlugin). Discovers
-   the root `appinfo.json` (root or `./webos-meta/`) + localized
+1. **iLib runtime (`ILibPlugin`)** → **`ViteILibPlugin`**
+   ([`dev-utils/plugins/ViteILibPlugin`](../../dev-utils/plugins/ViteILibPlugin)).
+   `@enact/i18n`'s runtime `Loader.js` is bundler-agnostic (XHR from the `ILIB_*`
+   constants), so the Vite plugin defines those constants (build **and** the dev
+   dep-optimizer, via `optimizeDeps.esbuildOptions.define`) and makes the data
+   available — copying the iLib `locale/` + app/theme `resources/` trees on
+   `writeBundle` (build) and serving them from source via middleware (dev).
+   Non-browser iLib loaders are neutralized separately (`ILIB_LOADER_RE`).
+   **Locale filtering** is supported via the `locales` option — `-l en-US,ko-KR`
+   trims 70 MB → 19 MB (6,755 → 1,988 files) and emits a trimmed manifest.
+2. **webOS metadata (`WebOSMetaPlugin`)** → **`ViteWebOSMetaPlugin`**
+   ([`dev-utils/plugins/ViteWebOSMetaPlugin`](../../dev-utils/plugins/ViteWebOSMetaPlugin)).
+   Discovers the root `appinfo.json` (root or `./webos-meta/`) + localized
    `resources/**/appinfo.json`, emits them and their referenced icon/splash assets
    (build: `writeBundle` copy; dev: middleware), and supplies the `<title>`
-   fallback via `ViteWebOSMetaPlugin.readTitle`. **Validated:** `appinfo.json` +
-   `icon*.png` land in `dist` and serve (HTTP 200) in dev. `$`-prefixed sys-assets
+   fallback via `ViteWebOSMetaPlugin.readTitle`. `$`-prefixed sys-assets
    (`$icon.png` → `sys-assets/<spec>/icon.png`, emitted per-spec preserving the
-   layout, appinfo value left untouched) are now handled — matching the webpack
-   plugin; verified against a fixture (sys-assets across specs, dedup across
-   locales, regular assets, untouched `$` values).
-3. ~~**`PrerenderPlugin` + isomorphic mixin**~~ — **ported** (`mixins/vite-isomorphic.js` +
-   `pack.js` `viteIsomorphic`). Uses a real **`vite build --ssr`** of the app entry (the key
-   correction from the first spike, which used `ssrLoadModule` and hit the JSX-in-`.js`
-   transform gap), then per-locale server render (`FileXHR` for iLib locale data, no DOM
-   shim needed) + assembly into the webpack-compatible output (fallback `index.html` +
-   deduped `index.<variant>.html` + `locale-map.json` + per-locale webOS `appinfo.json`),
-   reusing the bundler-agnostic `templates.js`/`FileXHR`. Browser-validated end-to-end on
-   qa-a11y (`-p -i -l en-US,ko-KR`): prerendered markup hydrates with no console warnings in the
-   production build. (A dev build shows two dev-only React warnings that are by-design in
-   `@enact/i18n` — locale class deferred to the client — and identical to webpack's isomorphic
-   output, including with `--externals`; `-p` strips them. Details in the scope doc.)
-   Full findings/phases in [`vite-isomorphic-scope.md`](./vite-isomorphic-scope.md).
-4. ~~**`SnapshotPlugin`**~~ — **ported (build-complete; on-device validation pending
-   the toolchain).** `--snapshot` (which implies `--isomorphic`) now builds through
-   `mixins/vite-snapshot.js`: the client build becomes a **self-contained UMD** `main.js`
-   (`output.format:'umd'`, `name:'App'`, `preserveEntrySignatures:'strict'`,
-   `inlineDynamicImports`) with a `global` banner for the bare-V8 context, so the app's
-   default export is exposed as the `App` global — mirroring webpack's
-   `output.library='App'`/`libraryTarget='umd'`. The snapshot helpers are reimplemented in
-   **ESM** ([`snapshot-helper-esm.js`](../../dev-utils/plugins/SnapshotPlugin/snapshot-helper-esm.js)
-   + [`snapshot-mock.js`](../../dev-utils/plugins/SnapshotPlugin/snapshot-mock.js), reusing
-   the bundler-agnostic `mock-window.js` + `@enact/core/snapshot`): import order deterministically
-   installs the mock window before `react-dom/client` loads (Rollup hoists CJS requires, so the
-   original CJS helper's in-line ordering can't be reproduced), and `global.updateEnvironment`
-   is defined for the on-device window rebind. A resolver redirects `react-dom/client` → the
-   facade and no-ops absent optional deps (`fbjs` is gone in React 19; a theme may lack
-   `internal/$L`). After the isomorphic prerender/assembly (startup script kept **classic**, since
-   `main.js` is UMD), `mksnapshot` (`V8_MKSNAPSHOT`) runs against `main.js` to emit
-   `snapshot_blob.bin` and tag `appinfo.json` `v8SnapshotFile`.
-   **Validated end-to-end with a real toolchain.** Against `mksnapshot` (V8) the UMD bundle
-   produces a genuine, non-zero startup blob (qa-a11y: **4.6 MB**, in line with the ~4.3 MB
-   webpack reference). The syntax must parse in the target board's V8; the app's browserslist
-   drives the output by default, and `V8_SNAPSHOT_TARGET` force-lowers it for a much older
-   firmware than the app targets. `--snapshot --externals` is unsupported (the snapshot must
-   embed `@enact`), matching webpack. The blob's V8 must match the firmware — a mismatched
-   `mksnapshot` is rejected/unparseable (see the matrix below).
+   layout, appinfo value left untouched) are handled — matching the webpack plugin.
+3. **Isomorphic prerendering (`PrerenderPlugin` + isomorphic mixin)** →
+   **`mixins/vite-isomorphic.js`** + `pack.js` `viteIsomorphic`. Uses a real
+   **`vite build --ssr`** of the app entry, then per-locale server render
+   (`FileXHR` for iLib locale data, no DOM shim needed) + assembly into the
+   webpack-compatible output (fallback `index.html` + deduped `index.<variant>.html`
+   + `locale-map.json` + per-locale webOS `appinfo.json`), reusing the
+   bundler-agnostic `templates.js`/`FileXHR`. Browser-validated end-to-end on
+   qa-a11y (`-p -i -l en-US,ko-KR`): prerendered markup hydrates with no console
+   warnings in the production build. (A dev build shows two dev-only React warnings
+   that are by-design in `@enact/i18n` — locale class deferred to the client — and
+   identical to webpack's isomorphic output, including with `--externals`; `-p`
+   strips them.) Full detail in
+   [`vite-isomorphic-scope.md`](./vite-isomorphic-scope.md).
+4. **V8 snapshot (`SnapshotPlugin`)** → **`mixins/vite-snapshot.js`**. `--snapshot`
+   (which implies `--isomorphic`) builds the client as a **self-contained UMD**
+   `main.js` (`output.format:'umd'`, `name:'App'`, `preserveEntrySignatures:'strict'`,
+   `inlineDynamicImports`) with a `global` banner for the bare-V8 context, exposing
+   the app's default export as the `App` global — mirroring webpack's
+   `output.library='App'`/`libraryTarget='umd'`. The snapshot helpers are ESM
+   ([`snapshot-helper-esm.js`](../../dev-utils/plugins/SnapshotPlugin/snapshot-helper-esm.js)
+   + [`snapshot-mock.js`](../../dev-utils/plugins/SnapshotPlugin/snapshot-mock.js),
+   reusing `mock-window.js` + `@enact/core/snapshot`): import order deterministically
+   installs the mock window before `react-dom/client` loads (Rollup hoists CJS
+   requires, so the original CJS helper's in-line ordering can't be reproduced), and
+   `global.updateEnvironment` is defined for the on-device window rebind. A resolver
+   redirects `react-dom/client` → the facade and no-ops absent optional deps (`fbjs`
+   is gone in React 19; a theme may lack `internal/$L`). After the isomorphic
+   prerender/assembly (startup script kept **classic**, since `main.js` is UMD),
+   `mksnapshot` (`V8_MKSNAPSHOT`) runs against `main.js` to emit `snapshot_blob.bin`
+   and tag `appinfo.json` `v8SnapshotFile`.
 
-   **core-js in the snapshot — parity with webpack, verified.** core-js is included by default
-   (as in the webpack path). Its WeakMap-based internal state serializes fine on a **modern**
-   snapshot V8, but a **very old** one (~Chrome 53) can't serialize a WeakMap-with-entries —
-   `mksnapshot` throws `illegal access` → 0-byte blob. This is a **core-js-3 + old-V8
-   limitation, not a bundler difference**: measured on the *same* `mksnapshot.53` against
-   qa-a11y built at `chrome 53`:
+   Against `mksnapshot` (V8) the UMD bundle produces a genuine, non-zero startup blob
+   (qa-a11y: **4.6 MB**, in line with the ~4.3 MB webpack reference). The syntax must
+   parse in the target board's V8; the app's browserslist drives the output by
+   default, and `V8_SNAPSHOT_TARGET` force-lowers it for firmware older than the app
+   targets. `--snapshot --externals` is unsupported (the snapshot must embed
+   `@enact`), matching webpack.
+
+   **core-js in the snapshot: parity with webpack.** core-js is included by default
+   (as in the webpack path). Its WeakMap-based internal state serializes fine on a
+   **modern** snapshot V8, but a **very old** one (~Chrome 53) can't serialize a
+   WeakMap-with-entries — `mksnapshot` throws `illegal access` → 0-byte blob. This is
+   a **core-js-3 + old-V8 limitation, not a bundler difference**, measured on the
+   *same* `mksnapshot.53` against qa-a11y built at `chrome 53`:
 
    | Bundle (chrome 53 target, core-js 3.22.8) | Result |
    | --- | --- |
    | **webpack** + core-js | `illegal access` → 0-byte blob |
    | **Vite** + core-js | `illegal access` → 0-byte blob (identical) |
-   | **Vite**, `ENACT_SNAPSHOT_NO_COREJS=1` | ✅ 4.6 MB blob |
+   | **Vite**, `ENACT_SNAPSHOT_NO_COREJS=1` | 4.6 MB blob |
 
-   So webpack and Vite behave identically; Vite additionally offers `ENACT_SNAPSHOT_NO_COREJS`
-   to still emit a blob (minus runtime builtin polyfills) on such old firmware, where webpack
-   emits nothing. On a firmware-matched **modern** `mksnapshot` (e.g. Chrome 132) neither the
-   `V8_SNAPSHOT_TARGET` lowering nor the no-core-js opt-out is needed — the default build (app
-   target + core-js) is correct for both bundlers. **Not validated here:** the blob on the
-   actual firmware (needs that firmware's `mksnapshot`) + on-device hydration.
-5. ~~**Framework externals**~~ — **ported** (`mixins/vite-framework.js` +
-   `pack.js` `--framework`/`--externals`). Webpack's DLL maps deep module requests to
-   IDs in a prebuilt bundle via a manifest; the Vite analog is a shared framework ESM
-   build addressed by an **import map** (exact keys per specifier, from a manifest),
-   with `build.rollupOptions.external` on the app build. Browser-validated end-to-end
-   on limestone/qa-a11y: 138-specifier framework + `enact.css`, app externalizes 60
-   specifiers, boots fully styled with a single React instance, console clean. Full
-   findings in [`vite-framework-externals-spike.md`](./vite-framework-externals-spike.md).
-6. **`GracefulFsPlugin`** — patches webpack's output FS to avoid EMFILE. Not
-   needed under Vite (different FS handling). *Drop.*
-7. ~~**`node-polyfill-webpack-plugin`**~~ — **ported.** `global` is supplied by
-   `ViteHtmlPlugin`'s head shim (R1) and `process.env.NODE_ENV` by `define`; fuller
-   coverage (`Buffer`, full `process`, and the node builtin modules — the webpack
-   plugin's `additionalAliases: console/domain/process/stream`) is now wired via
-   **`vite-plugin-node-polyfills`** in `config/vite.config.js`, gated to browser
-   targets. Globals are injected **reference-only** (like webpack's `ProvidePlugin`
-   — no global `typeof process` flip, no bundle bloat when unused; verified qa-a11y
-   doesn't bundle `buffer` and exposes no `window.Buffer`/`process`). A small
+   webpack and Vite behave identically; Vite additionally offers
+   `ENACT_SNAPSHOT_NO_COREJS` to still emit a blob (minus runtime builtin polyfills)
+   on such old firmware, where webpack emits nothing. On a firmware-matched **modern**
+   `mksnapshot` (e.g. Chrome 132) neither the `V8_SNAPSHOT_TARGET` lowering nor the
+   no-core-js opt-out is needed — the default build is correct for both bundlers.
+5. **Framework externals** → **`mixins/vite-framework.js`** + `pack.js`
+   `--framework`/`--externals`. Webpack's DLL maps deep module requests to IDs in a
+   prebuilt bundle via a manifest; the Vite analog is a shared framework ESM build
+   addressed by an **import map** (exact keys per specifier, from a manifest), with
+   `build.rollupOptions.external` on the app build. Browser-validated end-to-end on
+   limestone/qa-a11y: 138-specifier framework + `enact.css`, app externalizes 60
+   specifiers, boots fully styled with a single React instance, console clean.
+6. **`GracefulFsPlugin`** — patches webpack's output FS to avoid EMFILE. Not needed
+   under Vite (different FS handling); intentionally not ported.
+7. **Node polyfills (`node-polyfill-webpack-plugin`)** → **`vite-plugin-node-polyfills`**.
+   `global` is supplied by `ViteHtmlPlugin`'s head shim and `process.env.NODE_ENV`
+   by `define`; fuller coverage (`Buffer`, full `process`, and the node builtin
+   modules) is wired via `vite-plugin-node-polyfills`, gated to browser targets.
+   Globals are injected **reference-only** (like webpack's `ProvidePlugin` — no
+   global `typeof process` flip, no bundle bloat when unused; qa-a11y doesn't bundle
+   `buffer` and exposes no `window.Buffer`/`process`). A small
    `enact-node-polyfill-resolver` `resolveId` plugin resolves the injected shim
-   specifiers (`vite-plugin-node-polyfills/*`, `node-stdlib-browser`) from the CLI's
-   `node_modules`, since apps are built with `root: app.context` and can't reach
-   them otherwise. For the SSR/isomorphic build, `vite-isomorphic.js`'s
+   specifiers from the CLI's `node_modules`, since apps are built with
+   `root: app.context`. For the SSR/isomorphic build, `vite-isomorphic.js`'s
    `applySsrBuild` drops these plugins so the Node bundle uses the real builtins
-   (`path`/`fs`/`crypto`); verified the isomorphic build still prerenders cleanly.
-8. ~~**`icss` mode for non-`*.module` CSS / `forceCSSModules`**~~ — **both ported.**
-   The Enact `forceCSSModules` option (scope ALL css/less/scss, not just `*.module.*`)
-   is wired via `enactForceCSSModulesPlugin` in `config/vite.config.js`. Vite decides
-   module-ness only from the `.module.` filename infix (`cssModuleRE`) with no override
-   hook, so the plugin resolves each non-module style import and redirects it to a
-   **virtual `.module` id** — keeping the real directory so LESS `@import`/`url()` still
-   resolve, serving the real file via `load`, and letting `generateScopedName` recover
-   the real path for webpack-parity hashing. Verified end-to-end: non-module CSS **and**
-   LESS scope and export a class map, matching webpack's ident (`src_App_App_app__<hash>`).
+   (`path`/`fs`/`crypto`).
+8. **`icss` mode for non-`*.module` CSS / `forceCSSModules`.** The Enact
+   `forceCSSModules` option (scope ALL css/less/scss, not just `*.module.*`) is
+   wired via `enactForceCSSModulesPlugin` in `config/vite.config.js`. Vite decides
+   module-ness only from the `.module.` filename infix (`cssModuleRE`) with no
+   override hook, so the plugin resolves each non-module style import and redirects
+   it to a **virtual `.module` id** — keeping the real directory so LESS
+   `@import`/`url()` still resolve, serving the real file via `load`, and letting
+   `generateScopedName` recover the real path for webpack-parity hashing. Non-module
+   CSS and LESS scope and export a class map, matching webpack's ident
+   (`src_App_App_app__<hash>`).
 
-   The webpack `mode:'icss'` path (the **default**, option off) was initially assessed as
-   a no-op on the grounds that Vite already leaves non-module CSS global and `:export`
-   is unused in @enact/limestone. **That assessment was wrong** and is now fixed. Scoping
-   is indeed identical, but css-loader in `icss` mode still emits a **default export**
-   (the ICSS `:export` locals, usually `{}`), whereas Vite emits *no* default export for
-   plain CSS at build time. So the classic Enact idiom on a **non-module** stylesheet —
+   The default path (option off) matches webpack's `mode:'icss'`: css-loader in
+   `icss` mode leaves class names global but still emits a **default export** (the
+   ICSS `:export` locals, usually `{}`). Vite emits *no* default export for plain
+   CSS, so the classic Enact idiom on a **non-module** stylesheet —
    ```js
    import css from './App.less';        // plain .less, global classes
    kind({styles: {css, className: 'app'}});
    ```
-   — is a hard Vite build error (`"default" is not exported by "src/App/App.less"`),
-   even though webpack builds it fine (`classnames/bind` just falls back to the literal
-   global class name). `limestone/samples/qa-i18n` hits exactly this; `qa-a11y` does not,
-   because it uses `App.module.less`.
+   would otherwise be a build error (`"default" is not exported`). Parity is provided
+   by `enactICSSInteropPlugins()` **without scoping anything**: `enact-icss-extract`
+   lifts `:export {…}` blocks into a locals map and strips them from the emitted CSS
+   (as css-loader does); `enact-icss-default-export` (`enforce:'post'`) appends
+   `export default <locals>` when the proxy has none. Verified against webpack on
+   `qa-i18n`: both bundlers emit identical `styles:{css:{brandColor:"#ff0000"},className:"app"}`,
+   keep `.app` global, and strip `:export`. `*.module.*` files are untouched.
+9. **LESS/CSS `~` npm imports** — resolved by config items 7 and 8 in the *Config
+   details handled* list: `lessTildeImportPlugin` (LESS), `resolve.alias /^~/` (CSS),
+   and `tildeJsonImportPlugin` (`@import-json`).
 
-   Parity is restored by `enactICSSInteropPlugins()` — **without scoping anything**:
-   - `enact-icss-extract` (normal order → after `vite:css` compiles LESS/SCSS, before
-     `vite:css-post` builds the JS proxy) lifts `:export {…}` blocks into a locals map
-     and strips them from the emitted CSS, as css-loader does.
-   - `enact-icss-default-export` (`enforce:'post'` → after `vite:css-post`) appends
-     `export default <locals>` when the proxy has none. Modules that already have a
-     default export (dev's CSS-string proxy, `?inline`/`?url`/`?raw`) are left alone.
+## Command wiring
 
-   Verified against webpack on `qa-i18n` with a `.app{color:#123456}` rule plus an
-   `:export{brandColor:#ff0000}` block — both bundlers emit the identical
-   `styles:{css:{brandColor:"#ff0000"},className:"app"}`, keep `.app` **global**
-   (unscoped), and strip `:export` from the CSS. `*.module.*` files are untouched
-   (`qa-a11y` still scopes 623/660 classes; the rest are the deliberately global
-   `enact-locale-*`).
-9. ~~**LESS/CSS `~` npm imports**~~ — **resolved** (by config fixes #7 and #8 in
-   the config-issues list above): `lessTildeImportPlugin` (LESS),
-   `resolve.alias /^~/` (CSS), and `tildeJsonImportPlugin` (`@import-json`).
-
-## Command wiring (applied, behind a flag)
-
-`commands/pack.js` and `commands/serve.js` now branch to the Vite path when it is
-opted into via **`--vite`** or **`ENACT_BUNDLER=vite`**; otherwise webpack runs
-unchanged. Both bundlers coexist during migration.
+`commands/pack.js` and `commands/serve.js` branch to the Vite path when opted into via
+**`--vite`** or **`ENACT_BUNDLER=vite`**; otherwise webpack runs unchanged.
 
 - `enact serve --vite` → `vite.createServer(...).listen()` (native ESM dev server, HMR via `@vitejs/plugin-react`).
 - `enact pack --vite` / `enact pack -p --vite` → `vite.build(...)` (supports `--watch`, `-o/--output`, `--content-hash`, `--no-split-css`, `-l/--locales`, `--no-linting`, `--entry`).
-- Build-shaping flags are wired via **`mixins.applyVite`** (the Vite counterpart to
-  the webpack `mixins.apply`, in `dev-utils/mixins/vite.js`):
+- Build-shaping flags via **`mixins.applyVite`** (the Vite counterpart to the webpack
+  `mixins.apply`, in `dev-utils/mixins/vite.js`):
   - `--stats` → static bundle-analysis treemap `dist/stats.html`
     (`rollup-plugin-visualizer`, mirroring webpack's `webpack-bundle-analyzer`).
   - `--verbose` → raises Vite's log level and narrates build phases with a module
-    count (no percentage — Rollup has no fixed total up front, unlike webpack's `ProgressPlugin`).
+    count (no percentage — Rollup has no fixed total up front).
   - `--no-minify` (private) → Terser with `mangle:false` + beautify, keeping dead-code
-    removal (mirrors the webpack `unmangled` mixin). Only affects production builds.
+    removal (mirrors the webpack `unmangled` mixin). Production builds only.
 - `enact eject --vite` wires the ejected app's scripts to the Vite path (see
   [vite-eject-testing.md](vite-eject-testing.md)).
-- **`--framework` / `--externals`** are wired via **`mixins/vite-framework.js`** (the
-  Vite counterpart to the webpack DLL `framework`/`externals` mixins): `--framework`
+- **`--framework` / `--externals`** via **`mixins/vite-framework.js`**: `--framework`
   builds the shared `@enact`+react+ilib bundle as reusable ESM + a specifier manifest +
   one `enact.css`; `--externals=<path>` externalizes those specifiers from the app build
   and injects an import map (+ the shared stylesheet) resolved from the manifest.
   `--externals-public` sets the import-map base URL (remote framework path).
-  Browser-validated on limestone/qa-a11y. See
-  [vite-framework-externals-spike.md](vite-framework-externals-spike.md).
-- **`--isomorphic`** is wired via **`mixins/vite-isomorphic.js`** + `pack.js`'s
-  `viteIsomorphic` (client `hydrateRoot` build + `vite build --ssr` + per-locale prerender +
-  webpack-compatible HTML/`locale-map.json`/`appinfo.json` assembly). Browser-validated.
-- `--snapshot` is not ported (needs the webOS `V8_MKSNAPSHOT` toolchain) and prints a "not
-  yet supported, ignored" notice.
+- **`--isomorphic`** via **`mixins/vite-isomorphic.js`** + `pack.js`'s `viteIsomorphic`
+  (client `hydrateRoot` build + `vite build --ssr` + per-locale prerender +
+  webpack-compatible HTML/`locale-map.json`/`appinfo.json` assembly).
+- **`--snapshot`** via **`mixins/vite-snapshot.js`** (see item 4 above); emits the blob
+  when `V8_MKSNAPSHOT` is set and prints a skip notice otherwise (the app still builds
+  and runs without the snapshot).
 
-The reusable bundler plugins were **added to `@enact/dev-utils`** — mirroring how
-the webpack plugins (`ILibPlugin`, `WebOSMetaPlugin`, …) live there — and are
-consumed by `config/vite.config.js`:
+The reusable bundler plugins live in `@enact/dev-utils` — mirroring the webpack plugins
+(`ILibPlugin`, `WebOSMetaPlugin`, …) — and are consumed by `config/vite.config.js`:
 [`ViteHtmlPlugin`](../../dev-utils/plugins/ViteHtmlPlugin),
 [`ViteILibPlugin`](../../dev-utils/plugins/ViteILibPlugin), and
-[`ViteWebOSMetaPlugin`](../../dev-utils/plugins/ViteWebOSMetaPlugin). The
-config-level pieces (PostCSS chain incl. `~`/JSON-import handling, LESS
-`modifyVars`, the ESLint plugin) stay in `cli/config`, matching where
-`getStyleLoaders`/the eslint config live for webpack.
-
-> **dev-utils must be current.** Because these plugins live in `@enact/dev-utils`,
-> the copy under `cli/node_modules/@enact/dev-utils` must include them. Symlink the
-> sibling source (`npm link`/junction) or reinstall so the CLI picks up
-> `ViteHtmlPlugin`, `ViteILibPlugin`, and `ViteWebOSMetaPlugin`. (They have been
-> synced into the local install here.)
+[`ViteWebOSMetaPlugin`](../../dev-utils/plugins/ViteWebOSMetaPlugin). The config-level
+pieces (PostCSS chain incl. `~`/JSON-import handling, LESS `modifyVars`, the ESLint
+plugin) stay in `cli/config`, matching where `getStyleLoaders`/the eslint config live
+for webpack.
 
 ## Try it
 
@@ -371,184 +276,5 @@ enact pack -p --vite                 # production build (full iLib data)
 enact pack -p --vite -l en-US,ko-KR  # production build, locale-filtered
 ```
 
-> Status: **validated** on Sandstone and Limestone (build + serve), including
-> iLib i18n runtime + locale filtering, webOS metadata, and ESLint. Node 20+ is
-> required for `require()` of the ESM-only `vite` package (validated on Node 24).
-
-## Ported, pending on-device validation
-
-- **`--snapshot`** (gap #4) — **build-complete and locally validated** (the UMD `main.js`
-  evaluates snapshot-safe in a bare V8 and exposes the `App`/`updateEnvironment`/`ReactDOMClient`
-  globals); only the actual `mksnapshot` blob + on-device hydration remain, which need the
-  firmware-specific `V8_MKSNAPSHOT` toolchain and a webOS board. See gap #4 above and the
-  **Testing `--snapshot` on a webOS board** section below.
-
-## Everything else is ported
-
-- ~~**Framework self-inclusion in a theme repo**~~ — **ported.** Building `--framework`
-  *inside* a theme repo (e.g. limestone) now includes the theme's own components, mirroring
-  webpack's `libraries.push('.')`. `mixins/vite-framework.js` `enumerateSelfSpecs(context)`
-  detects a `@enact/*` theme package (has `ThemeDecorator`/`MoonstoneDecorator`, or is
-  `@enact/i18n`) and enumerates its own component subpaths as `@enact/<theme>/<component>`
-  specifiers; `applyFramework` adds a `resolve.alias` (`@enact/<theme>` → repo root, covering
-  transitive self-references) and extends `commonjsOptions` to the repo root so the theme's
-  own CJS-in-source (e.g. a `module.exports` `fontGenerator`) interops. Verified on limestone:
-  a repo-root `--framework` build emits **138 specifiers = 56 own components + 76 node_modules
-  `@enact` + react/ilib**, with `enact.css`. The change is gated on theme-repo detection, so a
-  sample/app-context build (the Jenkins path) is unaffected. (`--externals-polyfill` — move
-  core-js into the framework — is also wired: `pack --framework --externals-polyfill` folds
-  core-js in, and `pack --externals=<path> --externals-polyfill` delegates it out of the app.)
-
-## Measured: webpack vs Vite, command by command
-
-Real measurements, not estimates. **App:** `limestone/samples/qa-a11y`. **Machine:** 22
-logical cores / 31.5 GB RAM, Windows. Both bundlers run the same `enact pack`/`enact serve`
-CLI with `NODE_OPTIONS=--max-old-space-size=8192` (webpack's `--framework` build OOMs at the
-default heap, so the larger heap is given to *both* for fairness).
-
-**Methodology** (metric set follows [rstackjs/build-tools-performance](https://github.com/rstackjs/build-tools-performance),
-the reference bundler benchmark: startup, build no-cache/with-cache, memory, output size,
-gzipped size):
-
-- **No cache** — `<app>/node_modules/.cache` (webpack's `cache:{type:'filesystem'}` + the
-  babel-loader cache) and `<app>/node_modules/.vite` (Vite's dep-optimizer cache) are deleted
-  before the run. This matters: webpack has a persistent build cache and Vite has none, so
-  *not* clearing it silently hands webpack a warm cache and makes the comparison meaningless.
-- **With cache** — an immediate second run. Both runs build into an **empty** output dir, so
-  the cache is the only variable (otherwise the second run also pays to replace ~6.8k files
-  and reads as *slower* than the first).
-- **Peak RSS** — the build process's own `process.resourceUsage().maxRSS` (exact, zero
-  overhead). Covers the main build process, not parallel minifier workers.
-- **Gzipped** — gzip(level 9) of all emitted JS+CSS+HTML: a network-transfer proxy.
-- Single run per cell (not 3-run averaged); treat differences under ~5% as noise.
-
-### Build & startup time
-
-| Command | webpack (no cache) | Vite (no cache) | webpack (cached) | Vite (cached) |
-|---|---|---|---|---|
-| `pack` (dev) | **33.8s** | 44.8s | **28.5s** | 40.8s |
-| `pack -p` | **40.3s** | 48.0s | **36.3s** | 44.4s |
-| `pack -p --no-minify` ¹ | 39.5s | 44.1s | — | — |
-| `pack -p --content-hash` | **40.9s** | 47.1s | — | — |
-| `pack -p -i` (isomorphic) | **53.5s** | 81.5s | — | — |
-| `pack -p -i -l en-US,ko-KR` ² | **54.2s** | 73.5s | — | — |
-| `pack -p --snapshot` | **54.9s** | 78.7s | — | — |
-| `serve` (dev server ready) | 44.8s | **10.5s** | 38.6s | **7.5s** |
-
-### Peak memory (RSS)
-
-| Command | webpack | Vite |
-|---|---|---|
-| `pack` (dev) | **1162 MB** | 2355 MB |
-| `pack -p` | **1310 MB** | 1854 MB |
-| `pack -p -i` | **1334 MB** | 1920 MB |
-| `pack -p --snapshot` | **1646 MB** | 2036 MB |
-| `serve` | 1241 MB | **449 MB** |
-
-### Output size
-
-| Command | webpack files / total / main.js / gzip | Vite files / total / main.js / gzip |
-|---|---|---|
-| `pack` (dev) | 6779 / 71.8 MB / 5679 KB / 1011 KB | 6778 / 72.2 MB / **4283 KB** / **877 KB** |
-| `pack -p` | 6778 / 61.0 MB / **1108 KB** / **385 KB** | 6777 / 61.8 MB / 1263 KB / 448 KB |
-| `pack -p --no-minify` ¹ | 6778 / 61.2 MB / 1108 KB / 390 KB | 6777 / 63.8 MB / 3226 KB / 678 KB |
-| `pack -p -i` | 6778 / 61.1 MB / **1108 KB** / **391 KB** | 6777 / 61.9 MB / 1263 KB / 453 KB |
-| `pack -p -i -l en-US,ko-KR` ² | 6782 / 61.1 MB / 1108 KB / 392 KB | **2013 / 19.4 MB** / 1263 KB / 455 KB |
-| `pack -p --snapshot` | 6778 / 61.1 MB / **1115 KB** / **393 KB** | 6777 / 61.9 MB / 1275 KB / 454 KB |
-
-Total output is dominated by iLib locale JSON (~60 MB); `main.js`/gzip are the figures that
-track bundling quality.
-
-### What the numbers say
-
-- **Dev server is Vite's decisive win**: ready in **10.5s vs 44.8s** cold (**4.3×**) and
-  **7.5s vs 38.6s** warm (**5.1×**), using **449 MB vs 1241 MB** (**2.8× less**). This is the
-  day-to-day feedback loop and the main reason to migrate.
-- **webpack is currently faster for production builds** — 16–19% on plain `-p`, and **~1.5×**
-  on `-i`/`--snapshot`. The isomorphic gap is structural: the Vite path runs **two** builds
-  (client + a real `vite build --ssr`), where webpack prerenders from a single compilation.
-- **webpack's persistent cache is worth 10–16%**; Vite's dep cache buys 7–9% on builds but
-  ~30% on dev startup.
-- **Vite uses ~40–60% more memory** to build (but ~⅓ as much to serve).
-- **webpack's production bundle is smaller**: `main.js` 1108 KB vs 1263 KB (+14%), gzipped
-  385 KB vs 448 KB (**+16%**). Worth a follow-up (CJS interop / tree-shaking differences);
-  it is the one clear regression in the Vite output. Note Vite's **dev** bundle is *smaller*
-  (4283 KB vs 5679 KB).
-
-¹ **`--no-minify` is not comparable — the webpack flag is a silent no-op.** webpack's
-`main.js` is byte-identical with and without it (1108 KB, gzip 314 KB), while Vite's grows
-2.6× as expected. Cause: `terser-webpack-plugin@5.6.1` normalizes constructor options into
-`options.minimizer.options`, but `dev-utils/mixins/unmangled.js` writes to
-`options.terserOptions` — a key v5 never reads, so `mangle` stays `{safari10:true}`. This is
-a pre-existing webpack-path bug, unrelated to the Vite port.
-
-² **`-l` means different things in the two bundlers.** `locales` appears **nowhere** in
-webpack's `ILibPlugin`: there, `-l` scopes *prerendering only* (matching `pack --help`:
-"Locales for isomorphic mode") and the full iLib tree always ships. `ViteILibPlugin`
-*additionally* trims the emitted locale data — hence **2013 files / 19.4 MB vs 6782 / 61.1 MB**
-(**68% smaller**). Attractive for a TV app, but a **behavioral deviation**: a webpack build
-made with `-l en-US,ko-KR` can still switch to any locale at runtime, whereas the Vite build
-ships no data for unlisted locales and would fall back to unlocalized output. (Shared
-non-locale data such as `localematch.json` is kept, so it degrades rather than crashes.)
-Decide deliberately: gate it behind its own flag, or adopt it as intentional.
-
-### Not measured
-
-`pack -p --framework` and `pack -p --externals` are **excluded**. The webpack `--framework`
-build alone measured **12,905s (3.6 hours)**, single-threaded, and `--externals` needs a
-second framework build on top — together they dominated the run ~20:1 over every other
-command combined. It also **OOMs at the default heap** (hence `--max-old-space-size=8192`).
-Whether Vite's framework build is comparably slow is **unknown and worth measuring** — if it
-is dramatically faster, that is likely the single strongest argument in this comparison.
-
-Harness: `scratchpad/bench.cjs` + `bench-run.cjs` (throwaway; not part of the repo).
-
-## Recommendation
-
-Adopt Vite behind a feature flag for the **browser dev/build** path first (biggest
-DX win, lowest risk — measured **4–5× faster dev server startup** at **⅓ the memory**;
-see the benchmark above) — validated end-to-end including i18n runtime, locale filtering,
-webOS metadata, and ESLint. Beyond that, **`--isomorphic` and framework externals are
-now ported and validated** too. **`--snapshot`** is now ported and locally validated
-(snapshot-safe UMD bundle); it just needs a final on-device pass on a webOS board with
-the `V8_MKSNAPSHOT` toolchain — see below.
-
-## Testing `--snapshot` on a webOS board
-
-The snapshot blob is a **build-time** artifact and requires a `mksnapshot` binary whose
-V8 version **matches the target firmware's Chrome** (from the same webOS SDK/NDK release) —
-e.g. a Chrome-132 board needs that firmware's `mksnapshot`, **not** an arbitrary/old one. A
-mismatched binary either can't parse the modern output or produces a blob the board ignores
-at load. `mksnapshot` is a **Linux** tool (32-bit for older releases); on Windows run it via
-WSL or a Linux build machine (the guide's "doesn't support Windows OS" note). Steps:
-
-1. **Build with the firmware-matched toolchain**:
-   ```
-   export V8_MKSNAPSHOT=/path/to/mksnapshot        # matches the board's Chrome
-   ENACT_BUNDLER=vite enact pack -p --snapshot      # add -l en-US,ko-KR for multi-locale
-   ```
-   Expect: `Generated V8 snapshot blob (snapshot_blob.bin) and tagged appinfo.json.`
-   Verify `dist/snapshot_blob.bin` is **non-zero** and `dist/appinfo.json` has
-   `"v8SnapshotFile": "snapshot_blob.bin"`. (Without `V8_MKSNAPSHOT` the build still
-   succeeds and prints a skip notice; the app runs, just without the snapshot.)
-   *Old-firmware knobs (rarely needed):* `V8_SNAPSHOT_TARGET=chrome53` force-lowers the
-   syntax for a V8 older than the app targets, and `ENACT_SNAPSHOT_NO_COREJS=1` drops core-js
-   when that old V8 can't serialize its WeakMap state (see gap #4 — webpack hits the same
-   wall). On a modern firmware-matched `mksnapshot`, use neither.
-2. **Package + install (developer mode, not hosted)** — the snapshot is loaded by WAM
-   from the app's local install dir, so it must be a packaged IPK, not a served URL:
-   ```
-   ares-package dist
-   ares-install ./com.*.ipk        # Developer Mode enabled on the board
-   ```
-3. **Confirm the snapshot is actually used** — launch the app and check it renders, then
-   confirm WAM loaded the blob (via WAM logs / the `--profile-deserialization` output, or a
-   measurable cold-start improvement) rather than silently falling back — a `mksnapshot`
-   whose V8 doesn't match the firmware is ignored at load, so "it rendered" alone isn't proof.
-
-If step 1's blob is 0-byte, check `mksnapshot`'s stderr: `Unexpected token` means the
-binary is **older** than the app's syntax target (use the firmware-matched one, or
-`V8_SNAPSHOT_TARGET`); `illegal access` in module init is the core-js/WeakMap case on very
-old V8 (`ENACT_SNAPSHOT_NO_COREJS=1`, same limitation as webpack); a `window`/`document`
-`ReferenceError` means app/framework code touched the DOM at snapshot time (the local
-bare-V8 `vm` check guards this and is clean for qa-a11y).
+> Node 20+ is required for `require()` of the ESM-only `vite` package (validated on
+> Node 24).
