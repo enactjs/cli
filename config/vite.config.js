@@ -217,6 +217,13 @@ function enactICSSInteropPlugins () {
 // we neutralize them in both engines (Rollup build + esbuild dev optimizer).
 const ILIB_LOADER_RE = /(?:[/\\]|^\.\/lib\/)ilib-[\w-]+\.js$|(?:Node|Rhino|Qt|Ringo)Loader(?:\.js)?$/;
 
+// Catch-all `assetsInclude` regex mirroring webpack's `asset/resource` fallthrough:
+// any file whose extension is NOT code (js/ts/jsx…), markup (html/ejs), JSON, a
+// stylesheet, or wasm/sourcemap is emitted as a file asset, so `import cfg from
+// './analytics.cfg'` resolves to the emitted file's URL instead of Rollup trying to
+// parse the file as JavaScript.
+const ASSET_CATCHALL_RE = /\.(?!(?:m?[jt]sx?|c[jt]s|json5?|html?|ejs|css|less|s[ac]ss|styl|wasm|map)$)[a-z0-9_-]+$/i;
+
 // esbuild plugin (dev dependency optimizer) that stubs the iLib loaders to empty.
 const ilibStubEsbuildPlugin = {
 	name: 'enact-ilib-loader-stub',
@@ -386,6 +393,9 @@ module.exports = function (
 		logLevel: 'warn',
 		// Vite copies `<root>/public` into the build output automatically (webpack: copyPublicFolder).
 		publicDir: 'public',
+		// Treat unknown non-code extensions (e.g. `.cfg`) as emitted file assets, matching
+		// webpack's catch-all `asset/resource` loader
+		assetsInclude: ASSET_CATCHALL_RE,
 		define: {
 			'process.env.NODE_ENV': JSON.stringify(isEnvProduction ? 'production' : 'development'),
 			'process.env.PUBLIC_URL': JSON.stringify(app.publicUrl || ''),
