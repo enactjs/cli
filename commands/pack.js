@@ -120,7 +120,7 @@ function details (err, stats, output) {
 			console.log(
 				chalk.yellow(
 					'\nTreating warnings as errors because process.env.CI = true. \n' +
-						'Most CI servers set it automatically.\n'
+					'Most CI servers set it automatically.\n'
 				)
 			);
 			return new Error(filteredWarnings.join('\n\n'));
@@ -137,7 +137,7 @@ function details (err, stats, output) {
 			console.log(
 				chalk.yellow(
 					'NOTICE: This build contains debugging functionality and may run' +
-						' slower than in production mode.'
+					' slower than in production mode.'
 				)
 			);
 		}
@@ -193,7 +193,7 @@ function printErrorDetails (err, handler) {
 		console.log(
 			chalk.yellow(
 				'Compiled with the following type errors (you may want to check ' +
-					'these before deploying your app):\n'
+				'these before deploying your app):\n'
 			)
 		);
 		printBuildError(err);
