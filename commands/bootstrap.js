@@ -84,31 +84,61 @@ function api ({
 				['package.json', 'package-lock.json', 'npm-shrinkwrap.json']
 					.map(f => path.join(cwd, f))
 					.filter(f => fs.existsSync(f))
-					.forEach((f, i) => {
-						const lockfile = i > 0;
+					.forEach(f => {
+						const lockfile = path.basename(f) !== 'package.json';
 						// Restore any detected backups
 						if (fs.existsSync(f + '.bak')) {
 							fs.unlinkSync(f);
 							fs.renameSync(f + '.bak', f);
 						}
 						const obj = JSON.parse(fs.readFileSync(f, {encoding: 'utf8'}));
+						if (lockfile) {
+							obj.lockfileVersion = obj.lockfileVersion || 1;
+							obj.requires = true;
+						}
 						// Update dependency entry for local entries that exist
-						local
-							.filter(dep => obj.dependencies && obj.dependencies[dep])
-							.forEach(dep => {
-								const fileDep = 'file:' + path.join(override, dep, 'package.tgz');
-								if (lockfile) {
-									obj.lockfileVersion = obj.lockfileVersion || 1;
-									obj.requires = true;
-									obj.dependencies[dep].version = fileDep;
-									// Remove unneeded properties to avoid issues
-									['resolved', 'from', 'integrity', 'requires'].forEach(
-										key => delete obj.dependencies[dep][key]
-									);
-								} else {
+						local.forEach(dep => {
+							const fileDep = 'file:' + path.join(override, dep, 'package.tgz');
+							if (!lockfile) {
+								if (obj.dependencies && obj.dependencies[dep]) {
 									obj.dependencies[dep] = fileDep;
 								}
-							});
+								return;
+							}
+							// lockfileVersion 1 (and the legacy tree kept in v2):
+							// the flat "dependencies" map keyed by package name
+							if (obj.dependencies && obj.dependencies[dep]) {
+								obj.dependencies[dep].version = fileDep;
+								// Remove unneeded properties to avoid issues
+								['resolved', 'from', 'integrity', 'requires'].forEach(
+									key => delete obj.dependencies[dep][key]
+								);
+							}
+							// lockfileVersion 2 & 3: the "packages" map keyed by
+							// install path (e.g. "node_modules/@enact/core")
+							if (obj.packages) {
+								const nodeModulesKey = 'node_modules/' + dep;
+								if (obj.packages[nodeModulesKey]) {
+									obj.packages[nodeModulesKey].resolved = fileDep;
+									// Remove unneeded properties to avoid issues
+									['from', 'integrity'].forEach(
+										key => delete obj.packages[nodeModulesKey][key]
+									);
+								}
+								// The root package ("") mirrors package.json's
+								// dependency specifiers
+								const root = obj.packages[''];
+								if (root) {
+									['dependencies', 'devDependencies', 'optionalDependencies'].forEach(
+										depType => {
+											if (root[depType] && root[depType][dep]) {
+												root[depType][dep] = fileDep;
+											}
+										}
+									);
+								}
+							}
+						});
 						// Backup existing and write the newly modified file
 						fs.renameSync(f, f + '.bak');
 						fs.writeFileSync(f, JSON.stringify(obj, null, '  '), {encoding: 'utf8'});
