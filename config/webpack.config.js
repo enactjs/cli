@@ -612,7 +612,9 @@ module.exports = function (
 				}),
 			// Webpack5 removed node polyfills but we need this to run screenshot tests
 			new NodePolyfillPlugin({
-				additionalAliases: ['console', 'domain', 'process', 'stream']
+				additionalAliases: ['console', 'domain', 'process', 'stream'],
+				// Additional settings for ESM module analysis
+				includeAliases: ['console-browserify']
 			}),
 			// Provide meaningful information when modules are not found
 			new ModuleNotFoundPlugin(app.context),
