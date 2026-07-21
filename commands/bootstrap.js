@@ -117,20 +117,23 @@ function api ({
 							// lockfileVersion 2 & 3: the "packages" map keyed by
 							// install path (e.g. "node_modules/@enact/core")
 							if (obj.packages) {
-								// A dependency can be installed at the top level
-								// ("node_modules/@enact/core") or nested
-								// ("node_modules/@enact/limestone/node_modules/@enact/core"),
-								// so update every path that resolves to this package.
-								const suffix = 'node_modules/' + dep;
+								// The top-level install ("node_modules/@enact/core")
+								// gets pointed at the local tgz.
+								const topKey = 'node_modules/' + dep;
+								if (obj.packages[topKey]) {
+									obj.packages[topKey].resolved = fileDep;
+									// Remove unneeded properties to avoid issues
+									['from', 'integrity', 'requires'].forEach(
+										k => delete obj.packages[topKey][k]
+									);
+								}
+								// Nested installs
+								// ("node_modules/@enact/limestone/node_modules/@enact/core")
+								// are removed so the dependent resolves to the
+								// overridden top-level package instead.
 								Object.keys(obj.packages)
-									.filter(key => key === suffix || key.endsWith('/' + suffix))
-									.forEach(key => {
-										obj.packages[key].resolved = fileDep;
-										// Remove unneeded properties to avoid issues
-										['version', 'from', 'integrity', 'requires'].forEach(
-											k => delete obj.packages[key][k]
-										);
-									});
+									.filter(key => key.endsWith('/' + topKey))
+									.forEach(key => delete obj.packages[key]);
 								// The root package ("") mirrors package.json's
 								// dependency specifiers
 								const root = obj.packages[''];
