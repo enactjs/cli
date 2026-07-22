@@ -53,6 +53,7 @@ async function run () {
 		output: options.outputPath,
 		production: opts.production,
 		plugins,
+		define: options.defines,
 		polyfill: polyfillPath,
 		includeCoreJs: opts.externalsPolyfill && !polyfillPath,
 		snapshot: opts.snapshot

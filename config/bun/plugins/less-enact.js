@@ -5,6 +5,13 @@ const sass = require('sass');
 const {createPostcssEnactPlugin} = require('./postcss-enact');
 const {resolveTildeImport} = require('./resolve-tilde-import');
 
+const CSS_ASSET_NAMESPACE = 'enact-css-asset';
+const CSS_ASSET_QUERY = '?enact-css';
+
+function normalizePath (filePath) {
+	return path.resolve(filePath).replace(/\\/g, '/');
+}
+
 function isModuleStylesheet (filePath, forceCSSModules) {
 	return forceCSSModules || /\.module\.(css|less|scss|sass)$/.test(filePath);
 }
@@ -67,35 +74,55 @@ async function compileSass (source, filePath) {
 	return result.css;
 }
 
-function createCssLoadResult (filePath, processed, moduleMode) {
-	const result = {
-		loader: 'css',
-		contents: processed.css,
-		resolveDir: path.dirname(filePath)
-	};
-
-	if (moduleMode) {
-		result.exports = processed.exports;
+function createCssLoadResult (filePath, processed, moduleMode, cssStore) {
+	if (!moduleMode) {
+		return {
+			loader: 'css',
+			contents: processed.css,
+			resolveDir: path.dirname(filePath)
+		};
 	}
 
-	return result;
+	// Bun ignores `exports` on the css loader, so CSS modules must return JS that
+	// side-effect imports the processed CSS via a virtual namespace asset.
+	const key = normalizePath(filePath);
+	cssStore.set(key, processed.css);
+
+	return {
+		loader: 'js',
+		contents: [
+			'import ' + JSON.stringify(String(key + CSS_ASSET_QUERY)) + ';',
+			'export default ' + JSON.stringify(processed.exports || {}) + ';'
+		].join('\n')
+	};
 }
 
 function createLessEnactPlugin (options = {}) {
 	const postcssPlugin = createPostcssEnactPlugin(options);
 	const appContext = options.context || process.cwd();
 	const lessTildePlugin = createLessTildePlugin(appContext);
+	const cssStore = new Map();
 
 	return {
 		name: 'enact-less',
 		setup (build) {
+			build.onResolve({filter: /\?enact-css$/}, args => ({
+				path: normalizePath(args.path.replace(/\?enact-css$/, '')),
+				namespace: CSS_ASSET_NAMESPACE
+			}));
+
+			build.onLoad({filter: /.*/, namespace: CSS_ASSET_NAMESPACE}, args => ({
+				loader: 'css',
+				contents: cssStore.get(normalizePath(args.path)) || ''
+			}));
+
 			build.onLoad({filter: /\.(scss|sass)$/}, async args => {
 				const source = await Bun.file(args.path).text();
 				const css = await compileSass(source, args.path);
 				const moduleMode = isModuleStylesheet(args.path, options.forceCSSModules);
 				const processed = await postcssPlugin.processCss(css, args.path, moduleMode);
 
-				return createCssLoadResult(args.path, processed, moduleMode);
+				return createCssLoadResult(args.path, processed, moduleMode, cssStore);
 			});
 
 			build.onLoad({filter: /\.less$/}, async args => {
@@ -112,7 +139,7 @@ function createLessEnactPlugin (options = {}) {
 				const moduleMode = isModuleStylesheet(args.path, options.forceCSSModules);
 				const processed = await postcssPlugin.processCss(lessResult.css, args.path, moduleMode);
 
-				return createCssLoadResult(args.path, processed, moduleMode);
+				return createCssLoadResult(args.path, processed, moduleMode, cssStore);
 			});
 
 			build.onLoad({filter: /\.css$/}, async args => {
@@ -120,7 +147,7 @@ function createLessEnactPlugin (options = {}) {
 				const cssSource = await Bun.file(args.path).text();
 				const cssProcessed = await postcssPlugin.processCss(cssSource, args.path, moduleMode);
 
-				return createCssLoadResult(args.path, cssProcessed, moduleMode);
+				return createCssLoadResult(args.path, cssProcessed, moduleMode, cssStore);
 			});
 		}
 	};

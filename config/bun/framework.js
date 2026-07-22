@@ -195,6 +195,17 @@ function writeFrameworkEntry (context, modules, options = {}) {
 	const cacheDir = path.join(context, 'node_modules', '.cache', 'enact-bun');
 	fs.mkdirSync(cacheDir, {recursive: true});
 	const entryPath = path.join(cacheDir, 'framework-entry.js');
+
+	// Embed dynamic values only via JSON.stringify so generated JS cannot be injected.
+	const jsLiteral = value => JSON.stringify(String(value));
+	const registerRequire = (id, requestPath) =>
+		'__register(' +
+		jsLiteral(id) +
+		', function () { return require(' +
+		jsLiteral(requestPath) +
+		'); });';
+	const emitRequire = requestPath => 'require(' + jsLiteral(requestPath) + ');';
+
 	const lines = [
 		'var __registry = Object.create(null);',
 		'function __register(id, loader) { __registry[id] = loader; }',
@@ -202,8 +213,8 @@ function writeFrameworkEntry (context, modules, options = {}) {
 	];
 
 	if (options.polyfill) {
-		const polyfillPath = options.polyfill.replace(/\\/g, '/');
-		lines.push(`__register('@enact/polyfills', function () { return require(${JSON.stringify(polyfillPath)}); });`);
+		const polyfillPath = path.resolve(options.polyfill).replace(/\\/g, '/');
+		lines.push(registerRequire('@enact/polyfills', polyfillPath));
 	}
 
 	for (const {id, request} of modules) {
@@ -211,7 +222,7 @@ function writeFrameworkEntry (context, modules, options = {}) {
 		if (shouldExcludePath(normalizedRequest)) {
 			continue;
 		}
-		lines.push(`__register(${JSON.stringify(id)}, function () { return require(${JSON.stringify(request)}); });`);
+		lines.push(registerRequire(id, normalizedRequest));
 	}
 
 	lines.push('', '// Eagerly load framework modules for CSS extraction');
@@ -220,7 +231,7 @@ function writeFrameworkEntry (context, modules, options = {}) {
 		if (shouldExcludePath(normalizedRequest)) {
 			continue;
 		}
-		lines.push(`require(${JSON.stringify(request)});`);
+		lines.push(emitRequire(normalizedRequest));
 	}
 
 	lines.push(
@@ -293,6 +304,7 @@ async function applyFramework (options = {}) {
 		naming: 'enact.[ext]',
 		minify: !!options.production,
 		sourcemap: options.production ? 'none' : 'linked',
+		define: options.define || {global: 'globalThis'},
 		plugins
 	});
 

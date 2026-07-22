@@ -317,38 +317,73 @@ async function runBuild (buildOpts) {
 		await buildReactGlobals(options, buildOpts);
 	}
 
-	if (buildOpts.watch) {
-		console.log('Watching for file changes...');
-
-		const watchResult = await Bun.build({
-			...buildConfig,
-			watch: {
-				onRebuild (error, rebuildResult) {
-					if (error) {
-						console.error('Rebuild failed:', error);
-						return;
-					}
-					const rebuildInfo = finalizeBuild(rebuildResult, buildOpts, options);
-					if (rebuildInfo) {
-						console.log('Recompiled successfully.');
-						logBuildResult(buildOpts, options, rebuildInfo);
-					}
-				}
-			}
-		});
-
-		const watchInfo = finalizeBuild(watchResult, buildOpts, options);
-		if (!watchInfo) process.exit(1);
-		logBuildResult(buildOpts, options, watchInfo);
-
-		await new Promise(() => {});
-		return;
-	}
-
 	const result = await Bun.build(buildConfig);
 	const info = finalizeBuild(result, buildOpts, options);
 	if (!info) process.exit(1);
 	logBuildResult(buildOpts, options, info);
+
+	if (buildOpts.watch) {
+		await runWatchLoop(buildOpts, options, buildConfig);
+	}
+}
+
+async function runWatchLoop (buildOpts, options, buildConfig) {
+	const {createFileWatcher} = nodeRequire('./watch-files.js');
+	let building = false;
+	let rebuildQueued = false;
+
+	async function rebuild () {
+		if (building) {
+			rebuildQueued = true;
+			return;
+		}
+		building = true;
+		try {
+			const result = await Bun.build(buildConfig);
+			const rebuildInfo = finalizeBuild(result, buildOpts, options);
+			if (rebuildInfo) {
+				console.log('Recompiled successfully.');
+				logBuildResult(buildOpts, options, rebuildInfo);
+			}
+		} catch (err) {
+			console.error('Rebuild failed:', err);
+		} finally {
+			building = false;
+			if (rebuildQueued) {
+				rebuildQueued = false;
+				await rebuild();
+			}
+		}
+	}
+
+	const watchRoots = [options.context];
+	if (Array.isArray(options.additionalModulePaths)) {
+		watchRoots.push(...options.additionalModulePaths);
+	}
+
+	console.log('Watching for file changes...');
+	const watcher = createFileWatcher(watchRoots, {
+		ignorePaths: [options.outputPath, getCacheDirPath(options.context)],
+		onChange: async files => {
+			const shown = files.slice(0, 3).map(file => path.relative(options.context, file) || file);
+			const extra = files.length > 3 ? ` (+${files.length - 3} more)` : '';
+			console.log(`File change detected (${shown.join(', ')}${extra}), rebuilding...`);
+			await rebuild();
+		}
+	});
+
+	await new Promise(resolve => {
+		const stop = () => {
+			watcher.close();
+			resolve();
+		};
+		process.once('SIGINT', stop);
+		process.once('SIGTERM', stop);
+	});
+}
+
+function getCacheDirPath (context) {
+	return path.join(context, 'node_modules', '.cache', 'enact-bun');
 }
 
 const cliOpts = parseArgs(process.argv.slice(2));

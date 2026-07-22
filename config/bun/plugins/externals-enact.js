@@ -116,18 +116,18 @@ function createExternalsEnactPlugin (options = {}) {
 			build.onLoad({filter: /.*/, namespace: 'enact-external'}, args => {
 				const id = args.path;
 				const contents = [
-					`const fw = typeof enact_framework !== 'undefined' ? enact_framework : globalThis.enact_framework;`,
-					`const req = typeof fw === 'function' ? fw : fw && fw.require;`,
-					`if (!req) {`,
-					`	throw new Error('External Enact framework not loaded. Include enact.js before the app bundle.');`,
-					`}`,
-					`const mod = req(${JSON.stringify(id)});`,
-					`module.exports = mod && mod.__esModule ? mod.default : mod;`,
-					`if (mod && typeof mod === 'object') {`,
-					`	for (const key of Object.keys(mod)) {`,
-					`		if (key !== 'default') module.exports[key] = mod[key];`,
-					`	}`,
-					`}`
+					"const fw = typeof enact_framework !== 'undefined' ? enact_framework : globalThis.enact_framework;",
+					'const req = typeof fw === \'function\' ? fw : fw && fw.require;',
+					'if (!req) {',
+					"\tthrow new Error('External Enact framework not loaded. Include enact.js before the app bundle.');",
+					'}',
+					'const mod = req(' + JSON.stringify(String(id)) + ');',
+					'module.exports = mod && mod.__esModule ? mod.default : mod;',
+					'if (mod && typeof mod === \'object\') {',
+					'\tfor (const key of Object.keys(mod)) {',
+					"\t\tif (key !== 'default') module.exports[key] = mod[key];",
+					'\t}',
+					'}'
 				].join('\n');
 				return {loader: 'js', contents};
 			});

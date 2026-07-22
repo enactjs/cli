@@ -100,6 +100,48 @@ const setupProxyHandler = createSetupProxyHandler(buildOpts.context);
 const tls = getTlsOptions();
 const allowedHost = cliOpts.host === '0.0.0.0' ? 'localhost' : cliOpts.host;
 
+let rebuilding = false;
+let rebuildQueued = false;
+
+async function rebuildDevBundle () {
+	if (rebuilding) {
+		rebuildQueued = true;
+		return;
+	}
+	rebuilding = true;
+	try {
+		await runBuild(buildOpts, entryFile, plugins, cacheDir);
+		writeDevHtml(cacheDir, {title: buildOpts.title, publicPath: buildOpts.publicPath, customSkin: buildOpts.customSkin});
+		console.log('Rebuilt.');
+	} catch (err) {
+		console.error('Rebuild failed:', err);
+	} finally {
+		rebuilding = false;
+		if (rebuildQueued) {
+			rebuildQueued = false;
+			await rebuildDevBundle();
+		}
+	}
+}
+
+const {createFileWatcher} = nodeRequire('./watch-files.js');
+const watchRoots = [buildOpts.context];
+if (Array.isArray(buildOpts.additionalModulePaths)) {
+	watchRoots.push(...buildOpts.additionalModulePaths);
+}
+const fileWatcher = createFileWatcher(watchRoots, {
+	ignorePaths: [cacheDir, path.join(buildOpts.context, 'dist')],
+	onChange: async files => {
+		const shown = files.slice(0, 3).map(file => path.relative(buildOpts.context, file) || file);
+		const extra = files.length > 3 ? ` (+${files.length - 3} more)` : '';
+		console.log(`File change detected (${shown.join(', ')}${extra}), rebuilding...`);
+		await rebuildDevBundle();
+	}
+});
+
+process.once('SIGINT', () => fileWatcher.close());
+process.once('SIGTERM', () => fileWatcher.close());
+
 const server = Bun.serve({
 	hostname: cliOpts.host,
 	port: cliOpts.port,
@@ -160,27 +202,6 @@ const server = Bun.serve({
 		}
 
 		return new Response('Not Found', {status: 404});
-	}
-});
-
-Bun.build({
-	entrypoints: [entryFile],
-	outdir: cacheDir,
-	target: 'browser',
-	minify: false,
-	sourcemap: buildOpts.sourcemap ? 'linked' : 'none',
-	define: buildOpts.defines,
-	publicPath: buildOpts.publicPath || '/',
-	plugins,
-	alias: buildOpts.aliases,
-	watch: {
-		onRebuild (error) {
-			if (error) {
-				console.error('Rebuild failed:', error);
-			} else {
-				console.log('Rebuilt.');
-			}
-		}
 	}
 });
 

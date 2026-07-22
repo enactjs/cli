@@ -42,6 +42,9 @@ function ensureEntryFile (context, mainEntry, options = {}) {
 	const main = mainEntry.replace(/\\/g, '/');
 	const entryPath = path.join(cacheDir, isomorphic ? 'entry-isomorphic.js' : 'entry.js');
 	const lines = [];
+	// Embed dynamic values only via JSON.stringify so generated JS cannot be injected.
+	const jsLiteral = value => JSON.stringify(String(value));
+	const emitRequire = requestPath => 'require(' + jsLiteral(requestPath) + ');';
 
 	if (fastRefresh) {
 		lines.push(
@@ -57,12 +60,12 @@ function ensureEntryFile (context, mainEntry, options = {}) {
 	if (snapshot && isomorphic) {
 		const {resolveSnapshotHelper} = require('./plugins/snapshot-enact');
 		lines.push(
-			`require(${JSON.stringify(resolveSnapshotHelper('snapshot-redux-helper'))});`,
-			`require(${JSON.stringify(resolveSnapshotHelper('snapshot-helper'))});`
+			emitRequire(resolveSnapshotHelper('snapshot-redux-helper')),
+			emitRequire(resolveSnapshotHelper('snapshot-helper'))
 		);
 	}
 
-	lines.push(`require(${JSON.stringify(polyfills)});`);
+	lines.push(emitRequire(polyfills));
 
 	if (noAnimation) {
 		// Preserve ENACT_PACK_NO_ANIMATION in output for CI verification (Bun inlines defines elsewhere).
@@ -71,11 +74,11 @@ function ensureEntryFile (context, mainEntry, options = {}) {
 
 	if (isomorphic) {
 		lines.push(
-			`var __enactApp = require(${JSON.stringify(main)});`,
-			`module.exports = __enactApp && __enactApp.__esModule ? __enactApp.default : __enactApp;`
+			'var __enactApp = require(' + jsLiteral(main) + ');',
+			'module.exports = __enactApp && __enactApp.__esModule ? __enactApp.default : __enactApp;'
 		);
 	} else {
-		lines.push(`module.exports = require(${JSON.stringify(main)});`);
+		lines.push('module.exports = require(' + jsLiteral(main) + ');');
 	}
 
 	fs.writeFileSync(entryPath, lines.join('\n'), {encoding: 'utf8'});
@@ -99,6 +102,8 @@ function getResolveAliases (context) {
 
 function getDefines (opts = {}) {
 	const defines = {
+		// Browser global shim (replaces webpack NodePolyfillPlugin ProvidePlugin)
+		global: 'globalThis',
 		'process.env.NODE_ENV': JSON.stringify(opts.production ? 'production' : 'development'),
 		'process.env.PUBLIC_URL': JSON.stringify(opts.publicPath || '/'),
 		ENACT_PACK_ISOMORPHIC: JSON.stringify(!!opts.isomorphic),
