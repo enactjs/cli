@@ -1,13 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
+// Do not include "build" — some apps use that as a legitimate source folder name.
 const IGNORE_DIR_NAMES = new Set([
 	'node_modules',
 	'dist',
 	'.git',
 	'.cache',
 	'coverage',
-	'build',
 	'tmp',
 	'temp'
 ]);
@@ -29,6 +29,79 @@ function isWatchableFile (relativePath) {
 		return true;
 	}
 	return WATCH_EXTENSIONS.test(relativePath);
+}
+
+/**
+ * Resolve @enact/* packages that are symlinks/junctions (or otherwise realpath
+ * outside node_modules) so framework edits trigger pack/serve rebuilds.
+ * webpack watched the resolved module graph; Bun only watches explicit roots.
+ */
+function getLinkedEnactWatchRoots (context) {
+	const roots = [];
+	const seen = new Set();
+	const enactScope = path.join(path.resolve(context), 'node_modules', '@enact');
+
+	if (!fs.existsSync(enactScope)) {
+		return roots;
+	}
+
+	let entries;
+	try {
+		entries = fs.readdirSync(enactScope);
+	} catch (_e) {
+		return roots;
+	}
+
+	for (const name of entries) {
+		const pkgPath = path.join(enactScope, name);
+		let realPath;
+		try {
+			const stat = fs.lstatSync(pkgPath);
+			if (!stat.isDirectory() && !stat.isSymbolicLink()) {
+				continue;
+			}
+			realPath = fs.realpathSync(pkgPath);
+		} catch (_e) {
+			continue;
+		}
+
+		const normalizedPkg = normalizePath(pkgPath);
+		const normalizedReal = normalizePath(realPath);
+		if (normalizedReal === normalizedPkg || seen.has(normalizedReal)) {
+			continue;
+		}
+
+		seen.add(normalizedReal);
+		roots.push(realPath);
+	}
+
+	return roots;
+}
+
+function collectWatchRoots (context, additionalModulePaths = []) {
+	const roots = [path.resolve(context)];
+	const seen = new Set([normalizePath(context)]);
+
+	const add = dir => {
+		if (!dir) return;
+		const resolved = path.resolve(dir);
+		const key = normalizePath(resolved);
+		if (seen.has(key) || !fs.existsSync(resolved)) return;
+		seen.add(key);
+		roots.push(resolved);
+	};
+
+	if (Array.isArray(additionalModulePaths)) {
+		for (const modulePath of additionalModulePaths) {
+			add(modulePath);
+		}
+	}
+
+	for (const linked of getLinkedEnactWatchRoots(context)) {
+		add(linked);
+	}
+
+	return roots;
 }
 
 /**
@@ -124,4 +197,10 @@ function createFileWatcher (roots, options = {}) {
 	};
 }
 
-module.exports = {createFileWatcher, shouldIgnoreRelative, isWatchableFile};
+module.exports = {
+	createFileWatcher,
+	shouldIgnoreRelative,
+	isWatchableFile,
+	getLinkedEnactWatchRoots,
+	collectWatchRoots
+};

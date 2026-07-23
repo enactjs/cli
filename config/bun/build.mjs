@@ -319,8 +319,8 @@ async function runBuild (buildOpts) {
 
 	const result = await Bun.build(buildConfig);
 	const info = finalizeBuild(result, buildOpts, options);
-	if (!info) process.exit(1);
-	logBuildResult(buildOpts, options, info);
+	if (!info && !buildOpts.watch) process.exit(1);
+	if (info) logBuildResult(buildOpts, options, info);
 
 	if (buildOpts.watch) {
 		await runWatchLoop(buildOpts, options, buildConfig);
@@ -328,7 +328,7 @@ async function runBuild (buildOpts) {
 }
 
 async function runWatchLoop (buildOpts, options, buildConfig) {
-	const {createFileWatcher} = nodeRequire('./watch-files.js');
+	const {createFileWatcher, collectWatchRoots} = nodeRequire('./watch-files.js');
 	let building = false;
 	let rebuildQueued = false;
 
@@ -356,10 +356,7 @@ async function runWatchLoop (buildOpts, options, buildConfig) {
 		}
 	}
 
-	const watchRoots = [options.context];
-	if (Array.isArray(options.additionalModulePaths)) {
-		watchRoots.push(...options.additionalModulePaths);
-	}
+	const watchRoots = collectWatchRoots(options.context, options.additionalModulePaths);
 
 	console.log('Watching for file changes...');
 	const watcher = createFileWatcher(watchRoots, {

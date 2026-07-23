@@ -182,9 +182,51 @@ function createPostcssUrlPlugin (appContext = process.cwd()) {
 }
 createPostcssUrlPlugin.postcss = true;
 
+/**
+ * Pin relative @import paths to absolute filesystem paths so CSS relocated into
+ * the enact-bun css cache still resolves (e.g. @enovaui token sheets left as
+ * CSS @imports after LESS). url() is already absolute via createPostcssUrlPlugin.
+ */
+function createPostcssImportAbsolutePlugin (appContext = process.cwd()) {
+	return {
+		postcssPlugin: 'postcss-enact-import-absolute',
+		Once (root) {
+			const inputFile = root.source?.input?.file || appContext;
+			const currentFileDir = path.dirname(inputFile);
+
+			root.walkAtRules(atRule => {
+				if (atRule.name !== 'import') {
+					return;
+				}
+
+				const src = parseImportPath(atRule.params);
+				if (!src || isExternalUrl(src) || src.startsWith('~')) {
+					return;
+				}
+
+				let resolvedPath = null;
+				if (path.isAbsolute(src) || (src.startsWith('/') && fs.existsSync(src))) {
+					resolvedPath = src;
+				} else {
+					const candidate = path.resolve(currentFileDir, src);
+					if (fs.existsSync(candidate)) {
+						resolvedPath = candidate;
+					}
+				}
+
+				if (resolvedPath) {
+					atRule.params = formatImportParams(atRule.params, toBundlerCssUrl(resolvedPath));
+				}
+			});
+		}
+	};
+}
+createPostcssImportAbsolutePlugin.postcss = true;
+
 module.exports = {
 	resolveTildeImport,
 	toCssRelativeImport,
+	toBundlerCssUrl,
 	parseImportPath,
 	formatImportParams,
 	isExternalUrl,
@@ -193,5 +235,6 @@ module.exports = {
 	resolveCssAssetPath,
 	resolveCssUrlPath,
 	rewriteCssUrls,
-	createPostcssUrlPlugin
+	createPostcssUrlPlugin,
+	createPostcssImportAbsolutePlugin
 };

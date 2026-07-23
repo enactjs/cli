@@ -37,9 +37,11 @@ function renderHtml ({title, scriptSrc, cssHref, isomorphic, externalScripts, ex
 		.map(href => `\n\t\t<link rel="stylesheet" href="${href}" />`)
 		.join('');
 	const css = cssHref ? `\n\t\t<link rel="stylesheet" href="${cssHref}" />` : '';
-	const externalJs = !isomorphic && (externalScripts || [])
-		.map(src => `\n\t\t<script type="text/javascript" src="${src}"></script>`)
-		.join('');
+	const externalJs = !isomorphic
+		? (externalScripts || [])
+			.map(src => `\n\t\t<script type="text/javascript" src="${src}"></script>`)
+			.join('')
+		: '';
 	const scriptType = isomorphic ? 'text/javascript' : 'module';
 	const appScript = scriptSrc && !isomorphic
 		? `\n\t\t<script type="${scriptType}" src="${scriptSrc}"></script>`

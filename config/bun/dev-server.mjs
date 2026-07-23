@@ -124,11 +124,8 @@ async function rebuildDevBundle () {
 	}
 }
 
-const {createFileWatcher} = nodeRequire('./watch-files.js');
-const watchRoots = [buildOpts.context];
-if (Array.isArray(buildOpts.additionalModulePaths)) {
-	watchRoots.push(...buildOpts.additionalModulePaths);
-}
+const {createFileWatcher, collectWatchRoots} = nodeRequire('./watch-files.js');
+const watchRoots = collectWatchRoots(buildOpts.context, buildOpts.additionalModulePaths);
 const fileWatcher = createFileWatcher(watchRoots, {
 	ignorePaths: [cacheDir, path.join(buildOpts.context, 'dist')],
 	onChange: async files => {

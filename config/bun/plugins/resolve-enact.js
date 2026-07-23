@@ -95,17 +95,19 @@ function resolveFromModulePaths (request, modulePaths) {
 function getModuleSearchPaths (args, context, additionalModulePaths) {
 	const paths = new Set();
 
-	if (args.resolveDir) {
-		paths.add(args.resolveDir);
-	}
-	if (args.importer) {
-		paths.add(path.dirname(args.importer));
-	}
+	// Prefer the app context first (webpack resolve.modules: [./node_modules, ...])
+	// so monorepo packages do not pull a second copy of shared deps like react.
 	if (context) {
 		paths.add(context);
 	}
 	for (const modulePath of additionalModulePaths) {
 		paths.add(modulePath);
+	}
+	if (args.resolveDir) {
+		paths.add(args.resolveDir);
+	}
+	if (args.importer) {
+		paths.add(path.dirname(args.importer));
 	}
 
 	return [...paths];
@@ -165,20 +167,44 @@ function createResolveEnactPlugin (options = {}) {
 					}
 				}
 
-				for (const [key, target] of Object.entries(aliases)) {
-					if (args.path === key) {
-						let resolved = target;
-						if (!path.isAbsolute(target) && !target.startsWith('@')) {
-							resolved = path.resolve(context, target);
-						} else {
-							try {
-								resolved = require.resolve(target, {paths: [context, args.importer].filter(Boolean)});
-							} catch (_e) {
-								return undefined;
-							}
-						}
-						return toResolveResult(resolved);
+				// Longest key first so `react-dom` wins over `react` for `react-dom/client`.
+				const aliasKeys = Object.keys(aliases).sort((a, b) => b.length - a.length);
+				for (const key of aliasKeys) {
+					const exact = args.path === key;
+					const prefixed = args.path.startsWith(key + '/');
+					if (!exact && !prefixed) {
+						continue;
 					}
+
+					const target = aliases[key];
+					const suffix = exact ? '' : args.path.slice(key.length);
+					let resolved = target;
+					if (path.isAbsolute(target)) {
+						const candidate = suffix ? path.join(target, suffix.slice(1)) : target;
+						const absoluteImport = resolveImportPath(candidate);
+						if (absoluteImport) {
+							return toResolveResult(absoluteImport);
+						}
+						try {
+							return toResolveResult(require.resolve(candidate, {paths: [context]}));
+						} catch (_e) {
+							return toResolveResult(normalizeBundlerPath(candidate));
+						}
+					}
+					if (!target.startsWith('@')) {
+						resolved = path.resolve(context, target);
+						if (suffix) {
+							resolved = path.join(resolved, suffix.slice(1));
+						}
+					} else {
+						try {
+							const request = exact ? target : target + suffix;
+							resolved = require.resolve(request, {paths: [context, args.importer].filter(Boolean)});
+						} catch (_e) {
+							return undefined;
+						}
+					}
+					return toResolveResult(resolved);
 				}
 
 				if (args.path === 'ilib' || args.path === '@enact/i18n/ilib') {

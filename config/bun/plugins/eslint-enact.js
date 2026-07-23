@@ -1,62 +1,54 @@
 const path = require('path');
 const {ESLint} = require('eslint');
 
-let eslintInstance;
-
-function getESLint (context) {
-	if (!eslintInstance) {
-		const configFile = path.join(__dirname, '..', '..', 'eslintWebpackPluginConfig.js');
-		eslintInstance = new ESLint({
-			overrideConfigFile: configFile,
-			cache: true,
-			cacheLocation: path.join(context, 'node_modules', '.cache', '.eslintcache'),
-			cwd: context,
-			errorOnUnmatchedPattern: false
-		});
-	}
-	return eslintInstance;
-}
-
-function shouldLint (filePath) {
-	if (!/\.(js|mjs|jsx|ts|tsx)$/.test(filePath)) {
-		return false;
-	}
-	if (/node_modules[/\\]/.test(filePath) && !/node_modules[/\\]@enact[/\\]/.test(filePath)) {
-		return false;
-	}
-	return true;
-}
+const LINT_GLOBS = [
+	'**/*.{js,mjs,jsx,ts,tsx}',
+	// Framework packages are often linked under node_modules/@enact; include them
+	// explicitly because ESLint skips node_modules for the broad glob.
+	'node_modules/@enact/**/*.{js,mjs,jsx,ts,tsx}'
+];
 
 function createEslintEnactPlugin (options = {}) {
 	if (options.linting === false) {
 		return null;
 	}
 
+	const context = path.resolve(options.context || process.cwd());
+	const configFile = path.join(__dirname, '..', '..', 'eslintWebpackPluginConfig.js');
 	const formatterPath = require.resolve('react-dev-utils/eslintFormatter');
+	const eslint = new ESLint({
+		overrideConfigFile: configFile,
+		cache: true,
+		cacheLocation: path.join(context, 'node_modules', '.cache', '.eslintcache'),
+		cwd: context,
+		errorOnUnmatchedPattern: false
+	});
+
+	let formatterPromise;
+
+	const getFormatter = () => {
+		if (!formatterPromise) {
+			formatterPromise = eslint.loadFormatter(formatterPath);
+		}
+		return formatterPromise;
+	};
 
 	return {
 		name: 'enact-eslint',
 		setup (build) {
-			build.onLoad({filter: /\.(js|mjs|jsx|ts|tsx)$/}, async args => {
-				if (!shouldLint(args.path)) {
-					return undefined;
-				}
-
-				const eslint = getESLint(options.context);
-				const results = await eslint.lintFiles(args.path);
-				const formatter = await eslint.loadFormatter(formatterPath);
+			// One lint pass per Bun.build (including watch rebuilds), not per module.
+			build.onStart(async () => {
+				const results = await eslint.lintFiles(LINT_GLOBS);
+				const formatter = await getFormatter();
 				const resultText = await formatter.format(results);
 
 				if (resultText) {
 					console.log(resultText);
 				}
 
-				const hasErrors = results.some(result => result.errorCount > 0);
-				if (hasErrors) {
+				if (results.some(result => result.errorCount > 0)) {
 					throw new Error('Lint errors found.');
 				}
-
-				return undefined;
 			});
 		}
 	};

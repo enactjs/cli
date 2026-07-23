@@ -86,9 +86,18 @@ function ensureEntryFile (context, mainEntry, options = {}) {
 }
 
 function getResolveAliases (context) {
-	const aliases = {
-		'react-is': path.dirname(require.resolve('react-is/package.json'))
-	};
+	// Pin React singletons to the app copy. Monorepo samples often have a second
+	// physical react under the repo root; resolving from the importer (e.g.
+	// ThemeDecorator in ../../) yields two Reacts → "Invalid hook call".
+	// Mirrors webpack's dedupe set: ['react', 'react-dom', 'react-is', 'scheduler'].
+	const aliases = {};
+	for (const name of ['react', 'react-dom', 'react-is', 'scheduler']) {
+		try {
+			aliases[name] = path.dirname(require.resolve(name + '/package.json', {paths: [context]}));
+		} catch (_e) {
+			// Package may be absent (e.g. scheduler before install); skip.
+		}
+	}
 	if (fs.existsSync(path.join(context, 'node_modules', '@enact', 'i18n', 'ilib'))) {
 		aliases.ilib = '@enact/i18n/ilib';
 	} else {
@@ -176,16 +185,20 @@ function createBuildOptions (opts = {}) {
 		if (frameworkPublicPath) {
 			const ilibInEnact = path.join(frameworkPublicPath, 'node_modules', '@enact', 'i18n', 'ilib');
 			const ilibStandalone = path.join(frameworkPublicPath, 'node_modules', 'ilib');
-			process.env.ILIB_BASE_PATH = fs.existsSync(path.join(context, 'node_modules', '@enact', 'i18n', 'ilib'))
+			const ilibBase = fs.existsSync(path.join(context, 'node_modules', '@enact', 'i18n', 'ilib'))
 				? ilibInEnact.replace(/\\/g, '/')
 				: ilibStandalone.replace(/\\/g, '/');
+			process.env.ILIB_BASE_PATH = ilibBase;
+			// Keep Bun defines in sync — getDefines() ran before externals rewrote the path.
+			defines.ILIB_BASE_PATH = JSON.stringify(ilibBase);
 		}
 	}
 
 	if (opts.isomorphic || useSnapshot) {
 		// Prerender uses FileXHR, which maps bundled ilib URLs back to the filesystem.
 		process.env.ILIB_CONTEXT = context;
-		if (defines.ILIB_BASE_PATH) {
+		// Do not clobber an externals-derived ILIB_BASE_PATH with the local-app define.
+		if (!process.env.ILIB_BASE_PATH && defines.ILIB_BASE_PATH) {
 			process.env.ILIB_BASE_PATH = JSON.parse(defines.ILIB_BASE_PATH);
 		}
 		const {resolveIlibFsPath} = require('./ilib-meta');
