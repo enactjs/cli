@@ -79,6 +79,7 @@ const plugins = createEnactPlugins({
 	production: false,
 	sourcemap: buildOpts.sourcemap,
 	context: buildOpts.context,
+	outputPath: cacheDir,
 	additionalModulePaths: buildOpts.additionalModulePaths,
 	accent: buildOpts.accent,
 	forceCSSModules: buildOpts.forceCSSModules,

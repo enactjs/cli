@@ -39,6 +39,7 @@ async function run () {
 		production: opts.production,
 		sourcemap: options.sourcemap,
 		context: options.context,
+		outputPath: options.outputPath,
 		accent: options.accent,
 		forceCSSModules: options.forceCSSModules,
 		useTailwind: options.useTailwind,

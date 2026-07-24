@@ -293,6 +293,7 @@ async function runBuild (buildOpts) {
 		production: buildOpts.production,
 		sourcemap: options.sourcemap,
 		context: options.context,
+		outputPath: options.outputPath,
 		additionalModulePaths: options.additionalModulePaths,
 		accent: options.accent,
 		forceCSSModules: options.forceCSSModules,
