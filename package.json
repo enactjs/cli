@@ -84,7 +84,7 @@
     "license-checker": "^25.0.1",
     "mini-css-extract-plugin": "^2.10.2",
     "minimist": "^1.2.8",
-    "node-polyfill-webpack-plugin": "4.0.0",
+    "node-polyfill-webpack-plugin": "4.1.0",
     "postcss": "^8.5.16",
     "postcss-flexbugs-fixes": "^5.0.2",
     "postcss-loader": "^8.2.1",
@@ -123,7 +123,12 @@
     }
   },
   "overrides": {
-    "serialize-javascript": "^7.0.4"
+    "serialize-javascript": "^7.0.4",
+    "brace-expansion": ">=1.1.16",
+    "fast-uri": ">=3.1.4",
+    "js-yaml": ">=4.3.0",
+    "uuid": ">=11.1.1",
+    "sockjs": ">=0.3.24"
   },
   "devDependencies": {
     "eslint-config-prettier": "^10.1.8",
