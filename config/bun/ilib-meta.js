@@ -35,7 +35,10 @@ function bundleConst (name) {
 	);
 }
 
-function resolveBundlePath ({dir, context, publicPath, relative, symlinks = true}) {
+function resolveBundlePath ({dir, context, publicPath, relative, symlinks = false}) {
+	// Default false matches webpack ILibPlugin({symlinks: false}). Following
+	// realpaths turns linked @enact/limestone into ../../AppData/... which
+	// transformPath rewrites to /_/_/_/AppData/... and 404s in the browser.
 	if (path.isAbsolute(dir)) {
 		return JSON.stringify(dir.replace(/\\/g, '/'));
 	}

@@ -75,7 +75,14 @@ function writeIndexHtml (outputDir, options) {
 function writeDevHtml (cacheDir, options) {
 	fs.mkdirSync(cacheDir, {recursive: true});
 	const overlay = require('./dev-serve-utils').getDevOverlayScript();
-	const html = renderHtml({...options, scriptSrc: './entry.js'}).replace('</head>', `${overlay}\n\t</head>`);
+	// Bun emits entry.css beside entry.js; pack links it via writeIndexHtml, serve must too.
+	const cssFile = path.join(cacheDir, 'entry.css');
+	const cssHref = fs.existsSync(cssFile) ? './entry.css' : null;
+	const html = renderHtml({
+		...options,
+		scriptSrc: './entry.js',
+		cssHref: options.cssHref !== undefined ? options.cssHref : cssHref
+	}).replace('</head>', `${overlay}\n\t</head>`);
 	const target = path.join(cacheDir, 'index.html');
 	fs.writeFileSync(target, html, {encoding: 'utf8'});
 	return target;

@@ -91,9 +91,17 @@ const plugins = createEnactPlugins({
 
 await runBuild(buildOpts, entryFile, plugins, cacheDir);
 writeDevHtml(cacheDir, {title: buildOpts.title, publicPath: buildOpts.publicPath, customSkin: buildOpts.customSkin});
+// Copy iLib locale/resources (and webOS meta) into the serve output — same as pack.
+// Without this, XHR to /node_modules/ilib/locale/* 404s in the browser.
+nodeRequire('./post-build.js').applyPostBuild(buildOpts.context, cacheDir, {
+	ilibAdditionalResourcesPath: buildOpts.ilibAdditionalResourcesPath,
+	customSkin: buildOpts.customSkin,
+	watch: true
+});
 
 const publicDir = path.join(buildOpts.context, 'public');
 const mocksDir = path.join(buildOpts.context, '__mocks__');
+const appContext = buildOpts.context;
 const publicPath = buildOpts.publicPath || '/';
 const proxyHandler = createProxyHandler(app.proxy, publicDir, publicPath);
 const setupProxyHandler = createSetupProxyHandler(buildOpts.context);
@@ -112,6 +120,11 @@ async function rebuildDevBundle () {
 	try {
 		await runBuild(buildOpts, entryFile, plugins, cacheDir);
 		writeDevHtml(cacheDir, {title: buildOpts.title, publicPath: buildOpts.publicPath, customSkin: buildOpts.customSkin});
+		nodeRequire('./post-build.js').applyPostBuild(buildOpts.context, cacheDir, {
+			ilibAdditionalResourcesPath: buildOpts.ilibAdditionalResourcesPath,
+			customSkin: buildOpts.customSkin,
+			watch: true
+		});
 		console.log('Rebuilt.');
 	} catch (err) {
 		console.error('Rebuild failed:', err);
@@ -165,10 +178,15 @@ const server = Bun.serve({
 			});
 		}
 
-		for (const dir of [cacheDir, publicDir, mocksDir]) {
+		// cacheDir first (bundle + copied iLib), then public/mocks, then app root
+		// so /node_modules/ilib/* and theme resources resolve like webpack-dev-server.
+		for (const dir of [cacheDir, publicDir, mocksDir, appContext]) {
 			if (!fs.existsSync(dir)) continue;
-			const candidate = path.join(dir, pathname.replace(/^\//, ''));
-			if (candidate.startsWith(dir) && fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+			const root = path.resolve(dir);
+			const candidate = path.resolve(root, pathname.replace(/^\//, ''));
+			if ((candidate === root || candidate.startsWith(root + path.sep)) &&
+				fs.existsSync(candidate) &&
+				fs.statSync(candidate).isFile()) {
 				return new Response(Bun.file(candidate), {
 					headers: {'Access-Control-Allow-Origin': '*'}
 				});
