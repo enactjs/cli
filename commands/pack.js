@@ -20,12 +20,23 @@ const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const printBuildError = require('react-dev-utils/printBuildError');
 const webpack = require('webpack');
 const {optionParser: app, mixins, configHelper: helper} = require('@enact/dev-utils');
-const viteFw = require('@enact/dev-utils/mixins/vite-framework');
-const viteIso = require('@enact/dev-utils/mixins/vite-isomorphic');
-const viteSnap = require('@enact/dev-utils/mixins/vite-snapshot');
-const {parseLocales} = require('@enact/dev-utils/plugins/PrerenderPlugin/parse-locales');
+// The Vite mixins live in `@enact/dev-utils` and are only needed by the `--vite`
+// build path. They're absent when @enact/dev-utils is the published package
+// rather than the local source, so load them tolerantly — the webpack and
+// esbuild paths must not fail to load just because Vite's optional mixins aren't
+// present. `viteBuild` throws a clear error if `--vite` is used without them.
+let viteFw, viteIso, viteSnap, parseLocales;
+try {
+	viteFw = require('@enact/dev-utils/mixins/vite-framework');
+	viteIso = require('@enact/dev-utils/mixins/vite-isomorphic');
+	viteSnap = require('@enact/dev-utils/mixins/vite-snapshot');
+	({parseLocales} = require('@enact/dev-utils/plugins/PrerenderPlugin/parse-locales'));
+} catch (e) {
+	// Optional; see above.
+}
 
 const {isViteBundler} = require('./vite-utils');
+const {isEsbuildBundler} = require('./esbuild-utils');
 
 let chalk;
 let stripAnsi;
@@ -59,6 +70,7 @@ function displayHelp () {
 	console.log('    --no-linting      Build without code linting');
 	console.log('    --no-animation    Build without effects such as animation and shadow');
 	console.log('    --vite            [Experimental] Build with Vite instead of webpack');
+	console.log('    --esbuild         [Experimental] Build with esbuild instead of webpack');
 	console.log('    --stats           Output bundle analysis file');
 	console.log('    --verbose         Verbose log build details');
 	console.log('    -v, --version     Display version information');
@@ -362,6 +374,12 @@ async function viteIsomorphic (opts) {
 // --isomorphic (prerendering), --snapshot (V8 snapshot), and via mixins.applyVite:
 // --no-minify, --verbose, --stats.
 async function viteBuild (opts) {
+	if (!viteFw) {
+		throw new Error(
+			'The --vite build path requires the @enact/dev-utils Vite mixins, which are not present in ' +
+				'the installed @enact/dev-utils. Restore the local dev-utils (its junction/link) and retry.'
+		);
+	}
 	const {build: viteBuildApi} = require('vite');
 
 	if (opts.framework) return viteFramework(opts);
@@ -432,6 +450,119 @@ async function viteBuild (opts) {
 	if (!opts.watch) console.log(chalk.green('Compiled successfully.'));
 }
 
+// Print a size summary from esbuild's metafile, mirroring the webpack path's
+// printFileSizes (js/css/bin outputs, largest first).
+function printEsbuildFileSizes (metafile) {
+	if (!metafile) return;
+	const assets = Object.keys(metafile.outputs)
+		.filter(name => /\.(js|css|bin)$/.test(name) && !name.endsWith('.map'))
+		.map(name => {
+			const abs = path.resolve(name);
+			const size = fs.statSync(abs).size;
+			return {
+				folder: path.relative(app.context, path.dirname(abs)),
+				name: path.basename(abs),
+				size,
+				sizeLabel: filesize(size)
+			};
+		})
+		.sort((a, b) => b.size - a.size);
+	if (!assets.length) return;
+	const longestSizeLabelLength = Math.max.apply(
+		null,
+		assets.map(a => stripAnsi(a.sizeLabel).length)
+	);
+	assets.forEach(asset => {
+		let sizeLabel = asset.sizeLabel;
+		const sizeLength = stripAnsi(sizeLabel).length;
+		if (sizeLength < longestSizeLabelLength) {
+			sizeLabel += ' '.repeat(longestSizeLabelLength - sizeLength);
+		}
+		console.log('	' + sizeLabel + '	' + chalk.dim(asset.folder + path.sep) + chalk.cyan(asset.name));
+	});
+}
+
+// Experimental esbuild build path (core scope: a standard browser bundle for
+// `enact pack` / `enact pack -p`). Mirrors the webpack `build`/`watch` behavior
+// via esbuild's JS API, reusing config/esbuild.config (the same factory the
+// esbuild serve path uses). The webOS-specific build modes — --isomorphic
+// prerendering, --snapshot, --framework/--externals — are not yet ported to
+// esbuild; if requested they emit a notice and fall back to a standard bundle.
+async function esbuildBuild (opts) {
+	const esbuild = require('esbuild');
+	const configFactory = require('../config/esbuild.config');
+
+	const unsupported = ['framework', 'isomorphic', 'snapshot'].filter(f => opts[f]);
+	if (opts.externals) unsupported.push('externals');
+	if (unsupported.length) {
+		console.log(
+			chalk.yellow(
+				`NOTICE: ${unsupported.map(f => '--' + f).join(', ')} ` +
+					`${unsupported.length > 1 ? 'are' : 'is'} not yet supported on the esbuild ` +
+					'path; building a standard browser bundle.'
+			)
+		);
+	}
+
+	const output = opts.output ? path.resolve(opts.output) : path.resolve('./dist');
+	const buildOptions = configFactory(
+		opts.production ? 'production' : 'development',
+		!opts.linting,
+		opts['content-hash'],
+		// isomorphic forced off (core scope): prerendering isn't ported, so a
+		// client render is the correct behavior.
+		false,
+		!opts.animation,
+		!opts['split-css'],
+		opts['ilib-additional-path'],
+		opts.locales,
+		opts.output
+	);
+
+	// Entry override (the esbuild config defaults the entry to the app context).
+	if (opts.entry || app.entry) {
+		buildOptions.entryPoints = {main: path.resolve(opts.entry || app.entry)};
+	}
+
+	// Remove all content but keep the directory so that if you're in it, you
+	// don't end up in Trash (matches the webpack path).
+	await fs.emptyDir(output);
+
+	if (opts.watch) {
+		const ctx = await esbuild.context(buildOptions);
+		await ctx.watch();
+		copyPublicFolder(output);
+		console.log(
+			opts.production ?
+				'Creating an optimized production build and watching for changes...' :
+				'Creating a development build and watching for changes...'
+		);
+		['SIGINT', 'SIGTERM'].forEach(sig =>
+			process.on(sig, async () => {
+				await ctx.dispose();
+				process.exit();
+			})
+		);
+		return;
+	}
+
+	console.log(opts.production ? 'Creating an optimized production build...' : 'Creating a development build...');
+	// esbuild.build rejects on build errors; the cli() catch formats them.
+	const result = await esbuild.build(buildOptions);
+	copyPublicFolder(output);
+
+	if (result.warnings && result.warnings.length) {
+		console.log(chalk.yellow('Compiled with warnings:\n'));
+		result.warnings.forEach(w => console.log('  ' + (w.text || '')));
+		console.log();
+	} else {
+		console.log(chalk.green('Compiled successfully.'));
+	}
+	console.log();
+	printEsbuildFileSizes(result.metafile);
+	console.log();
+}
+
 // Create the production build and print the deployment instructions.
 function build (config) {
 	if (process.env.NODE_ENV === 'development') {
@@ -495,6 +626,12 @@ function api (opts = {}) {
 		return viteBuild(opts);
 	}
 
+	// Experimental esbuild bundler path (opt-in via `--esbuild` or ENACT_BUNDLER=esbuild).
+	if (isEsbuildBundler(opts)) {
+		process.env.NODE_ENV = opts.production ? 'production' : 'development';
+		return esbuildBuild(opts);
+	}
+
 	// make the framework option available globally in order to be used by the eslint-webpack-plugin custom configuration
 	process.env.FRAMEWORK = opts.framework;
 	// Do this as the first thing so that any code reading it knows the right env.
@@ -548,6 +685,7 @@ function cli (args) {
 			'verbose',
 			'watch',
 			'vite',
+			'esbuild',
 			'help'
 		],
 		string: ['externals', 'externals-public', 'locales', 'entry', 'ilib-additional-path', 'output', 'meta'],

@@ -331,13 +331,36 @@ function lessTildeImportPlugin (context) {
 	};
 }
 
+// Location of the generated combined entry, *relative to the app's
+// node_modules*. Single source of truth: `createCombinedEntry` writes the file
+// here, and `babelTransformFilter` below exempts this same path from the
+// "skip node_modules" rule so the entry still gets transpiled (see there for
+// why that matters). Keep the two derived from this constant so they can't drift.
+const ENTRY_CACHE_SUBDIR = ['.cache', 'enact-vite'];
+
+// Character class matching either path separator, for regexes built below.
+const SEP = '[\\\\/]';
+
+// `.cache[\\/]enact-vite`, with the dot escaped, for use inside a path regex.
+const ENTRY_CACHE_PATTERN = ENTRY_CACHE_SUBDIR.map(seg => seg.replace(/\./g, '\\.')).join(SEP);
+
+// Which files babel-preset-enact runs on. Mirrors webpack's
+// `exclude: /node_modules.(?!@enact)/` — transpile everything except non-@enact
+// node_modules — with one addition: the generated combined entry. That entry
+// does `import 'core-js/stable'`, and babel-preset-enact's `useBuiltIns: 'entry'`
+// is what rewrites it into just the polyfills the app's browserslist needs.
+// Left excluded (it lives under node_modules) the import survives verbatim and
+// Rollup pulls in the whole core-js stable set — measured on qa-a11y: 483
+// core-js modules instead of webpack's 77.
+const babelTransformFilter = new RegExp(`${SEP}node_modules${SEP}(?!@enact${SEP}|${ENTRY_CACHE_PATTERN}${SEP})`);
+
 // Webpack's entry is `[polyfills, appMain]`, bundled into a single `main` chunk.
 // Rollup has no array-concatenation entry, so we generate a tiny combined entry
 // module (in the build cache, not the source tree) that imports each in order.
 // Absolute-path targets are imported by a relative path; bare specifiers (e.g.
 // `core-js/stable`) are emitted as-is so Vite resolves + pre-bundles them.
 function createCombinedEntry (context, targets) {
-	const dir = path.join(context, 'node_modules', '.cache', 'enact-vite');
+	const dir = path.join(context, 'node_modules', ...ENTRY_CACHE_SUBDIR);
 	fs.mkdirSync(dir, {recursive: true});
 	const file = path.join(dir, 'index.js');
 	const body =
@@ -458,7 +481,26 @@ module.exports = function (
 			// components across them triggers "Invalid hook call / more than one copy
 			// of React". Webpack avoids this via single-tree resolution + exposing
 			// React on global in the isomorphic path.
-			dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', ...enactPackages],
+			dedupe: [
+				'react',
+				'react-dom',
+				'react/jsx-runtime',
+				'react/jsx-dev-runtime',
+				// Shared libraries that the Enact stack ships a copy of inside *each*
+				// `@enact/*` package, plus iLib (which exists both top-level and nested
+				// under `@enact/i18n/ilib`). Without deduping, each importer pulls in its
+				// own copy: measured on qa-a11y, 22 redundant iLib modules and 12
+				// prop-types ones. They are pinned to identical versions across the stack
+				// (ramda 0.32.0, classnames 2.5.1, warning 4.0.3, invariant 2.2.4), so
+				// collapsing them to one copy is safe.
+				'ilib',
+				'ramda',
+				'prop-types',
+				'classnames',
+				'warning',
+				'invariant',
+				...enactPackages
+			],
 			// Don't follow symlinks to their real paths (matches webpack `symlinks: false`).
 			preserveSymlinks: true
 		},
@@ -582,7 +624,7 @@ module.exports = function (
 				// pre-compiled output, so they must be transpiled like app code. Mirror
 				// webpack's `exclude: /node_modules.(?!@enact)/`: process everything except
 				// non-@enact node_modules.
-				exclude: /[\\/]node_modules[\\/](?!@enact[\\/])/,
+				exclude: babelTransformFilter,
 				// Reuse the exact Enact babel preset so JSX/TS/decorator handling matches webpack.
 				babel: {
 					babelrc: false,

@@ -28,6 +28,7 @@ const WebpackDevServer = require('webpack-dev-server');
 const {optionParser: app} = require('@enact/dev-utils');
 
 const {isViteBundler} = require('./vite-utils');
+const {isEsbuildBundler} = require('./esbuild-utils');
 
 let chalk;
 
@@ -63,6 +64,7 @@ function displayHelp () {
 	console.log('    -p, --port        Server port number');
 	console.log('    -m, --meta        JSON to override package.json enact metadata');
 	console.log('    --vite            [Experimental] Serve with Vite instead of webpack');
+	console.log('    --esbuild         [Experimental] Serve with esbuild instead of webpack');
 	console.log('    --no-linting      Build without code linting');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
@@ -401,6 +403,13 @@ function api (opts) {
 		return viteServe(opts, host, port);
 	}
 
+	// Experimental esbuild bundler path (opt-in via `--esbuild` or ENACT_BUNDLER=esbuild).
+	if (isEsbuildBundler(opts)) {
+		process.env.NODE_ENV = 'development';
+		const {esbuildServe} = require('./esbuild-serve');
+		return esbuildServe(opts, host, port, chalk);
+	}
+
 	// We can disable the typechecker formatter since react-dev-utils includes their
 	// own formatter in their dev client.
 	process.env.DISABLE_TSFORMATTER = 'true';
@@ -420,7 +429,7 @@ function api (opts) {
 function cli (args) {
 	const opts = minimist(args, {
 		string: ['host', 'port', 'meta'],
-		boolean: ['browser', 'fast', 'help', 'linting', 'vite'],
+		boolean: ['browser', 'fast', 'help', 'linting', 'vite', 'esbuild'],
 		default: {linting: true},
 		alias: {b: 'browser', i: 'host', p: 'port', f: 'fast', m: 'meta', h: 'help'}
 	});
