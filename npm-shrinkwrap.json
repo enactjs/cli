@@ -57,10 +57,9 @@
         "postcss-normalize": "^13.0.1",
         "postcss-preset-env": "^11.3.2",
         "postcss-resolution-independence": "^1.1.11",
+        "preact": "^10.29.7",
         "prompts": "^2.4.2",
-        "react": "^19.2.7",
         "react-dev-utils": "^12.0.1",
-        "react-dom": "^19.2.7",
         "react-is": "^19.2.7",
         "react-refresh": "^0.18.0",
         "react-test-renderer": "^19.2.7",
@@ -36956,6 +36955,24 @@
         "postcss": "^8.2.9"
       }
     },
+    "node_modules/preact": {
+      "version": "10.29.7",
+      "resolved": "https://registry.npmjs.org/preact/-/preact-10.29.7.tgz",
+      "integrity": "sha512-DCHYrK/B10yUD3ZjLfhZ3WIE/9Vf9VFUODcRE2dRomTYDpJk6z6L9wecSfhfE6M9ZTHUdyQkoC46arIDhEV84Q==",
+      "license": "MIT",
+      "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/preact"
+      },
+      "peerDependencies": {
+        "preact-render-to-string": ">=5"
+      },
+      "peerDependenciesMeta": {
+        "preact-render-to-string": {
+          "optional": true
+        }
+      }
+    },
     "node_modules/prelude-ls": {
       "version": "1.2.1",
       "resolved": "https://registry.npmjs.org/prelude-ls/-/prelude-ls-1.2.1.tgz",
@@ -37283,6 +37300,7 @@
       "resolved": "https://registry.npmjs.org/react/-/react-19.2.7.tgz",
       "integrity": "sha512-HNe9WslTbXmFK8o8cmwgAeJFSBvt1bPdHCVKtaaV+WlAN36mpT4hcRpwbf3fY56ar2oIXzsBpOAiIRHAdY0OlQ==",
       "license": "MIT",
+      "peer": true,
       "engines": {
         "node": ">=0.10.0"
       }
@@ -37516,6 +37534,7 @@
       "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-19.2.7.tgz",
       "integrity": "sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ==",
       "license": "MIT",
+      "peer": true,
       "dependencies": {
         "scheduler": "^0.27.0"
       },

@@ -367,7 +367,13 @@ module.exports = function (
 				fs.existsSync(path.join(app.context, 'node_modules', '@enact', 'i18n', 'ilib')) ?
 					{ilib: '@enact/i18n/ilib'} :
 					{'@enact/i18n/ilib': 'ilib'},
-				app.alias
+				app.alias,
+				{
+					react: 'preact/compat',
+					'react-dom/test-utils': 'preact/test-utils',
+					'react-dom': 'preact/compat', // Must be below test-utils
+					'react/jsx-runtime': 'preact/jsx-runtime'
+				}
 			),
 			// Optional configuration for redirecting module requests.
 			fallback: app.resolveFallback
