@@ -827,7 +827,14 @@ module.exports = function (
 	const eslintPlugin = !noLinting && {
 		name: 'enact-eslint',
 		setup (build) {
-			build.onEnd(() => {
+			// onStart, not onEnd: the lint is a separate child process, so kicking
+			// it off as the build begins lets it run fully in parallel with the
+			// bundling. Started at onEnd it serialized *after* the build — and
+			// because the child handle keeps the event loop alive, `pack` didn't
+			// exit until the lint finished, adding its whole runtime to the wall
+			// clock. (Mirrors the same fix on the Vite path, where lint now runs
+			// concurrently and is awaited at closeBundle.)
+			build.onStart(() => {
 				if (eslintRunning) return;
 				eslintRunning = true;
 				const eslintBin = resolveBin('eslint', 'bin/eslint.js', __dirname);
@@ -959,6 +966,42 @@ module.exports = function (
 			{'@enact/i18n/ilib': 'ilib'};
 
 	// ---------------------------------------------------------------------
+	// Optional Terser pass (ENACT_ESBUILD_MINIFY=terser, production only): the
+	// bundle is built unminified (see `minify` below), then each emitted .js is
+	// run through Terser with the same options the webpack path uses, and each
+	// .css through esbuild's CSS minifier (which `minify:false` also disabled).
+	// Runs once per process — `pack` is one-shot, and the dev server never sets
+	// production mode.
+	const useTerser = isEnvProduction && process.env.ENACT_ESBUILD_MINIFY === 'terser';
+	const terserPlugin = useTerser && {
+		name: 'enact-terser',
+		setup (build) {
+			build.initialOptions.metafile = true;
+			let minified = false;
+			build.onEnd(async result => {
+				if (minified || !result.metafile) return;
+				minified = true;
+				const terser = require('terser');
+				const esb = require('esbuild');
+				for (const f of Object.keys(result.metafile.outputs)) {
+					if (/\.map$/.test(f)) continue;
+					const abs = path.resolve(f);
+					if (/\.js$/.test(f)) {
+						const out = await terser.minify(fs.readFileSync(abs, 'utf8'), {
+							mangle: {safari10: true},
+							compress: {ecma: 5, comparisons: false, inline: 2},
+							format: {comments: false, ascii_only: true}
+						});
+						if (out.code) fs.writeFileSync(abs, out.code);
+					} else if (/\.css$/.test(f)) {
+						const out = await esb.transform(fs.readFileSync(abs, 'utf8'), {loader: 'css', minify: true});
+						if (out.code) fs.writeFileSync(abs, out.code);
+					}
+				}
+			});
+		}
+	};
+
 	// Final esbuild build-options object, consumed by `esbuild.context()` in
 	// both the dev server (serve.js) and the production build script.
 	// ---------------------------------------------------------------------
@@ -982,7 +1025,13 @@ module.exports = function (
 		// esbuild-known engine. (`app.setEnactTargetsAsDefault()` above has
 		// already seeded the Enact default browserslist when the app has none.)
 		target: esbuildTargetFromBrowserslist(app.context) || 'es2019',
-		minify: isEnvProduction,
+		// esbuild's native minifier is the default: equal to Terser on raw bytes
+		// and essentially free. ENACT_ESBUILD_MINIFY=terser opts into a Terser
+		// pass instead (JS built unminified here, then minified by the
+		// enact-terser plugin below; CSS is minified separately) — measured on
+		// qa-a11y it recovers ~32 KB gzip (370 -> 338 KB) for a few seconds of
+		// build time, the inverse of the Vite path's ENACT_VITE_MINIFY=esbuild.
+		minify: isEnvProduction && process.env.ENACT_ESBUILD_MINIFY !== 'terser',
 		sourcemap: shouldUseSourceMap ? (isEnvProduction ? true : 'linked') : false,
 		logLevel: 'info',
 		metafile: true,
@@ -1020,7 +1069,8 @@ module.exports = function (
 			webosMeta,
 			typeCheckPlugin,
 			eslintPlugin,
-			assetResourcePlugin
+			assetResourcePlugin,
+			terserPlugin
 		].filter(Boolean),
 		define
 	};
