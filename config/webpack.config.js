@@ -369,10 +369,11 @@ module.exports = function (
 					{'@enact/i18n/ilib': 'ilib'},
 				app.alias,
 				{
-					react: 'preact/compat',
-					'react-dom/test-utils': 'preact/test-utils',
-					'react-dom': 'preact/compat', // Must be below test-utils
-					'react/jsx-runtime': 'preact/jsx-runtime'
+					react: path.dirname(require.resolve('preact/compat/package.json')),
+					'react-dom/test-utils': path.dirname(require.resolve('preact/test-utils/package.json')),
+					'react-dom': path.dirname(require.resolve('preact/compat/package.json')), // Must be below test-utils
+					'react/jsx-runtime': path.dirname(require.resolve('preact/jsx-runtime/package.json')),
+					'react/jsx-dev-runtime': path.dirname(require.resolve('preact/compat/package.json'))
 				}
 			),
 			// Optional configuration for redirecting module requests.

@@ -82,15 +82,19 @@ module.exports = {
 		'^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|less|sass|scss|json)$)': require.resolve('./fileTransform')
 	},
 	transformIgnorePatterns: [
-		'[/\\\\]node_modules[/\\\\](?!@enact).+\\.(js|jsx|mjs|cjs|ts|tsx)$',
+		'[/\\\\]node_modules[/\\\\](?!(@enact|preact)).+\\.(js|jsx|mjs|cjs|ts|tsx)$',
 		'^.+\\.module\\.(css|less|sass|scss)$'
 	],
 	moduleNameMapper: {
 		'^.+\\.module\\.(css|less|sass|scss)$': require.resolve('identity-obj-proxy'),
 		'^@testing-library/jest-dom$': require.resolve('@testing-library/jest-dom'),
-		'^@testing-library/react$': require.resolve('@testing-library/react'),
+		'^@testing-library/react$': require.resolve('@testing-library/preact'),
 		'^@testing-library/user-event$': require.resolve('@testing-library/user-event'),
-		'^react$': require.resolve('react'),
+		'^react$': require.resolve('preact/compat'),
+		'^react-dom/test-utils$': require.resolve('preact/test-utils'),
+		'^react-dom$': require.resolve('preact/compat'),
+		'^react/jsx-runtime$': require.resolve('preact/jsx-runtime'),
+		'^react/jsx-dev-runtime$': require.resolve('preact/compat/jsx-dev-runtime'),
 		'^react-is$': require.resolve('react-is'),
 		// Backward compatibility for new iLib location with old Enact
 		'^ilib[/](.*)$': path.join(app.context, globals.ILIB_BASE_PATH, '$1'),
