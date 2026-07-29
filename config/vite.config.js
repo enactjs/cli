@@ -39,35 +39,52 @@ const {getPostCssPlugins} = require('./postcss-plugins');
 // build's `eslint-webpack-plugin` (same flat config in eslintWebpackPluginConfig).
 function enactEslintPlugin () {
 	let isBuild = true;
+	let lintPromise = null;
 	return {
 		name: 'enact-eslint',
 		configResolved (resolved) {
 			isBuild = resolved.command === 'build';
 		},
-		async buildStart () {
-			let ESLint;
-			try {
-				({ESLint} = require('eslint'));
-			} catch (e) {
-				return; // eslint not available; skip silently
-			}
-			const eslint = new ESLint({
-				cwd: app.context,
-				overrideConfigFile: require.resolve('./eslintWebpackPluginConfig'),
-				errorOnUnmatchedPattern: false,
-				cache: true,
-				cacheLocation: path.resolve('./node_modules/.cache/.eslintcache-vite')
-			});
-			const results = await eslint.lintFiles(['src/**/*.{js,mjs,jsx,ts,tsx}']);
-			const errorCount = results.reduce((n, r) => n + r.errorCount, 0);
-			const warningCount = results.reduce((n, r) => n + r.warningCount, 0);
-			if (errorCount || warningCount) {
-				const formatter = await eslint.loadFormatter('stylish');
-				const output = formatter.format(results);
-				if (output) console.log(output);
-			}
+		// Kick the lint off WITHOUT awaiting it, so it runs alongside the Rollup
+		// build instead of serializing in front of it (profiling showed the old
+		// awaited form added ~3-8s of wall time before the first module was even
+		// resolved; webpack's eslint-webpack-plugin likewise lints concurrently
+		// with compilation). The result is awaited in `closeBundle`, where errors
+		// still fail the build; the dev server just prints when the lint lands.
+		buildStart () {
+			lintPromise = (async () => {
+				let ESLint;
+				try {
+					({ESLint} = require('eslint'));
+				} catch (e) {
+					return null; // eslint not available; skip silently
+				}
+				const eslint = new ESLint({
+					cwd: app.context,
+					overrideConfigFile: require.resolve('./eslintWebpackPluginConfig'),
+					errorOnUnmatchedPattern: false,
+					cache: true,
+					cacheLocation: path.resolve('./node_modules/.cache/.eslintcache-vite')
+				});
+				const results = await eslint.lintFiles(['src/**/*.{js,mjs,jsx,ts,tsx}']);
+				const errorCount = results.reduce((n, r) => n + r.errorCount, 0);
+				const warningCount = results.reduce((n, r) => n + r.warningCount, 0);
+				if (errorCount || warningCount) {
+					const formatter = await eslint.loadFormatter('stylish');
+					const output = formatter.format(results);
+					if (output) console.log(output);
+				}
+				return errorCount;
+			})();
+			// Dev server: closeBundle doesn't run until shutdown, so surface any
+			// lint failure as soon as it lands instead.
+			if (!isBuild) lintPromise.catch(() => {});
+		},
+		async closeBundle () {
+			if (!isBuild || !lintPromise) return;
+			const errorCount = await lintPromise;
 			// Match webpack: errors fail the build; the dev server only warns.
-			if (isBuild && errorCount > 0) {
+			if (errorCount > 0) {
 				this.error(`ESLint found ${errorCount} error(s).`);
 			}
 		}
@@ -99,17 +116,186 @@ function enactNeutralizeWebpackHmrPlugin () {
 // node_modules, not the app's, so an app built with `root: app.context` (e.g. a
 // sample under a theme repo) can't resolve them. We need to resolve those specifiers from the
 // CLI instead; their transitive deps then resolve from the CLI tree naturally.
+const NODE_POLYFILL_FROM_CLI = /^(?:vite-plugin-node-polyfills|node-stdlib-browser)(?:\/|$)/;
+
+// Resolve a CLI-owned specifier, preferring its ESM build. `require.resolve`
+// picks the `require` condition, i.e. the CJS file — and the shims are imported
+// with a *default* import (`import __buffer_polyfill from '…/shims/buffer'`).
+// Served as-is over the dev server that fails with "does not provide an export
+// named 'default'", which kills the entry module and leaves the app unmounted.
+// These packages publish both builds (`exports: {".": {require: …, import: …}}`),
+// so consult the exports map and take the `import` condition when present.
+function resolveFromCliPreferEsm (source) {
+	const resolved = require.resolve(source);
+	try {
+		// The shim packages only export ".", so `require.resolve(pkg +
+		// '/package.json')` is blocked by the exports map. Walk up from the
+		// resolved file instead to find the owning package.json.
+		let dir = path.dirname(resolved);
+		for (;;) {
+			const pkgJson = path.join(dir, 'package.json');
+			if (fs.existsSync(pkgJson)) {
+				const esm = JSON.parse(fs.readFileSync(pkgJson, 'utf8')).exports?.['.']?.import;
+				if (typeof esm === 'string') {
+					const abs = path.join(dir, esm);
+					if (fs.existsSync(abs)) return abs;
+				}
+				break;
+			}
+			const parent = path.dirname(dir);
+			if (parent === dir) break;
+			dir = parent;
+		}
+	} catch (e) {
+		// Malformed package.json or no `import` condition — use what we resolved.
+	}
+	return resolved;
+}
+
 function enactNodePolyfillResolverPlugin () {
-	const FROM_CLI = /^(?:vite-plugin-node-polyfills|node-stdlib-browser)(?:\/|$)/;
 	return {
 		name: 'enact-node-polyfill-resolver',
 		enforce: 'pre',
 		resolveId (source) {
-			if (!FROM_CLI.test(source)) return null;
+			if (!NODE_POLYFILL_FROM_CLI.test(source)) return null;
 			try {
-				return require.resolve(source);
+				return resolveFromCliPreferEsm(source);
 			} catch (e) {
 				return null;
+			}
+		}
+	};
+}
+
+// Vite's `define` substitutes these at build time, but in the dev server the
+// identifiers survive untouched in the served source, so the app's entry throws
+// `ReferenceError: ENACT_PACK_ISOMORPHIC is not defined` before it can mount —
+// a blank page with the whole module graph loading 200. Defining them as real
+// globals in the document makes the dev server behave like the build regardless
+// of how `define` is applied. (`ViteHtmlPlugin` already uses this approach for
+// Node's `global`.) Build output is unaffected: `define` inlines the values and
+// this script simply isn't part of the emitted HTML path.
+function enactDevGlobalsPlugin (globals) {
+	const script =
+		'<script>' +
+		Object.entries(globals)
+			.map(([name, value]) => `globalThis.${name}=${JSON.stringify(value)};`)
+			.join('') +
+		'</script>';
+	return {
+		name: 'enact-dev-globals',
+		apply: 'serve',
+		transformIndexHtml (html) {
+			return /<\/head>/i.test(html) ? html.replace(/<\/head>/i, `${script}</head>`) : script + html;
+		}
+	};
+}
+
+// --- babel transform cache --------------------------------------------------
+// @vitejs/plugin-react has no equivalent of babel-loader's `cacheDirectory`, so
+// every build re-runs babel-preset-enact over the app plus all raw `@enact/*`
+// source (~380 files; measured 2.6-4.3s per production build, and it is also
+// why a "cached" Vite build barely improves on a cold one). This wraps the
+// react plugin's `transform` hook with a memory+disk cache keyed on the *input
+// code* plus a config signature — content-keyed, so watch-mode edits simply
+// miss and re-transform, and prior plugins' output changes invalidate
+// naturally. Entries are only stored for successful transforms; any cache I/O
+// failure falls through to a real transform.
+const BABEL_PRESET_ENACT_MTIME = (() => {
+	try {
+		return fs.statSync(require.resolve('babel-preset-enact')).mtimeMs;
+	} catch (e) {
+		return 0;
+	}
+})();
+
+function wrapReactBabelCache (reactPlugins, cacheDir, baseSignature) {
+	const nodeCrypto = require('crypto');
+	const sha1 = s => nodeCrypto.createHash('sha1').update(s).digest('hex');
+	let diskOk = true;
+	try {
+		fs.mkdirSync(cacheDir, {recursive: true});
+	} catch (e) {
+		diskOk = false;
+	}
+	const mem = new Map();
+	const plugins = [reactPlugins].flat(Infinity).filter(Boolean);
+	const target = plugins.find(p => p && p.name === 'vite:react-babel');
+	if (!target) return plugins;
+	const hook = target.transform;
+	const isObj = hook && typeof hook === 'object' && typeof hook.handler === 'function';
+	const orig = isObj ? hook.handler : hook;
+	if (typeof orig !== 'function') return plugins;
+
+	const cachedTransform = function (code, id, options) {
+		// Only plain file ids; leave virtual/queried ids to the real transform.
+		if (typeof code !== 'string' || !id || id.includes('\0') || id.includes('?')) {
+			return orig.call(this, code, id, options);
+		}
+		const key = sha1(`${baseSignature}|${id}|${options && options.ssr ? 'ssr' : 'web'}|${code}`);
+		const hit = mem.get(key);
+		if (hit) return hit;
+		if (diskOk) {
+			try {
+				const entry = JSON.parse(fs.readFileSync(path.join(cacheDir, key + '.json'), 'utf8'));
+				mem.set(key, entry);
+				return entry;
+			} catch (e) {
+				// disk miss — transform for real below
+			}
+		}
+		const finish = result => {
+			if (result && typeof result === 'object' && typeof result.code === 'string') {
+				const entry = {code: result.code, map: result.map || null};
+				mem.set(key, entry);
+				if (diskOk) {
+					try {
+						const dest = path.join(cacheDir, key + '.json');
+						const tmp = `${dest}.${process.pid}.tmp`;
+						fs.writeFileSync(tmp, JSON.stringify(entry));
+						fs.renameSync(tmp, dest);
+					} catch (e) {
+						// best effort
+					}
+				}
+				return entry;
+			}
+			return result;
+		};
+		const r = orig.call(this, code, id, options);
+		return r && typeof r.then === 'function' ? r.then(finish) : finish(r);
+	};
+
+	if (isObj) target.transform = {...hook, handler: cachedTransform};
+	else target.transform = cachedTransform;
+	return plugins;
+}
+
+function enactNodePolyfillOptimizerFixPlugin () {
+	const BUILTINS = new Set(require('module').builtinModules);
+	return {
+		name: 'enact-node-polyfill-optimizer-fix',
+		configResolved (config) {
+			const esbuildOptions = config.optimizeDeps && config.optimizeDeps.esbuildOptions;
+			const plugins = esbuildOptions && esbuildOptions.plugins;
+			if (!Array.isArray(plugins)) return;
+			const index = plugins.findIndex(p => p && p.name === 'node-stdlib-browser-alias');
+			if (index === -1) return;
+
+			const map = {};
+			for (const entry of config.resolve.alias || []) {
+				if (!entry || typeof entry.find !== 'string' || typeof entry.replacement !== 'string') continue;
+				const name = entry.find.replace(/^node:/, '');
+				if (!BUILTINS.has(name)) continue;
+				map[entry.find] = NODE_POLYFILL_FROM_CLI.test(entry.replacement) ?
+					require.resolve(entry.replacement) :
+					entry.replacement;
+			}
+			if (!Object.keys(map).length) return;
+			try {
+				plugins[index] = require('node-stdlib-browser/helpers/esbuild/plugin')(map);
+			} catch (e) {
+				// Leave the original in place; the scan degrades but still serves.
 			}
 		}
 	};
@@ -269,12 +455,44 @@ const ilibStubEsbuildPlugin = {
 // esbuild's optimizer cannot parse. The Rollup build transforms them via
 // @vitejs/plugin-react; this does the equivalent for pre-bundling. ESM is
 // preserved (caller.supportsStaticESM) so esbuild can still bundle/tree-shake.
+// Location of the generated combined entry, *relative to the app's
+// node_modules*. Single source of truth: `createCombinedEntry` writes the file
+// here, and the two filters below key off this same path. Keep them all derived
+// from this constant so they can't drift.
+const ENTRY_CACHE_SUBDIR = ['.cache', 'enact-vite'];
+
+// Character class matching either path separator, for regexes built below.
+const SEP = '[\\\\/]';
+
+// `.cache[\\/]enact-vite`, with the dot escaped, for use inside a path regex.
+const ENTRY_CACHE_PATTERN = ENTRY_CACHE_SUBDIR.map(seg => seg.replace(/\./g, '\\.')).join(SEP);
+
+// Which files babel-preset-enact runs on. Mirrors webpack's
+// `exclude: /node_modules.(?!@enact)/` — transpile everything except non-@enact
+// node_modules — with one addition: the generated combined entry. That entry
+// does `import 'core-js/stable'`, and babel-preset-enact's `useBuiltIns: 'entry'`
+// is what rewrites it into just the polyfills the app's browserslist needs.
+// Left excluded (it lives under node_modules) the import survives verbatim and
+// Rollup pulls in the whole core-js stable set — measured on qa-a11y: 483
+// core-js modules instead of webpack's 77.
+const babelTransformFilter = new RegExp(`${SEP}node_modules${SEP}(?!@enact${SEP}|${ENTRY_CACHE_PATTERN}${SEP})`);
+
+const ENACT_BABEL_OPTIMIZE_FILTER = new RegExp(
+	`${SEP}@enact${SEP}.*\\.(?:jsx?|mjs)$|${SEP}${ENTRY_CACHE_PATTERN}${SEP}index\\.js$`
+);
+
 const enactBabelEsbuildPlugin = {
 	name: 'enact-babel-optimize',
 	setup (build) {
 		let babel;
 		const preset = require.resolve('babel-preset-enact');
-		build.onLoad({filter: /[\\/]@enact[\\/].*\.(?:jsx?|mjs)$/}, async args => {
+		// `@enact/*` source, plus the generated combined entry — the latter must be
+		// transformed here too so the scanner expands `import 'core-js/stable'` into
+		// the same per-feature imports the request-time transform produces. If the
+		// two disagree, the browser requests core-js specifiers the optimizer never
+		// pre-bundled, forcing a re-optimize that 504s the in-flight page
+		// ("Outdated Optimize Dep") and leaves the app blank until a manual reload.
+		build.onLoad({filter: ENACT_BABEL_OPTIMIZE_FILTER}, async args => {
 			// iLib data/loaders under @enact/i18n are not Enact source. Leave them
 			// to esbuild (and the loader stub) rather than paying babel on big files.
 			if (/[\\/]ilib[\\/]/.test(args.path)) return null;
@@ -331,28 +549,6 @@ function lessTildeImportPlugin (context) {
 	};
 }
 
-// Location of the generated combined entry, *relative to the app's
-// node_modules*. Single source of truth: `createCombinedEntry` writes the file
-// here, and `babelTransformFilter` below exempts this same path from the
-// "skip node_modules" rule so the entry still gets transpiled (see there for
-// why that matters). Keep the two derived from this constant so they can't drift.
-const ENTRY_CACHE_SUBDIR = ['.cache', 'enact-vite'];
-
-// Character class matching either path separator, for regexes built below.
-const SEP = '[\\\\/]';
-
-// `.cache[\\/]enact-vite`, with the dot escaped, for use inside a path regex.
-const ENTRY_CACHE_PATTERN = ENTRY_CACHE_SUBDIR.map(seg => seg.replace(/\./g, '\\.')).join(SEP);
-
-// Which files babel-preset-enact runs on. Mirrors webpack's
-// `exclude: /node_modules.(?!@enact)/` — transpile everything except non-@enact
-// node_modules — with one addition: the generated combined entry. That entry
-// does `import 'core-js/stable'`, and babel-preset-enact's `useBuiltIns: 'entry'`
-// is what rewrites it into just the polyfills the app's browserslist needs.
-// Left excluded (it lives under node_modules) the import survives verbatim and
-// Rollup pulls in the whole core-js stable set — measured on qa-a11y: 483
-// core-js modules instead of webpack's 77.
-const babelTransformFilter = new RegExp(`${SEP}node_modules${SEP}(?!@enact${SEP}|${ENTRY_CACHE_PATTERN}${SEP})`);
 
 // Webpack's entry is `[polyfills, appMain]`, bundled into a single `main` chunk.
 // Rollup has no array-concatenation entry, so we generate a tiny combined entry
@@ -538,7 +734,12 @@ module.exports = function (
 			outDir: path.resolve('./dist'),
 			emptyOutDir: true,
 			sourcemap: shouldUseSourceMap,
-			minify: isEnvProduction ? 'terser' : false,
+			// Terser matches webpack's output quality and gzips ~6% better than
+			// esbuild's minifier (measured on qa-a11y: 286 KB vs 303 KB main.js
+			// gzip) at ~3s extra build time (Vite parallelizes Terser across
+			// workers). ENACT_VITE_MINIFY=esbuild opts into the faster minifier
+			// when build speed matters more than the last few KB.
+			minify: isEnvProduction ? (process.env.ENACT_VITE_MINIFY === 'esbuild' ? 'esbuild' : 'terser') : false,
 			cssMinify: isEnvProduction,
 			// Preserve webpack-style split behaviour: single main CSS when --no-split-css.
 			cssCodeSplit: !noSplitCSS,
@@ -573,7 +774,11 @@ module.exports = function (
 			// sibling packages (e.g. `all-samples`). Point the scanner at the app
 			// entry so it crawls the whole import graph (including cross-package
 			// imports) and pre-bundles everything in one pass.
-			entries: [path.relative(app.context, appEntry).replace(/\\/g, '/')],
+			// Scan the *combined* entry, not just the app entry: it imports both the
+			// core-js polyfills and the app, so one crawl covers everything the
+			// browser will actually request. Pointing at the app entry alone left
+			// core-js undiscovered, which then triggered a re-optimize on first load.
+			entries: [path.relative(app.context, entry).replace(/\\/g, '/')],
 			// The dev-server dependency scanner/optimizer is esbuild-based and defaults
 			// the `.js` loader to `js`; Enact authors JSX inside plain `.js` files, which
 			// breaks the scan without this. (Request-time transforms go through
@@ -614,12 +819,23 @@ module.exports = function (
 			// Skip for non-browser targets. Dropped for the SSR build in applySsrBuild.
 			!['node', 'async-node', 'webworker'].includes(app.environment) &&
 			enactNodePolyfillResolverPlugin(),
+			enactDevGlobalsPlugin({
+				ENACT_PACK_ISOMORPHIC: !!isomorphic,
+				ENACT_PACK_NO_ANIMATION: !!noAnimation
+			}),
 			!['node', 'async-node', 'webworker'].includes(app.environment) &&
 			nodePolyfills({
 				globals: {Buffer: true, process: true, global: false},
 				protocolImports: true
 			}),
-			react({
+			// Must come after nodePolyfills so its esbuild plugin is already in the
+			// config by the time this rewrites it.
+			!['node', 'async-node', 'webworker'].includes(app.environment) &&
+			enactNodePolyfillOptimizerFixPlugin(),
+			// Wrapped with a content-keyed transform cache (see wrapReactBabelCache);
+			// the signature invalidates on CLI version, env, browserslist targets and
+			// the preset itself.
+			...wrapReactBabelCache(react({
 				// @enact/* packages ship raw source (JSX inside .js, ESM) rather than
 				// pre-compiled output, so they must be transpiled like app code. Mirror
 				// webpack's `exclude: /node_modules.(?!@enact)/`: process everything except
@@ -642,7 +858,12 @@ module.exports = function (
 					},
 					presets: [require.resolve('babel-preset-enact')]
 				}
-			}),
+			}), path.join(app.context, 'node_modules', '.cache', 'enact-vite-babel'), [
+				require('../package.json').version,
+				process.env.NODE_ENV,
+				process.env.BROWSERSLIST || '',
+				BABEL_PRESET_ENACT_MTIME
+			].join('|')),
 			ViteHtmlPlugin({
 				entry,
 				// Fall back to the webOS appinfo title when no app/theme title is set.

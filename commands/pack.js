@@ -286,7 +286,18 @@ async function viteIsomorphic (opts) {
 		viteSnap.applySnapshotBuild(clientConfig, {context: app.context, appEntry: serverEntry});
 	}
 	mixins.applyVite(clientConfig, opts);
-	await viteBuildApi(clientConfig);
+
+	// 2) SSR build config (Node-loadable CJS whose default export is the app element).
+	const ssrConfig = configFactory(opts.production ? 'production' : 'development', true, false, true);
+	viteIso.applySsrBuild(ssrConfig, {serverEntry, outDir: ssrOut});
+
+	// The client and SSR builds are independent (separate configs, separate
+	// outDirs; all shared setup — chdir, env, the generated combined entry —
+	// happens above at config-creation time), so run them concurrently instead
+	// of back to back. Profiling showed the sequential form was the isomorphic
+	// path's structural penalty vs webpack, which prerenders from a single
+	// compilation.
+	await Promise.all([viteBuildApi(clientConfig), viteBuildApi(ssrConfig)]);
 
 	// Inject the framework import map (+ shared stylesheet) into the client index.html BEFORE
 	// the isomorphic assembly transforms it into the fallback/variant files.
@@ -298,11 +309,6 @@ async function viteIsomorphic (opts) {
 		}
 		viteFw.injectHtml(path.join(outDir, 'index.html'), manifest, collected, base);
 	}
-
-	// 2) SSR build (Node-loadable CJS whose default export is the app element).
-	const ssrConfig = configFactory(opts.production ? 'production' : 'development', true, false, true);
-	viteIso.applySsrBuild(ssrConfig, {serverEntry, outDir: ssrOut});
-	await viteBuildApi(ssrConfig);
 
 	// 3) Per-locale prerender. Load the SSR bundle fresh for each locale so iLib re-initializes.
 	const bundlePath = path.join(ssrOut, 'app.server.cjs');
