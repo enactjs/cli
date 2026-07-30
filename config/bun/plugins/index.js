@@ -13,7 +13,7 @@ function createEnactPlugins (options = {}) {
 	const plugins = [];
 
 	if (options.framework) {
-		plugins.unshift(createFrameworkExclusionsPlugin());
+		plugins.unshift(createFrameworkExclusionsPlugin({context: options.context}));
 	}
 
 	const eslintPlugin = createEslintEnactPlugin(options);

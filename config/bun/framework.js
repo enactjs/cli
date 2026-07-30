@@ -16,45 +16,23 @@ const ROOT_PACKAGES = [
 	'react/jsx-dev-runtime'
 ];
 
-const FRAMEWORK_IGNORE = [
-	'**/webpack.config.js',
-	'**/eslint.config.js',
-	'**/karma.conf.js',
-	'**/build/**/*.*',
-	'**/dist/**/*.*',
-	'**/@enact/dev-utils/**/*.*',
-	'**/@enact/docs-utils/**/*.*',
-	'**/@enact/storybook-utils/**/*.*',
-	'**/@enact/ui-test-utils/**/*.*',
-	'**/@enact/screenshot-test-utils/**/*.*',
-	'**/ilib/localedata/**/*.*',
-	'**/node_modules/**/*.*',
-	'**/samples/**/*.*',
-	'**/tests/**/*.*',
-	'**/ilib-node*.js',
-	'**/AsyncNodeLoader.js',
-	'**/NodeLoader.js',
-	'**/RhinoLoader.js',
-	'**/react-dom/cjs/react-dom-server.node.*'
-];
-
-const ILIB_IGNORE = [
-	'!node_modules',
-	'!locale',
-	'**/ilib-node*.js',
-	'**/AsyncNodeLoader.js',
-	'**/NodeLoader.js',
-	'**/RhinoLoader.js'
-];
-
 function isFrameworkModuleFile (file) {
 	return !/(^|[/\\])test[/\\]|\.test\.(js|jsx|es6)$|[-.]specs?\.(js|jsx|es6)$|\.bak(?:\.|\/|\\)/.test(file);
 }
 
 function getModuleId (nodeModules, file) {
 	const absPath = path.join(nodeModules, file);
-	let dir = absPath;
+	const parent = path.dirname(absPath);
 
+	// dir/index.js identifies dir itself — independent of package.json. The
+	// check must be scoped to the immediate parent only: components without a
+	// package.json (e.g. limestone/Chips) would otherwise ascend and claim an
+	// ancestor id, shadowing the package root in the framework registry.
+	if (/^index\.(js|jsx|es6)$/.test(path.basename(absPath)) && parent.length > nodeModules.length) {
+		return path.relative(nodeModules, parent).replace(/\\/g, '/');
+	}
+
+	let dir = parent;
 	while (dir.startsWith(nodeModules) && dir.length > nodeModules.length) {
 		const pkgPath = path.join(dir, 'package.json');
 		if (fs.existsSync(pkgPath)) {
@@ -68,9 +46,6 @@ function getModuleId (nodeModules, file) {
 				}
 			} catch (_e) {
 				// ignore invalid package.json
-			}
-			if (/[/\\]index\.(js|jsx|es6)$/.test(absPath)) {
-				return path.relative(nodeModules, dir).replace(/\\/g, '/');
 			}
 		}
 		dir = path.dirname(dir);
@@ -147,20 +122,82 @@ function getThemeLocalModules (context) {
 		});
 }
 
+// Packages excluded from the framework bundle at the package level.
+const EXCLUDED_FRAMEWORK_PACKAGES = new Set([
+	'dev-utils',
+	'docs-utils',
+	'storybook-utils',
+	'ui-test-utils',
+	'screenshot-test-utils'
+]);
+
+// Directories never descended into when collecting framework sources. Pruning
+// at descent time matters: fast-glob's ignore filters entries but still walks
+// each package's real node_modules tree (~30s per enumeration).
+const WALK_PRUNE_DIRS = new Set([
+	'node_modules',
+	'tests',
+	'__tests__',
+	'samples',
+	'dist',
+	'build',
+	'coverage',
+	'localedata',
+	'locale',
+	'.git'
+]);
+
+const WALK_SKIP_FILES = /(?:webpack|eslint)\.config\.js$|karma\.conf\.js$|ilib-node[^/\\]*\.js$|AsyncNodeLoader\.js$|NodeLoader\.js$|RhinoLoader\.js$|react-dom-server\.node/;
+
+function walkPackageDir (dir, relative, results) {
+	let entries;
+	try {
+		entries = fs.readdirSync(dir, {withFileTypes: true});
+	} catch (_e) {
+		return;
+	}
+	for (const entry of entries) {
+		const rel = relative ? `${relative}/${entry.name}` : entry.name;
+		if (entry.isDirectory()) {
+			// Nested junctions (e.g. @enact/i18n/ilib) are directories via stat;
+			// use lstat-based check to avoid re-entering linked trees.
+			if (WALK_PRUNE_DIRS.has(entry.name) || entry.isSymbolicLink()) continue;
+			walkPackageDir(path.join(dir, entry.name), rel, results);
+		} else if (/\.(js|jsx|es6)$/.test(entry.name) && !WALK_SKIP_FILES.test(rel)) {
+			results.push(rel);
+		}
+	}
+}
+
+// Collect one package's sources by realpathing its root first. In dev
+// workspaces @enact packages are junctions into the framework repo; globbing
+// through the junction with followSymbolicLinks:false silently skips the whole
+// package (enact.js then ships without the framework), while following links
+// globally recurses into nested node_modules junctions and never finishes.
+function listPackageFiles (baseDir, name) {
+	const pkgPath = path.join(baseDir, name);
+	let realDir;
+	try {
+		realDir = fs.realpathSync(pkgPath);
+	} catch (_e) {
+		return [];
+	}
+	const results = [];
+	walkPackageDir(realDir, '', results);
+	return results.filter(isFrameworkModuleFile).map(file => `${name}/${file}`);
+}
+
 function getFrameworkModuleRequests (context, options = {}) {
 	const nodeModules = path.join(context, 'node_modules');
-	const enactFiles = fastGlob.sync('@enact/**/*.@(js|jsx|es6)', {
-		cwd: nodeModules,
-		onlyFiles: true,
-		ignore: FRAMEWORK_IGNORE,
-		followSymbolicLinks: false
-	});
-	const ilibFiles = fastGlob.sync('ilib/**/*.@(js|jsx|es6)', {
-		cwd: nodeModules,
-		onlyFiles: true,
-		ignore: ILIB_IGNORE,
-		followSymbolicLinks: false
-	});
+	const enactScope = path.join(nodeModules, '@enact');
+	const enactFiles = [];
+	if (fs.existsSync(enactScope)) {
+		for (const name of fs.readdirSync(enactScope)) {
+			if (EXCLUDED_FRAMEWORK_PACKAGES.has(name)) continue;
+			enactFiles.push(...listPackageFiles(nodeModules, `@enact/${name}`));
+		}
+	}
+	const ilibFiles = listPackageFiles(nodeModules, 'ilib');
 
 	const modules = new Map();
 	for (const pkg of ROOT_PACKAGES) {

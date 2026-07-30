@@ -98,6 +98,19 @@ function getResolveAliases (context) {
 			// Package may be absent (e.g. scheduler before install); skip.
 		}
 	}
+	// react-is must understand the bundled React's element symbols. Apps rarely
+	// depend on it directly, so context resolution often fails and the bare
+	// import inside prop-types would fall back to its nested react-is@16, which
+	// cannot recognize React 19 elements — every PropTypes.node check would
+	// then emit "expected a ReactNode". Fall back to the CLI's React-19-aware
+	// copy (this was the pre-migration behavior).
+	if (!aliases['react-is']) {
+		try {
+			aliases['react-is'] = path.dirname(require.resolve('react-is/package.json'));
+		} catch (_e) {
+			// leave unaliased
+		}
+	}
 	if (fs.existsSync(path.join(context, 'node_modules', '@enact', 'i18n', 'ilib'))) {
 		aliases.ilib = '@enact/i18n/ilib';
 	} else {

@@ -122,10 +122,14 @@ function createExternalsEnactPlugin (options = {}) {
 					"\tthrow new Error('External Enact framework not loaded. Include enact.js before the app bundle.');",
 					'}',
 					'const mod = req(' + JSON.stringify(String(id)) + ');',
-					'module.exports = mod && mod.__esModule ? mod.default : mod;',
-					'if (mod && typeof mod === \'object\') {',
+					// Pure named-export modules (e.g. @enact/core/util) have __esModule
+					// set but no default — falling back to mod itself is required, or the
+					// named-export copy below writes onto undefined and throws.
+					"const resolved = mod && mod.__esModule && mod.default !== undefined ? mod.default : mod;",
+					'module.exports = resolved;',
+					"if (mod && typeof mod === 'object' && resolved && (typeof resolved === 'object' || typeof resolved === 'function')) {",
 					'\tfor (const key of Object.keys(mod)) {',
-					"\t\tif (key !== 'default') module.exports[key] = mod[key];",
+					"\t\tif (key !== 'default' && !(key in resolved)) resolved[key] = mod[key];",
 					'\t}',
 					'}'
 				].join('\n');

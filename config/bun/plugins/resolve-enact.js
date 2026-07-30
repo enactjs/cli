@@ -70,12 +70,6 @@ function toResolveResult (filePath) {
 	return {path: normalizeBundlerPath(absolutePath)};
 }
 
-function isNodeBuiltin (request) {
-	const normalized = request.replace(/^node:/, '');
-	const builtins = require('module').builtinModules || [];
-	return builtins.includes(normalized) || builtins.includes(`node:${normalized}`);
-}
-
 function normalizeAdditionalModulePaths (paths, context) {
 	if (!paths) return [];
 	const list = Array.isArray(paths) ? paths : [paths];
@@ -129,46 +123,63 @@ function createResolveEnactPlugin (options = {}) {
 	const aliases = options.aliases || {};
 	const additionalModulePaths = normalizeAdditionalModulePaths(options.additionalModulePaths, context);
 
+	// Hoisted out of the resolve callback — it runs for every import in the graph.
+	const builtins = require('module').builtinModules || [];
+	const builtinsSet = new Set(builtins.concat(builtins.map(name => `node:${name}`)));
+	// Longest key first so `react-dom` wins over `react` for `react-dom/client`.
+	const aliasKeys = Object.keys(aliases).sort((a, b) => b.length - a.length);
+	// Bare-specifier resolution is deterministic per (request, resolveDir); the
+	// same specifier ('react', '@enact/ui/...') repeats across hundreds of files.
+	const bareResolveCache = new Map();
+
 	return {
 		name: 'enact-resolve',
 		setup (build) {
-			build.onResolve({filter: /.*/}, args => {
+			// Relative imports ('./x', '../x') never match this filter, so Bun's
+			// native resolver handles them without a JS round-trip. It performs
+			// the same extension/index/package.json resolution this plugin did.
+			build.onResolve({filter: /^[^.]/}, args => {
 				if (isExternalUrl(args.path)) {
 					return {external: true};
 				}
 
-				if (path.isAbsolute(args.path)) {
-					const absoluteImport = resolveImportPath(args.path);
-					if (absoluteImport) {
-						return toResolveResult(absoluteImport);
-					}
-				}
-
-				if (args.path.startsWith('.') && args.resolveDir) {
-					const relativeImport = resolveImportPath(path.resolve(args.resolveDir, args.path));
-					if (relativeImport) {
-						return toResolveResult(relativeImport);
-					}
-				}
-
+				// App-root imports (/assets/x) must be checked before the absolute
+				// bail-out: on POSIX they satisfy path.isAbsolute.
 				const appRootPath = resolveAppRootImport(args.path, context);
 				if (appRootPath) {
 					return toResolveResult(appRootPath);
 				}
 
-				if (!args.path.startsWith('.') && !path.isAbsolute(args.path)) {
-					if (isNodeBuiltin(args.path)) {
-						return undefined;
+				// Absolute imports (generated entries, cache CSS assets) still need JS
+				// resolution — Bun's native resolver rejects forward-slash absolute
+				// specifiers on Windows. These are few, so the cost is negligible.
+				if (path.isAbsolute(args.path)) {
+					const absoluteImport = resolveImportPath(args.path);
+					if (absoluteImport) {
+						return toResolveResult(absoluteImport);
 					}
-
-					const fromModulePaths = resolveFromModulePaths(args.path, additionalModulePaths);
-					if (fromModulePaths) {
-						return toResolveResult(fromModulePaths);
-					}
+					return undefined;
 				}
 
-				// Longest key first so `react-dom` wins over `react` for `react-dom/client`.
-				const aliasKeys = Object.keys(aliases).sort((a, b) => b.length - a.length);
+				if (builtinsSet.has(args.path)) {
+					return undefined;
+				}
+
+				const cacheKey = `${args.path}\0${args.resolveDir || ''}`;
+				if (bareResolveCache.has(cacheKey)) {
+					return bareResolveCache.get(cacheKey);
+				}
+				const result = resolveBareSpecifier(args);
+				bareResolveCache.set(cacheKey, result);
+				return result;
+			});
+
+			function resolveBareSpecifier (args) {
+				const fromModulePaths = resolveFromModulePaths(args.path, additionalModulePaths);
+				if (fromModulePaths) {
+					return toResolveResult(fromModulePaths);
+				}
+
 				for (const key of aliasKeys) {
 					const exact = args.path === key;
 					const prefixed = args.path.startsWith(key + '/');
@@ -218,16 +229,14 @@ function createResolveEnactPlugin (options = {}) {
 					}
 				}
 
-				if (!args.path.startsWith('.') && !path.isAbsolute(args.path)) {
-					const searchPaths = getModuleSearchPaths(args, context, additionalModulePaths);
-					const resolved = resolveNodeModule(args.path, searchPaths);
-					if (resolved) {
-						return toResolveResult(resolved);
-					}
+				const searchPaths = getModuleSearchPaths(args, context, additionalModulePaths);
+				const nodeResolved = resolveNodeModule(args.path, searchPaths);
+				if (nodeResolved) {
+					return toResolveResult(nodeResolved);
 				}
 
 				return undefined;
-			});
+			}
 
 			build.onLoad({filter: /node_modules[/\\]ilib[/\\]index\.js$/}, async args => {
 				let source = await Bun.file(args.path).text();

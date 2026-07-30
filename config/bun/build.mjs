@@ -182,7 +182,7 @@ async function buildReactGlobals (options, _buildOpts) {
 	}
 }
 
-function finalizeBuild (result, buildOpts, options) {
+async function finalizeBuild (result, buildOpts, options) {
 	if (!result.success) {
 		for (const log of result.logs) console.error(log);
 		return null;
@@ -201,11 +201,10 @@ function finalizeBuild (result, buildOpts, options) {
 		}
 	}
 
-	nodeRequire('./post-build.js').applyPostBuild(options.context, options.outputPath, {
+	await nodeRequire('./post-build.js').applyPostBuild(options.context, options.outputPath, {
 		publicPath: options.publicPath,
 		ilibAdditionalResourcesPath: options.ilibAdditionalResourcesPath,
-		customSkin: options.customSkin,
-		watch: buildOpts.watch
+		customSkin: options.customSkin
 	});
 
 	writeIndexHtml(options.outputPath, {
@@ -319,7 +318,7 @@ async function runBuild (buildOpts) {
 	}
 
 	const result = await Bun.build(buildConfig);
-	const info = finalizeBuild(result, buildOpts, options);
+	const info = await finalizeBuild(result, buildOpts, options);
 	if (!info && !buildOpts.watch) process.exit(1);
 	if (info) logBuildResult(buildOpts, options, info);
 
@@ -341,7 +340,7 @@ async function runWatchLoop (buildOpts, options, buildConfig) {
 		building = true;
 		try {
 			const result = await Bun.build(buildConfig);
-			const rebuildInfo = finalizeBuild(result, buildOpts, options);
+			const rebuildInfo = await finalizeBuild(result, buildOpts, options);
 			if (rebuildInfo) {
 				console.log('Recompiled successfully.');
 				logBuildResult(buildOpts, options, rebuildInfo);
