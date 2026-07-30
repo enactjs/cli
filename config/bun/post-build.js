@@ -20,12 +20,12 @@ function ensureCustomizationsDir (output) {
 	fs.ensureDirSync(path.join(output, 'customizations'));
 }
 
-function applyPostBuild (context, output, options = {}) {
+async function applyPostBuild (context, output, options = {}) {
 	copyPublicFolder(context, output);
-	applyIlibResources(context, output, {
+	await applyIlibResources(context, output, {
 		ilibAdditionalResourcesPath: options.ilibAdditionalResourcesPath,
 		create: true,
-		cache: !options.watch
+		cache: options.cache !== false
 	});
 	applyWebOSMeta(context, output, {
 		v8SnapshotFile: options.v8SnapshotFile

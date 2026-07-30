@@ -1,12 +1,9 @@
 const path = require('path');
 const {ESLint} = require('eslint');
 
-const LINT_GLOBS = [
-	'**/*.{js,mjs,jsx,ts,tsx}',
-	// Framework packages are often linked under node_modules/@enact; include them
-	// explicitly because ESLint skips node_modules for the broad glob.
-	'node_modules/@enact/**/*.{js,mjs,jsx,ts,tsx}'
-];
+// App sources only — eslint-webpack-plugin excluded node_modules (including
+// linked @enact packages), and linting the framework tree costs minutes.
+const LINT_GLOBS = ['**/*.{js,mjs,jsx,ts,tsx}'];
 
 // Webpack's eslint plugin only linted the module graph; Bun scans the filesystem.
 // Skip pack outputs (dist, dist2 from pack.sh -o=, custom --output, cache, etc.).
@@ -62,12 +59,22 @@ function createEslintEnactPlugin (options = {}) {
 		return formatterPromise;
 	};
 
+	let lintRun = null;
+
 	return {
 		name: 'enact-eslint',
 		setup (build) {
 			// One lint pass per Bun.build (including watch rebuilds), not per module.
-			build.onStart(async () => {
-				const results = await eslint.lintFiles(LINT_GLOBS);
+			// Kicked off at build start but awaited at build end, so linting runs
+			// concurrently with bundling (matches eslint-webpack-plugin timing).
+			build.onStart(() => {
+				lintRun = eslint.lintFiles(LINT_GLOBS);
+			});
+
+			build.onEnd(async () => {
+				if (!lintRun) return;
+				const results = await lintRun;
+				lintRun = null;
 				const formatter = await getFormatter();
 				const resultText = await formatter.format(results);
 

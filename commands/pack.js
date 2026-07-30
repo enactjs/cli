@@ -81,6 +81,37 @@ function printErrorDetails (err, handler) {
 	if (handler) handler();
 }
 
+// Empty the output directory without paying its deletion on the critical path:
+// rename it aside (instant) and delete the old tree in the background while the
+// build runs. Deleting a populated dist (~6.7k iLib files) costs seconds on
+// Windows. Falls back to emptyDir when rename fails (e.g. dist is locked).
+function clearOutput (output) {
+	// Sweep orphans from runs that exited before their background delete finished.
+	try {
+		const parent = path.dirname(output);
+		const prefix = `${path.basename(output)}.old-`;
+		for (const name of fs.readdirSync(parent)) {
+			if (name.startsWith(prefix)) {
+				fs.rm(path.join(parent, name), {recursive: true, force: true}, () => {});
+			}
+		}
+	} catch (_e) {
+		// best-effort cleanup
+	}
+
+	if (!fs.existsSync(output)) {
+		return fs.ensureDir(output);
+	}
+	const trash = `${output}.old-${process.pid}-${Date.now()}`;
+	return fs
+		.rename(output, trash)
+		.then(() => {
+			fs.rm(trash, {recursive: true, force: true}, () => {});
+			return fs.ensureDir(output);
+		})
+		.catch(() => fs.emptyDir(output));
+}
+
 function buildArgs (opts) {
 	const args = ['--context', app.context];
 	if (opts.production) args.push('--production');
@@ -160,7 +191,7 @@ function api (opts = {}) {
 		console.log('Creating an optimized production build...');
 	}
 
-	return fs.emptyDir(output).then(() => {
+	return clearOutput(output).then(() => {
 		const build = spawnBunScript('build.mjs', buildArgs({...opts, output}), {cwd: app.context});
 		if (opts.watch) {
 			return build;

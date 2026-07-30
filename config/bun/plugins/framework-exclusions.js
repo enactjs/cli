@@ -37,15 +37,25 @@ function shouldExcludeFrameworkImport (args) {
 	return false;
 }
 
-function createFrameworkExclusionsPlugin () {
+function createFrameworkExclusionsPlugin (options = {}) {
+	const context = options.context;
+
 	return {
 		name: 'enact-framework-exclusions',
 		setup (build) {
 			build.onResolve({filter: /^react-dom\/server$/}, () => {
+				// Must resolve from the app context: the CLI ships its own react-dom
+				// whose patch version can differ, and react-dom/server hard-fails at
+				// module scope on any version mismatch with the bundled react (#527).
+				const paths = context ? [context] : undefined;
 				try {
-					return {path: require.resolve('react-dom/server.browser')};
+					return {path: require.resolve('react-dom/server.browser', paths && {paths})};
 				} catch (_e) {
-					return undefined;
+					try {
+						return {path: require.resolve('react-dom/server.browser')};
+					} catch (_e2) {
+						return undefined;
+					}
 				}
 			});
 

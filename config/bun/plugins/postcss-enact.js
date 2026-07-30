@@ -76,29 +76,39 @@ function buildPostcssPlugins (options = {}) {
 }
 
 function createPostcssEnactPlugin (options = {}) {
+	// Built once per plugin instance: postcss-preset-env resolves browserslist
+	// and assembles its feature set at construction, which is far too expensive
+	// to repeat for every stylesheet. All base plugins are stateless visitors.
+	const basePlugins = buildPostcssPlugins(options);
+	const baseProcessor = postcss(basePlugins);
+
 	return {
 		async processCss (source, filePath, asModule) {
-			let moduleExports = {};
-			const plugins = [...buildPostcssPlugins(options)];
-
-			if (asModule) {
-				plugins.unshift(
-					postcssModules({
-						generateScopedName: (name, filename) =>
-							getLocalIdent(
-								{resourcePath: filename || filePath, rootContext: options.context},
-								'[name]_[local]',
-								name
-							),
-						getJSON: (_cssFileName, cssExports) => {
-							moduleExports = cssExports;
-						}
-					})
-				);
+			if (!asModule) {
+				const plainResult = await baseProcessor.process(source, {from: filePath});
+				return {css: plainResult.css, exports: undefined};
 			}
 
-			const result = await postcss(plugins).process(source, {from: filePath});
-			return {css: result.css, exports: asModule ? moduleExports : undefined};
+			// Only the postcss-modules instance is per-file (its getJSON callback
+			// captures this file's class map); the base chain is reused.
+			let moduleExports = {};
+			const processor = postcss([
+				postcssModules({
+					generateScopedName: (name, filename) =>
+						getLocalIdent(
+							{resourcePath: filename || filePath, rootContext: options.context},
+							'[name]_[local]',
+							name
+						),
+					getJSON: (_cssFileName, cssExports) => {
+						moduleExports = cssExports;
+					}
+				}),
+				...basePlugins
+			]);
+
+			const result = await processor.process(source, {from: filePath});
+			return {css: result.css, exports: moduleExports};
 		}
 	};
 }

@@ -18786,19 +18786,6 @@
         "@babel/types": "^7.28.2"
       }
     },
-    "node_modules/@types/eslint": {
-      "version": "9.6.1",
-      "resolved": "https://registry.npmjs.org/@types/eslint/-/eslint-9.6.1.tgz",
-      "integrity": "sha512-FXx2pKgId/WyYo2jXw63kk7/+TY7u7AziEJxJAnSFzHlqTAS3Ync6SvgYAN/k4/PQpnnVuzoMuVnByKK2qp0ag==",
-      "dev": true,
-      "license": "MIT",
-      "optional": true,
-      "peer": true,
-      "dependencies": {
-        "@types/estree": "*",
-        "@types/json-schema": "*"
-      }
-    },
     "node_modules/@types/estree": {
       "version": "1.0.9",
       "resolved": "https://registry.npmjs.org/@types/estree/-/estree-1.0.9.tgz",
@@ -32515,17 +32502,6 @@
       "license": "MIT",
       "engines": {
         "node": "^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0"
-      }
-    },
-    "node_modules/jiti": {
-      "version": "2.7.0",
-      "resolved": "https://registry.npmjs.org/jiti/-/jiti-2.7.0.tgz",
-      "integrity": "sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==",
-      "license": "MIT",
-      "optional": true,
-      "peer": true,
-      "bin": {
-        "jiti": "lib/jiti-cli.mjs"
       }
     },
     "node_modules/js-tokens": {

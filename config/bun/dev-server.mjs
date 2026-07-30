@@ -94,10 +94,9 @@ await runBuild(buildOpts, entryFile, plugins, cacheDir);
 writeDevHtml(cacheDir, {title: buildOpts.title, publicPath: buildOpts.publicPath, customSkin: buildOpts.customSkin});
 // Copy iLib locale/resources (and webOS meta) into the serve output — same as pack.
 // Without this, XHR to /node_modules/ilib/locale/* 404s in the browser.
-nodeRequire('./post-build.js').applyPostBuild(buildOpts.context, cacheDir, {
+await nodeRequire('./post-build.js').applyPostBuild(buildOpts.context, cacheDir, {
 	ilibAdditionalResourcesPath: buildOpts.ilibAdditionalResourcesPath,
-	customSkin: buildOpts.customSkin,
-	watch: true
+	customSkin: buildOpts.customSkin
 });
 
 const publicDir = path.join(buildOpts.context, 'public');
@@ -121,10 +120,9 @@ async function rebuildDevBundle () {
 	try {
 		await runBuild(buildOpts, entryFile, plugins, cacheDir);
 		writeDevHtml(cacheDir, {title: buildOpts.title, publicPath: buildOpts.publicPath, customSkin: buildOpts.customSkin});
-		nodeRequire('./post-build.js').applyPostBuild(buildOpts.context, cacheDir, {
+		await nodeRequire('./post-build.js').applyPostBuild(buildOpts.context, cacheDir, {
 			ilibAdditionalResourcesPath: buildOpts.ilibAdditionalResourcesPath,
-			customSkin: buildOpts.customSkin,
-			watch: true
+			customSkin: buildOpts.customSkin
 		});
 		console.log('Rebuilt.');
 	} catch (err) {
