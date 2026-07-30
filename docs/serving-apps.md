@@ -18,7 +18,7 @@ sidebar:
     -v, --version     Display version information
     -h, --help        Display help information
 ```
-The `enact serve` command (aliased as `npm run serve`) will build and host your project on **http://localhost:8080/**. The options allow you to customize the host IP and host port, which can also be overriden via `HOST` and `PORT` environment variable. While the `enact serve` is active, any changes to source code will trigger a rebuild and update any loaded browser windows.
+The `enact serve` command (aliased as `npm run serve`) will build and host your project on **http://localhost:8080/** using Bun's full-stack development server with hot module replacement. The options allow you to customize the host IP and host port, which can also be overriden via `HOST` and `PORT` environment variable. While the `enact serve` is active, any changes to source code will trigger a rebuild and update any loaded browser windows.
 
 ## Custom Proxy
 

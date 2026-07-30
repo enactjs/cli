@@ -35,4 +35,4 @@ jobs:
 
       - name: Run ESLint
         run: |
-          npm run lint -- -- --report-unused-disable-directives --max-warnings 0
+          npm run lint -- --report-unused-disable-directives --max-warnings 0

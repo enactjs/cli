@@ -87,6 +87,6 @@ When multiple locales are specified for prerendering, each locale is evaluated i
 ## How It Works
 With an isomorphic build, the app is built in a special pseudo-library layout, in a universal module definition ([UMD](https://github.com/umdjs/umd)) format. In a Node environment, the top-level export is the `ReactElement` export of the 'isomorphic' file. In a browser environment, the app executes normally.
 
-During the build process, a custom webpack plugin, `PrerenderPlugin`, will access the build within its Node environment and use React's [`ReactDOMServer`](https://reactjs.org/docs/react-dom-server.html#rendertostring) to render the initial state of the app into an HTML string and inject that into the **index.html** file, within the `root` ID `div` element.  This is the same API used in server-side rendering.
+During the build process, the `PrerenderPlugin` post-build step accesses the bundle within its Node environment and uses React's [`ReactDOMServer`](https://reactjs.org/docs/react-dom-server.html#rendertostring) to render the initial state of the app into an HTML string and inject that into the **index.html** file, within the `root` ID `div` element.  This is the same API used in server-side rendering.
 
 When the webpage loads up in a browser environment, the built JavaScript is loaded normally (and is expected to render itself into the HTML), except React will detect the DOM tree and will simply attach event listeners and go through the React lifecycle methods.

@@ -4,7 +4,9 @@ sidebar:
   order: 1
 ---
 
-The Enact CLI package provides a command-line tool for creating and building Enact applications. It leverages powerful open source tools and technologies such as [webpack](https://webpack.js.org), [Babel](https://babeljs.io), [LESS](http://lesscss.org), and [Jest](https://jestjs.io) to provide a development environment for apps that requires zero configuration to get started.
+The Enact CLI package provides a command-line tool for creating and building Enact applications. It leverages [Bun](https://bun.com) as its bundler and development server, along with [Babel](https://babeljs.io), [LESS](http://lesscss.org), and [Jest](https://jestjs.io) to provide a development environment for apps that requires zero configuration to get started.
+
+**Requirements:** Node.js 20.12+ and [Bun 1.3+](https://bun.com/docs/installation).
 
 The following sections describe its installation and usage:
 

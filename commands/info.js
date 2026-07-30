@@ -119,7 +119,7 @@ function api ({cliInfo = false, dev = false} = {}) {
 					'eslint',
 					'jest',
 					'less',
-					'webpack'
+					'bun'
 				].forEach(dep => logVersion(dep));
 			} else {
 				const app = require('@enact/dev-utils').optionParser;

@@ -40,10 +40,10 @@ const enhanced = ['chalk', 'cross-spawn', 'filesize', 'fs-extra', 'minimist', 's
 const content = ['@babel/runtime', 'core-js', 'react', 'react-dom'];
 const bareDeps = {'cpy-cli': '^3.1.1', rimraf: '^3.0.2'};
 const bareTasks = {
-	serve: 'webpack-dev-server --hot --inline --env development --config config/webpack.config.js',
-	pack: 'webpack --env development --config config/webpack.config.js && cpy public dist',
-	'pack-p': 'webpack --env production --config config/webpack.config.js && cpy public dist',
-	watch: 'cpy public dist && webpack --env development --config config/webpack.config.js --watch',
+	serve: 'bun config/bun/dev-server.mjs',
+	pack: 'bun config/bun/build.mjs && cpy public dist',
+	'pack-p': 'bun config/bun/build.mjs --production && cpy public dist',
+	watch: 'cpy public dist && bun config/bun/build.mjs --watch',
 	clean: 'rimraf build dist',
 	lint: 'eslint --no-config-lookup --config enact --ignore-pattern config/* .',
 	license: 'license-checker ',
@@ -61,7 +61,7 @@ function displayHelp () {
 	console.log('  Options');
 	console.log('    -b, --bare        Abandon Enact CLI command enhancements');
 	console.log('                      and eject into a a barebones setup (using');
-	console.log('                      webpack, eslint, karma, etc. directly)');
+	console.log('                      Bun, eslint, karma, etc. directly)');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();

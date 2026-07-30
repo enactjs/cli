@@ -22,7 +22,7 @@ This will generate a basic app based on the Limestone project template, complete
 ## Enact Project Settings
 The @enact/cli tool will check the project's **package.json** looking for an optional `enact` object for a few customization options:
 
-* `template` _[string]_ - Filepath to an alternate HTML template to use with the [Webpack html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin).
+* `template` _[string]_ - Filepath to an alternate HTML template used when generating **index.html**.
 * `isomorphic` _[string]_ - Alternate filepath to a custom isomorphic-compatible entry point. Not needed if main entry point is already isomorphic-compatible.
 * `title` _[string]_ - Title text that should be put within the HTML's `<title></title>` tags. Note: if this is a webOS-project, the title will, by default, be auto-detected from the **appinfo.json** content.
 * `theme` _[object]_ - A simplified string name to extrapolate `fontGenerator`, `ri`, and `screenTypes` preset values from. For example, `"limestone"`.
@@ -30,12 +30,12 @@ The @enact/cli tool will check the project's **package.json** looking for an opt
 * `ri` _[object]_ - Resolution independence options to be forwarded to the [postcss-resolution-independence](https://github.com/enactjs/postcss-resolution-independence). By default, will use any preset for a specified theme or fallback to limestone.
 	* `baseSize` _[number]_ - The root font-size to use when converting the value of the base unit to a resolution-independent unit. For example, when `baseSize` is set to 24, 48px in the LESS file will be converted to 2rem.
 * `screenTypes` _[array|string]_ - Array of 1 or more screentype definitions to be used with prerender HTML initialization. Can alternatively reference a json filepath to read for screentype definitions.  By default, will use any preset for a specified theme or fallback to limestone.
-* `nodeBuiltins` _[object]_ - Configuration settings for polyfilling NodeJS built-ins. See `node` [webpack option](https://webpack.js.org/configuration/node/).
-* `resolveFallback` _[object]_ - Configuration settings for redirecting module requests when normal resolving fails. See `resolve.fallback` [webpack option](https://webpack.js.org/configuration/resolve/#resolvefallback).
+* `nodeBuiltins` _[object]_ - Configuration settings for polyfilling NodeJS built-ins.
+* `resolveFallback` _[object]_ - Configuration settings for redirecting module requests when normal resolving fails.
 * `externalStartup` _[boolean]_ - Flag whether to externalize the startup/update js that is normally inlined within prerendered app HTML output.
 * `forceCSSModules` _[boolean]_ - Flag whether to force all LESS/CSS to be processed in a modular context (not just the `*.module.css` and `*.module.less` files).
 * `deep` _[string|array]_ - 1 or more JavaScript conditions that, when met, indicate deeplinking and any prerender should be discarded.
-* `target` _[string|array]_ - A build-type generic preset string (see `target` [webpack option](https://webpack.js.org/configuration/target/)) or alternatively a specific [browserslist array](https://github.com/browserslist/browserslist) of desired targets.
+* `target` _[string|array]_ - A build-type generic preset string or alternatively a specific [browserslist array](https://github.com/browserslist/browserslist) of desired targets.
 * `proxy` _[string]_ - Proxy target during project `serve` to be used within the [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware).
 
 For example:
@@ -60,7 +60,7 @@ For example:
 ## Available npm Tasks
 Included within the project template are a number of npm tasks available, with each mapped to Enact CLI commands:
 
-* `npm run serve` - Packages and hosts the app on a local http server using [webpack-dev-server](https://github.com/webpack/webpack-dev-server). Supports hot module replacement and inline updates as the source code changes.
+* `npm run serve` - Packages and hosts the app on a local http server using Bun's development server with HMR. Supports hot module replacement and inline updates as the source code changes.
 * `npm run pack` - Packages the app into **./dist** in development mode (unminified code, with any applicable development code).
 * `npm run pack-p` - Packages the app into **./dist** in production mode (minified code, with development code dropped).
 * `npm run watch` - Packages in development mode and sets up a watcher that will rebuild the app whenever the source code changes.
