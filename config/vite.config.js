@@ -610,6 +610,18 @@ module.exports = function (
 	const entry = createCombinedEntry(app.context, ['core-js/stable', appEntry]);
 	const coreJsDir = path.dirname(require.resolve('core-js/package.json'));
 
+	// --externals-polyfill (pack.js sets the env var before creating this config):
+	// the shared framework provides core-js, and its externalization requires the
+	// combined entry's `import 'core-js/stable'` to survive babel UN-expanded so
+	// the rollup `external` hook can match it as a single bare specifier (the
+	// core-js alias is dropped in that mode — see vite-framework applyExternals).
+	// Excluding the generated entry from babel disables the useBuiltIns:'entry'
+	// expansion for this build only; app and @enact source transpile as usual.
+	const externalPolyfill = process.env.ENACT_VITE_EXTERNAL_POLYFILL === 'true';
+	const babelExclude = externalPolyfill ?
+		new RegExp(`${SEP}node_modules${SEP}(?!@enact${SEP})`) :
+		babelTransformFilter;
+
 	// Maps `forceCSSModules` virtual `.module` ids back to their real style files, so
 	// `generateScopedName` can hash on the real path (see enactForceCSSModulesPlugin).
 	const forcedCSSVirtual = new Map();
@@ -839,8 +851,9 @@ module.exports = function (
 				// @enact/* packages ship raw source (JSX inside .js, ESM) rather than
 				// pre-compiled output, so they must be transpiled like app code. Mirror
 				// webpack's `exclude: /node_modules.(?!@enact)/`: process everything except
-				// non-@enact node_modules.
-				exclude: babelTransformFilter,
+				// non-@enact node_modules (plus the generated entry, unless the polyfill
+				// is externalized — see babelExclude above).
+				exclude: babelExclude,
 				// Reuse the exact Enact babel preset so JSX/TS/decorator handling matches webpack.
 				babel: {
 					babelrc: false,
@@ -862,7 +875,11 @@ module.exports = function (
 				require('../package.json').version,
 				process.env.NODE_ENV,
 				process.env.BROWSERSLIST || '',
-				BABEL_PRESET_ENACT_MTIME
+				BABEL_PRESET_ENACT_MTIME,
+				// Mode changes what the entry transforms to (expanded polyfills vs
+				// verbatim import); without this a cached expanded entry from a normal
+				// build would be served to an externals-polyfill build.
+				externalPolyfill ? 'external-polyfill' : ''
 			].join('|')),
 			ViteHtmlPlugin({
 				entry,

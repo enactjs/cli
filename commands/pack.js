@@ -259,6 +259,10 @@ async function viteIsomorphic (opts) {
 	);
 
 	// 1) Client build (isomorphic ON → the app entry uses hydrateRoot).
+	// --externals-polyfill: keep the entry's `import 'core-js/stable'` un-expanded
+	// in the CLIENT build so it can be externalized (see viteBuild). Cleared again
+	// before the SSR config below — the SSR build always bundles.
+	if (opts.externals && opts['externals-polyfill']) process.env.ENACT_VITE_EXTERNAL_POLYFILL = 'true';
 	const clientConfig = configFactory(
 		opts.production ? 'production' : 'development',
 		!opts.linting,
@@ -288,6 +292,7 @@ async function viteIsomorphic (opts) {
 	mixins.applyVite(clientConfig, opts);
 
 	// 2) SSR build config (Node-loadable CJS whose default export is the app element).
+	delete process.env.ENACT_VITE_EXTERNAL_POLYFILL;
 	const ssrConfig = configFactory(opts.production ? 'production' : 'development', true, false, true);
 	viteIso.applySsrBuild(ssrConfig, {serverEntry, outDir: ssrOut});
 
@@ -375,6 +380,12 @@ async function viteBuild (opts) {
 	if (opts.snapshot || opts.isomorphic) return viteIsomorphic(opts);
 
 	const configFactory = require('../config/vite.config');
+	// --externals-polyfill: tell the config factory to leave the entry's
+	// `import 'core-js/stable'` un-expanded so applyExternals can externalize it to
+	// the framework bundle. Otherwise babel's useBuiltIns:'entry' rewrites it into
+	// individual core-js/modules/* imports that neither match the external hook nor
+	// resolve (the core-js alias is dropped in this mode).
+	if (opts.externals && opts['externals-polyfill']) process.env.ENACT_VITE_EXTERNAL_POLYFILL = 'true';
 	const config = configFactory(
 		opts.production ? 'production' : 'development',
 		!opts.linting,
