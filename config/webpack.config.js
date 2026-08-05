@@ -384,8 +384,12 @@ module.exports = function (
 				shouldUseSourceMap && {
 					enforce: 'pre',
 					exclude: /@babel(?:\/|\\{1,2})runtime/,
-					test: /\.(js|mjs|jsx|ts|tsx|css)$/,
+					test: /\.(js|mjs|jsx|css)$/,
 					loader: require.resolve('source-map-loader')
+				},
+				{
+					test: /\.tsx?$/,
+					loader: require.resolve('ts-loader'),
 				},
 				{
 					// "oneOf" will traverse all following loaders until one will
