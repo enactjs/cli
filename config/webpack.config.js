@@ -347,9 +347,7 @@ module.exports = function (
 		],
 		resolve: {
 			// These are the reasonable defaults supported by the React/ES6 ecosystem.
-			extensions: ['.js', '.mjs', '.jsx', '.ts', '.tsx', '.json'].filter(
-				ext => useTypeScript || !ext.includes('ts')
-			),
+			extensions: ['.js', '.mjs', '.jsx', '.ts', '.tsx', '.json'],
 			// Allows us to specify paths to check for module resolving.
 			modules: [
 				path.resolve('./node_modules'),

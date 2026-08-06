@@ -26,7 +26,12 @@ let chalk;
 
 const blacklist = ['node_modules', 'build', 'dist', 'docs', '.git', '.gitignore', 'samples', 'tests'];
 const babelConfig = path.join(__dirname, '..', 'config', 'babel.config.js');
-const babelRename = {original: '^(\\.(?!.*\\bstyles\\b.*).*)\\.less$', replacement: '$1.css'};
+const babelRename = {
+	replacements: [
+		{original: '^(\\.(?!.*\\bstyles\\b.*).*)\\.less$', replacement: '$1.css'},
+		{original: '^(\\..*)\\.(?:jsx|tsx?)$', replacement: '$1.js'}
+	]
+};
 const lessPlugins = [new LessPluginResolve({prefix: '~'}), new LessPluginRi(app.ri)];
 
 function displayHelp () {
@@ -80,8 +85,19 @@ function api ({source = '.', output = './build', commonjs = true, ignore} = {}) 
 	const filter = (src, dest) => {
 		if (ignore && ignore.test && ignore.test(src)) {
 			return false;
-		} else if (/\.(js|js|ts|tsx)$/i.test(src)) {
-			return fs.ensureDir(path.dirname(dest)).then(() => transpile(src, dest, babelPlugins));
+		} else if (/\.d\.ts$/i.test(src)) {
+			// TypeScript declaration files are copied verbatim
+			return true;
+		} else if (/\.(js|jsx|ts|tsx)$/i.test(src)) {
+			// TS/JSX sources are emitted with a .js extension so the build output
+			// is resolvable by consumers
+			return fs.ensureDir(path.dirname(dest)).then(() => transpile(src, dest.replace(/\.(?:jsx|tsx?)$/i, '.js'), babelPlugins));
+		} else if (path.basename(src) === 'package.json') {
+			// Rewrite any main field pointing at a TS/JSX source to the emitted .js filename
+			return fs.ensureDir(path.dirname(dest)).then(() => {
+				const meta = fs.readFileSync(src, {encoding: 'utf8'}).replace(/("main"\s*:\s*"[^"]+)\.(?:jsx|tsx?)(")/i, '$1.js$2');
+				return fs.writeFile(dest, meta, {encoding: 'utf8'});
+			});
 		} else if (/\.(less|css)$/i.test(src)) {
 			// LESS/CSS within a 'styles' directory will not be run through LESS compiler
 			if (/[\\/]+styles[\\/]+/i.test('./' + src)) {
