@@ -37,6 +37,7 @@ const FileXHR = require('@enact/dev-utils/plugins/PrerenderPlugin/FileXHR');
 const templates = require('@enact/dev-utils/plugins/PrerenderPlugin/templates');
 const {optionParser: app} = require('@enact/dev-utils');
 const {writeEsbuildStatsReport} = require('./esbuild-stats');
+const {createVerboseLogger} = require('./esbuild-verbose');
 
 let parseLocales;
 try {
@@ -235,6 +236,7 @@ function renderLocale ({ssrBundlePath, locale, ReactDOMServer}) {
 }
 
 async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
+	const verbose = createVerboseLogger(opts.verbose, chalk);
 	if (!parseLocales) {
 		throw new Error(
 			'esbuild-isomorphic: could not load ' +
@@ -292,7 +294,9 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 		clientOptions.minify = false;
 		clientOptions.plugins = clientOptions.plugins.filter(p => p.name !== 'enact-terser');
 	}
+	verbose.stage('Building client bundle');
 	const clientResult = await esbuild.build(clientOptions);
+	verbose.stageDone(clientResult.metafile ? `${Object.keys(clientResult.metafile.inputs).length} input modules` : undefined);
 
 	// 2. SSR build — same transform pipeline (Babel, CSS Modules), which
 	// matters: both builds must produce identical CSS-module class names for
@@ -301,6 +305,7 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 	// inside config/esbuild.config.js; written to a throwaway directory.
 	process.env.ENACT_ESBUILD_SSR = 'true';
 	let ssrOptions;
+	verbose.stage('Building SSR bundle');
 	try {
 		ssrOptions = configFactory(
 			opts.production ? 'production' : 'development',
@@ -317,6 +322,7 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 			ssrOptions.entryPoints = {main: path.resolve(opts.entry || app.entry)};
 		}
 		await esbuild.build(ssrOptions);
+		verbose.stageDone();
 	} finally {
 		delete process.env.ENACT_ESBUILD_SSR;
 	}
@@ -325,14 +331,17 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 	const ReactDOMServer = importFresh(require.resolve('react-dom/server', {paths: [app.context]}));
 
 	// 3. Prerender each locale, deduping identical renders.
+	verbose.stage(`Prerendering ${locales.length} locale${locales.length === 1 ? '' : 's'}`);
 	const status = {prerender: [], attr: [], alias: []};
 	for (let i = 0; i < locales.length; i++) {
 		let appHtml;
+		const localeStart = Date.now();
 		try {
 			appHtml = renderLocale({ssrBundlePath, locale: locales[i], ReactDOMServer});
 		} catch (e) {
 			throw new Error(`Unable to prerender locale "${locales[i]}": ${e.stack || e.message || e}`);
 		}
+		verbose.detail(`${locales[i]}: rendered in ${Date.now() - localeStart}ms (${appHtml.length} chars)`);
 
 		status.attr[i] = {classes: ''};
 		appHtml = appHtml.replace(
@@ -350,12 +359,19 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 			status.alias[i] = locales[index];
 		}
 	}
+	const dedupedCount = status.alias.filter(Boolean).length;
+	verbose.stageDone(
+		dedupedCount ?
+			`${dedupedCount} of ${locales.length} locale(s) produced identical output and were deduped` :
+			'no duplicate renders'
+	);
 	simplifyAliases(locales, status);
 
 	// 4. HTML assembly: strip the client's own <script> tag from index.html
 	// (the startup script loads it asynchronously instead, so the browser
 	// paints the prerendered markup first), then inject prerendered markup
 	// per locale.
+	verbose.stage('Assembling per-locale HTML');
 	const indexHtmlPath = path.join(output, 'index.html');
 	const baseHtml = fs.readFileSync(indexHtmlPath, 'utf8');
 	const jsAssets = Object.keys(clientResult.metafile.outputs)
@@ -418,10 +434,12 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 		const mapping = {fallback: 'index.html', locales: locales.reduce(mapper, {})};
 		fs.writeFileSync(path.join(output, 'locale-map.json'), JSON.stringify(mapping, null, '\t'));
 	}
+	verbose.stageDone();
 
 	// 5. webOS meta coupling: patch the root appinfo.json + per-locale
 	// appinfo.json files EsbuildWebOSMetaPlugin already emitted from the
 	// client build (see the file-level comment for what's not ported).
+	verbose.stage('Patching webOS appinfo.json files');
 	const rootAppInfoPath = path.join(output, 'appinfo.json');
 	if (fs.existsSync(rootAppInfoPath)) {
 		const info = JSON.parse(fs.readFileSync(rootAppInfoPath, 'utf8'));
@@ -438,9 +456,12 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 			fs.writeFileSync(localizedAppInfoPath, JSON.stringify(info, null, '\t'));
 		}
 	}
+	verbose.stageDone();
 
 	// Clean up the throwaway SSR build directory.
+	verbose.stage('Cleaning up SSR build directory');
 	await fs.promises.rm(ssrOptions.outdir, {recursive: true, force: true});
+	verbose.stageDone();
 
 	console.log(chalk.green(`Compiled successfully. Prerendered ${locales.length} locale${locales.length === 1 ? '' : 's'}.`));
 	console.log();
@@ -448,12 +469,16 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 	if (opts.stats) {
 		// Only the client bundle is meaningful to report on — the SSR build
 		// is a throwaway Node-only bundle used solely for rendering.
+		verbose.stage('Writing bundle stats report');
 		const reportPath = writeEsbuildStatsReport(clientResult.metafile, output, app.context);
+		verbose.stageDone();
 		if (reportPath) {
 			console.log(chalk.dim(`Bundle stats written to ${path.relative(app.context, reportPath)}`));
 			console.log();
 		}
 	}
+
+	verbose.total();
 }
 
 module.exports = {esbuildIsomorphicBuild};

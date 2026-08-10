@@ -15,6 +15,7 @@ const {filesize} = require('filesize');
 const fs = require('fs-extra');
 const {optionParser: app} = require('@enact/dev-utils');
 const {writeEsbuildStatsReport} = require('./esbuild-stats');
+const {createVerboseLogger} = require('./esbuild-verbose');
 
 function copyPublicFolder (output) {
 	const staticAssets = './public';
@@ -66,6 +67,7 @@ function printEsbuildFileSizes (metafile, chalk, stripAnsi) {
 async function esbuildBuild (opts, chalk, stripAnsi) {
 	const esbuild = require('esbuild');
 	const configFactory = require('../config/esbuild.config');
+	const verbose = createVerboseLogger(opts.verbose, chalk);
 
 	if (opts.isomorphic && !opts.watch) {
 		const {esbuildIsomorphicBuild} = require('./esbuild-isomorphic');
@@ -86,6 +88,7 @@ async function esbuildBuild (opts, chalk, stripAnsi) {
 	}
 
 	const output = opts.output ? path.resolve(opts.output) : path.resolve('./dist');
+	verbose.stage('Resolving esbuild build options');
 	const buildOptions = configFactory(
 		opts.production ? 'production' : 'development',
 		!opts.linting,
@@ -100,6 +103,7 @@ async function esbuildBuild (opts, chalk, stripAnsi) {
 		opts.locales,
 		opts.output
 	);
+	verbose.stageDone(`platform=${buildOptions.platform}, target=${buildOptions.target}`);
 
 	// --no-minify: config/esbuild.config.js's `minify` build option is
 	// otherwise driven only by NODE_ENV/ENACT_ESBUILD_MINIFY, not this flag.
@@ -122,8 +126,10 @@ async function esbuildBuild (opts, chalk, stripAnsi) {
 	await fs.emptyDir(output);
 
 	if (opts.watch) {
+		verbose.stage('Starting esbuild watch context');
 		const ctx = await esbuild.context(buildOptions);
 		await ctx.watch();
+		verbose.stageDone();
 		copyPublicFolder(output);
 		console.log(
 			opts.production ?
@@ -141,8 +147,13 @@ async function esbuildBuild (opts, chalk, stripAnsi) {
 
 	console.log(opts.production ? 'Creating an optimized production build...' : 'Creating a development build...');
 	// esbuild.build rejects on build errors; the cli() catch formats them.
+	verbose.stage('Bundling');
 	const result = await esbuild.build(buildOptions);
+	verbose.stageDone(result.metafile ? `${Object.keys(result.metafile.inputs).length} input modules` : undefined);
+
+	verbose.stage('Copying public/');
 	copyPublicFolder(output);
+	verbose.stageDone();
 
 	if (result.warnings && result.warnings.length) {
 		console.log(chalk.yellow('Compiled with warnings:\n'));
@@ -156,12 +167,16 @@ async function esbuildBuild (opts, chalk, stripAnsi) {
 	console.log();
 
 	if (opts.stats) {
+		verbose.stage('Writing bundle stats report');
 		const reportPath = writeEsbuildStatsReport(result.metafile, output, app.context);
+		verbose.stageDone();
 		if (reportPath) {
 			console.log(chalk.dim(`Bundle stats written to ${path.relative(app.context, reportPath)}`));
 			console.log();
 		}
 	}
+
+	verbose.total();
 }
 
 module.exports = {esbuildBuild};
