@@ -6,15 +6,21 @@
  * `pack.js` stays untouched — mirrors `esbuild-serve.js`'s split from `serve.js`.
  *
  * Reuses the same `config/esbuild.config` factory the esbuild serve path uses.
- * The webOS-specific build modes — --isomorphic prerendering, --snapshot,
- * --framework/--externals — are not yet ported to esbuild; if requested they
- * emit a notice and fall back to a standard bundle.
+ * The webOS-specific build modes now have esbuild counterparts: --isomorphic
+ * prerendering (esbuild-isomorphic.js), --snapshot (esbuild-snapshot.js,
+ * wired through esbuild-isomorphic.js since --snapshot implies isomorphic),
+ * and --framework/--externals (esbuild-framework.js / esbuild-externals.js).
+ * Only --isomorphic/--snapshot combined with --watch is not supported, since
+ * prerendering is a one-shot build+render pass with no rebuild-and-re-render
+ * story yet.
  */
 const path = require('path');
 const {filesize} = require('filesize');
 const fs = require('fs-extra');
 const {optionParser: app} = require('@enact/dev-utils');
+const viteFw = require('@enact/dev-utils/mixins/vite-framework');
 const {writeEsbuildStatsReport} = require('./esbuild-stats');
+const {applyEsbuildExternals, jsAssetUrls, markScriptsAsModule} = require('./esbuild-externals');
 
 function copyPublicFolder (output) {
 	const staticAssets = './public';
@@ -67,14 +73,24 @@ async function esbuildBuild (opts, chalk, stripAnsi) {
 	const esbuild = require('esbuild');
 	const configFactory = require('../config/esbuild.config');
 
-	if (opts.isomorphic && !opts.watch) {
+	// --framework takes precedence over everything else, matching the Vite
+	// path's dispatch order in pack.js's `viteBuild`.
+	if (opts.framework) {
+		const {esbuildFramework} = require('./esbuild-framework');
+		return esbuildFramework(opts, chalk, esbuild, configFactory);
+	}
+
+	// --snapshot implies --isomorphic (the snapshot embeds the prerendered
+	// app), matching webpack's `mixins/index.js` and the Vite path's
+	// `viteBuild`.
+	if ((opts.isomorphic || opts.snapshot) && !opts.watch) {
 		const {esbuildIsomorphicBuild} = require('./esbuild-isomorphic');
 		return esbuildIsomorphicBuild(opts, chalk, esbuild, configFactory);
 	}
 
-	const unsupported = ['framework', 'snapshot'].filter(f => opts[f]);
-	if (opts.externals) unsupported.push('externals');
+	const unsupported = [];
 	if (opts.isomorphic && opts.watch) unsupported.push('isomorphic (with --watch)');
+	if (opts.snapshot && opts.watch) unsupported.push('snapshot (with --watch)');
 	if (unsupported.length) {
 		console.log(
 			chalk.yellow(
@@ -98,7 +114,8 @@ async function esbuildBuild (opts, chalk, stripAnsi) {
 		!opts['split-css'],
 		opts['ilib-additional-path'],
 		opts.locales,
-		opts.output
+		opts.output,
+		Boolean(opts.externals && opts['externals-polyfill'])
 	);
 
 	// --no-minify: config/esbuild.config.js's `minify` build option is
@@ -110,6 +127,25 @@ async function esbuildBuild (opts, chalk, stripAnsi) {
 	if (!opts.minify) {
 		buildOptions.minify = false;
 		buildOptions.plugins = buildOptions.plugins.filter(p => p.name !== 'enact-terser');
+	}
+
+	if (opts.verbose) {
+		const {esbuildVerbosePlugin} = require('./esbuild-verbose');
+		buildOptions.plugins = buildOptions.plugins.concat([esbuildVerbosePlugin()]);
+	}
+
+	// --externals: externalize the shared framework specifiers out of the app
+	// build, collecting the ones actually imported so the import map injected
+	// into index.html afterward only lists what's really used. Manifest-aware
+	// (see esbuild-externals.js): only specifiers the framework build's
+	// manifest actually provides are externalized, so an app whose imports
+	// the framework doesn't cover still builds — the uncovered pieces stay
+	// bundled.
+	const collected = new Set();
+	let manifest = null;
+	if (opts.externals) {
+		manifest = viteFw.readManifest(path.resolve(opts.externals));
+		applyEsbuildExternals(buildOptions, collected, manifest, {polyfill: opts['externals-polyfill']});
 	}
 
 	// Entry override (the esbuild config defaults the entry to the app context).
@@ -143,6 +179,21 @@ async function esbuildBuild (opts, chalk, stripAnsi) {
 	// esbuild.build rejects on build errors; the cli() catch formats them.
 	const result = await esbuild.build(buildOptions);
 	copyPublicFolder(output);
+
+	// --externals post-step: resolve the collected specifiers against the
+	// framework's manifest and inject the import map + shared stylesheet into
+	// the built index.html (matches the Vite path's `viteBuild`).
+	if (opts.externals) {
+		let base = opts['externals-public'];
+		if (!base) {
+			fs.copySync(path.resolve(opts.externals), path.join(output, 'framework'), {dereference: true});
+			base = './framework';
+		}
+		const indexHtmlPath = path.join(output, 'index.html');
+		markScriptsAsModule(indexHtmlPath, jsAssetUrls(result.metafile, output, buildOptions.publicPath));
+		const n = viteFw.injectHtml(indexHtmlPath, manifest, collected, base);
+		console.log(chalk.cyan(`Externalized ${n} framework specifiers via import map (base: ${base}).`));
+	}
 
 	if (result.warnings && result.warnings.length) {
 		console.log(chalk.yellow('Compiled with warnings:\n'));

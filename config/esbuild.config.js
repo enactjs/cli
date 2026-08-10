@@ -107,7 +107,16 @@ module.exports = function (
 	ilibAdditionalResourcesPath,
 	// iLib locale filtering (webpack `-l`), threaded through to EsbuildILibPlugin.
 	locales,
-	outputPath
+	outputPath,
+	// `--externals --externals-polyfill`: core-js/stable is meant to reach
+	// `applyEsbuildExternals`' onResolve hook as the literal bare specifier
+	// `corejs-proxy.js` requires it by — but babel's `useBuiltIns` expansion
+	// (from babel-preset-enact) rewrites that into dozens of individual
+	// `core-js/modules/es.*.js` requires first, so the hook never sees the
+	// specifier it's looking for. When this is set, `babelPlugin` below skips
+	// transforming `corejs-proxy.js` so the literal specifier survives
+	// unexpanded through to esbuild's resolver instead.
+	externalPolyfill = false
 ) {
 	process.chdir(app.context);
 
@@ -209,6 +218,7 @@ module.exports = function (
 			ri: app.ri,
 			forceCSSModules: Boolean(app.forceCSSModules),
 			tailwind: useTailwind,
+			externalPolyfill,
 			babelConfig: (() => {
 				try {
 					return fs.statSync(path.join(__dirname, 'babel.config.js')).mtimeMs;
@@ -627,12 +637,23 @@ module.exports = function (
 	// transforms); esbuild's `source-map-loader` step (for consuming
 	// upstream .map files from dependencies) has no direct replacement here.
 	// ---------------------------------------------------------------------
+	// Absolute path of the corejs-proxy module (`require('core-js/stable')` at
+	// module level, so babel-preset-enact's `useBuiltIns:'entry'` can find and
+	// expand it) — see the `externalPolyfill` doc comment above.
+	const corejsProxyPath = path.join(__dirname, 'corejs-proxy.js');
 	const babelPlugin = {
 		name: 'enact-babel',
 		setup (build) {
 			build.onLoad({filter: /\.(js|mjs|jsx|ts|tsx)$/}, args => {
 				if (/node_modules/.test(args.path) && !/node_modules[\\/]@enact/.test(args.path)) {
 					return null; // let esbuild's default JS loader handle third-party code
+				}
+				if (externalPolyfill && path.resolve(args.path) === corejsProxyPath) {
+					// Skip babel here specifically so its `require('core-js/stable')`
+					// survives as the literal bare specifier `applyEsbuildExternals`
+					// externalizes — plain CommonJS, so esbuild's default JS loader
+					// handles it fine on its own without babel.
+					return null;
 				}
 				// Babel dominates build time (it runs over all app code *and*
 				// @enact's raw source), and esbuild re-invokes onLoad on every
@@ -1089,7 +1110,14 @@ module.exports = function (
 		alias: isSSRBuild ? app.alias || {} : Object.assign(reactAliases, ilibAliases, app.alias),
 		nodePaths: [
 			path.resolve('./node_modules'),
-			...getAdditionalModulePaths(app.additionalModulePaths)
+			...getAdditionalModulePaths(app.additionalModulePaths),
+			// Fallback for files generated *into* the app tree (e.g. the
+			// framework's `.enact-framework-src/core-js-stable.js` polyfill
+			// wrapper, or the snapshot entry) that reference the CLI's own
+			// dependencies (core-js) rather than the app's — normal
+			// node_modules-walk resolution from those files' location never
+			// reaches this directory since it isn't an ancestor of them.
+			path.join(__dirname, '..', 'node_modules')
 		],
 		loader: {
 			'.png': 'file',

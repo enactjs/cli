@@ -23,20 +23,31 @@
  * isomorphic path uses for its own SSR bundle (see
  * docs/vite-isomorphic-scope.md).
  *
- * Scope: `--isomorphic --externals`/`--framework` combined is not yet
- * supported here (the framework esbuild path doesn't exist yet — see
- * esbuild-pack.js's NOTICE for the same gap on a plain build). Neither is
- * `--snapshot`. Auto-generating brand-new per-locale appinfo.json files that
- * don't already exist isn't ported either — this pass only patches files
+ * Scope: `--isomorphic --framework` combined is not supported — `--framework`
+ * is dispatched before this module is ever reached (see esbuild-pack.js), so
+ * the two are mutually exclusive by construction, matching the Vite path's
+ * own precedence in `viteBuild`. `--isomorphic --externals` and `--snapshot`
+ * (which implies isomorphic) ARE supported below, via esbuild-externals.js /
+ * esbuild-snapshot.js. Auto-generating brand-new per-locale appinfo.json
+ * files that don't already exist isn't ported — this pass only patches files
  * EsbuildWebOSMetaPlugin already emitted from the client build.
  */
 const fs = require('fs');
 const path = require('path');
+// Plain `fs` above is used throughout this file (existing code); `fs-extra`
+// is only needed for `copySync` when staging the externalized framework
+// files into the output (mirrors esbuild-pack.js, which imports fs-extra as
+// its `fs` directly — kept separate here rather than renaming this file's
+// existing `fs` usages).
+const fsExtra = require('fs-extra');
 const importFresh = require('import-fresh');
 const FileXHR = require('@enact/dev-utils/plugins/PrerenderPlugin/FileXHR');
 const templates = require('@enact/dev-utils/plugins/PrerenderPlugin/templates');
 const {optionParser: app} = require('@enact/dev-utils');
+const viteFw = require('@enact/dev-utils/mixins/vite-framework');
 const {writeEsbuildStatsReport} = require('./esbuild-stats');
+const {applyEsbuildExternals, jsAssetUrls, markScriptsAsModule} = require('./esbuild-externals');
+const {applyEsbuildSnapshotBuild, runMkSnapshot, writeSnapshotAppinfo} = require('./esbuild-snapshot');
 
 let parseLocales;
 try {
@@ -242,14 +253,14 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 		);
 	}
 
-	if (opts.snapshot) {
-		console.log(chalk.yellow('NOTICE: --snapshot is not yet supported on the esbuild path; skipping it.'));
-	}
-	if (opts.framework || opts.externals) {
+	// --snapshot + --externals is unsupported (the snapshot must embed
+	// @enact, not externalize it) — matches the webpack/Vite paths'
+	// `opts.snapshot && !opts.externals` guard.
+	if (opts.snapshot && opts.externals) {
 		console.log(
 			chalk.yellow(
-				'NOTICE: --framework/--externals combined with --isomorphic is not yet supported on the ' +
-				'esbuild path; building without the shared framework.'
+				'NOTICE: --snapshot with --externals is not supported; the snapshot must embed @enact. ' +
+				'Building without a snapshot.'
 			)
 		);
 	}
@@ -261,7 +272,13 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 		return;
 	}
 
-	console.log(opts.production ? 'Creating an optimized isomorphic build...' : 'Creating an isomorphic build...');
+	console.log(
+		opts.snapshot && !opts.externals ?
+			`Creating a V8 snapshot production build (${locales.length} locale(s))...` :
+			opts.production ?
+				`Creating an optimized isomorphic build (${locales.length} locale(s))...` :
+				`Creating an isomorphic build (${locales.length} locale(s))...`
+	);
 
 	// Remove all content but keep the directory so that if you're in it, you
 	// don't end up in Trash (matches the plain esbuild pack path).
@@ -279,7 +296,8 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 		!opts['split-css'],
 		opts['ilib-additional-path'],
 		opts.locales,
-		opts.output
+		opts.output,
+		Boolean(opts.externals && opts['externals-polyfill'])
 	);
 	if (opts.entry || app.entry) {
 		clientOptions.entryPoints = {main: path.resolve(opts.entry || app.entry)};
@@ -292,7 +310,48 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 		clientOptions.minify = false;
 		clientOptions.plugins = clientOptions.plugins.filter(p => p.name !== 'enact-terser');
 	}
+
+	// --externals: externalize the shared framework out of the CLIENT build
+	// (the browser loads it via import map); the SSR build below always
+	// bundles @enact so it can render server-side. Both reuse `configFactory`
+	// (same rootContext), so CSS-module hashes stay consistent between them.
+	const collected = new Set();
+	let manifest = null;
+	if (opts.externals) {
+		manifest = viteFw.readManifest(path.resolve(opts.externals));
+		applyEsbuildExternals(clientOptions, collected, manifest, {polyfill: opts['externals-polyfill']});
+	}
+	// --snapshot: build the client as a self-contained bundle (global `App`)
+	// that mksnapshot can snapshot. Implies isomorphic; combined with
+	// --externals is unsupported (NOTICE'd above) — the snapshot must embed
+	// @enact, not externalize it.
+	if (opts.snapshot && !opts.externals) {
+		// No `serverEntry` variable exists in this file (unlike pack.js's
+		// `viteIsomorphic`) — the rest of this module instead falls back to
+		// `app.context` itself (a directory; esbuild resolves it the same way
+		// as any other directory entry point) whenever neither `--entry` nor
+		// the package's `entry` field is set, so the snapshot entry mirrors
+		// that same convention rather than inventing a different default.
+		applyEsbuildSnapshotBuild(clientOptions, {context: app.context, appEntry: opts.entry || app.entry || app.context});
+	}
+
 	const clientResult = await esbuild.build(clientOptions);
+
+	// Inject the framework import map (+ shared stylesheet) into the client
+	// index.html BEFORE the isomorphic assembly below transforms it into the
+	// fallback/variant files, and mark its own bundle script as a module —
+	// applyEsbuildExternals switches the client build to ESM output, which a
+	// plain (non-module) `<script defer>` tag can't parse.
+	if (opts.externals) {
+		let base = opts['externals-public'];
+		if (!base) {
+			fsExtra.copySync(path.resolve(opts.externals), path.join(output, 'framework'), {dereference: true});
+			base = './framework';
+		}
+		const indexHtmlPath = path.join(output, 'index.html');
+		markScriptsAsModule(indexHtmlPath, jsAssetUrls(clientResult.metafile, output, clientOptions.publicPath));
+		viteFw.injectHtml(indexHtmlPath, manifest, collected, base);
+	}
 
 	// 2. SSR build — same transform pipeline (Babel, CSS Modules), which
 	// matters: both builds must produce identical CSS-module class names for
@@ -362,7 +421,15 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 		.filter(f => f.endsWith('.js') && !f.endsWith('.map'))
 		.map(f => `${clientOptions.publicPath}/${path.relative(output, path.resolve(f))}`.replace(/\\/g, '/'));
 
-	const startupScript = `<script type="text/javascript">${templates.startup(app.screenTypes, jsAssets)}</script>`;
+	// `moduleType`: esbuild's *default* client-build format (no --externals,
+	// no --snapshot) is a self-contained IIFE, so the dynamically-loaded
+	// script is correctly classic there — unlike Vite, whose Rollup output is
+	// ESM by default regardless, hence its own startup script is always
+	// `type="module"` (see vite-isomorphic.js's `assemble`). Only
+	// `applyEsbuildExternals` switches this build's format to ESM (bare
+	// specifiers resolved via the import map above), so only that case needs
+	// the dynamically-created script marked as a module too.
+	const startupScript = `<script type="text/javascript">${templates.startup(app.screenTypes, jsAssets, Boolean(opts.externals))}</script>`;
 	let shellHtml = baseHtml.replace(/<script[^>]*src="[^"]*"[^>]*><\/script>/g, '');
 	shellHtml = shellHtml.includes('</head>') ? shellHtml.replace('</head>', `${startupScript}</head>`) : shellHtml + startupScript;
 
@@ -441,6 +508,25 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 
 	// Clean up the throwaway SSR build directory.
 	await fs.promises.rm(ssrOptions.outdir, {recursive: true, force: true});
+
+	// 6. V8 snapshot: run mksnapshot against the self-contained client bundle
+	// and record the blob in appinfo.json. Requires the webOS `V8_MKSNAPSHOT`
+	// toolchain; without it the build still succeeds and the startup script
+	// falls back to loading main.js (classic <script>) at runtime.
+	if (opts.snapshot && !opts.externals) {
+		const snapshotResult = runMkSnapshot({outDir: output});
+		if (snapshotResult.ok) {
+			writeSnapshotAppinfo({outDir: output, blob: snapshotResult.blob});
+			console.log(chalk.green(`Generated V8 snapshot blob (${snapshotResult.blob}) and tagged appinfo.json.`));
+		} else {
+			console.log(
+				chalk.yellow(`V8 snapshot blob not generated: ${snapshotResult.error.message.split('\n')[0]}`)
+			);
+			console.log(
+				chalk.yellow('Set V8_MKSNAPSHOT to the webOS mksnapshot binary to emit the blob; the app runs without it.')
+			);
+		}
+	}
 
 	console.log(chalk.green(`Compiled successfully. Prerendered ${locales.length} locale${locales.length === 1 ? '' : 's'}.`));
 	console.log();
