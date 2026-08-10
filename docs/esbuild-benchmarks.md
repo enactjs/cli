@@ -1,11 +1,23 @@
 # Measured: webpack vs esbuild vs Vite, command by command
 
-Real measurements, not estimates. Scope is the three commands the esbuild path
-implements: **`serve`**, **`pack`**, and **`pack -p`** — measured for all three
-bundlers on the same app in the same session. These numbers are from the CLI
-**after** the optimization pass described below was applied to *both* the Vite
-and esbuild paths. (`--isomorphic`, `--snapshot` and `--framework`/`--externals`
-exist only on the webpack and Vite paths; see `vite-benchmarks.md` for those.)
+Real measurements, not estimates. Scope is **`serve`**, **`pack`**, and
+**`pack -p`** — measured for all three bundlers on the same app in the same
+session. These numbers are from the CLI **after** the optimization pass
+described below was applied to *both* the Vite and esbuild paths.
+
+**Feature scope note (post-dates this benchmark run):** at the time these
+numbers were captured, esbuild only had `serve`/`pack`/`pack -p`, so that's
+all this document measures. The esbuild path has since grown
+`--isomorphic` (+ every `--locales` mode except `tv`, which hits a known
+ilib locale-data gap on `pa-PK` — `signage`'s 20 locales are fine, `tv`'s 195
+are not), `--snapshot` (structurally — the actual V8 blob still needs the
+firmware-matched `V8_MKSNAPSHOT` toolchain, same caveat as webpack/Vite), and
+`--framework`/`--externals`/`--externals-public`/`--externals-polyfill`,
+functionally on par with the Vite path (see `vite-benchmarks.md` and
+`vite-isomorphic-scope.md` for the equivalent Vite feature descriptions —
+esbuild's behavior matches them). None of that is benchmarked here yet — the
+tables below remain scoped to what was actually measured; treat any timing
+claim for the newer commands as unverified until a real run adds it.
 
 **App:** `limestone/samples/qa-a11y`
 **Machine:** PC Intel vPro / 31.5 GB RAM, Windows, Node 24
@@ -124,4 +136,12 @@ NODE_OPTIONS=--max-old-space-size=8192 enact serve --esbuild      # esbuild
 NODE_OPTIONS=--max-old-space-size=8192 enact serve --vite         # vite
 # smaller esbuild bundle (+Terser time):
 ENACT_ESBUILD_MINIFY=terser NODE_OPTIONS=--max-old-space-size=8192 enact pack -p --esbuild
+```
+
+Newer esbuild commands (functional, not benchmarked above):
+
+```bash
+enact pack --esbuild --isomorphic --locales=en-US,ko-KR   # prerender, one variant per locale
+enact pack --esbuild --framework --externals-polyfill      # shared framework bundle (in the theme repo)
+enact pack --esbuild --externals=../limestone/dist --externals-polyfill -o app-dist  # app build against it
 ```
