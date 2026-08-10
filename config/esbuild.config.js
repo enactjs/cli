@@ -125,6 +125,15 @@ module.exports = function (
 
 	process.env.NODE_ENV = env || process.env.NODE_ENV;
 	const isEnvProduction = process.env.NODE_ENV === 'production';
+	// Set by the isomorphic prerender build (esbuild-isomorphic.js) when
+	// compiling the server-rendered bundle: real Node builtins must resolve
+	// normally (ilib's Node loader genuinely needs `fs`), unlike the browser
+	// build below which stubs them out. Everything else in this factory
+	// (Babel, CSS Modules/postcss pipeline) is reused unchanged, which is
+	// required for the client and SSR builds to produce identical
+	// CSS-module class names (both derive from the same resourcePath +
+	// rootContext-based `cssModuleIdent`).
+	const isSSRBuild = process.env.ENACT_ESBUILD_SSR === 'true';
 
 	const publicPath = getPublicUrlOrPath(!isEnvProduction, app.publicUrl, process.env.PUBLIC_URL).replace(/^\/$/, '');
 
@@ -666,25 +675,33 @@ module.exports = function (
 		setup (build) {
 			// `util` has real, commonly-used behavior (format/inherits/etc.),
 			// so prefer the actual browser-compatible `util` npm package over
-			// an empty stub when it's available.
-			build.onResolve({filter: /^util$/}, () => {
-				try {
-					return {path: require.resolve('util/')};
-				} catch (e) {
-					return {path: 'util', namespace: 'enact-empty-stub'};
-				}
-			});
+			// an empty stub when it's available. Not needed for SSR builds —
+			// real Node `util` is available natively.
+			if (!isSSRBuild) {
+				build.onResolve({filter: /^util$/}, () => {
+					try {
+						return {path: require.resolve('util/')};
+					} catch (e) {
+						return {path: 'util', namespace: 'enact-empty-stub'};
+					}
+				});
+			}
 
 			// Everything else that's a genuine Node builtin (fs, child_process,
 			// net, etc.) has no meaningful browser equivalent for this app;
-			// resolve to an empty module rather than failing the bundle.
-			const nodeBuiltins = new Set(require('module').builtinModules);
-			build.onResolve({filter: /.*/}, args => {
-				if (nodeBuiltins.has(args.path) && args.path !== 'util') {
-					return {path: args.path, namespace: 'enact-empty-stub'};
-				}
-				return null;
-			});
+			// resolve to an empty module rather than failing the bundle. Skip
+			// this for SSR builds — esbuild's `platform: 'node'` already
+			// externalizes real builtins automatically, and ilib's Node
+			// locale loader genuinely needs a working `fs`.
+			if (!isSSRBuild) {
+				const nodeBuiltins = new Set(require('module').builtinModules);
+				build.onResolve({filter: /.*/}, args => {
+					if (nodeBuiltins.has(args.path) && args.path !== 'util') {
+						return {path: args.path, namespace: 'enact-empty-stub'};
+					}
+					return null;
+				});
+			}
 
 			// ilib's alternate-JS-engine loaders: never reached at runtime in
 			// a browser, and not present in this package install.
@@ -1002,6 +1019,12 @@ module.exports = function (
 		}
 	};
 
+	// SSR builds write to their own directory — never the app's real output
+	// dir — since they use the same entryNames/chunkNames patterns as the
+	// client build and would otherwise silently overwrite the browser
+	// bundle with the Node/CJS one (or vice versa, depending on build order).
+	const ssrOutdir = path.join(outdir, '.ssr');
+
 	// Final esbuild build-options object, consumed by `esbuild.context()` in
 	// both the dev server (serve.js) and the production build script.
 	// ---------------------------------------------------------------------
@@ -1013,26 +1036,48 @@ module.exports = function (
 		entryPoints: {main: app.context},
 		inject: [require.resolve('./polyfills')],
 		bundle: true,
-		outdir,
+		outdir: isSSRBuild ? ssrOutdir : outdir,
 		entryNames,
 		chunkNames,
 		assetNames,
 		publicPath,
-		platform: 'browser',
+		platform: isSSRBuild ? 'node' : 'browser',
+		// Critical for SSR: react/react-dom must NOT be bundled into the SSR
+		// output. esbuild-isomorphic.js loads react-dom/server separately
+		// (via require.resolve against the app's own node_modules) to call
+		// renderToString — if the SSR bundle also bundled its own private
+		// copy of react/react-dom, the two would be different module
+		// instances with separate internal hook-dispatcher state, causing
+		// "Cannot read properties of null (reading 'useEffect')" the moment
+		// any component uses a hook. Marking them external instead leaves
+		// `require('react')` etc. as plain runtime requires, so both sides
+		// resolve to the exact same module instance.
+		external: isSSRBuild ? ['react', 'react-dom', 'react-dom/*'] : undefined,
+		// SSR output must be CJS: ilib's Node locale loader has leftover
+		// `require()` calls, and the prerender step loads this bundle with
+		// `require()` itself (an ESM/.mjs bundle would throw `require is not
+		// defined`) — matching the reasoning the Vite isomorphic path uses
+		// for its own SSR build.
+		format: isSSRBuild ? 'cjs' : undefined,
 		// Target the app's browserslist (esbuild's analog of webpack's
 		// `target: app.environment`), converted to esbuild engine identifiers.
 		// Falls back to a modern baseline if the list resolves to no
 		// esbuild-known engine. (`app.setEnactTargetsAsDefault()` above has
 		// already seeded the Enact default browserslist when the app has none.)
-		target: esbuildTargetFromBrowserslist(app.context) || 'es2019',
+		// SSR builds target the Node runtime instead, since that's what
+		// actually executes this bundle.
+		target: isSSRBuild ? 'node18' : esbuildTargetFromBrowserslist(app.context) || 'es2019',
 		// esbuild's native minifier is the default: equal to Terser on raw bytes
 		// and essentially free. ENACT_ESBUILD_MINIFY=terser opts into a Terser
 		// pass instead (JS built unminified here, then minified by the
 		// enact-terser plugin below; CSS is minified separately) — measured on
 		// qa-a11y it recovers ~32 KB gzip (370 -> 338 KB) for a few seconds of
 		// build time, the inverse of the Vite path's ENACT_VITE_MINIFY=esbuild.
-		minify: isEnvProduction && process.env.ENACT_ESBUILD_MINIFY !== 'terser',
-		sourcemap: shouldUseSourceMap ? (isEnvProduction ? true : 'linked') : false,
+		// SSR builds skip minification entirely — it's a throwaway Node
+		// bundle used only to render HTML strings during the build, never
+		// shipped.
+		minify: !isSSRBuild && isEnvProduction && process.env.ENACT_ESBUILD_MINIFY !== 'terser',
+		sourcemap: !isSSRBuild && shouldUseSourceMap ? (isEnvProduction ? true : 'linked') : false,
 		logLevel: 'info',
 		metafile: true,
 		absWorkingDir: app.context,
@@ -1041,7 +1086,7 @@ module.exports = function (
 		// `alias` below only remaps bare imports of these names; it does not
 		// polyfill globals like `process`/`Buffer` referenced without an
 		// import. Add real shims via `inject` if your app relies on those.
-		alias: Object.assign(reactAliases, ilibAliases, app.alias),
+		alias: isSSRBuild ? app.alias || {} : Object.assign(reactAliases, ilibAliases, app.alias),
 		nodePaths: [
 			path.resolve('./node_modules'),
 			...getAdditionalModulePaths(app.additionalModulePaths)
@@ -1063,14 +1108,19 @@ module.exports = function (
 			caseSensitivePathsPlugin,
 			babelPlugin,
 			stylesPlugin,
-			// dev-utils esbuild plugins (webOS features)
-			html,
-			ilib && ilib.plugin,
-			webosMeta,
-			typeCheckPlugin,
-			eslintPlugin,
+			// dev-utils esbuild plugins (webOS features) — only the client
+			// build should emit index.html/ilib locale data/appinfo.json;
+			// the SSR build is a throwaway Node bundle for rendering only.
+			!isSSRBuild && html,
+			!isSSRBuild && ilib && ilib.plugin,
+			!isSSRBuild && webosMeta,
+			// Type-checking/linting already ran once against the client
+			// build; no need to duplicate against the SSR build of the same
+			// source.
+			!isSSRBuild && typeCheckPlugin,
+			!isSSRBuild && eslintPlugin,
 			assetResourcePlugin,
-			terserPlugin
+			!isSSRBuild && terserPlugin
 		].filter(Boolean),
 		define
 	};
