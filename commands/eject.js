@@ -31,7 +31,6 @@ const internal = [
 	'babel-plugin-transform-rename-import',
 	'glob',
 	'global-modules',
-	'less-plugin-npm-import',
 	'semver',
 	'tar',
 	'validate-npm-package-name'
@@ -54,6 +53,9 @@ const bareTasks = {
 // automatically (no `cpy` step) and loads the generated root `vite.config.mjs`.
 // Reuse the same `rimraf` pin as the webpack bare setup so the version lives in one place.
 const bareDepsVite = {rimraf: bareDeps.rimraf};
+// esbuild-pack.js already copies public/ itself (like the non-bare path),
+// so no cpy-cli is needed here either, same reasoning as bareDepsVite.
+const bareDepsEsbuild = {rimraf: bareDeps.rimraf};
 const bareTasksVite = {
 	serve: 'vite',
 	pack: 'vite build --mode development',
@@ -67,6 +69,29 @@ const bareTasksVite = {
 };
 // Bundler-driven scripts that understand `--vite`; used to steer a non-bare Vite eject.
 const VITE_CAPABLE_SCRIPTS = ['serve', 'pack'];
+// esbuild variants of the barebones setup (used with `--esbuild`). Unlike
+// webpack/Vite, esbuild's own CLI binary has no `--config <file>` mechanism
+// that can load a JS module returning build options — all of the Babel/CSS
+// Modules/ilib/HTML-generation/etc. transform logic in config/esbuild.config.js
+// only runs via esbuild's *JS API*, called from commands/esbuild-*.js. So
+// even a "bare" esbuild eject still drives serve/pack through
+// scripts/{serve,pack}.js --esbuild rather than a raw `esbuild ...` CLI
+// invocation — see the --bare/--esbuild handling in api() below, which keeps
+// the scripts/ folder for this bundler choice specifically. The "bare"
+// trimming still applies everywhere else (dependencies, ESLint, etc.).
+const bareTasksEsbuild = {
+	serve: 'node ./scripts/serve.js --esbuild',
+	pack: 'node ./scripts/pack.js --esbuild',
+	'pack-p': 'node ./scripts/pack.js --esbuild --production',
+	watch: 'node ./scripts/pack.js --esbuild --watch',
+	clean: 'rimraf build dist',
+	lint: bareTasks.lint,
+	license: bareTasks.license,
+	test: bareTasks.test,
+	'test-watch': bareTasks['test-watch']
+};
+// Bundler-driven scripts that understand `--esbuild`; used to steer a non-bare esbuild eject.
+const ESBUILD_CAPABLE_SCRIPTS = ['serve', 'pack'];
 // The Enact Vite config (config/vite.config.js) is a factory `(mode) => InlineConfig`,
 // not the object/`{command, mode}` shape Vite's CLI expects. A bare Vite eject writes
 // this thin root config to adapt it so `vite` / `vite build` work directly.
@@ -76,6 +101,15 @@ const VITE_ROOT_CONFIG =
 	'// config/vite.config.js exports `(mode) => InlineConfig`; Vite calls with {command, mode}.\n' +
 	"const enactViteConfig = require('./config/vite.config.js');\n" +
 	"export default ({mode}) => enactViteConfig(mode || 'production');\n";
+
+// esbuild's internal ESLint invocation (config/esbuild.config.js) passes
+// --config explicitly pre-eject; that gets stripped on eject (see the
+// @remove-on-eject markers around it), so ESLint falls back to its own
+// auto-discovery from the project root — which needs a real eslint.config.js
+// (ESLint 9 flat config), not the legacy package.json#eslintConfig field
+// configurePackage() writes. Reuse the copied config/eslintWebpackPluginConfig.js
+// (already a valid flat-config module) via a thin root adapter.
+const ESLINT_ROOT_CONFIG = "module.exports = require('./config/eslintWebpackPluginConfig');\n";
 
 function displayHelp () {
 	let e = 'node ' + path.relative(process.cwd(), __filename);
@@ -91,6 +125,11 @@ function displayHelp () {
 	console.log('    --vite            [Experimental] Use Vite instead of webpack:');
 	console.log('                      alone, points the serve/pack scripts at the');
 	console.log('                      Vite path; with --bare, emits a bare Vite setup');
+	console.log('    --esbuild         [Experimental] Use esbuild instead of webpack:');
+	console.log('                      alone, points the serve/pack scripts at the');
+	console.log('                      esbuild path; with --bare, dependencies/ESLint');
+	console.log('                      are still trimmed, but scripts/ is kept since');
+	console.log('                      esbuild has no config-file-loading CLI of its own');
 	console.log('    -v, --version     Display version information');
 	console.log('    -h, --help        Display help information');
 	console.log();
@@ -141,13 +180,13 @@ function checkGitStatus () {
 	if (status) {
 		throw new Error(
 			chalk.red('This git repository has untracked files or uncommitted changes:') +
-				'\n\n' +
-				status
-					.split('\n')
-					.map(line => line.match(/ .*/g)[0].trim())
-					.join('\n') +
-				'\n\n' +
-				chalk.red('Remove untracked files, stash or commit any changes, and try again.')
+			'\n\n' +
+			status
+				.split('\n')
+				.map(line => line.match(/ .*/g)[0].trim())
+				.join('\n') +
+			'\n\n' +
+			chalk.red('Remove untracked files, stash or commit any changes, and try again.')
 		);
 	}
 }
@@ -156,9 +195,9 @@ function verifyAbsent ({dest}) {
 	if (fs.existsSync(dest)) {
 		throw new Error(
 			`"${dest}" already exists in your app folder. We cannot ` +
-				'continue as you would lose all the changes in that file or directory. ' +
-				'Please move or delete it (maybe make a copy for backup) and run this ' +
-				'command again.'
+			'continue as you would lose all the changes in that file or directory. ' +
+			'Please move or delete it (maybe make a copy for backup) and run this ' +
+			'command again.'
 		);
 	}
 }
@@ -183,15 +222,21 @@ function copySanitizedFile ({src, dest}) {
 	fs.writeFileSync(dest, data, {encoding: 'utf8'});
 }
 
-function configurePackage (bare, vite) {
+function configurePackage (bare, vite, esbuild) {
 	const own = require('../package.json');
 	const app = require(path.resolve('package.json'));
 	const backup = JSON.stringify(app, null, 2) + os.EOL;
 	const availScripts = fs.existsSync('./scripts') ? fs.readdirSync('./scripts').map(f => f.replace(/\.js$/, '')) : [];
 	const enactCLI = new RegExp('enact (' + availScripts.join('|') + ')', 'g');
-	// Select the webpack or Vite flavor of the barebones tasks/deps.
-	const tasks = vite ? bareTasksVite : bareTasks;
-	const deps = vite ? bareDepsVite : bareDeps;
+	// Select the webpack, Vite, or esbuild flavor of the barebones tasks/deps.
+	// esbuild has no bare-specific dependency set of its own — every package
+	// its pipeline needs (esbuild, @babel/core, postcss + plugins, less,
+	// sass, ejs, resolve, graceful-fs, fast-glob, import-fresh, ...) is
+	// already in `own.dependencies` and not in `internal`/`enhanced`, so the
+	// generic merge loop below picks them all up correctly for both bare and
+	// non-bare esbuild ejects without needing a separate list here.
+	const tasks = esbuild ? bareTasksEsbuild : vite ? bareTasksVite : bareTasks;
+	const deps = esbuild ? bareDepsEsbuild : vite ? bareDepsVite : bareDeps;
 	const eslintConfig = {extends: 'enact'};
 	const eslintIgnore = ['build/*', 'config/*', 'dist/*', 'node_modules/*', 'scripts/*'];
 	const conflicts = [];
@@ -233,12 +278,19 @@ function configurePackage (bare, vite) {
 			app.scripts[key] = tasks[key];
 		} else if (!bare) {
 			app.scripts[key] = app.scripts[key].replace(enactCLI, (match, name) => {
-				// In a non-bare Vite eject, steer the bundler-driven scripts down the
-				// Vite path so `npm run serve`/`pack` use Vite, not webpack. Only the
-				// commands that understand the flag (serve, pack) get it.
-				const viteFlag = vite && VITE_CAPABLE_SCRIPTS.includes(name) ? ' --vite' : '';
-				console.log(`	Updating npm task ${chalk.cyan(key)} to use ` + chalk.cyan(`scripts/${name}.js${viteFlag}`));
-				return `node ./scripts/${name}.js${viteFlag}`;
+				// In a non-bare Vite/esbuild eject, steer the bundler-driven scripts
+				// down that path so `npm run serve`/`pack` use it instead of
+				// webpack. Only the commands that understand the flag
+				// (serve, pack) get it. esbuild and vite are mutually
+				// exclusive (validated in api() before we ever get here).
+				const bundlerFlag =
+					esbuild && ESBUILD_CAPABLE_SCRIPTS.includes(name) ?
+						' --esbuild' :
+						vite && VITE_CAPABLE_SCRIPTS.includes(name) ?
+							' --vite' :
+							'';
+				console.log(`	Updating npm task ${chalk.cyan(key)} to use ` + chalk.cyan(`scripts/${name}.js${bundlerFlag}`));
+				return `node ./scripts/${name}.js${bundlerFlag}`;
 			});
 		}
 	});
@@ -295,8 +347,17 @@ function npmInstall () {
 	});
 }
 
-function api ({bare = false, vite = false} = {}) {
-	if (bare) {
+function api ({bare = false, vite = false, esbuild = false} = {}) {
+	if (vite && esbuild) {
+		return Promise.reject(new Error('--vite and --esbuild cannot be used together; choose one.'));
+	}
+	// Every other bare eject (webpack, Vite) can drop the scripts/ folder
+	// because their real CLI binaries can load a JS config file directly.
+	// esbuild's CLI has no equivalent — all of config/esbuild.config.js's
+	// Babel/CSS Modules/ilib/HTML-generation logic only runs via esbuild's
+	// JS API, called from commands/esbuild-*.js — so a bare esbuild eject
+	// keeps scripts/ and drives serve/pack through it (see bareTasksEsbuild).
+	if (bare && !esbuild) {
 		assets.pop();
 	}
 	return validateEject().then(({abort = false, files = []}) => {
@@ -312,9 +373,23 @@ function api ({bare = false, vite = false} = {}) {
 				console.log(`	Adding ${chalk.cyan('vite.config.mjs')} to the project`);
 				fs.writeFileSync('vite.config.mjs', VITE_ROOT_CONFIG, {encoding: 'utf8'});
 			}
+			if (bare && esbuild) {
+				console.log(
+					chalk.yellow(
+						'NOTICE: esbuild has no config-file-loading CLI of its own, so scripts/ ' +
+						'is kept even with --bare — serve/pack still run through ' +
+						'scripts/{serve,pack}.js --esbuild. Dependencies and ESLint config are ' +
+						'still trimmed as usual.'
+					)
+				);
+			}
 			console.log();
 			console.log(chalk.cyan('Configuring package.json'));
-			const con = configurePackage(bare, vite);
+			const con = configurePackage(bare, vite, esbuild);
+			if (esbuild) {
+				console.log(`	Adding ${chalk.cyan('eslint.config.js')} to the project`);
+				fs.writeFileSync('eslint.config.js', ESLINT_ROOT_CONFIG, {encoding: 'utf8'});
+			}
 			console.log();
 			console.log(chalk.cyan('Running npm install...'));
 			return npmInstall().then(() => {
@@ -325,8 +400,8 @@ function api ({bare = false, vite = false} = {}) {
 					console.log(
 						chalk.yellow(
 							`NOTICE: Existing ${list} settings within the package.json ` +
-								'were overwritten. A backup of the original content has been ' +
-								'preserved to package.old.json.'
+							'were overwritten. A backup of the original content has been ' +
+							'preserved to package.old.json.'
 						)
 					);
 				}
@@ -340,7 +415,7 @@ function api ({bare = false, vite = false} = {}) {
 
 function cli (args) {
 	const opts = minimist(args, {
-		boolean: ['bare', 'vite', 'help'],
+		boolean: ['bare', 'vite', 'esbuild', 'help'],
 		alias: {b: 'bare', h: 'help'}
 	});
 	if (opts.help) displayHelp();
@@ -349,7 +424,7 @@ function cli (args) {
 
 	import('chalk').then(({default: _chalk}) => {
 		chalk = _chalk;
-		api({bare: opts.bare, vite: opts.vite}).catch(err => {
+		api({bare: opts.bare, vite: opts.vite, esbuild: opts.esbuild}).catch(err => {
 			console.error(chalk.red('ERROR: ') + err.message);
 			process.exit(1);
 		});
