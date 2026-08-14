@@ -15894,12 +15894,6 @@
         "url": "https://opencollective.com/eslint"
       }
     },
-    "node_modules/@eslint/eslintrc/node_modules/argparse": {
-      "version": "2.0.1",
-      "resolved": "https://registry.npmjs.org/argparse/-/argparse-2.0.1.tgz",
-      "integrity": "sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==",
-      "license": "Python-2.0"
-    },
     "node_modules/@eslint/eslintrc/node_modules/globals": {
       "version": "14.0.0",
       "resolved": "https://registry.npmjs.org/globals/-/globals-14.0.0.tgz",
@@ -16126,6 +16120,15 @@
         "node": ">=8"
       }
     },
+    "node_modules/@istanbuljs/load-nyc-config/node_modules/argparse": {
+      "version": "1.0.10",
+      "resolved": "https://registry.npmjs.org/argparse/-/argparse-1.0.10.tgz",
+      "integrity": "sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==",
+      "license": "MIT",
+      "dependencies": {
+        "sprintf-js": "~1.0.2"
+      }
+    },
     "node_modules/@istanbuljs/load-nyc-config/node_modules/find-up": {
       "version": "4.1.0",
       "resolved": "https://registry.npmjs.org/find-up/-/find-up-4.1.0.tgz",
@@ -16137,6 +16140,19 @@
       },
       "engines": {
         "node": ">=8"
+      }
+    },
+    "node_modules/@istanbuljs/load-nyc-config/node_modules/js-yaml": {
+      "version": "3.15.1",
+      "resolved": "https://registry.npmjs.org/js-yaml/-/js-yaml-3.15.1.tgz",
+      "integrity": "sha512-S99WuO3HlhO3XN41EtYUNl9zzXjoJx7QvmipxsJVxtCBT0YHEFy+iOJhjSvrmV12nYhWpZaM8lPHkJm0yUMbag==",
+      "license": "MIT",
+      "dependencies": {
+        "argparse": "^1.0.7",
+        "esprima": "^4.0.0"
+      },
+      "bin": {
+        "js-yaml": "bin/js-yaml.js"
       }
     },
     "node_modules/@istanbuljs/load-nyc-config/node_modules/locate-path": {
@@ -20244,13 +20260,10 @@
       }
     },
     "node_modules/argparse": {
-      "version": "1.0.10",
-      "resolved": "https://registry.npmjs.org/argparse/-/argparse-1.0.10.tgz",
-      "integrity": "sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==",
-      "license": "MIT",
-      "dependencies": {
-        "sprintf-js": "~1.0.2"
-      }
+      "version": "2.0.1",
+      "resolved": "https://registry.npmjs.org/argparse/-/argparse-2.0.1.tgz",
+      "integrity": "sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==",
+      "license": "Python-2.0"
     },
     "node_modules/aria-query": {
       "version": "5.3.0",
@@ -34924,19 +34937,6 @@
       "integrity": "sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==",
       "license": "MIT"
     },
-    "node_modules/js-yaml": {
-      "version": "3.15.1",
-      "resolved": "https://registry.npmjs.org/js-yaml/-/js-yaml-3.15.1.tgz",
-      "integrity": "sha512-S99WuO3HlhO3XN41EtYUNl9zzXjoJx7QvmipxsJVxtCBT0YHEFy+iOJhjSvrmV12nYhWpZaM8lPHkJm0yUMbag==",
-      "license": "MIT",
-      "dependencies": {
-        "argparse": "^1.0.7",
-        "esprima": "^4.0.0"
-      },
-      "bin": {
-        "js-yaml": "bin/js-yaml.js"
-      }
-    },
     "node_modules/jsdom": {
       "version": "20.0.3",
       "resolved": "https://registry.npmjs.org/jsdom/-/jsdom-20.0.3.tgz",
@@ -37397,12 +37397,6 @@
           "optional": true
         }
       }
-    },
-    "node_modules/postcss-loader/node_modules/argparse": {
-      "version": "2.0.1",
-      "resolved": "https://registry.npmjs.org/argparse/-/argparse-2.0.1.tgz",
-      "integrity": "sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==",
-      "license": "Python-2.0"
     },
     "node_modules/postcss-loader/node_modules/cosmiconfig": {
       "version": "9.0.2",
