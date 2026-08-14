@@ -26,7 +26,32 @@
  */
 const fs = require('fs');
 const path = require('path');
-const {runMkSnapshot, writeSnapshotAppinfo} = require('@enact/dev-utils/mixins/vite-snapshot');
+// Tolerant load, same reasoning/pattern as esbuild-pack.js and pack.js: only
+// needed by --snapshot. `applyEsbuildSnapshotBuild` below doesn't touch these
+// (plain fs/path + the facade), so it stays usable either way; only the two
+// functions re-exported at the bottom (called solely from esbuild-isomorphic.js's
+// `opts.snapshot` branch) need the guard.
+let viteSnap;
+try {
+	viteSnap = require('@enact/dev-utils/mixins/vite-snapshot');
+} catch (e) {
+	// Optional; see above. runMkSnapshot/writeSnapshotAppinfo throw a clear error if used without it.
+}
+function requireViteSnap () {
+	if (!viteSnap) {
+		throw new Error(
+			'--snapshot requires @enact/dev-utils/mixins/vite-snapshot, which is not available. ' +
+			'Update @enact/dev-utils to a version that includes it.'
+		);
+	}
+	return viteSnap;
+}
+function runMkSnapshot (...args) {
+	return requireViteSnap().runMkSnapshot(...args);
+}
+function writeSnapshotAppinfo (...args) {
+	return requireViteSnap().writeSnapshotAppinfo(...args);
+}
 
 const HELPER_DIR = path.join(
 	path.dirname(require.resolve('@enact/dev-utils/package.json')),

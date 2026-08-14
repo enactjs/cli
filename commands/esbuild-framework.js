@@ -18,7 +18,16 @@
 const path = require('path');
 const fs = require('fs-extra');
 const {optionParser: app} = require('@enact/dev-utils');
-const viteFw = require('@enact/dev-utils/mixins/vite-framework');
+// Tolerant load, same reasoning/pattern as esbuild-pack.js and pack.js. Unlike
+// those, --framework needs viteFw for its entire body, so this module is only
+// ever require()'d lazily from within esbuild-pack.js's `if (opts.framework)`
+// branch — a missing mixin here only breaks --framework, not every pack call.
+let viteFw;
+try {
+	viteFw = require('@enact/dev-utils/mixins/vite-framework');
+} catch (e) {
+	// Optional; see above. esbuildFramework() throws a clear error below.
+}
 
 const FRAMEWORK_CSS = 'enact.css';
 const DROP_PLUGIN_NAMES = new Set([
@@ -33,6 +42,12 @@ const DROP_PLUGIN_NAMES = new Set([
 ]);
 
 async function esbuildFramework (opts, chalk, esbuild, configFactory) {
+	if (!viteFw) {
+		throw new Error(
+			'--framework requires @enact/dev-utils/mixins/vite-framework, which is not available. ' +
+			'Update @enact/dev-utils to a version that includes it.'
+		);
+	}
 	const {createRequire} = require('module');
 	const appRequire = createRequire(path.join(app.context, 'package.json'));
 

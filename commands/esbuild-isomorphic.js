@@ -44,7 +44,14 @@ const importFresh = require('import-fresh');
 const FileXHR = require('@enact/dev-utils/plugins/PrerenderPlugin/FileXHR');
 const templates = require('@enact/dev-utils/plugins/PrerenderPlugin/templates');
 const {optionParser: app} = require('@enact/dev-utils');
-const viteFw = require('@enact/dev-utils/mixins/vite-framework');
+// Tolerant load, same reasoning/pattern as esbuild-pack.js and pack.js: only
+// needed here by --isomorphic/--snapshot combined with --externals.
+let viteFw;
+try {
+	viteFw = require('@enact/dev-utils/mixins/vite-framework');
+} catch (e) {
+	// Optional; see above. `--externals` throws a clear error if used without it.
+}
 const {writeEsbuildStatsReport} = require('./esbuild-stats');
 const {applyEsbuildExternals, jsAssetUrls, markScriptsAsModule} = require('./esbuild-externals');
 const {applyEsbuildSnapshotBuild, runMkSnapshot, writeSnapshotAppinfo} = require('./esbuild-snapshot');
@@ -266,11 +273,10 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 	}
 
 	const output = opts.output ? path.resolve(opts.output) : path.resolve('./dist');
-	const locales = parseLocales(app.context, opts.locales);
-	if (locales.length === 0) {
-		console.log(chalk.yellow('NOTICE: --isomorphic given but no locales resolved from --locales; skipping prerendering.'));
-		return;
-	}
+	// Match the Vite path's default (pack.js's `viteIsomorphic`): --isomorphic/--snapshot
+	// without an explicit --locales still prerenders, defaulting to en-US, rather than
+	// silently skipping prerendering and falling back to a plain client build.
+	const locales = opts.locales ? parseLocales(app.context, opts.locales) || ['en-US'] : ['en-US'];
 
 	console.log(
 		opts.snapshot && !opts.externals ?
@@ -318,6 +324,12 @@ async function esbuildIsomorphicBuild (opts, chalk, esbuild, configFactory) {
 	const collected = new Set();
 	let manifest = null;
 	if (opts.externals) {
+		if (!viteFw) {
+			throw new Error(
+				'--externals requires @enact/dev-utils/mixins/vite-framework, which is not available. ' +
+				'Update @enact/dev-utils to a version that includes it.'
+			);
+		}
 		manifest = viteFw.readManifest(path.resolve(opts.externals));
 		applyEsbuildExternals(clientOptions, collected, manifest, {polyfill: opts['externals-polyfill']});
 	}

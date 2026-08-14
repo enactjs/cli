@@ -18,7 +18,18 @@ const path = require('path');
 const {filesize} = require('filesize');
 const fs = require('fs-extra');
 const {optionParser: app} = require('@enact/dev-utils');
-const viteFw = require('@enact/dev-utils/mixins/vite-framework');
+// The Vite mixins live in @enact/dev-utils and are only needed by --externals
+// below. They're absent when @enact/dev-utils is the published package
+// rather than the local source (or a dev-utils branch that hasn't merged the
+// Vite mixin work in yet), so load tolerantly — a plain `enact pack --esbuild`
+// (no --externals) must not fail to load just because it's missing. See
+// pack.js's own tolerant load of the same mixin for the reference pattern.
+let viteFw;
+try {
+	viteFw = require('@enact/dev-utils/mixins/vite-framework');
+} catch (e) {
+	// Optional; see above. `--externals` throws a clear error if used without it.
+}
 const {writeEsbuildStatsReport} = require('./esbuild-stats');
 const {applyEsbuildExternals, jsAssetUrls, markScriptsAsModule} = require('./esbuild-externals');
 
@@ -144,6 +155,12 @@ async function esbuildBuild (opts, chalk, stripAnsi) {
 	const collected = new Set();
 	let manifest = null;
 	if (opts.externals) {
+		if (!viteFw) {
+			throw new Error(
+				'--externals requires @enact/dev-utils/mixins/vite-framework, which is not available. ' +
+				'Update @enact/dev-utils to a version that includes it.'
+			);
+		}
 		manifest = viteFw.readManifest(path.resolve(opts.externals));
 		applyEsbuildExternals(buildOptions, collected, manifest, {polyfill: opts['externals-polyfill']});
 	}
