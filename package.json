@@ -89,7 +89,7 @@
     "postcss-flexbugs-fixes": "^5.0.2",
     "postcss-loader": "^8.2.1",
     "postcss-normalize": "^13.0.1",
-    "postcss-preset-env": "^11.3.2",
+    "postcss-preset-env": "^10.6.1",
     "postcss-resolution-independence": "github:enactjs/postcss-resolution-independence#release/1.1.12",
     "prompts": "^2.4.2",
     "react": "^19.2.7",
