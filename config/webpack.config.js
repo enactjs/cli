@@ -16,7 +16,10 @@
 const fs = require('fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const ESLintPlugin = require('eslint-webpack-plugin');
+// Replaces eslint-webpack-plugin: runs ESLint as an overlapped child process
+// instead of in-process work gated behind webpack's own module graph. See
+// eslint-overlap-plugin.js's file comment for the profiling data and reasoning.
+const ESLintPlugin = require('./eslint-overlap-plugin');
 const ForkTsCheckerWebpackPlugin =
 	process.env.TSC_COMPILE_ON_ERROR === 'true' ?
 		require('react-dev-utils/ForkTsCheckerWarningWebpackPlugin') :
@@ -66,6 +69,8 @@ module.exports = function (
 
 	process.env.NODE_ENV = env || process.env.NODE_ENV;
 	const isEnvProduction = process.env.NODE_ENV === 'production';
+	// See the `minimizer` block below for the full rationale/trade-off.
+	const useEsbuildMinify = process.env.ENACT_WEBPACK_MINIFY === 'esbuild';
 
 	const publicPath = getPublicUrlOrPath(!isEnvProduction, app.publicUrl, process.env.PUBLIC_URL).replace(/^\/$/, '');
 
@@ -402,8 +407,18 @@ module.exports = function (
 								babelrc: false,
 								// This is a feature of `babel-loader` for webpack (not Babel itself).
 								// It enables caching results in ./node_modules/.cache/babel-loader/
-								// directory for faster rebuilds.
-								cacheDirectory: !isEnvProduction,
+								// directory for faster rebuilds. Enabled unconditionally (this used
+								// to be `!isEnvProduction`, inherited from create-react-app's own
+								// default, whose reasoning — CI production builds are one-shot, so
+								// there's nothing to warm from — doesn't hold for a repeated local
+								// `pack -p` or a persistent CI worker reusing `node_modules/.cache`
+								// across builds, both of which are real usage patterns here. The
+								// cache is content-addressed (babel config + file hash), so there's
+								// no staleness risk from enabling it. Measured (qa-a11y, interleaved,
+								// config untouched between runs): production `pack -p` warm rebuilds
+								// went from 0% improvement over cold to ~14%, matching dev mode's
+								// existing cache benefit.
+								cacheDirectory: true,
 								cacheCompression: false,
 								compact: isEnvProduction
 							}
@@ -507,48 +522,74 @@ module.exports = function (
 		optimization: {
 			minimize: isEnvProduction,
 			// These are only used in production mode
+			// ENACT_WEBPACK_MINIFY=esbuild opts into esbuild's minifier for both JS
+			// and CSS instead of the Terser/cssnano defaults below — dramatically
+			// faster (esbuild's minifier is what makes the --esbuild path's own
+			// production builds fast), at the same ~10-13% larger-gzip-output cost
+			// already documented for the Vite/esbuild paths' own minifier-choice
+			// knobs (ENACT_VITE_MINIFY=esbuild / ENACT_ESBUILD_MINIFY=terser — this
+			// is the webpack-side counterpart, filling the same gap). Both
+			// terser-webpack-plugin and css-minimizer-webpack-plugin ship this
+			// swap built in (`TerserPlugin.esbuildMinify` /
+			// `CssMinimizerPlugin.esbuildMinify`) — esbuild is already a direct
+			// dependency of this package (the --esbuild bundler path), not an
+			// optional peer dep some environments might be missing.
 			minimizer: [
-				new TerserPlugin({
-					terserOptions: {
-						parse: {
-							// we want uglify-js to parse ecma 8 code. However, we don't want it
-							// to apply any minfication steps that turns valid ecma 5 code
-							// into invalid ecma 5 code. This is why the 'compress' and 'output'
-							// sections only apply transformations that are ecma 5 safe
-							// https://github.com/facebook/create-react-app/pull/4234
-							ecma: 8
-						},
-						compress: {
-							ecma: 5,
-							warnings: false,
-							// Disabled because of an issue with Uglify breaking seemingly valid code:
-							// https://github.com/facebook/create-react-app/issues/2376
-							// Pending further investigation:
-							// https://github.com/mishoo/UglifyJS2/issues/2011
-							comparisons: false,
-							// Disabled because of an issue with Terser breaking valid code:
-							// https://github.com/facebook/create-react-app/issues/5250
-							// Pending futher investigation:
-							// https://github.com/terser-js/terser/issues/120
-							inline: 2
-						},
-						mangle: {
-							safari10: true
-						},
-						output: {
-							ecma: 5,
-							comments: false,
-							// Turned on because emoji and regex is not minified properly using default
-							// https://github.com/facebook/create-react-app/issues/2488
-							// eslint-disable-next-line camelcase
-							ascii_only: true
+				new TerserPlugin(
+					useEsbuildMinify ?
+						{
+							// esbuild's own minifier: no equivalent for the CRA-era safety
+							// options below (ecma5/safari10 mangle/ascii_only output aren't
+							// concepts esbuild's TransformOptions has), so this path relies
+							// on esbuild's own defaults instead of trying to replicate them —
+							// same acceptance the --esbuild bundler path itself already makes
+							// (its own minify step is a plain `minify: true`, no custom
+							// minimizerOptions either).
+							minify: TerserPlugin.esbuildMinify,
+							parallel: true
+						} :
+						{
+							terserOptions: {
+								parse: {
+									// we want uglify-js to parse ecma 8 code. However, we don't want it
+									// to apply any minfication steps that turns valid ecma 5 code
+									// into invalid ecma 5 code. This is why the 'compress' and 'output'
+									// sections only apply transformations that are ecma 5 safe
+									// https://github.com/facebook/create-react-app/pull/4234
+									ecma: 8
+								},
+								compress: {
+									ecma: 5,
+									warnings: false,
+									// Disabled because of an issue with Uglify breaking seemingly valid code:
+									// https://github.com/facebook/create-react-app/issues/2376
+									// Pending further investigation:
+									// https://github.com/mishoo/UglifyJS2/issues/2011
+									comparisons: false,
+									// Disabled because of an issue with Terser breaking valid code:
+									// https://github.com/facebook/create-react-app/issues/5250
+									// Pending futher investigation:
+									// https://github.com/terser-js/terser/issues/120
+									inline: 2
+								},
+								mangle: {
+									safari10: true
+								},
+								output: {
+									ecma: 5,
+									comments: false,
+									// Turned on because emoji and regex is not minified properly using default
+									// https://github.com/facebook/create-react-app/issues/2488
+									// eslint-disable-next-line camelcase
+									ascii_only: true
+								}
+							},
+							// Use multi-process parallel running to improve the build speed
+							// Default number of concurrent runs: os.cpus().length - 1
+							parallel: true
 						}
-					},
-					// Use multi-process parallel running to improve the build speed
-					// Default number of concurrent runs: os.cpus().length - 1
-					parallel: true
-				}),
-				new CssMinimizerPlugin()
+				),
+				new CssMinimizerPlugin(useEsbuildMinify ? {minify: CssMinimizerPlugin.esbuildMinify} : undefined)
 			],
 			splitChunks: noSplitCSS && {
 				cacheGroups: {
@@ -670,11 +711,7 @@ module.exports = function (
 				}),
 			!noLinting &&
 				new ESLintPlugin({
-					// Plugin options
-					configType: 'flat',
-					extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx'],
 					formatter: require.resolve('react-dev-utils/eslintFormatter'),
-					eslintPath: require.resolve('eslint'),
 					// @remove-on-eject-begin
 					overrideConfigFile: require.resolve('./eslintWebpackPluginConfig'),
 					// @remove-on-eject-end
