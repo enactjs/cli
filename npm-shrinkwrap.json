@@ -7525,6 +7525,9 @@
       "cpu": [
         "arm64"
       ],
+      "libc": [
+        "glibc"
+      ],
       "license": "MIT",
       "optional": true,
       "os": [
@@ -7537,6 +7540,9 @@
       "integrity": "sha512-KQ3Lki6l+Pz1k/eBipN41ES+YUK30beLGb9YqcB1O542cyLCNE6GaxrfcY3T6EezmGGk84wb5XyO9loTM9tkcA==",
       "cpu": [
         "arm64"
+      ],
+      "libc": [
+        "musl"
       ],
       "license": "MIT",
       "optional": true,
@@ -7551,6 +7557,9 @@
       "cpu": [
         "loong64"
       ],
+      "libc": [
+        "glibc"
+      ],
       "license": "MIT",
       "optional": true,
       "os": [
@@ -7563,6 +7572,9 @@
       "integrity": "sha512-jiuG/Obbel7uw1PwHNFfrkiKhLAF6mnyZ6aWlOAVN9WqKm8v0OFGnciJIHu8+CMvXLQ8AD51LPzAoUfT21D5Ew==",
       "cpu": [
         "loong64"
+      ],
+      "libc": [
+        "musl"
       ],
       "license": "MIT",
       "optional": true,
@@ -7577,6 +7589,9 @@
       "cpu": [
         "ppc64"
       ],
+      "libc": [
+        "glibc"
+      ],
       "license": "MIT",
       "optional": true,
       "os": [
@@ -7589,6 +7604,9 @@
       "integrity": "sha512-0CVdx6lcnT3Q9inOH8tsMIOJ6ImndllMjqJHg8RLVdB7Vq4SfkEXl9mCSsVNuNA4MCYycRicCUxPCabVHJRr6A==",
       "cpu": [
         "riscv64"
+      ],
+      "libc": [
+        "glibc"
       ],
       "license": "MIT",
       "optional": true,
@@ -7603,6 +7621,9 @@
       "cpu": [
         "riscv64"
       ],
+      "libc": [
+        "musl"
+      ],
       "license": "MIT",
       "optional": true,
       "os": [
@@ -7615,6 +7636,9 @@
       "integrity": "sha512-HYJtLfXq94q8iZNFT1lknx258wlkkWhZeUXJRqzKBBUJ00CvZ+N33zgbCqimLjsyw5Va6uUxhVa12mI+kaveEw==",
       "cpu": [
         "s390x"
+      ],
+      "libc": [
+        "glibc"
       ],
       "license": "MIT",
       "optional": true,
@@ -7629,6 +7653,9 @@
       "cpu": [
         "x64"
       ],
+      "libc": [
+        "glibc"
+      ],
       "license": "MIT",
       "optional": true,
       "os": [
@@ -7641,6 +7668,9 @@
       "integrity": "sha512-azrt6+5ydLd8Vt210AAFis/lZevSfPw93EJRIJG+xPu4WCJ8K0kppCTpMyLPcKT7H15M4Jnt2tMp5bOvCkRC6A==",
       "cpu": [
         "x64"
+      ],
+      "libc": [
+        "musl"
       ],
       "license": "MIT",
       "optional": true,
