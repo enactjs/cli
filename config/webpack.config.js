@@ -69,8 +69,6 @@ module.exports = function (
 
 	process.env.NODE_ENV = env || process.env.NODE_ENV;
 	const isEnvProduction = process.env.NODE_ENV === 'production';
-	// See the `minimizer` block below for the full rationale/trade-off.
-	const useEsbuildMinify = process.env.ENACT_WEBPACK_MINIFY === 'esbuild';
 
 	const publicPath = getPublicUrlOrPath(!isEnvProduction, app.publicUrl, process.env.PUBLIC_URL).replace(/^\/$/, '');
 
@@ -522,74 +520,48 @@ module.exports = function (
 		optimization: {
 			minimize: isEnvProduction,
 			// These are only used in production mode
-			// ENACT_WEBPACK_MINIFY=esbuild opts into esbuild's minifier for both JS
-			// and CSS instead of the Terser/cssnano defaults below — dramatically
-			// faster (esbuild's minifier is what makes the --esbuild path's own
-			// production builds fast), at the same ~10-13% larger-gzip-output cost
-			// already documented for the Vite/esbuild paths' own minifier-choice
-			// knobs (ENACT_VITE_MINIFY=esbuild / ENACT_ESBUILD_MINIFY=terser — this
-			// is the webpack-side counterpart, filling the same gap). Both
-			// terser-webpack-plugin and css-minimizer-webpack-plugin ship this
-			// swap built in (`TerserPlugin.esbuildMinify` /
-			// `CssMinimizerPlugin.esbuildMinify`) — esbuild is already a direct
-			// dependency of this package (the --esbuild bundler path), not an
-			// optional peer dep some environments might be missing.
 			minimizer: [
-				new TerserPlugin(
-					useEsbuildMinify ?
-						{
-							// esbuild's own minifier: no equivalent for the CRA-era safety
-							// options below (ecma5/safari10 mangle/ascii_only output aren't
-							// concepts esbuild's TransformOptions has), so this path relies
-							// on esbuild's own defaults instead of trying to replicate them —
-							// same acceptance the --esbuild bundler path itself already makes
-							// (its own minify step is a plain `minify: true`, no custom
-							// minimizerOptions either).
-							minify: TerserPlugin.esbuildMinify,
-							parallel: true
-						} :
-						{
-							terserOptions: {
-								parse: {
-									// we want uglify-js to parse ecma 8 code. However, we don't want it
-									// to apply any minfication steps that turns valid ecma 5 code
-									// into invalid ecma 5 code. This is why the 'compress' and 'output'
-									// sections only apply transformations that are ecma 5 safe
-									// https://github.com/facebook/create-react-app/pull/4234
-									ecma: 8
-								},
-								compress: {
-									ecma: 5,
-									warnings: false,
-									// Disabled because of an issue with Uglify breaking seemingly valid code:
-									// https://github.com/facebook/create-react-app/issues/2376
-									// Pending further investigation:
-									// https://github.com/mishoo/UglifyJS2/issues/2011
-									comparisons: false,
-									// Disabled because of an issue with Terser breaking valid code:
-									// https://github.com/facebook/create-react-app/issues/5250
-									// Pending futher investigation:
-									// https://github.com/terser-js/terser/issues/120
-									inline: 2
-								},
-								mangle: {
-									safari10: true
-								},
-								output: {
-									ecma: 5,
-									comments: false,
-									// Turned on because emoji and regex is not minified properly using default
-									// https://github.com/facebook/create-react-app/issues/2488
-									// eslint-disable-next-line camelcase
-									ascii_only: true
-								}
-							},
-							// Use multi-process parallel running to improve the build speed
-							// Default number of concurrent runs: os.cpus().length - 1
-							parallel: true
+				new TerserPlugin({
+					terserOptions: {
+						parse: {
+							// we want uglify-js to parse ecma 8 code. However, we don't want it
+							// to apply any minfication steps that turns valid ecma 5 code
+							// into invalid ecma 5 code. This is why the 'compress' and 'output'
+							// sections only apply transformations that are ecma 5 safe
+							// https://github.com/facebook/create-react-app/pull/4234
+							ecma: 8
+						},
+						compress: {
+							ecma: 5,
+							warnings: false,
+							// Disabled because of an issue with Uglify breaking seemingly valid code:
+							// https://github.com/facebook/create-react-app/issues/2376
+							// Pending further investigation:
+							// https://github.com/mishoo/UglifyJS2/issues/2011
+							comparisons: false,
+							// Disabled because of an issue with Terser breaking valid code:
+							// https://github.com/facebook/create-react-app/issues/5250
+							// Pending futher investigation:
+							// https://github.com/terser-js/terser/issues/120
+							inline: 2
+						},
+						mangle: {
+							safari10: true
+						},
+						output: {
+							ecma: 5,
+							comments: false,
+							// Turned on because emoji and regex is not minified properly using default
+							// https://github.com/facebook/create-react-app/issues/2488
+							// eslint-disable-next-line camelcase
+							ascii_only: true
 						}
-				),
-				new CssMinimizerPlugin(useEsbuildMinify ? {minify: CssMinimizerPlugin.esbuildMinify} : undefined)
+					},
+					// Use multi-process parallel running to improve the build speed
+					// Default number of concurrent runs: os.cpus().length - 1
+					parallel: true
+				}),
+				new CssMinimizerPlugin()
 			],
 			splitChunks: noSplitCSS && {
 				cacheGroups: {

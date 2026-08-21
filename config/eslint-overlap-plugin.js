@@ -13,9 +13,8 @@
  * so there's almost nothing left for it to overlap with — the ~5.5s of lint
  * work lands squarely in the build's critical path.
  *
- * This mirrors the fix already applied to the Vite and esbuild paths (see
- * `esbuild.config.js`'s `eslintPlugin`): kick ESLint off as EARLY as
- * possible (`compiler.hooks.run`/`watchRun`, before a single module has
+ * The fix: kick ESLint off as EARLY as possible
+ * (`compiler.hooks.run`/`watchRun`, before a single module has
  * built) as its own child process, and only await it right before assets are
  * finalized (`processAssets`, the same stage the original plugin used, so
  * plugin ordering relative to ILibPlugin/etc. is unaffected). Lint work then
@@ -23,11 +22,10 @@
  * serializing after it — by the time processAssets is reached the child has
  * often already finished, so the await is close to free.
  *
- * Unlike the esbuild path's child (which doesn't check its exit code at
- * all — a latent gap, not intentionally mirrored here), this plugin DOES
- * fail the build on lint errors in non-development mode, matching
- * eslint-webpack-plugin's own default (`failOnError: mode !== 'development'`)
- * so production builds keep failing on real lint errors.
+ * The child's exit code IS checked, so this plugin fails the build on lint
+ * errors in non-development mode, matching eslint-webpack-plugin's own
+ * default (`failOnError: mode !== 'development'`) — production builds keep
+ * failing on real lint errors.
  */
 const {spawn} = require('child_process');
 const path = require('path');
@@ -59,7 +57,7 @@ class ESLintOverlapPlugin {
 			pending = new Promise(resolvePromise => {
 				const eslintBin = resolveBin('eslint', 'bin/eslint.js', __dirname);
 				// ESLint 9's flat config has no `--ext` flag; file patterns are
-				// passed as glob arguments instead — matches the esbuild path.
+				// passed as glob arguments instead.
 				const args = [eslintBin, 'src/**/*.{js,mjs,jsx,ts,tsx}'];
 				if (this.configFile) args.push('--config', this.configFile);
 				if (this.formatter) args.push('--format', this.formatter);
@@ -83,9 +81,7 @@ class ESLintOverlapPlugin {
 			// A fresh compile (not the first) needs a fresh lint pass; a run
 			// already in flight from the previous compile is left to finish
 			// (its result is stale by the time this compile's processAssets
-			// reaches it, but re-spawning mid-flight would pile up processes,
-			// same concern esbuild.config.js's comment calls out for its own
-			// per-request re-invocation).
+			// reaches it, but re-spawning mid-flight would pile up processes).
 			pending = null;
 			start();
 		});
