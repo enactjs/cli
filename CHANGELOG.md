@@ -1,4 +1,4 @@
-## unreleased
+## 7.3.4 (August 21, 2026)
 
 ### bootstrap
 
