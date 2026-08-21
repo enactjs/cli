@@ -1,4 +1,5 @@
 /* eslint no-console: off */
+/* global __dirname */
 /**
  * ESLintOverlapPlugin — replacement for `eslint-webpack-plugin` that runs
  * ESLint as a separate, genuinely concurrent child process instead of
