@@ -16,7 +16,10 @@
 const fs = require('fs');
 const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const ESLintPlugin = require('eslint-webpack-plugin');
+// Replaces eslint-webpack-plugin: runs ESLint as an overlapped child process
+// instead of in-process work gated behind webpack's own module graph. See
+// eslint-overlap-plugin.js's file comment for the profiling data and reasoning.
+const ESLintPlugin = require('./eslint-overlap-plugin');
 const ForkTsCheckerWebpackPlugin =
 	process.env.TSC_COMPILE_ON_ERROR === 'true' ?
 		require('react-dev-utils/ForkTsCheckerWarningWebpackPlugin') :
@@ -402,8 +405,18 @@ module.exports = function (
 								babelrc: false,
 								// This is a feature of `babel-loader` for webpack (not Babel itself).
 								// It enables caching results in ./node_modules/.cache/babel-loader/
-								// directory for faster rebuilds.
-								cacheDirectory: !isEnvProduction,
+								// directory for faster rebuilds. Enabled unconditionally (this used
+								// to be `!isEnvProduction`, inherited from create-react-app's own
+								// default, whose reasoning — CI production builds are one-shot, so
+								// there's nothing to warm from — doesn't hold for a repeated local
+								// `pack -p` or a persistent CI worker reusing `node_modules/.cache`
+								// across builds, both of which are real usage patterns here. The
+								// cache is content-addressed (babel config + file hash), so there's
+								// no staleness risk from enabling it. Measured (qa-a11y, interleaved,
+								// config untouched between runs): production `pack -p` warm rebuilds
+								// went from 0% improvement over cold to ~14%, matching dev mode's
+								// existing cache benefit.
+								cacheDirectory: true,
 								cacheCompression: false,
 								compact: isEnvProduction
 							}
@@ -670,11 +683,7 @@ module.exports = function (
 				}),
 			!noLinting &&
 				new ESLintPlugin({
-					// Plugin options
-					configType: 'flat',
-					extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx'],
 					formatter: require.resolve('react-dev-utils/eslintFormatter'),
-					eslintPath: require.resolve('eslint'),
 					// @remove-on-eject-begin
 					overrideConfigFile: require.resolve('./eslintWebpackPluginConfig'),
 					// @remove-on-eject-end
