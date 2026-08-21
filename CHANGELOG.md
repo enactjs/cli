@@ -4,6 +4,18 @@
 
 * Added `--react-compiler` option to build using `babel-plugin-react-compiler`
 
+## 7.3.4 (August 21, 2026)
+
+### bootstrap
+
+* Fixed `--override` to support `package-lock.json` with `lockfileVersion` 2 and 3.
+
+## 7.3.3 (July 7, 2026)
+
+### transpile
+
+* Added `LessPluginRi` patch to fix unexpected behaviors when `enact transpile`.
+
 ## 7.3.2 (June 23, 2026)
 
 ### create, template
