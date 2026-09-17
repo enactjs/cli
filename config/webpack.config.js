@@ -276,6 +276,32 @@ module.exports = function (
 		return Array.isArray(paths) ? paths : [paths];
 	};
 
+	// When @enact/* is npm-linked from a pnpm workspace, nested deps (e.g. xhr's
+	// "global") live in the workspace node_modules, not beside the linked package.
+	// Keep resolve.symlinks=false for ilib, but search that store as well.
+	const getLinkedPnpmNodeModules = context => {
+		const pkgs = ['i18n', 'core', 'ui', 'spotlight', 'webos'];
+		for (let i = 0; i < pkgs.length; i++) {
+			try {
+				const linked = path.join(context, 'node_modules', '@enact', pkgs[i]);
+				if (!fs.existsSync(linked)) continue;
+				let dir = fs.realpathSync(linked);
+				for (let depth = 0; depth < 6; depth++) {
+					const nm = path.join(dir, 'node_modules');
+					if (fs.existsSync(path.join(nm, '.pnpm'))) {
+						return [nm];
+					}
+					const parent = path.dirname(dir);
+					if (parent === dir) break;
+					dir = parent;
+				}
+			} catch (e) {
+				// ignore missing or broken links
+			}
+		}
+		return [];
+	};
+
 	return {
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
@@ -354,6 +380,7 @@ module.exports = function (
 			modules: [
 				path.resolve('./node_modules'),
 				'node_modules',
+				...getLinkedPnpmNodeModules(app.context),
 				...getAdditionalModulePaths(app.additionalModulePaths)
 			],
 			// Don't resolve symlinks to their underlying paths
