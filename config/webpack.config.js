@@ -277,29 +277,33 @@ module.exports = function (
 	};
 
 	// When @enact/* is npm-linked from a pnpm workspace, nested deps (e.g. xhr's
-	// "global") live in the workspace node_modules, not beside the linked package.
-	// Keep resolve.symlinks=false for ilib, but search that store as well.
+	// "global") live in the workspace store rather than beside the linked package,
+	// and resolve.symlinks=false (needed for ilib) stops webpack from walking up
+	// into it. Resolve against pnpm's hoist directory, which holds the workspace's
+	// transitive deps -- deliberately not the workspace root, which would expose
+	// the framework's own devDependencies to the app if it were publicly hoisted.
 	const getLinkedPnpmNodeModules = context => {
-		const pkgs = ['i18n', 'core', 'ui', 'spotlight', 'webos'];
-		for (let i = 0; i < pkgs.length; i++) {
+		const stores = [];
+		['core', 'i18n', 'spotlight', 'ui', 'webos'].forEach(name => {
 			try {
-				const linked = path.join(context, 'node_modules', '@enact', pkgs[i]);
-				if (!fs.existsSync(linked)) continue;
+				const linked = path.join(context, 'node_modules', '@enact', name);
+				if (!fs.existsSync(linked)) return;
 				let dir = fs.realpathSync(linked);
 				for (let depth = 0; depth < 6; depth++) {
-					const nm = path.join(dir, 'node_modules');
-					if (fs.existsSync(path.join(nm, '.pnpm'))) {
-						return [nm];
+					const hoisted = path.join(dir, 'node_modules', '.pnpm', 'node_modules');
+					if (fs.existsSync(hoisted)) {
+						if (!stores.includes(hoisted)) stores.push(hoisted);
+						return;
 					}
 					const parent = path.dirname(dir);
-					if (parent === dir) break;
+					if (parent === dir) return;
 					dir = parent;
 				}
 			} catch (e) {
 				// ignore missing or broken links
 			}
-		}
-		return [];
+		});
+		return stores;
 	};
 
 	return {
