@@ -276,6 +276,72 @@ module.exports = function (
 		return Array.isArray(paths) ? paths : [paths];
 	};
 
+	// When @enact/* is npm-linked from a pnpm workspace, nested deps (e.g. xhr's
+	// "global") live beside the real package in the virtual store, not beside the
+	// symlink webpack sees with resolve.symlinks=false (needed for ilib).
+	// Follow those nested links into .pnpm/<pkg>/node_modules so siblings resolve.
+	// Also search pnpm's hoist dir and the workspace node_modules created by
+	// shamefullyHoist (the inner .pnpm/node_modules dir is not always present).
+	const getLinkedPnpmNodeModules = context => {
+		const stores = [];
+		const add = dir => {
+			if (dir && fs.existsSync(dir) && !stores.includes(dir)) stores.push(dir);
+		};
+		const addRealParent = entry => {
+			try {
+				if (fs.existsSync(entry)) add(path.dirname(fs.realpathSync(entry)));
+			} catch (e) {
+				// ignore missing or broken links
+			}
+		};
+		const addNestedStores = nodeModulesDir => {
+			let names;
+			try {
+				names = fs.readdirSync(nodeModulesDir);
+			} catch (e) {
+				return;
+			}
+			names.forEach(name => {
+				if (name.startsWith('.')) return;
+				const full = path.join(nodeModulesDir, name);
+				if (name.startsWith('@')) {
+					let scoped;
+					try {
+						scoped = fs.readdirSync(full);
+					} catch (err) {
+						return;
+					}
+					scoped.forEach(child => addRealParent(path.join(full, child)));
+					return;
+				}
+				addRealParent(full);
+			});
+		};
+
+		['core', 'i18n', 'spotlight', 'ui', 'webos'].forEach(name => {
+			try {
+				const linked = path.join(context, 'node_modules', '@enact', name);
+				if (!fs.existsSync(linked)) return;
+				let dir = fs.realpathSync(linked);
+				addNestedStores(path.join(dir, 'node_modules'));
+				for (let depth = 0; depth < 6; depth++) {
+					const pnpmDir = path.join(dir, 'node_modules', '.pnpm');
+					if (fs.existsSync(pnpmDir)) {
+						add(path.join(pnpmDir, 'node_modules'));
+						add(path.join(dir, 'node_modules'));
+						return;
+					}
+					const parent = path.dirname(dir);
+					if (parent === dir) return;
+					dir = parent;
+				}
+			} catch (e) {
+				// ignore missing or broken links
+			}
+		});
+		return stores;
+	};
+
 	return {
 		mode: isEnvProduction ? 'production' : 'development',
 		// Don't attempt to continue if there are any errors.
@@ -354,7 +420,8 @@ module.exports = function (
 			modules: [
 				path.resolve('./node_modules'),
 				'node_modules',
-				...getAdditionalModulePaths(app.additionalModulePaths)
+				...getAdditionalModulePaths(app.additionalModulePaths),
+				...getLinkedPnpmNodeModules(app.context)
 			],
 			// Don't resolve symlinks to their underlying paths
 			symlinks: false,
