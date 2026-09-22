@@ -420,8 +420,8 @@ module.exports = function (
 			modules: [
 				path.resolve('./node_modules'),
 				'node_modules',
-				...getLinkedPnpmNodeModules(app.context),
-				...getAdditionalModulePaths(app.additionalModulePaths)
+				...getAdditionalModulePaths(app.additionalModulePaths),
+				...getLinkedPnpmNodeModules(app.context)
 			],
 			// Don't resolve symlinks to their underlying paths
 			symlinks: false,
