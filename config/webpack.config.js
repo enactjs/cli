@@ -623,14 +623,21 @@ module.exports = function (
 			// Automatically detect ./appinfo.json and ./webos-meta/appinfo.json files,
 			// and parses any to copy over any webOS meta assets at build time.
 			new WebOSMetaPlugin({htmlPlugin: HtmlWebpackPlugin}),
-			// TypeScript type checking
-			useTypeScript &&
-				new ForkTsCheckerWebpackPlugin({
+			// TypeScript type checking. Skip when `typescript` is not resolvable
+			// (e.g. Jenkins `npm link` pruned it) so pack still emits bundles.
+			useTypeScript && (() => {
+				let typescriptPath;
+				try {
+					typescriptPath = resolve.sync('typescript', {
+						basedir: app.context
+					});
+				} catch (e) {
+					return false;
+				}
+				return new ForkTsCheckerWebpackPlugin({
 					async: !isEnvProduction,
 					typescript: {
-						typescriptPath: resolve.sync('typescript', {
-							basedir: 'node_modules'
-						}),
+						typescriptPath,
 						configOverwrite: {
 							compilerOptions: {
 								sourceMap: shouldUseSourceMap,
@@ -647,7 +654,6 @@ module.exports = function (
 							syntactic: true
 						},
 						mode: 'write-references'
-						// profile: true,
 					},
 					issue: {
 						// prettier-ignore
@@ -665,7 +671,8 @@ module.exports = function (
 					logger: {
 						infrastructure: 'silent'
 					}
-				}),
+				});
+			})(),
 			!noLinting &&
 				new ESLintPlugin({
 					// Plugin options

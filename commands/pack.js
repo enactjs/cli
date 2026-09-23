@@ -325,17 +325,22 @@ function cli (args) {
 	if (opts.help) displayHelp();
 
 	process.chdir(app.context);
-	import('chalk').then(({default: _chalk}) => {
-		chalk = _chalk;
-		import('strip-ansi').then(({default: _stripAnsi}) => {
-			stripAnsi = _stripAnsi;
-			api(opts).catch(err => {
+	import('chalk')
+		.then(async ({default: _chalk}) => {
+			chalk = _chalk;
+			stripAnsi = (await import('strip-ansi')).default;
+			try {
+				await api(opts);
+			} catch (err) {
 				printErrorDetails(err, () => {
 					process.exit(1);
 				});
-			});
+			}
+		})
+		.catch(err => {
+			console.error(err && err.stack ? err.stack : err);
+			process.exit(1);
 		});
-	});
 }
 
 module.exports = {api, cli};
