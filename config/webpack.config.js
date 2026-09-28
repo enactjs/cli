@@ -41,7 +41,7 @@ const createEnvironmentHash = require('./createEnvironmentHash');
 // fork-ts-checker needs the classic TypeScript compiler API. TypeScript 7's
 // package entry only exports a version, so resolution via `main` fails and the
 // checker cannot run. Return null to skip it instead of failing the build.
-function resolveLegacyTypeScript(context) {
+function resolveLegacyTypeScript (context) {
 	let typescriptPath;
 	try {
 		typescriptPath = require.resolve('typescript', {paths: [context]});
