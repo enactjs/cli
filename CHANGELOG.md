@@ -1,3 +1,9 @@
+## 7.3.4 (August 21, 2026)
+
+### bootstrap
+
+* Fixed `--override` to support `package-lock.json` with `lockfileVersion` 2 and 3.
+
 ## 7.3.3 (July 7, 2026)
 
 ### transpile
