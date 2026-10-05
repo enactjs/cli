@@ -1,3 +1,17 @@
+## unreleased
+
+### lint
+
+* Updated `eslint` to v10.
+
+### pack, serve, test, transpile
+
+* Added `@babel/core` v8 as a peer dependency to support `babel-preset-enact` with Babel 8.
+
+### test, transpile
+
+* Updated `@babel/plugin-transform-modules-commonjs` to v8.
+
 ## 7.3.4 (August 21, 2026)
 
 ### bootstrap

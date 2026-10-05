@@ -1,5 +1,5 @@
 /* eslint no-console: off, no-undef: off */
-/* eslint-env node, es6 */
+
 const cp = require('child_process');
 const path = require('path');
 const glob = require('glob');
