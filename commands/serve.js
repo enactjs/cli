@@ -1,5 +1,4 @@
 /* eslint no-console: off, no-undef: off */
-/* eslint-env node, es6 */
 // @remove-on-eject-begin
 /**
  * Portions of this source code file are from create-react-app, used under the
@@ -326,7 +325,7 @@ function api (opts) {
 		try {
 			meta = JSON.parse(opts.meta);
 		} catch (e) {
-			throw new Error('Invalid metadata; must be a valid JSON string.\n' + e.message);
+			throw new Error('Invalid metadata; must be a valid JSON string.\n' + e.message, {cause: e});
 		}
 		app.applyEnactMeta(meta);
 	}
