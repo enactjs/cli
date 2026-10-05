@@ -4,6 +4,15 @@
 
 * Fixed `--override` to support `package-lock.json` with `lockfileVersion` 2 and 3.
 
+### pack
+
+* Fixed `enact pack` to work with TypeScript 7 by skipping in-build type checking (`fork-ts-checker`), which requires the JavaScript API that TypeScript 7 no longer provides.
+* Fixed `enact pack` to report errors thrown while preparing the build and exit with a non-zero status, rather than logging them as an uncaught exception and exiting successfully without producing any output.
+
+### serve
+
+* Fixed `enact serve` to report errors thrown while preparing the build and exit with a non-zero status.
+
 ## 7.3.3 (July 7, 2026)
 
 ### transpile

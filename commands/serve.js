@@ -368,11 +368,15 @@ function cli (args) {
 
 	import('chalk').then(({default: _chalk}) => {
 		chalk = _chalk;
-		api(opts).catch(err => {
-			// console.error(chalk.red('ERROR: ') + (err.message || err));
-			console.log(err);
-			process.exit(1);
-		});
+		// Run api() inside the promise chain so errors thrown synchronously are reported and fail the
+		// process instead of becoming an uncaught exception that bin/enact.js logs and swallows.
+		Promise.resolve()
+			.then(() => api(opts))
+			.catch(err => {
+				// console.error(chalk.red('ERROR: ') + (err.message || err));
+				console.log(err);
+				process.exit(1);
+			});
 	});
 }
 

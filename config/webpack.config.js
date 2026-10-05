@@ -39,6 +39,25 @@ const {
 } = require('@enact/dev-utils');
 const createEnvironmentHash = require('./createEnvironmentHash');
 
+// TypeScript 7 and later no longer ship the classic JavaScript API (and have no `main` entry for
+// `resolve` to find) that fork-ts-checker relies on, so in-build type checking is only available
+// with TypeScript < 7. Source files are still transpiled by Babel regardless of the version; use
+// `tsc` to type check with TypeScript 7+.
+function hasTypeScriptJsApi () {
+	let version;
+	try {
+		version = require(path.resolve('node_modules/typescript/package.json')).version;
+	} catch (e) {
+		// TypeScript is not installed; let the type checker setup report that.
+		return true;
+	}
+	if (parseInt(version) >= 7) {
+		console.log(`TypeScript ${version} detected: skipping in-build type checking (run tsc separately).`);
+		return false;
+	}
+	return true;
+}
+
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
 module.exports = function (
@@ -624,7 +643,7 @@ module.exports = function (
 			// and parses any to copy over any webOS meta assets at build time.
 			new WebOSMetaPlugin({htmlPlugin: HtmlWebpackPlugin}),
 			// TypeScript type checking
-			useTypeScript &&
+			useTypeScript && hasTypeScriptJsApi() &&
 				new ForkTsCheckerWebpackPlugin({
 					async: !isEnvProduction,
 					typescript: {

@@ -329,11 +329,16 @@ function cli (args) {
 		chalk = _chalk;
 		import('strip-ansi').then(({default: _stripAnsi}) => {
 			stripAnsi = _stripAnsi;
-			api(opts).catch(err => {
-				printErrorDetails(err, () => {
-					process.exit(1);
+			// Run api() inside the promise chain so that errors thrown synchronously while preparing the
+			// build (e.g. creating the webpack config) are reported and fail the process, rather than
+			// becoming an uncaught exception that bin/enact.js logs and then exits successfully.
+			Promise.resolve()
+				.then(() => api(opts))
+				.catch(err => {
+					printErrorDetails(err, () => {
+						process.exit(1);
+					});
 				});
-			});
 		});
 	});
 }
