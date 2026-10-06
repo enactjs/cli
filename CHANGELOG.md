@@ -1,5 +1,15 @@
 ## unreleased
 
+### pack
+
+* Fixed `enact pack` to skip TypeScript type checking, with a warning, when the installed `typescript` package does not expose `createProgram` (TypeScript 7). Apps on TypeScript 5.x still run `fork-ts-checker-webpack-plugin`.
+* Fixed `enact pack` to exit with code 1 when the build fails, including when `chalk` has not loaded yet.
+* Updated the optional `typescript` peer dependency to `^5.4.0 || ^7.0.2`.
+
+### transpile
+
+* Added support for transpiling `.ts`, `.tsx`, and `.jsx` sources to `.js`, copying `.d.ts` files as-is, and rewriting `package.json` `main` fields that point at those sources.
+
 ### bootstrap
 
 * Fixed `--override` to support `package-lock.json` with `lockfileVersion` 2 and 3.
