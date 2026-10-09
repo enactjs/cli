@@ -27,7 +27,6 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
-const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {
@@ -38,6 +37,27 @@ const {
 	WebOSMetaPlugin
 } = require('@enact/dev-utils');
 const createEnvironmentHash = require('./createEnvironmentHash');
+
+// fork-ts-checker needs the classic TypeScript compiler API. TypeScript 7's
+// package entry only exports a version, so resolution via `main` fails and the
+// checker cannot run. Return null to skip it instead of failing the build.
+function resolveLegacyTypeScript (context) {
+	let typescriptPath;
+	try {
+		typescriptPath = require.resolve('typescript', {paths: [context]});
+	} catch (e) {
+		return null;
+	}
+
+	try {
+		const typescript = require(typescriptPath);
+		if (typeof typescript.createProgram === 'function') return typescriptPath;
+	} catch (e) {
+		return null;
+	}
+
+	return null;
+}
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
@@ -60,6 +80,12 @@ module.exports = function (
 
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
+	const typeScriptPath = useTypeScript ? resolveLegacyTypeScript(app.context) : null;
+	if (useTypeScript && !typeScriptPath) {
+		console.warn(
+			'Skipping TypeScript type checking during the build. The installed "typescript" package does not provide the compiler API required by fork-ts-checker.'
+		);
+	}
 
 	// Check if Tailwind config exists
 	const useTailwind = fs.existsSync(path.join(app.context, 'tailwind.config.js'));
@@ -626,13 +652,11 @@ module.exports = function (
 			// and parses any to copy over any webOS meta assets at build time.
 			new WebOSMetaPlugin({htmlPlugin: HtmlWebpackPlugin}),
 			// TypeScript type checking
-			useTypeScript &&
+			typeScriptPath &&
 				new ForkTsCheckerWebpackPlugin({
 					async: !isEnvProduction,
 					typescript: {
-						typescriptPath: resolve.sync('typescript', {
-							basedir: 'node_modules'
-						}),
+						typescriptPath: typeScriptPath,
 						configOverwrite: {
 							compilerOptions: {
 								sourceMap: shouldUseSourceMap,
