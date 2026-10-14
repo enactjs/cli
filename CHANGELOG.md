@@ -1,3 +1,11 @@
+## unreleased
+
+### pack
+
+* Fixed `enact pack` to skip TypeScript type checking, with a warning, when the installed `typescript` package does not expose `createProgram` (TypeScript 7). Apps on TypeScript 5.x and 6.x still run `fork-ts-checker-webpack-plugin`.
+* Fixed `enact pack` to exit with code 1 when the build fails, including when `chalk` has not loaded yet.
+* Updated the optional `typescript` peer dependency to `^5.4.0 || ^6.0.0 || ^7.0.2`.
+
 ## 7.3.4 (August 21, 2026)
 
 ### bootstrap
