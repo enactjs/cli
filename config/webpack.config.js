@@ -27,6 +27,7 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {
