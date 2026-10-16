@@ -6,6 +6,12 @@
 
 * Updated `eslint` to v10.
 
+### pack
+
+* Fixed `enact pack` to skip TypeScript type checking, with a warning, when the installed `typescript` package does not expose `createProgram` (TypeScript 7). Apps on TypeScript 5.x and 6.x still run `fork-ts-checker-webpack-plugin`.
+* Fixed `enact pack` to exit with code 1 when the build fails, including when `chalk` has not loaded yet.
+* Updated the optional `typescript` peer dependency to `^5.4.0 || ^6.0.0 || ^7.0.2`.
+
 ### pack, serve
 
 * Removed the `react/jsx-uses-react` and `react/react-in-jsx-scope` lint rules added when `DISABLE_NEW_JSX_TRANSFORM` is set. `babel-preset-enact` no longer supports the classic JSX transform, and these rules no longer exist in `eslint-config-enact`.
