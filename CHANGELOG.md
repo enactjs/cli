@@ -1,5 +1,7 @@
 ## unreleased
 
+* Updated the minimum version of Node to `20.19.0`, required by ESLint 10.
+
 ### lint
 
 * Updated `eslint` to v10.
