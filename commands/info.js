@@ -1,5 +1,4 @@
 /* eslint no-console: off, no-undef: off */
-
 const path = require('path');
 const fs = require('fs');
 const spawn = require('cross-spawn');
