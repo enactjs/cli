@@ -4,6 +4,10 @@
 
 * Updated `eslint` to v10.
 
+### pack, serve
+
+* Removed the `react/jsx-uses-react` and `react/react-in-jsx-scope` lint rules added when `DISABLE_NEW_JSX_TRANSFORM` is set. `babel-preset-enact` no longer supports the classic JSX transform, and these rules no longer exist in `eslint-config-enact`.
+
 ### pack, serve, test, transpile
 
 * Added `@babel/core` v8 as a peer dependency to support `babel-preset-enact` with Babel 8.
