@@ -113,17 +113,25 @@ class TypeScriptCheckPlugin {
 					compilation.warnings.push(new WebpackError(`TypeScript type checking could not run:\n${failure}`));
 					return;
 				}
+				const errors = [];
+				const warnings = [];
 				diagnostics
 					.filter(({file}) => !file || !excludeFile.test(file))
 					.forEach(diagnostic => {
-						const issue = new WebpackError(formatDiagnostic(diagnostic));
-						issue.hideStack = true;
-						if (diagnostic.category === 'error' && !this.compileOnError) {
-							compilation.errors.push(issue);
-						} else {
-							compilation.warnings.push(issue);
-						}
+						const isError = diagnostic.category === 'error' && !this.compileOnError;
+						(isError ? errors : warnings).push(formatDiagnostic(diagnostic));
 					});
+
+				// All diagnostics are reported as a single issue, since react-dev-utils only
+				// prints the first error of a compilation in `enact serve`
+				const report = (list, issues) => {
+					if (!list.length) return;
+					const issue = new WebpackError(list.join('\n\n'));
+					issue.hideStack = true;
+					issues.push(issue);
+				};
+				report(errors, compilation.errors);
+				report(warnings, compilation.warnings);
 			});
 		});
 	}
