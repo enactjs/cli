@@ -210,7 +210,9 @@ function devServerConfig (host, port, protocol, publicPath, proxy, allowedHost) 
 			// we specified in the webpack config. When homepage is '.', default to serving
 			// from the root.
 			// remove last slash so user can land on `/test` instead of `/test/`
-			publicPath: publicPath.slice(0, -1)
+			publicPath: publicPath.slice(0, -1),
+			// Errors and warnings are already printed by react-dev-utils' createCompiler
+			stats: 'none'
 		},
 		historyApiFallback: {
 			// ensure JSON file requests correctly 404 error when not found.
