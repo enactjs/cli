@@ -37,11 +37,12 @@ const {
 	WebOSMetaPlugin
 } = require('@enact/dev-utils');
 const createEnvironmentHash = require('./createEnvironmentHash');
+const TypeScriptCheckPlugin = require('./TypeScriptCheckPlugin');
 
 // fork-ts-checker needs the classic TypeScript compiler API. TypeScript 7's
-// package entry only exports a version, so resolution via `main` fails and the
-// checker cannot run. Return null to skip it instead of failing the build.
-function resolveLegacyTypeScript (context) {
+// package entry only exports a version, so for it the `tsc` binary is resolved
+// instead and run by TypeScriptCheckPlugin. Return null when neither is available.
+function resolveTypeScript (context) {
 	let typescriptPath;
 	try {
 		typescriptPath = require.resolve('typescript', {paths: [context]});
@@ -51,7 +52,16 @@ function resolveLegacyTypeScript (context) {
 
 	try {
 		const typescript = require(typescriptPath);
-		if (typeof typescript.createProgram === 'function') return typescriptPath;
+		if (typeof typescript.createProgram === 'function') return {typescriptPath};
+	} catch (e) {
+		// Fall back to the tsc binary below
+	}
+
+	try {
+		const packagePath = require.resolve('typescript/package.json', {paths: [context]});
+		const {bin} = require(packagePath);
+		const tscPath = typeof bin === 'string' ? bin : bin && bin.tsc;
+		if (tscPath) return {tscPath: path.join(path.dirname(packagePath), tscPath)};
 	} catch (e) {
 		return null;
 	}
@@ -80,10 +90,10 @@ module.exports = function (
 
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
-	const typeScriptPath = useTypeScript ? resolveLegacyTypeScript(app.context) : null;
-	if (useTypeScript && !typeScriptPath) {
+	const {typescriptPath, tscPath} = (useTypeScript && resolveTypeScript(app.context)) || {};
+	if (useTypeScript && !typescriptPath && !tscPath) {
 		console.warn(
-			'Skipping TypeScript type checking during the build. The installed "typescript" package does not provide the compiler API required by fork-ts-checker.'
+			'Skipping TypeScript type checking during the build. Unable to resolve the "typescript" package or its tsc binary.'
 		);
 	}
 
@@ -652,11 +662,11 @@ module.exports = function (
 			// and parses any to copy over any webOS meta assets at build time.
 			new WebOSMetaPlugin({htmlPlugin: HtmlWebpackPlugin}),
 			// TypeScript type checking
-			typeScriptPath &&
+			typescriptPath &&
 				new ForkTsCheckerWebpackPlugin({
 					async: !isEnvProduction,
 					typescript: {
-						typescriptPath: typeScriptPath,
+						typescriptPath,
 						configOverwrite: {
 							compilerOptions: {
 								sourceMap: shouldUseSourceMap,
@@ -691,6 +701,13 @@ module.exports = function (
 					logger: {
 						infrastructure: 'silent'
 					}
+				}),
+			// TypeScript 7+ type checking via the tsc binary
+			tscPath &&
+				new TypeScriptCheckPlugin({
+					tscPath,
+					context: app.context,
+					compileOnError: process.env.TSC_COMPILE_ON_ERROR === 'true'
 				}),
 			!noLinting &&
 				new ESLintPlugin({
