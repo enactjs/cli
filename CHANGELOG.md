@@ -6,6 +6,10 @@
 * Fixed `enact pack` to exit with code 1 when the build fails, including when `chalk` has not loaded yet.
 * Updated the optional `typescript` peer dependency to `^5.4.0 || ^6.0.0 || ^7.0.2`.
 
+### serve
+
+* Fixed `enact serve` printing compilation errors twice.
+
 ## 7.3.4 (August 21, 2026)
 
 ### bootstrap

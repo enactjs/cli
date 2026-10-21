@@ -17,6 +17,7 @@ const path = require('path');
 const minimist = require('minimist');
 const clearConsole = require('react-dev-utils/clearConsole');
 const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
+const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const openBrowser = require('react-dev-utils/openBrowser');
 const redirectServedPathMiddleware = require('react-dev-utils/redirectServedPathMiddleware');
@@ -26,6 +27,7 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const {optionParser: app} = require('@enact/dev-utils');
+const TypeScriptCheckPlugin = require('../config/TypeScriptCheckPlugin');
 
 let chalk;
 
@@ -285,6 +287,16 @@ function serve (config, host, port, open) {
 				}
 			});
 			callback();
+		});
+		// createCompiler only prints the first error of a compilation. With TypeScript 7 the type errors are
+		// part of the compilation, so print them as well when another error (e.g. ESLint) was shown instead.
+		compiler.hooks.done.tap('EnactCLI', stats => {
+			const typeScriptError = stats.compilation.errors.find(TypeScriptCheckPlugin.isTypeScriptError);
+			if (!typeScriptError) return;
+
+			const [shown] = formatWebpackMessages(stats.toJson({all: false, warnings: true, errors: true})).errors;
+			const [typeScriptMessage] = formatWebpackMessages({errors: [typeScriptError.message], warnings: []}).errors;
+			if (shown !== typeScriptMessage) console.log(typeScriptMessage + '\n');
 		});
 		// Load proxy config
 		const proxySetting = app.proxy;

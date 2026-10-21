@@ -5,8 +5,11 @@ const {WebpackError} = require('webpack');
 
 const pluginName = 'EnactTypeScriptCheckPlugin';
 
+// Errors reported by this plugin, so `enact serve` can tell them apart from other compilation errors
+const reportedErrors = new WeakSet();
+
 // Diagnostics are not reported for test and setup files, matching the fork-ts-checker issue filters.
-const excludeFile = /(^|[\\/])__tests__[\\/]|\.(spec|test)\.[^\\/]+$|[\\/]src[\\/]setup(Proxy|Tests)\.[^\\/]+$/;
+const excludeFile = /(^|[\\/])__tests__[\\/]|\.(spec|test)\.[^\\/]+$|(^|[\\/])src[\\/]setup(Proxy|Tests)\.[^\\/]+$/;
 
 // Parses `tsc --pretty false` output. Each diagnostic starts with `file(line,col): error TSxxxx: message`
 // (or `error TSxxxx: message` for global ones) and any following indented lines elaborate on it.
@@ -129,12 +132,16 @@ class TypeScriptCheckPlugin {
 					const issue = new WebpackError(list.join('\n\n'));
 					issue.hideStack = true;
 					issues.push(issue);
+					return issue;
 				};
-				report(errors, compilation.errors);
+				const error = report(errors, compilation.errors);
+				if (error) reportedErrors.add(error);
 				report(warnings, compilation.warnings);
 			});
 		});
 	}
 }
+
+TypeScriptCheckPlugin.isTypeScriptError = error => reportedErrors.has(error);
 
 module.exports = TypeScriptCheckPlugin;
