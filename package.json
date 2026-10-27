@@ -45,7 +45,7 @@
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.29.7",
     "@daltontan/postcss-import-json": "^1.1.1",
-    "@enact/dev-utils": "^7.0.6",
+    "@enact/dev-utils": "enactjs/dev-utils#feature/NXT-20982",
     "@enact/template-limestone": "1.0.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.6.3",
     "@testing-library/jest-dom": "^7.0.1",
@@ -124,8 +124,7 @@
   },
   "overrides": {
     "serialize-javascript": "^7.0.4",
-    "uuid": "^11.1.1",
-    "webpack": "^5.112.2"
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "eslint-config-prettier": "^10.1.8",
