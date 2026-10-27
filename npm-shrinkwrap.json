@@ -11,7 +11,7 @@
       "dependencies": {
         "@babel/plugin-transform-modules-commonjs": "^7.29.7",
         "@daltontan/postcss-import-json": "^1.1.1",
-        "@enact/dev-utils": "enactjs/dev-utils#feature/NXT-20982",
+        "@enact/dev-utils": "github:enactjs/dev-utils#feature/NXT-20982",
         "@enact/template-limestone": "1.0.0",
         "@pmmmwh/react-refresh-webpack-plugin": "^0.6.3",
         "@testing-library/jest-dom": "^7.0.1",
@@ -4973,7 +4973,7 @@
     },
     "node_modules/@enact/dev-utils": {
       "version": "7.0.6",
-      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#f1e0c653724dfade15b043ddddb43cc6827567ac",
+      "resolved": "git+ssh://git@github.com/enactjs/dev-utils.git#57b0a781996aaedb7ab9f706676cbbae891fa476",
       "license": "Apache-2.0",
       "dependencies": {
         "browserslist": "^4.29.5",
