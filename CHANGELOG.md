@@ -12,10 +12,6 @@
 * Fixed `enact serve` printing compilation errors twice.
 * Updated `webpack-dev-server` to v6 and `@pmmmwh/react-refresh-webpack-plugin` to `0.6.3` for compatibility.
 
-### test
-
-* Pinned `jest-environment-jsdom` to `29.7.0`, as the jsdom 26 bundled with v30 makes the global `window` property non-configurable and breaks specs that spy on `window`.
-
 * Updated dependencies, including major updates to `chalk` (v6), `dotenv` (v18), `dotenv-expand` (v1000), `validate-npm-package-name` (v8), `@testing-library/jest-dom` (v7), `less-loader` (v13), `sass-loader` (v17), and `postcss-preset-env` (v11).
 * Updated the supported Node.js engines to `^22.15.0 || >=24.0.0`, as `webpack-dev-server` 6 requires Node.js 22.15 or later.
 
