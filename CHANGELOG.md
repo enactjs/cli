@@ -1,5 +1,8 @@
 ## unreleased
 
+* Updated dependencies, including major updates to `chalk` (v6), `dotenv` (v18), `dotenv-expand` (v1000), `validate-npm-package-name` (v8), `@testing-library/jest-dom` (v7), `less-loader` (v13), `sass-loader` (v17), and `postcss-preset-env` (v11).
+* Updated the supported Node.js engines to `^22.15.0 || >=24.0.0`, as `webpack-dev-server` 6 requires Node.js 22.15 or later.
+
 ### pack
 
 * Fixed `enact pack` and `enact serve` to type check TypeScript 7 apps by running the `tsc` binary, since TypeScript 7 does not expose the compiler API required by `fork-ts-checker-webpack-plugin`. Apps on TypeScript 5.x and 6.x still use `fork-ts-checker-webpack-plugin`.
@@ -11,9 +14,6 @@
 
 * Fixed `enact serve` printing compilation errors twice.
 * Updated `webpack-dev-server` to v6 and `@pmmmwh/react-refresh-webpack-plugin` to `0.6.3` for compatibility.
-
-* Updated dependencies, including major updates to `chalk` (v6), `dotenv` (v18), `dotenv-expand` (v1000), `validate-npm-package-name` (v8), `@testing-library/jest-dom` (v7), `less-loader` (v13), `sass-loader` (v17), and `postcss-preset-env` (v11).
-* Updated the supported Node.js engines to `^22.15.0 || >=24.0.0`, as `webpack-dev-server` 6 requires Node.js 22.15 or later.
 
 ## 7.3.4 (August 21, 2026)
 
