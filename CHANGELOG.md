@@ -4,11 +4,20 @@
 
 * Fixed `enact pack` and `enact serve` to type check TypeScript 7 apps by running the `tsc` binary, since TypeScript 7 does not expose the compiler API required by `fork-ts-checker-webpack-plugin`. Apps on TypeScript 5.x and 6.x still use `fork-ts-checker-webpack-plugin`.
 * Fixed `enact pack` to exit with code 1 when the build fails, including when `chalk` has not loaded yet.
+* Fixed `enact pack --production` failing on Less deprecation notices (for example calling a mixin without parentheses) by disabling `less-loader`'s `lessLogAsWarnOrErr` option, which `less-loader` 13 enables by default.
 * Updated the optional `typescript` peer dependency to `^5.4.0 || ^6.0.0 || ^7.0.2`.
 
 ### serve
 
 * Fixed `enact serve` printing compilation errors twice.
+* Updated `webpack-dev-server` to v6 and `@pmmmwh/react-refresh-webpack-plugin` to `0.6.3` for compatibility.
+
+### test
+
+* Pinned `jest-environment-jsdom` to `29.7.0`, as the jsdom 26 bundled with v30 makes the global `window` property non-configurable and breaks specs that spy on `window`.
+
+* Updated dependencies, including major updates to `chalk` (v6), `dotenv` (v18), `dotenv-expand` (v1000), `validate-npm-package-name` (v8), `@testing-library/jest-dom` (v7), `less-loader` (v13), `sass-loader` (v17), and `postcss-preset-env` (v11).
+* Updated the supported Node.js engines to `^22.15.0 || >=24.0.0`, as `webpack-dev-server` 6 requires Node.js 22.15 or later.
 
 ## 7.3.4 (August 21, 2026)
 
