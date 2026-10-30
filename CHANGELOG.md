@@ -1,6 +1,7 @@
 ## unreleased
 
-* Updated the minimum version of Node to `20.19.0`, required by ESLint 10.
+* Updated dependencies, including major updates to `chalk` (v6), `dotenv` (v18), `dotenv-expand` (v1000), `validate-npm-package-name` (v8), `@testing-library/jest-dom` (v7), `less-loader` (v13), `sass-loader` (v17), and `postcss-preset-env` (v11).
+* Updated the supported Node.js engines to `^22.15.0 || >=24.0.0`, as `webpack-dev-server` 6 requires Node.js 22.15 or later.
 
 ### lint
 
@@ -8,8 +9,9 @@
 
 ### pack
 
-* Fixed `enact pack` to skip TypeScript type checking, with a warning, when the installed `typescript` package does not expose `createProgram` (TypeScript 7). Apps on TypeScript 5.x and 6.x still run `fork-ts-checker-webpack-plugin`.
+* Fixed `enact pack` and `enact serve` to type check TypeScript 7 apps by running the `tsc` binary, since TypeScript 7 does not expose the compiler API required by `fork-ts-checker-webpack-plugin`. Apps on TypeScript 5.x and 6.x still use `fork-ts-checker-webpack-plugin`.
 * Fixed `enact pack` to exit with code 1 when the build fails, including when `chalk` has not loaded yet.
+* Fixed `enact pack --production` failing on Less deprecation notices (for example calling a mixin without parentheses) by disabling `less-loader`'s `lessLogAsWarnOrErr` option, which `less-loader` 13 enables by default.
 * Updated the optional `typescript` peer dependency to `^5.4.0 || ^6.0.0 || ^7.0.2`.
 
 ### pack, serve
@@ -19,6 +21,11 @@
 ### pack, serve, test, transpile
 
 * Added `@babel/core` v8 as a peer dependency to support `babel-preset-enact` with Babel 8.
+
+### serve
+
+* Fixed `enact serve` printing compilation errors twice.
+* Updated `webpack-dev-server` to v6 and `@pmmmwh/react-refresh-webpack-plugin` to `0.6.3` for compatibility.
 
 ### test, transpile
 
