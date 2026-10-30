@@ -292,6 +292,12 @@ module.exports = function (
 		getStyleLoaders(cssLoaderOptions, {
 			loader: require.resolve('less-loader'),
 			options: {
+				// less-loader 13 defaults `lessLogAsWarnOrErr` to true, which surfaces
+				// Less deprecation notices (e.g. calling a mixin without parentheses) as
+				// webpack warnings. Under `pack --production` CI treats warnings as errors,
+				// so restore the pre-13 silent behavior to avoid breaking builds on
+				// framework-sourced deprecations outside the app's control.
+				lessLogAsWarnOrErr: false,
 				lessOptions: {
 					modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent)
 				},
