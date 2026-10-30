@@ -3,6 +3,10 @@
 * Updated dependencies, including major updates to `chalk` (v6), `dotenv` (v18), `dotenv-expand` (v1000), `validate-npm-package-name` (v8), `@testing-library/jest-dom` (v7), `less-loader` (v13), `sass-loader` (v17), and `postcss-preset-env` (v11).
 * Updated the supported Node.js engines to `^22.15.0 || >=24.0.0`, as `webpack-dev-server` 6 requires Node.js 22.15 or later.
 
+### lint
+
+* Updated `eslint` to v10.
+
 ### pack
 
 * Fixed `enact pack` and `enact serve` to type check TypeScript 7 apps by running the `tsc` binary, since TypeScript 7 does not expose the compiler API required by `fork-ts-checker-webpack-plugin`. Apps on TypeScript 5.x and 6.x still use `fork-ts-checker-webpack-plugin`.
@@ -10,10 +14,22 @@
 * Fixed `enact pack --production` failing on Less deprecation notices (for example calling a mixin without parentheses) by disabling `less-loader`'s `lessLogAsWarnOrErr` option, which `less-loader` 13 enables by default.
 * Updated the optional `typescript` peer dependency to `^5.4.0 || ^6.0.0 || ^7.0.2`.
 
+### pack, serve
+
+* Removed the `react/jsx-uses-react` and `react/react-in-jsx-scope` lint rules added when `DISABLE_NEW_JSX_TRANSFORM` is set. `babel-preset-enact` no longer supports the classic JSX transform, and these rules no longer exist in `eslint-config-enact`.
+
+### pack, serve, test, transpile
+
+* Added `@babel/core` v8 as a peer dependency to support `babel-preset-enact` with Babel 8.
+
 ### serve
 
 * Fixed `enact serve` printing compilation errors twice.
 * Updated `webpack-dev-server` to v6 and `@pmmmwh/react-refresh-webpack-plugin` to `0.6.3` for compatibility.
+
+### test, transpile
+
+* Updated `@babel/plugin-transform-modules-commonjs` to v8.
 
 ## 7.3.4 (August 21, 2026)
 
