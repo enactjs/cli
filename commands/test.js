@@ -1,5 +1,4 @@
 /* eslint no-console: off, no-undef: off */
-/* eslint-env node, es6 */
 // @remove-on-eject-begin
 /**
  * Portions of this source code file are from create-react-app, used under the
