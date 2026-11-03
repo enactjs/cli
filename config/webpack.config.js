@@ -423,6 +423,17 @@ module.exports = function (
 		// @remove-on-eject-end
 		module: {
 			rules: [
+				// The webpack-dev-server / webpack-dev-middleware client runtimes use
+				// ESM syntax while importing named exports from CommonJS `.cjs` files
+				// (e.g. `import { Logger } from "...Logger.cjs"`). Under the default
+				// `javascript/esm` module type webpack rejects this with
+				// "Can't import the named export 'Logger' ... only default export is
+				// available", breaking `enact serve`. Forcing `javascript/auto` for
+				// these client modules restores the CommonJS interop.
+				{
+					test: /[\\/]node_modules[\\/]webpack-dev-(?:server|middleware)[\\/]client[\\/].*\.(js|mjs|cjs)$/,
+					type: 'javascript/auto'
+				},
 				shouldUseSourceMap && {
 					enforce: 'pre',
 					exclude: /@babel(?:\/|\\{1,2})runtime/,
