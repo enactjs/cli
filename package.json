@@ -127,11 +127,7 @@
     "serialize-javascript": "^7.0.4",
     "uuid": "^11.1.1",
     "minimatch": "^11.0.1",
-    "glob": "$glob",
-    "read-package-json": {
-      "glob": "^8.1.0",
-      "minimatch": "^5.1.6"
-    }
+    "glob": "$glob"
   },
   "devDependencies": {
     "eslint-config-prettier": "^10.1.8",
