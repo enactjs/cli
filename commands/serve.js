@@ -171,7 +171,7 @@ function devServerConfig (host, port, protocol, publicPath, proxy, allowedHost) 
 					// https://github.com/facebook/create-react-app/issues/1065
 					ignored: [
 						ignoredFiles(path.resolve(app.context, 'src')),
-						'/node_modules[\\/](?!@enact[\\/](?!.*node_modules))/'
+						/node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
 					]
 				}
 			},
@@ -186,7 +186,7 @@ function devServerConfig (host, port, protocol, publicPath, proxy, allowedHost) 
 					// https://github.com/facebook/create-react-app/issues/1065
 					ignored: [
 						ignoredFiles(path.resolve(app.context, 'src')),
-						'/node_modules[\\/](?!@enact[\\/](?!.*node_modules))/'
+						/node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
 					]
 				}
 			}
