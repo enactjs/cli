@@ -81,7 +81,7 @@
     "less": "^4.9.1",
     "less-loader": "^13.1.0",
     "less-plugin-npm-import": "^2.1.0",
-    "license-checker": "^25.0.1",
+    "license-checker-rseidelsohn": "^5.0.1",
     "mini-css-extract-plugin": "^2.10.2",
     "minimist": "^1.2.8",
     "node-polyfill-webpack-plugin": "4.0.0",
