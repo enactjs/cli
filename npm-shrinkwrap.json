@@ -1,12 +1,12 @@
 {
   "name": "@enact/cli",
-  "version": "7.3.4",
+  "version": "7.4.0",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
       "name": "@enact/cli",
-      "version": "7.3.4",
+      "version": "7.4.0",
       "license": "Apache-2.0",
       "dependencies": {
         "@babel/plugin-transform-modules-commonjs": "^8.0.1",
