@@ -1,5 +1,3 @@
-/* eslint-env node, es6 */
-
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');

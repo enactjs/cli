@@ -1,5 +1,5 @@
 /* eslint no-console: off, no-undef: off */
-/* eslint-env jest */
+
 const fs = require('fs');
 const path = require('path');
 const {packageRoot} = require('@enact/dev-utils');

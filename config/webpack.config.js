@@ -1,5 +1,5 @@
 /* eslint no-console: off, no-undef: off */
-/* eslint-env node, es6 */
+
 // @remove-on-eject-begin
 /**
  * Portions of this source code file are from create-react-app, used under the
@@ -27,7 +27,6 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
-const resolve = require('resolve');
 const TerserPlugin = require('terser-webpack-plugin');
 const {DefinePlugin, EnvironmentPlugin} = require('webpack');
 const {
@@ -38,6 +37,37 @@ const {
 	WebOSMetaPlugin
 } = require('@enact/dev-utils');
 const createEnvironmentHash = require('./createEnvironmentHash');
+const TypeScriptCheckPlugin = require('./TypeScriptCheckPlugin');
+
+// fork-ts-checker needs the classic TypeScript compiler API. TypeScript 7's
+// package entry only exports a version, so for it the `tsc` binary is resolved
+// instead and run by TypeScriptCheckPlugin. Return null when neither is available.
+function resolveTypeScript (context) {
+	let typescriptPath;
+	try {
+		typescriptPath = require.resolve('typescript', {paths: [context]});
+	} catch (e) {
+		return null;
+	}
+
+	try {
+		const typescript = require(typescriptPath);
+		if (typeof typescript.createProgram === 'function') return {typescriptPath};
+	} catch (e) {
+		// Fall back to the tsc binary below
+	}
+
+	try {
+		const packagePath = require.resolve('typescript/package.json', {paths: [context]});
+		const {bin} = require(packagePath);
+		const tscPath = typeof bin === 'string' ? bin : bin && bin.tsc;
+		if (tscPath) return {tscPath: path.join(path.dirname(packagePath), tscPath)};
+	} catch (e) {
+		return null;
+	}
+
+	return null;
+}
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
@@ -60,6 +90,12 @@ module.exports = function (
 
 	// Check if TypeScript is setup
 	const useTypeScript = fs.existsSync('tsconfig.json');
+	const {typescriptPath, tscPath} = (useTypeScript && resolveTypeScript(app.context)) || {};
+	if (useTypeScript && !typescriptPath && !tscPath) {
+		console.warn(
+			'Skipping TypeScript type checking during the build. Unable to resolve the "typescript" package or its tsc binary.'
+		);
+	}
 
 	// Check if Tailwind config exists
 	const useTailwind = fs.existsSync(path.join(app.context, 'tailwind.config.js'));
@@ -256,6 +292,12 @@ module.exports = function (
 		getStyleLoaders(cssLoaderOptions, {
 			loader: require.resolve('less-loader'),
 			options: {
+				// less-loader 13 defaults `lessLogAsWarnOrErr` to true, which surfaces
+				// Less deprecation notices (e.g. calling a mixin without parentheses) as
+				// webpack warnings. Under `pack --production` CI treats warnings as errors,
+				// so restore the pre-13 silent behavior to avoid breaking builds on
+				// framework-sourced deprecations outside the app's control.
+				lessLogAsWarnOrErr: false,
 				lessOptions: {
 					modifyVars: Object.assign({__DEV__: !isEnvProduction}, app.accent)
 				},
@@ -394,7 +436,7 @@ module.exports = function (
 					oneOf: [
 						// Process JS with Babel.
 						{
-							test: /\.(js|mjs|jsx|ts|tsx)$/,
+							test: /\.(js|cjs|mjs|jsx|ts|tsx)$/,
 							exclude: /node_modules.(?!@enact)/,
 							loader: require.resolve('babel-loader'),
 							options: {
@@ -490,7 +532,7 @@ module.exports = function (
 							// by webpacks internal loaders.
 							// Exclude `ejs` HTML templating language as that's handled by
 							// the HtmlWebpackPlugin.
-							exclude: [/^$/, /\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.ejs$/, /\.json$/],
+							exclude: [/^$/, /\.(js|cjs|mjs|jsx|ts|tsx)$/, /\.html$/, /\.ejs$/, /\.json$/],
 							type: 'asset/resource'
 						}
 						// ** STOP ** Are you adding a new loader?
@@ -626,13 +668,11 @@ module.exports = function (
 			// and parses any to copy over any webOS meta assets at build time.
 			new WebOSMetaPlugin({htmlPlugin: HtmlWebpackPlugin}),
 			// TypeScript type checking
-			useTypeScript &&
+			typescriptPath &&
 				new ForkTsCheckerWebpackPlugin({
 					async: !isEnvProduction,
 					typescript: {
-						typescriptPath: resolve.sync('typescript', {
-							basedir: 'node_modules'
-						}),
+						typescriptPath,
 						configOverwrite: {
 							compilerOptions: {
 								sourceMap: shouldUseSourceMap,
@@ -667,6 +707,13 @@ module.exports = function (
 					logger: {
 						infrastructure: 'silent'
 					}
+				}),
+			// TypeScript 7+ type checking via the tsc binary
+			tscPath &&
+				new TypeScriptCheckPlugin({
+					tscPath,
+					context: app.context,
+					compileOnError: process.env.TSC_COMPILE_ON_ERROR === 'true'
 				}),
 			!noLinting &&
 				new ESLintPlugin({

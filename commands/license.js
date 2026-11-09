@@ -1,7 +1,6 @@
 /* eslint no-console: off, no-undef: off */
-/* eslint-env node, es6 */
 const path = require('path');
-const checker = require('license-checker');
+const checker = require('license-checker-rseidelsohn');
 const minimist = require('minimist');
 
 let chalk;

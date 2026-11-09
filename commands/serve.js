@@ -1,5 +1,4 @@
 /* eslint no-console: off, no-undef: off */
-/* eslint-env node, es6 */
 // @remove-on-eject-begin
 /**
  * Portions of this source code file are from create-react-app, used under the
@@ -17,6 +16,7 @@ const path = require('path');
 const minimist = require('minimist');
 const clearConsole = require('react-dev-utils/clearConsole');
 const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
+const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
 const openBrowser = require('react-dev-utils/openBrowser');
 const redirectServedPathMiddleware = require('react-dev-utils/redirectServedPathMiddleware');
@@ -26,6 +26,7 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const {optionParser: app} = require('@enact/dev-utils');
+const TypeScriptCheckPlugin = require('../config/TypeScriptCheckPlugin');
 
 let chalk;
 
@@ -170,7 +171,7 @@ function devServerConfig (host, port, protocol, publicPath, proxy, allowedHost) 
 					// https://github.com/facebook/create-react-app/issues/1065
 					ignored: [
 						ignoredFiles(path.resolve(app.context, 'src')),
-						'/node_modules[\\/](?!@enact[\\/](?!.*node_modules))/'
+						/node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
 					]
 				}
 			},
@@ -185,7 +186,7 @@ function devServerConfig (host, port, protocol, publicPath, proxy, allowedHost) 
 					// https://github.com/facebook/create-react-app/issues/1065
 					ignored: [
 						ignoredFiles(path.resolve(app.context, 'src')),
-						'/node_modules[\\/](?!@enact[\\/](?!.*node_modules))/'
+						/node_modules[\\/](?!@enact[\\/](?!.*node_modules))/
 					]
 				}
 			}
@@ -210,7 +211,9 @@ function devServerConfig (host, port, protocol, publicPath, proxy, allowedHost) 
 			// we specified in the webpack config. When homepage is '.', default to serving
 			// from the root.
 			// remove last slash so user can land on `/test` instead of `/test/`
-			publicPath: publicPath.slice(0, -1)
+			publicPath: publicPath.slice(0, -1),
+			// Errors and warnings are already printed by react-dev-utils' createCompiler
+			stats: 'none'
 		},
 		historyApiFallback: {
 			// ensure JSON file requests correctly 404 error when not found.
@@ -284,6 +287,16 @@ function serve (config, host, port, open) {
 			});
 			callback();
 		});
+		// createCompiler only prints the first error of a compilation. With TypeScript 7 the type errors are
+		// part of the compilation, so print them as well when another error (e.g. ESLint) was shown instead.
+		compiler.hooks.done.tap('EnactCLI', stats => {
+			const typeScriptError = stats.compilation.errors.find(TypeScriptCheckPlugin.isTypeScriptError);
+			if (!typeScriptError) return;
+
+			const [shown] = formatWebpackMessages(stats.toJson({all: false, warnings: true, errors: true})).errors;
+			const [typeScriptMessage] = formatWebpackMessages({errors: [typeScriptError.message], warnings: []}).errors;
+			if (shown !== typeScriptMessage) console.log(typeScriptMessage + '\n');
+		});
 		// Load proxy config
 		const proxySetting = app.proxy;
 		const proxyConfig = prepareProxy(proxySetting, './public', publicPath);
@@ -326,7 +339,7 @@ function api (opts) {
 		try {
 			meta = JSON.parse(opts.meta);
 		} catch (e) {
-			throw new Error('Invalid metadata; must be a valid JSON string.\n' + e.message);
+			throw new Error('Invalid metadata; must be a valid JSON string.\n' + e.message, {cause: e});
 		}
 		app.applyEnactMeta(meta);
 	}
