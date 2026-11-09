@@ -436,7 +436,7 @@ module.exports = function (
 					oneOf: [
 						// Process JS with Babel.
 						{
-							test: /\.(js|mjs|jsx|ts|tsx)$/,
+							test: /\.(js|cjs|mjs|jsx|ts|tsx)$/,
 							exclude: /node_modules.(?!@enact)/,
 							loader: require.resolve('babel-loader'),
 							options: {
@@ -532,7 +532,7 @@ module.exports = function (
 							// by webpacks internal loaders.
 							// Exclude `ejs` HTML templating language as that's handled by
 							// the HtmlWebpackPlugin.
-							exclude: [/^$/, /\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.ejs$/, /\.json$/],
+							exclude: [/^$/, /\.(js|cjs|mjs|jsx|ts|tsx)$/, /\.html$/, /\.ejs$/, /\.json$/],
 							type: 'asset/resource'
 						}
 						// ** STOP ** Are you adding a new loader?

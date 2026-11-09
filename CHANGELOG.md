@@ -1,4 +1,4 @@
-## unreleased
+## 7.4.0 (November 9, 2026)
 
 * Updated dependencies, including major updates to `chalk` (v6), `dotenv` (v18), `dotenv-expand` (v1000), `validate-npm-package-name` (v8), `@testing-library/jest-dom` (v7), `less-loader` (v13), `sass-loader` (v17), and `postcss-preset-env` (v11).
 * Updated the supported Node.js engines to `^22.15.0 || >=24.0.0`, as `webpack-dev-server` 6 requires Node.js 22.15 or later.
