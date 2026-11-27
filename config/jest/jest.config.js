@@ -24,7 +24,7 @@ const iLibDirs = ['node_modules/@enact/i18n/ilib', 'node_modules/ilib', 'ilib'];
 
 // Resolve the ilib base path, supporting npm workspaces where ilib may be
 // hoisted to a parent node_modules directory.
-function resolveIlibDir(context) {
+function resolveIlibDir (context) {
 	// Check local directories first (backward compatibility)
 	const found = iLibDirs.find(f => fs.existsSync(path.join(context, f)));
 	if (found) return found;
