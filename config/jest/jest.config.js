@@ -24,8 +24,14 @@ const iLibDirs = ['node_modules/@enact/i18n/ilib', 'node_modules/ilib', 'ilib'];
 const globals = {
 	__DEV__: true,
 	// Support npm workspaces where ilib may be hoisted to a parent node_modules
-	ILIB_BASE_PATH: iLibDirs.find(f => fs.existsSync(path.join(app.context, f)))
-		|| (() => { try { return path.relative(app.context, path.dirname(require.resolve('ilib/package.json', {paths: [app.context]}))); } catch { return iLibDirs[1]; } })(),
+	ILIB_BASE_PATH: iLibDirs.find(f => fs.existsSync(path.join(app.context, f))) ||
+		(() => {
+			try {
+				return path.relative(app.context, path.dirname(require.resolve('ilib/package.json', {paths: [app.context]})));
+			} catch {
+				return iLibDirs[1];
+			}
+		})(),
 	ILIB_RESOURCES_PATH: 'resources',
 	ILIB_CACHE_ID: new Date().getTime() + '',
 	[rbConst(app.name)]: 'resources'
