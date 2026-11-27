@@ -21,26 +21,11 @@ const rbConst = name =>
 	'_PATH';
 
 const iLibDirs = ['node_modules/@enact/i18n/ilib', 'node_modules/ilib', 'ilib'];
-
-// Resolve the ilib base path, supporting npm workspaces where ilib may be
-// hoisted to a parent node_modules directory.
-function resolveIlibDir (context) {
-	// Check local directories first (backward compatibility)
-	const found = iLibDirs.find(f => fs.existsSync(path.join(context, f)));
-	if (found) return found;
-
-	// Fall back to Node module resolution (supports workspaces hoisting)
-	try {
-		const ilibPkg = require.resolve('ilib/package.json', {paths: [context]});
-		return path.relative(context, path.dirname(ilibPkg));
-	} catch {
-		return iLibDirs[1];
-	}
-}
-
 const globals = {
 	__DEV__: true,
-	ILIB_BASE_PATH: resolveIlibDir(app.context),
+	// Support npm workspaces where ilib may be hoisted to a parent node_modules
+	ILIB_BASE_PATH: iLibDirs.find(f => fs.existsSync(path.join(app.context, f)))
+		|| (() => { try { return path.relative(app.context, path.dirname(require.resolve('ilib/package.json', {paths: [app.context]}))); } catch { return iLibDirs[1]; } })(),
 	ILIB_RESOURCES_PATH: 'resources',
 	ILIB_CACHE_ID: new Date().getTime() + '',
 	[rbConst(app.name)]: 'resources'
